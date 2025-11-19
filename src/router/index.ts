@@ -33,15 +33,15 @@ const routes = [
     name: 'CreateTrip',
     component: CreateTripPage
   },
- {
-  path: '/forum/create',
-  name: 'CreatePost',
-  component: ForumCreatePostPage
+  {
+    path: '/forum/create',
+    name: 'CreatePost',
+    component: ForumCreatePostPage
   },
   {
-  path: '/profile/edit',
-  name: 'EditProfile',
-  component: EditProfilePage
+    path: '/profile/edit',
+    name: 'EditProfile',
+    component: EditProfilePage
   },
 ]
 

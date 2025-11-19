@@ -8,10 +8,10 @@
       </div>
       
       <div class="navbar-menu">
-        <router-link to="/" class="navbar-item">{{ $t('navbar.home') }}</router-link>
-        <router-link to="/trips" class="navbar-item">{{ $t('navbar.trips') }}</router-link>
-        <router-link to="/forum" class="navbar-item">{{ $t('navbar.forum') }}</router-link>
-        <router-link to="/profile" class="navbar-item">{{ $t('navbar.profile') }}</router-link>
+        <router-link to="/" class="navbar-item">{{ t('navbar.home') }}</router-link>
+        <router-link to="/trips" class="navbar-item">{{ t('navbar.trips') }}</router-link>
+        <router-link to="/forum" class="navbar-item">{{ t('navbar.forum') }}</router-link>
+        <router-link to="/profile" class="navbar-item">{{ t('navbar.profile') }}</router-link>
       </div>
       
       <div class="navbar-right">
@@ -21,18 +21,28 @@
           <span class="plus-icon">+</span> Cipta Trip
         </router-link>
 
-        <button class="button-login">{{ $t('navbar.login') }}</button>
+        <button class="button-login" @click="showLogin = true">
+          {{ t('navbar.login') }}
+        </button>
       </div>
     </div>
+
+    <LoginModal v-if="showLogin" @close="showLogin = false" />
   </nav>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'; // Tambah ref
 import { RouterLink } from 'vue-router';
 import LanguageSwitcher from './LanguageSwitcher.vue';
+import { useI18n } from 'vue-i18n';
+import LoginModal from './LoginModal.vue'; // Import Modal
+
+const { t } = useI18n();
+const showLogin = ref(false); // Tambah State
 </script>
 
-<style scoped>
+<style scoped lang="css">
 .navbar {
   width: 100%;
   background-color: #ffffff;
