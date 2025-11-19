@@ -1,0 +1,15 @@
+{
+  "navbar": {
+    "home": "Laman Utama",
+    "trips": "Trip",
+    "forum": "Forum",
+    "profile": "Profil",
+    "login": "Log Masuk"
+  },
+  "footer": {
+    "description": "Platform anda untuk pengembaraan rekreasi.",
+    "quickLinks": "Pautan Pantas",
+    "contact": "Hubungi Kami",
+    "allRightsReserved": "Hak Cipta Terpelihara."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "navbar": {
+    "home": "Home",
+    "trips": "Trips",
+    "forum": "Forum",
+    "profile": "Profile",
+    "login": "Login"
+  },
+  "footer": {
+    "description": "Your platform for recreational adventures.",
+    "quickLinks": "Quick Links",
+    "contact": "Contact Us",
+    "allRightsReserved": "All Rights Reserved."
+  }
+}
