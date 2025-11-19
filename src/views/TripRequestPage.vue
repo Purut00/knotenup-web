@@ -2,10 +2,10 @@
   <div class="request-page">
     
     <div class="page-header">
-      <h1>Papan Permintaan Trip</h1>
-      <p>Tak jumpa trip yang sesuai? Minta organizer buatkan untuk anda!</p>
+      <h1>{{ t('request.title') }}</h1>
+      <p>{{ t('request.sub') }}</p>
       <button class="btn-create-request" @click="showModal = true">
-        ➕ Buat Request Baru
+        ➕ {{ t('request.createBtn') }}
       </button>
     </div>
 
@@ -25,53 +25,52 @@
         
         <div class="details-grid">
           <div class="detail-item">
-            <span>💰 Bajet</span>
+            <span>💰 {{ t('request.budget') }}</span>
             <strong>RM {{ req.budget }}</strong>
           </div>
           <div class="detail-item">
-            <span>👥 Pax</span>
-            <strong>{{ req.pax }} Orang</strong>
+            <span>👥 {{ t('request.pax') }}</span>
+            <strong>{{ req.pax }}</strong>
           </div>
         </div>
 
-        <button class="btn-offer">🤝 Offer Trip Ini</button>
+        <button class="btn-offer">🤝 {{ t('request.offerBtn') }}</button>
       </div>
 
     </div>
 
     <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
       <div class="modal-form">
-        <h3>Saya nak pergi ke...</h3>
+        <h3>{{ t('request.modalTitle') }}</h3>
         
         <div class="form-group">
-          <label>Destinasi / Lokasi</label>
-          <input type="text" v-model="newRequest.destination" placeholder="Cth: Pulau Perhentian" />
+          <label>{{ t('createTrip.location') }}</label> <input type="text" v-model="newRequest.destination" placeholder="Cth: Pulau Perhentian" />
         </div>
 
         <div class="row">
           <div class="form-group half">
-            <label>Bajet (RM)</label>
+            <label>{{ t('request.budget') }} (RM)</label>
             <input type="number" v-model="newRequest.budget" placeholder="300" />
           </div>
           <div class="form-group half">
-            <label>Jumlah Pax</label>
+            <label>{{ t('request.pax') }}</label>
             <input type="number" v-model="newRequest.pax" placeholder="5" />
           </div>
         </div>
 
         <div class="form-group">
-          <label>Tarikh Cadangan</label>
+          <label>{{ t('createTrip.startDate') }}</label>
           <input type="date" v-model="newRequest.date" />
         </div>
 
         <div class="form-group">
-          <label>Nota Tambahan</label>
+          <label>{{ t('request.note') }}</label>
           <textarea v-model="newRequest.note" placeholder="Nak pakej fullboard sekali snorkeling..."></textarea>
         </div>
 
         <div class="modal-actions">
-          <button class="btn-cancel" @click="showModal = false">Batal</button>
-          <button class="btn-submit" @click="submitRequest">Hantar Request</button>
+          <button class="btn-cancel" @click="showModal = false">{{ t('common.cancel') }}</button>
+          <button class="btn-submit" @click="submitRequest">{{ t('common.submit') }}</button>
         </div>
       </div>
     </div>
@@ -81,7 +80,9 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
+import { useI18n } from 'vue-i18n'; // 1. Import i18n
 
+const { t } = useI18n(); // 2. Activate function t
 const showModal = ref(false);
 
 // Data Dummy Requests
@@ -123,7 +124,7 @@ const submitRequest = () => {
     userName: 'Anda (User)',
     userAvatar: 'https://i.pravatar.cc/150?img=11',
     destination: newRequest.destination,
-    date: newRequest.date,
+    date: newRequest.date || 'Tarikh Bebas',
     budget: newRequest.budget || 0,
     pax: newRequest.pax || 1,
     note: newRequest.note

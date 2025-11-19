@@ -1,15 +1,136 @@
 {
+  "common": {
+    "search": "Search",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "loading": "Loading...",
+    "back": "Back",
+    "next": "Next",
+    "reset": "Reset"
+  },
   "navbar": {
     "home": "Home",
     "trips": "Trips",
+    "requests": "Trip Requests",
     "forum": "Forum",
     "profile": "Profile",
-    "login": "Login"
+    "login": "Login",
+    "createTrip": "Create Trip"
+  },
+  "home": {
+    "heroTitle": "DISCOVER YOUR NEXT ADVENTURE",
+    "heroSub": "Explore land, water, and air activities with our community.",
+    "searchPlaceholder": "Search activities, locations, or trips...",
+    "popularActivities": "Popular Activities",
+    "latestTrips": "Latest Trips",
+    "viewAllTrips": "View All Trips",
+    "communityDiscuss": "Community Discussions"
+  },
+  "trip": {
+    "headerTitle": "Explore Recreation Trips",
+    "headerSub": "Find the best outdoor experiences from verified organizers.",
+    "filterDest": "Search destination...",
+    "filterDate": "Date",
+    "filterLevel": "Level",
+    "filterBudget": "Max Budget",
+    "slotsLeft": "{count} left!",
+    "full": "Full",
+    "open": "Open",
+    "perPax": "/pax"
+  },
+  "createTrip": {
+    "title": "Create New Trip",
+    "step1": "Basics",
+    "step2": "Logistics",
+    "step3": "Media",
+    "basicInfo": "Basic Information",
+    "tripTitle": "Trip Title",
+    "category": "Category",
+    "level": "Difficulty Level",
+    "location": "Location / Destination",
+    "datePrice": "Date & Price",
+    "startDate": "Start Date",
+    "duration": "Duration",
+    "price": "Price (RM)",
+    "slots": "Total Slots",
+    "includes": "Package Includes",
+    "mediaInfo": "Media & Details",
+    "desc": "Full Description",
+    "submitBtn": "Publish Trip!"
+  },
+  "forum": {
+    "headerTitle": "KnotenUp Community Hub",
+    "headerSub": "Discuss everything about outdoor activities, gears, and experiences.",
+    "searchPlaceholder": "Search discussion topics...",
+    "filterHot": "Hot",
+    "filterNew": "New",
+    "filterTop": "Top",
+    "createPost": "Create New Post",
+    "sidebarAbout": "About Community",
+    "sidebarTopic": "Filter by Activity",
+    "comments": "Comments",
+    "share": "Share"
+  },
+  "request": {
+    "title": "Trip Request Board",
+    "sub": "Can't find a suitable trip? Ask organizers to create one for you!",
+    "createBtn": "Make New Request",
+    "modalTitle": "I want to go to...",
+    "budget": "Budget",
+    "pax": "Pax",
+    "note": "Additional Notes",
+    "offerBtn": "Offer This Trip"
+  },
+  "profile": {
+    "tripsJoined": "Trips Joined",
+    "tripsOrganized": "Trips Organized",
+    "posts": "Forum Posts",
+    "myCard": "My Card",
+    "editProfile": "Edit Profile",
+    "tabUpcoming": "Upcoming Trips",
+    "tabHistory": "Trip History",
+    "tabPosts": "My Posts",
+    "settingsTitle": "Profile Settings",
+    "personalInfo": "Personal Info",
+    "socialMedia": "Social Media & Contact",
+    "changePhoto": "Change Photo",
+    "displayName": "Display Name",
+    "bio": "Short Bio",
+    "whatsappPlaceholder": "WhatsApp No. (e.g. 60123456789)",
+    "usernamePlaceholder": "Username only",
+    "uploadPhoto": "Click to change",
+    "saveSuccess": "Profile saved successfully!"
   },
   "footer": {
-    "description": "Your platform for recreational adventures.",
+    "desc": "Your platform for recreational adventures.",
     "quickLinks": "Quick Links",
     "contact": "Contact Us",
-    "allRightsReserved": "All Rights Reserved."
+    "rights": "All Rights Reserved."
+  },
+  "auth": {
+    "modalTitle": "Start Your Adventure",
+    "modalSub": "Log in for full access to Trips & Forum.",
+    "continueWith": "Continue with {provider}",
+    "disclaimer": "By signing up, you agree to our Terms & Privacy."
+  },
+  "components": {
+    "postedBy": "Posted by",
+    "comments": "Comments",
+    "share": "Share",
+    "save": "Save",
+    "viewDetails": "View Details",
+    "join": "Join",
+    "reset": "Reset",
+    "anyDate": "Anytime",
+    "thisWeek": "This Week",
+    "nextMonth": "Next Month",
+    "allLevels": "All Levels",
+    "easy": "🟢 Easy",
+    "moderate": "🟡 Moderate",
+    "hard": "🔴 Hardcore"
   }
 }

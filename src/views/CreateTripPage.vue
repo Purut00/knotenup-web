@@ -3,21 +3,21 @@
     <div class="form-container">
       
       <div class="form-header">
-        <h2>Cipta Trip Baru</h2>
+        <h2>{{ t('createTrip.title') }}</h2>
         <div class="progress-bar">
           <div class="step" :class="{ active: currentStep >= 1 }">
             <div class="step-circle">1</div>
-            <span>Asas</span>
+            <span>{{ t('createTrip.step1') }}</span>
           </div>
           <div class="line" :class="{ filled: currentStep >= 2 }"></div>
           <div class="step" :class="{ active: currentStep >= 2 }">
             <div class="step-circle">2</div>
-            <span>Logistik</span>
+            <span>{{ t('createTrip.step2') }}</span>
           </div>
           <div class="line" :class="{ filled: currentStep >= 3 }"></div>
           <div class="step" :class="{ active: currentStep >= 3 }">
             <div class="step-circle">3</div>
-            <span>Media</span>
+            <span>{{ t('createTrip.step3') }}</span>
           </div>
         </div>
       </div>
@@ -25,16 +25,16 @@
       <div class="form-body">
         
         <div v-if="currentStep === 1" class="step-content">
-          <h3>Maklumat Asas Trip</h3>
+          <h3>{{ t('createTrip.basicInfo') }}</h3>
           
           <div class="form-group">
-            <label>Tajuk Trip</label>
+            <label>{{ t('createTrip.tripTitle') }}</label>
             <input type="text" v-model="form.title" placeholder="Contoh: Hiking Gunung Kinabalu 3H2M" />
           </div>
 
           <div class="row">
             <div class="form-group half">
-              <label>Kategori</label>
+              <label>{{ t('createTrip.category') }}</label>
               <select v-model="form.category">
                 <option disabled value="">Pilih Kategori</option>
                 <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
@@ -45,7 +45,7 @@
               </select>
             </div>
             <div class="form-group half">
-              <label>Level Kesukaran</label>
+              <label>{{ t('createTrip.level') }}</label>
               <select v-model="form.difficulty">
                 <option>🟢 Santai (Easy)</option>
                 <option>🟡 Sederhana (Moderate)</option>
@@ -55,32 +55,32 @@
           </div>
 
           <div class="form-group">
-            <label>Lokasi / Destinasi</label>
+            <label>{{ t('createTrip.location') }}</label>
             <input type="text" v-model="form.location" placeholder="Contoh: Taman Negara, Pahang" />
           </div>
         </div>
 
         <div v-if="currentStep === 2" class="step-content">
-          <h3>Tarikh & Harga</h3>
+          <h3>{{ t('createTrip.datePrice') }}</h3>
 
           <div class="row">
             <div class="form-group half">
-              <label>Tarikh Mula</label>
+              <label>{{ t('createTrip.startDate') }}</label>
               <input type="date" v-model="form.startDate" />
             </div>
             <div class="form-group half">
-              <label>Durasi</label>
+              <label>{{ t('createTrip.duration') }}</label>
               <input type="text" v-model="form.duration" placeholder="Cth: 3 Hari 2 Malam" />
             </div>
           </div>
 
           <div class="row">
             <div class="form-group half">
-              <label>Harga (RM)</label>
+              <label>{{ t('createTrip.price') }}</label>
               <input type="number" v-model="form.price" placeholder="0.00" />
             </div>
             <div class="form-group half">
-              <label>Jumlah Slot Peserta</label>
+              <label>{{ t('createTrip.slots') }}</label>
               <input type="number" v-model="form.maxSlots" placeholder="Cth: 20" />
             </div>
           </div>
@@ -93,7 +93,7 @@
         </div>
 
         <div v-if="currentStep === 3" class="step-content">
-          <h3>Media & Info Lanjut</h3>
+          <h3>{{ t('createTrip.mediaInfo') }}</h3>
 
           <div class="form-group">
             <label>Gambar Utama (Cover)</label>
@@ -104,12 +104,12 @@
           </div>
 
           <div class="form-group">
-            <label>Deskripsi Penuh / Itinerary</label>
+            <label>{{ t('createTrip.desc') }}</label>
             <textarea v-model="form.description" rows="6" placeholder="Terangkan tentatif program di sini..."></textarea>
           </div>
 
           <div class="form-group">
-           <label style="margin-top: 1rem;">Pakej Termasuk (Tick mana yang ada):</label>
+            <label style="margin-top: 1rem;">{{ t('createTrip.includes') }}:</label>
             <div class="services-grid">
               <label class="checkbox-item" v-for="service in TRIP_SERVICES" :key="service">
                 <input type="checkbox" :value="service" v-model="form.includes">
@@ -122,9 +122,19 @@
       </div>
 
       <div class="form-footer">
-        <button v-if="currentStep > 1" @click="prevStep" class="btn-secondary">Kembali</button>
-        <div style="flex: 1"></div> <button v-if="currentStep < 3" @click="nextStep" class="btn-primary">Seterusnya</button>
-        <button v-if="currentStep === 3" @click="submitForm" class="btn-success">Terbitkan Trip!</button>
+        <button v-if="currentStep > 1" @click="prevStep" class="btn-secondary">
+          {{ t('common.back') }}
+        </button>
+        
+        <div style="flex: 1"></div> 
+        
+        <button v-if="currentStep < 3" @click="nextStep" class="btn-primary">
+          {{ t('common.next') }}
+        </button>
+        
+        <button v-if="currentStep === 3" @click="submitForm" class="btn-success">
+          {{ t('createTrip.submitBtn') }}
+        </button>
       </div>
 
     </div>
@@ -134,8 +144,10 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n'; // 1. Import i18n
 import { ACTIVITY_CATEGORIES, TRIP_SERVICES } from '../constants/data';
 
+const { t } = useI18n(); // 2. Activate function t
 const router = useRouter();
 const currentStep = ref(1);
 
@@ -165,10 +177,9 @@ const prevStep = () => {
 
 // Submit Data
 const submitForm = () => {
-  // NANTI: Di sini kita akan hantar data ke Firebase
   console.log("Data untuk dihantar:", form);
-  alert("Trip berjaya dicipta! (Data hanya console log buat masa ini)");
-  router.push('/trips'); // Redirect balik ke trip list
+  alert("Trip berjaya dicipta!");
+  router.push('/trips');
 };
 </script>
 

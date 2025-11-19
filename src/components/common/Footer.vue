@@ -11,6 +11,7 @@
           <li><router-link to="/">{{ $t('navbar.home') }}</router-link></li>
           <li><router-link to="/trips">{{ $t('navbar.trips') }}</router-link></li>
           <li><router-link to="/forum">{{ $t('navbar.forum') }}</router-link></li>
+          <li><router-link to="/requests">{{ $t('navbar.requests') }}</router-link></li>
         </ul>
       </div>
       <div class="footer-section">

@@ -1,7 +1,7 @@
 <template>
   <div class="create-post-page">
     <div class="form-card">
-      <h2>✍️ Cipta Topik Baru</h2>
+      <h2>✍️ {{ t('forum.createPost') }}</h2>
       
       <div class="form-group">
         <label>Tajuk Topik</label>
@@ -9,7 +9,7 @@
       </div>
 
       <div class="form-group">
-        <label>Kategori</label>
+        <label>{{ t('createTrip.category') }}</label>
         <select v-model="form.category">
           <option disabled value="">Pilih Kategori</option>
           <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
@@ -24,8 +24,8 @@
       </div>
 
       <div class="form-actions">
-        <button @click="$router.back()" class="btn-cancel">Batal</button>
-        <button @click="submitPost" class="btn-submit">Terbitkan</button>
+        <button @click="$router.back()" class="btn-cancel">{{ t('common.cancel') }}</button>
+        <button @click="submitPost" class="btn-submit">{{ t('common.submit') }}</button>
       </div>
     </div>
   </div>
@@ -34,8 +34,10 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n'; // Import
 import { ACTIVITY_CATEGORIES } from '../constants/data';
 
+const { t } = useI18n(); // Activate
 const router = useRouter();
 const form = reactive({ title: '', category: '', content: '' });
 
@@ -47,6 +49,7 @@ const submitPost = () => {
 </script>
 
 <style scoped>
+/* ... CSS KEKAL SAMA ... */
 .create-post-page { padding: 2rem; background: #dae0e6; min-height: 100vh; display: flex; justify-content: center; }
 .form-card { background: white; padding: 2rem; width: 100%; max-width: 600px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
 h2 { margin-bottom: 1.5rem; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 1rem; }

@@ -1,8 +1,8 @@
 <template>
   <div class="trip-page">
     <div class="trip-header">
-      <h1>Terokai Trip Rekreasi</h1>
-      <p>Cari pengalaman outdoor terbaik dari penganjur yang disahkan.</p>
+      <h1>{{ t('trip.headerTitle') }}</h1>
+      <p>{{ t('trip.headerSub') }}</p>
     </div>
 
     <div class="sticky-filter">
@@ -34,6 +34,9 @@
 <script setup lang="ts">
 import TripFilter from '../components/trip/TripFilter.vue';
 import TripCard from '../components/trip/TripCard.vue';
+import { useI18n } from 'vue-i18n'; // Import
+
+const { t } = useI18n(); // Activate
 
 // Data Dummy untuk Trip
 const trips = [
@@ -105,55 +108,13 @@ const trips = [
 </script>
 
 <style scoped>
-.trip-header {
-  background-color: #2c3e50;
-  color: white;
-  padding: 3rem 2rem;
-  text-align: center;
-}
-
-.sticky-filter {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-.content-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.results-meta {
-  margin-bottom: 1.5rem;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.trip-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
-}
-
-.load-more {
-  text-align: center;
-  margin-top: 3rem;
-}
-
-.load-more button {
-  padding: 0.8rem 2rem;
-  border: 1px solid #2c3e50;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 50px;
-  font-weight: bold;
-  transition: all 0.3s;
-}
-
-.load-more button:hover {
-  background: #2c3e50;
-  color: white;
-}
+/* ... CSS KEKAL SAMA ... */
+.trip-header { background-color: #2c3e50; color: white; padding: 3rem 2rem; text-align: center; }
+.sticky-filter { position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.content-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.results-meta { margin-bottom: 1.5rem; color: #666; font-size: 0.9rem; }
+.trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
+.load-more { text-align: center; margin-top: 3rem; }
+.load-more button { padding: 0.8rem 2rem; border: 1px solid #2c3e50; background: transparent; cursor: pointer; border-radius: 50px; font-weight: bold; transition: all 0.3s; }
+.load-more button:hover { background: #2c3e50; color: white; }
 </style>

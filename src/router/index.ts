@@ -6,6 +6,7 @@ import ProfilePage from '../views/ProfilePage.vue'
 import CreateTripPage from '../views/CreateTripPage.vue';
 import ForumCreatePostPage from '../views/ForumCreatePostPage.vue';
 import EditProfilePage from '../views/EditProfilePage.vue';
+import TripRequestPage from '../views/TripRequestPage.vue'
 
 const routes = [
   {
@@ -26,11 +27,13 @@ const routes = [
   {
     path: '/profile',
     name: 'Profile',
+    meta: { requiresAuth: true },
     component: ProfilePage
   },
   {
     path: '/create-trip',
     name: 'CreateTrip',
+    meta: { requiresAuth: true },
     component: CreateTripPage
   },
   {
@@ -43,6 +46,11 @@ const routes = [
     name: 'EditProfile',
     component: EditProfilePage
   },
+  {
+    path: '/requests',
+    name: 'requests',
+    component: TripRequestPage
+  }
 ]
 
 const router = createRouter({

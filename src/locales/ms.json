@@ -1,15 +1,137 @@
 {
+  "common": {
+    "search": "Cari",
+    "cancel": "Batal",
+    "submit": "Hantar",
+    "save": "Simpan",
+    "edit": "Edit",
+    "delete": "Padam",
+    "view": "Lihat",
+    "loading": "Memuatkan...",
+    "back": "Kembali",
+    "next": "Seterusnya",
+    "reset": "Reset"
+  },
   "navbar": {
     "home": "Laman Utama",
     "trips": "Trip",
+    "requests": "Request Trip",
     "forum": "Forum",
     "profile": "Profil",
-    "login": "Log Masuk"
+    "login": "Log Masuk",
+    "createTrip": "Cipta Trip"
+  },
+  "home": {
+    "heroTitle": "TEMUI PENGEMBARAAN ANDA SETERUSNYA",
+    "heroSub": "Terokai aktiviti darat, air, dan udara bersama komuniti kami.",
+    "searchPlaceholder": "Cari aktiviti, lokasi, atau trip...",
+    "popularActivities": "Aktiviti Popular",
+    "latestTrips": "Trip Terkini",
+    "viewAllTrips": "Lihat Semua Trip",
+    "communityDiscuss": "Perbincangan Komuniti"
+  },
+  "trip": {
+    "headerTitle": "Terokai Trip Rekreasi",
+    "headerSub": "Cari pengalaman outdoor terbaik dari penganjur yang disahkan.",
+    "filterDest": "Cari destinasi...",
+    "filterDate": "Tarikh",
+    "filterLevel": "Tahap",
+    "filterBudget": "Bajet Max",
+    "slotsLeft": "Tinggal {count}!",
+    "full": "Penuh",
+    "open": "Buka",
+    "perPax": "/pax"
+  },
+  "createTrip": {
+    "title": "Cipta Trip Baru",
+    "step1": "Asas",
+    "step2": "Logistik",
+    "step3": "Media",
+    "basicInfo": "Maklumat Asas",
+    "tripTitle": "Tajuk Trip",
+    "category": "Kategori",
+    "level": "Level Kesukaran",
+    "location": "Lokasi / Destinasi",
+    "datePrice": "Tarikh & Harga",
+    "startDate": "Tarikh Mula",
+    "duration": "Durasi",
+    "price": "Harga (RM)",
+    "slots": "Jumlah Slot",
+    "includes": "Pakej Termasuk",
+    "mediaInfo": "Media & Info Lanjut",
+    "desc": "Deskripsi Penuh",
+    "submitBtn": "Terbitkan Trip!"
+  },
+  "forum": {
+    "headerTitle": "Pusat Komuniti KnotenUp",
+    "headerSub": "Bincangkan segalanya tentang aktiviti luar, gear, dan pengalaman.",
+    "searchPlaceholder": "Cari topik perbincangan...",
+    "filterHot": "Hangat",
+    "filterNew": "Terkini",
+    "filterTop": "Terbaik",
+    "createPost": "Cipta Post Baru",
+    "sidebarAbout": "Tentang Komuniti",
+    "sidebarTopic": "Saring Ikut Aktiviti",
+    "comments": "Komen",
+    "share": "Kongsi"
+  },
+  "request": {
+    "title": "Papan Permintaan Trip",
+    "sub": "Tak jumpa trip yang sesuai? Minta organizer buatkan untuk anda!",
+    "createBtn": "Buat Request Baru",
+    "modalTitle": "Saya nak pergi ke...",
+    "budget": "Bajet",
+    "pax": "Pax",
+    "note": "Nota Tambahan",
+    "offerBtn": "Offer Trip Ini"
+  },
+  "profile": {
+    "tripsJoined": "Trip Disertai",
+    "tripsOrganized": "Trip Dianjurkan",
+    "posts": "Post Forum",
+    "myCard": "My Card",
+    "editProfile": "Edit Profil",
+    "tabUpcoming": "Trip Akan Datang",
+    "tabHistory": "Sejarah Trip",
+    "tabPosts": "Post Saya",
+    "settingsTitle": "Tetapan Profil",
+    "personalInfo": "Info Peribadi",
+    "socialMedia": "Sosial Media & Contact",
+    "changePhoto": "Tukar Gambar",
+    "displayName": "Nama Paparan",
+    "bio": "Bio Ringkas",
+    "whatsappPlaceholder": "No. WhatsApp (cth: 60123456789)",
+    "usernamePlaceholder": "Username sahaja",
+    "uploadPhoto": "Klik untuk tukar",
+    "saveSuccess": "Profil berjaya disimpan!"
   },
   "footer": {
-    "description": "Platform anda untuk pengembaraan rekreasi.",
+    "desc": "Platform anda untuk pengembaraan rekreasi.",
     "quickLinks": "Pautan Pantas",
     "contact": "Hubungi Kami",
-    "allRightsReserved": "Hak Cipta Terpelihara."
+    "rights": "Hak Cipta Terpelihara."
+  },
+  "auth": {
+    "modalTitle": "Mula Pengembaraan",
+    "modalSub": "Masuk untuk akses penuh ke Trip & Forum.",
+    "continueWith": "Teruskan dengan {provider}",
+    "disclaimer": "Dengan mendaftar, anda bersetuju dengan Terma & Privasi kami."
+  },
+  "components": {
+    "postedBy": "Dikirim oleh",
+    "comments": "Komen",
+    "share": "Kongsi",
+    "save": "Simpan",
+    "viewDetails": "Lihat Detail",
+    "join": "Sertai",
+    "reset": "Reset",
+    "anyDate": "Bila-bila masa",
+    "thisWeek": "Minggu Ini",
+    "nextMonth": "Bulan Depan",
+    "allLevels": "Semua Level",
+    "easy": "🟢 Santai (Easy)",
+    "moderate": "🟡 Sederhana",
+    "hard": "🔴 Hardcore"
   }
+  
 }

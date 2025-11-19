@@ -1,24 +1,27 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, FacebookAuthProvider, OAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // ⚠️ PENTING: Nanti anda perlu ganti kod ini dengan config dari Firebase Console anda sendiri.
 // Buat masa ni, kita letak placeholder supaya kod tak error.
 const firebaseConfig = {
-  apiKey: "API_KEY_ANDA_DI_SINI",
-  authDomain: "knotenup-web.firebaseapp.com",
-  projectId: "knotenup-web",
-  storageBucket: "knotenup-web.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef"
+  apiKey: "AIzaSyDjycGE-Pr8EtRAoX9cj-bNXuhtFKb-NyA",
+  authDomain: "kpv6-4af4c.firebaseapp.com",
+  projectId: "kpv6-4af4c",
+  storageBucket: "kpv6-4af4c.firebasestorage.app",
+  messagingSenderId: "959484978054",
+  appId: "1:959484978054:web:59d7ab3f0d4a19dc45c207",
+  measurementId: "G-QT0DF01NPH"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Setup Providers (Google, FB, Apple)
 const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
 
-export { auth, googleProvider, facebookProvider, appleProvider };
+export { auth, db, googleProvider, facebookProvider, appleProvider };

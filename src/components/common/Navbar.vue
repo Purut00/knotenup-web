@@ -11,19 +11,33 @@
         <router-link to="/" class="navbar-item">{{ t('navbar.home') }}</router-link>
         <router-link to="/trips" class="navbar-item">{{ t('navbar.trips') }}</router-link>
         <router-link to="/forum" class="navbar-item">{{ t('navbar.forum') }}</router-link>
-        <router-link to="/profile" class="navbar-item">{{ t('navbar.profile') }}</router-link>
-      </div>
-      
+        
+        <router-link v-if="currentUser" to="/profile" class="navbar-item user-name-link">
+           👤 {{ getFirstName(currentUser.displayName) }}
+        </router-link>
+      </div>  
+
       <div class="navbar-right">
         <LanguageSwitcher />
         
-        <router-link to="/create-trip" class="btn-create">
-          <span class="plus-icon">+</span> Cipta Trip
+        <router-link to="/create-trip" class="navbar-item" style="color: #e67e22;">
+          {{ t('navbar.createTrip') }}
         </router-link>
 
-        <button class="button-login" @click="showLogin = true">
+        <router-link to="/requests" class="navbar-item" style="color: #e67e22;">
+          {{ t('navbar.requests') }}
+        </router-link>
+
+        <div v-if="currentUser" class="user-actions">
+          <button @click="handleLogout" class="button-logout">
+            Logout
+          </button>
+        </div>
+
+        <button v-else class="button-login" @click="showLogin = true">
           {{ t('navbar.login') }}
         </button>
+
       </div>
     </div>
 
@@ -32,14 +46,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'; // Tambah ref
-import { RouterLink } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 import LanguageSwitcher from './LanguageSwitcher.vue';
 import { useI18n } from 'vue-i18n';
-import LoginModal from './LoginModal.vue'; // Import Modal
+import LoginModal from './LoginModal.vue';
+import { auth } from '../../firebaseConfig';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 
 const { t } = useI18n();
-const showLogin = ref(false); // Tambah State
+const router = useRouter();
+const showLogin = ref(false);
+const currentUser = ref<User | null>(null);
+
+// Helper: Ambil nama depan sahaja supaya tak panjang sangat
+const getFirstName = (fullName: string | null) => {
+  if (!fullName) return 'Profile';
+  return fullName.split(' ')[0]; // Ambil perkataan pertama
+};
+
+onMounted(() => {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser.value = user;
+    } else {
+      currentUser.value = null;
+    }
+  });
+});
+
+const handleLogout = async () => {
+  await signOut(auth);
+  router.push('/');
+};
 </script>
 
 <style scoped lang="css">
@@ -130,4 +169,20 @@ const showLogin = ref(false); // Tambah State
   line-height: 1;
 }
 
+.button-logout {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  color: #e74c3c; /* Merah */
+  border: 1px solid #e74c3c;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.button-logout:hover {
+  background-color: #e74c3c;
+  color: white;
+}
 </style>

@@ -2,113 +2,56 @@
   <div class="filter-container">
     <div class="filter-item search-input">
       <span class="icon">🔍</span>
-      <input type="text" placeholder="Cari destinasi..." />
+      <input type="text" :placeholder="t('trip.filterDest')" />
     </div>
 
     <div class="filter-item">
-      <span class="label">Tarikh</span>
+      <span class="label">{{ t('trip.filterDate') }}</span>
       <select>
-        <option>Bila-bila masa</option>
-        <option>Minggu Ini</option>
-        <option>Bulan Depan</option>
+        <option>{{ t('components.anyDate') }}</option>
+        <option>{{ t('components.thisWeek') }}</option>
+        <option>{{ t('components.nextMonth') }}</option>
       </select>
     </div>
 
     <div class="filter-item">
-      <span class="label">Level</span>
+      <span class="label">{{ t('trip.filterLevel') }}</span>
       <select>
-        <option>Semua Level</option>
-        <option>🟢 Santai (Easy)</option>
-        <option>🟡 Sederhana</option>
-        <option>🔴 Hardcore</option>
+        <option>{{ t('components.allLevels') }}</option>
+        <option>{{ t('components.easy') }}</option>
+        <option>{{ t('components.moderate') }}</option>
+        <option>{{ t('components.hard') }}</option>
       </select>
     </div>
 
     <div class="filter-item">
-      <span class="label">Bajet Max</span>
+      <span class="label">{{ t('createTrip.category') }}</span>
       <select>
-        <option>RM 1000+</option>
-        <option>RM 500</option>
-        <option>RM 200</option>
-        <option>RM 100</option>
-      </select>
-    </div>
-
-    <div class="filter-item">
-      <span class="label">Aktiviti</span>
-      <select>
-        <option>Semua Aktiviti</option>
+        <option value="">All</option>
         <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
           <option v-for="item in group.items" :key="item">{{ item }}</option>
         </optgroup>
       </select>
     </div>
 
-    <button class="btn-reset">Reset</button>
+    <button class="btn-reset">{{ t('components.reset') }}</button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { ACTIVITY_CATEGORIES } from '../../constants/data';
+
+const { t } = useI18n();
 </script>
 
 <style scoped>
-.filter-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 2rem;
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
-  overflow-x: auto; /* Boleh scroll tepi kalau skrin kecil */
-  white-space: nowrap;
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  min-width: 120px;
-}
-
-.search-input {
-  flex-direction: row;
-  align-items: center;
-  background: #f5f5f5;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  min-width: 200px;
-}
-.search-input input {
-  border: none;
-  background: transparent;
-  outline: none;
-  margin-left: 0.5rem;
-  width: 100%;
-}
-
-.label {
-  font-size: 0.7rem;
-  color: #888;
-  font-weight: bold;
-  margin-bottom: 2px;
-}
-
-select {
-  border: 1px solid #ddd;
-  padding: 0.4rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  color: #333;
-  cursor: pointer;
-}
-
-.btn-reset {
-  margin-left: auto;
-  border: none;
-  background: none;
-  color: #e67e22;
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: underline;
-}
+/* ... CSS KEKAL SAMA ... */
+.filter-container { display: flex; align-items: center; gap: 1rem; padding: 1rem 2rem; background: white; border-bottom: 1px solid #e0e0e0; overflow-x: auto; white-space: nowrap; }
+.filter-item { display: flex; flex-direction: column; min-width: 120px; }
+.search-input { flex-direction: row; align-items: center; background: #f5f5f5; padding: 0.5rem 1rem; border-radius: 50px; min-width: 200px; }
+.search-input input { border: none; background: transparent; outline: none; margin-left: 0.5rem; width: 100%; }
+.label { font-size: 0.7rem; color: #888; font-weight: bold; margin-bottom: 2px; }
+select { border: 1px solid #ddd; padding: 0.4rem; border-radius: 6px; font-size: 0.9rem; color: #333; cursor: pointer; }
+.btn-reset { margin-left: auto; border: none; background: none; color: #e67e22; font-weight: bold; cursor: pointer; text-decoration: underline; }
 </style>
