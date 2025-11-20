@@ -3,7 +3,7 @@
     <div class="navbar-container">
       <div class="navbar-brand">
         <router-link to="/">
-          <span class="logo-text">KnotenUp</span>
+          <span class="logo-text">KnotenUp<span style="font-size: 1rem; font-weight: normal;">.com</span></span>
         </router-link>
       </div>
       
@@ -142,9 +142,18 @@ const handleLogout = async () => {
 }
 
 .logo-text {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
+  font-size: 1.3rem;       
+  font-weight: 600;        
+  color: #ee4d2d;           /* Merah/Oren Shopee */
+  letter-spacing: -1px;     /* Huruf rapat sikit macam logo */
+  text-decoration: none;    /* Buang garis bawah */
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Font kemas */
+}
+
+/* Optional: Kalau nak tambah kesan hover */
+.navbar-brand a:hover .logo-text {
+  opacity: 0.9;
+
 }
 .btn-create {
   display: flex;

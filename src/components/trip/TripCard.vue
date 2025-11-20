@@ -1,5 +1,6 @@
 <template>
-  <div class="trip-card">
+  <div class="trip-card" @click="goToDetail">
+    
     <div class="status-badge" :class="trip.status">
       {{ trip.status === 'open' ? t('trip.open') : t('trip.full') }}
     </div>
@@ -12,7 +13,7 @@
     <div class="card-content">
       <div class="header-row">
         <span class="category">{{ trip.category }}</span>
-        <div class="rating">⭐ {{ trip.rating }}</div>
+        <div class="rating">⭐ {{ trip.rating || '5.0' }}</div>
       </div>
 
       <h3>{{ trip.title }}</h3>
@@ -36,7 +37,7 @@
 
       <div class="card-footer">
         <div class="organizer">
-          <img :src="trip.organizerImage" alt="Org" />
+          <img :src="trip.organizerImage || 'https://i.pravatar.cc/150?img=3'" alt="Org" />
           <span>{{ trip.organizerName }}</span>
         </div>
         <div class="price-action">
@@ -44,49 +45,69 @@
         </div>
       </div>
       
-      <router-link :to="'/trips/' + trip.id" class="btn-join">
-       {{ t('components.viewDetails') }}
-      </router-link>
-    </div>
+      </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-defineProps<{ trip: any }>();
+
+const props = defineProps<{ trip: any }>();
 const { t } = useI18n();
+const router = useRouter();
+
+// Fungsi bawa ke page detail
+const goToDetail = () => {
+  router.push(`/trips/${props.trip.id}`);
+};
 </script>
 
 <style scoped>
-/* ... CSS KEKAL SAMA ... */
-.trip-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border: 1px solid #eee; position: relative; transition: transform 0.2s; display: flex; flex-direction: column; }
-.trip-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.12); }
-.status-badge { position: absolute; top: 10px; left: 10px; z-index: 10; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; color: white; }
+.trip-card { 
+  background: white; 
+  border-radius: 8px; /* Kurangkan radius sikit biar tajam */
+  overflow: hidden; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+  border: 1px solid #eee; 
+  position: relative; 
+  transition: transform 0.2s, box-shadow 0.2s; 
+  display: flex; 
+  flex-direction: column;
+  cursor: pointer; /* PENTING: Tunjuk ni boleh klik */
+}
+
+.trip-card:hover { 
+  transform: translateY(-3px); 
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+  border-color: #27ae60; /* Highlight hijau sikit bila hover */
+}
+
+.status-badge { position: absolute; top: 10px; left: 10px; z-index: 10; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase; color: white; }
 .status-badge.open { background-color: #2ecc71; }
 .status-badge.full { background-color: #e74c3c; }
-.card-image { height: 180px; background-size: cover; background-position: center; position: relative; }
-.level-badge { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
-.card-content { padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem; flex-grow: 1; }
-.header-row { display: flex; justify-content: space-between; font-size: 0.8rem; }
-.category { color: #3498db; font-weight: bold; text-transform: uppercase; }
-.rating { color: #f1c40f; }
-h3 { margin: 0; font-size: 1.1rem; color: #2c3e50; line-height: 1.3; }
-.info-row { display: flex; gap: 1rem; font-size: 0.85rem; color: #7f8c8d; }
+
+.card-image { height: 160px; background-size: cover; background-position: center; position: relative; }
+.level-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+
+.card-content { padding: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; }
+
+.header-row { display: flex; justify-content: space-between; font-size: 0.75rem; }
+.category { color: #27ae60; font-weight: bold; text-transform: uppercase; font-size: 0.7rem; }
+.rating { color: #f1c40f; font-weight: bold; }
+
+h3 { margin: 0; font-size: 1rem; color: #2c3e50; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.info-row { display: flex; gap: 1rem; font-size: 0.8rem; color: #7f8c8d; }
+
 .progress-section { margin-top: auto; }
-.progress-label { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 4px; color: #555; }
+.progress-label { display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 3px; color: #999; }
 .spots-left { color: #e67e22; font-weight: bold; }
-.progress-bar { height: 6px; background-color: #ecf0f1; border-radius: 3px; overflow: hidden; }
-.progress-fill { height: 100%; background-color: #3498db; border-radius: 3px; }
+.progress-bar { height: 4px; background-color: #ecf0f1; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background-color: #27ae60; border-radius: 2px; }
+
 .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #f5f5f5; }
-.organizer { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #555; }
-.organizer img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
-.price { font-weight: 800; font-size: 1.1rem; color: #2c3e50; }
-.btn-join { width: 100%; padding: 0.6rem; background-color: #2c3e50; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
-.btn-join:hover { background-color: #1a252f; }
-.btn-join {
-  /* ... css lama ... */
-  text-decoration: none; /* Tambah ini sbb router-link jadi tag <a> */
-  display: block;        /* Tambah ini */
-  text-align: center;    /* Tambah ini */
-}
+.organizer { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: #555; }
+.organizer img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
+.price { font-weight: 800; font-size: 1rem; color: #2c3e50; }
 </style>
