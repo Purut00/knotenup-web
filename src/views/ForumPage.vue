@@ -5,7 +5,6 @@
       <div class="banner-content">
         <h1>{{ t('forum.headerTitle') }}</h1>
         <p>{{ t('forum.headerSub') }}</p>
-        
         <div class="search-wrapper">
           <SearchBar 
             :placeholder="t('forum.searchPlaceholder')" 
@@ -32,7 +31,11 @@
           </div>
         </div>
 
-        <div v-if="filteredPosts.length > 0">
+        <div v-if="loading" style="text-align: center; padding: 3rem;">
+          <p>⏳ {{ t('common.loading') }}</p>
+        </div>
+
+        <div v-else-if="filteredPosts.length > 0">
           <ForumPostCard 
             v-for="post in filteredPosts" 
             :key="post.id" 
@@ -41,13 +44,11 @@
         </div>
 
         <div v-else class="empty-state">
-          <p>Tiada perbincangan untuk kategori <strong>{{ selectedCategory }}</strong>.</p>
-          <button @click="selectedCategory = ''">Lihat Semua Topik</button>
+          <p>Tiada perbincangan ditemui.</p>
+          <button v-if="selectedCategory" @click="selectedCategory = ''">Lihat Semua Topik</button>
+          <button v-else @click="$router.push('/forum/create')">Mulakan Topik Baru</button>
         </div>
         
-        <div v-if="filteredPosts.length > 0" class="load-more">
-          <button>Muat Lagi...</button>
-        </div>
       </div>
 
       <div class="sidebar-column">
@@ -60,7 +61,7 @@
             <p>Selamat datang ke forum rasmi KnotenUp.</p>
             <div class="stats">
               <div class="stat-item"><strong>1.2k</strong><span>Ahli</span></div>
-              <div class="stat-item"><strong>150</strong><span>Online</span></div>
+              <div class="stat-item"><strong>{{ posts.length }}</strong><span>Topik</span></div>
             </div>
             <button class="btn-create-post" @click="$router.push('/forum/create')">
               ✍️ {{ t('forum.createPost') }}
@@ -84,18 +85,10 @@
                 </optgroup>
               </select>
             </div>
-            
-            <div class="categories-list">
-              <p class="label-small">Paling Popular:</p>
-              <a href="#" @click.prevent="selectedCategory = 'Hiking'">⛰️ Hiking</a>
-              <a href="#" @click.prevent="selectedCategory = 'Camping'">⛺ Camping</a>
-              <a href="#" @click.prevent="selectedCategory = 'Cycling'">🚴 Cycling</a>
-            </div>
           </div>
         </div>
 
       </div>
-
     </div>
   </div>
 </template>
@@ -103,74 +96,69 @@
 <script setup lang="ts">
 import SearchBar from '../components/common/SearchBar.vue';
 import ForumPostCard from '../components/forum/ForumPostCard.vue';
-import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n'; // Import
+import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ACTIVITY_CATEGORIES } from '../constants/data';
 
-const { t } = useI18n(); // Activate
-const handleSearch = (q: string) => {
-  alert(`Mencari forum: ${q}`);
+// Firebase Imports
+import { db } from '../firebaseConfig';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+
+const { t } = useI18n();
+const handleSearch = (q: string) => { alert(`Mencari: ${q}`); };
+const selectedCategory = ref('');
+const posts = ref<any[]>([]);
+const loading = ref(true);
+
+// Helper: Kira masa lalu (Time Ago)
+const getTimeAgo = (timestamp: any) => {
+  if (!timestamp) return 'Baru saja';
+  const date = timestamp.toDate(); // Tukar Firebase Timestamp ke JS Date
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (seconds < 60) return `${seconds} saat lepas`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minit lepas`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} jam lepas`;
+  const days = Math.floor(hours / 24);
+  return `${days} hari lepas`;
 };
 
-const selectedCategory = ref('');
-
-const posts = ref([
-  {
-    id: 1,
-    title: "Kasut hiking apa paling sesuai untuk Dragon Back?",
-    author: "MatGunung88",
-    category: "Hiking",
-    timeAgo: "2 jam lepas",
-    votes: 45,
-    commentCount: 12,
-    excerpt: "Salam semua, saya plan nak hiking Dragon Back weekend ni. Kasut getah adidas kampung okay tak?",
-    image: null
-  },
-  {
-    id: 2,
-    title: "Trip Report: Camping di Sungai Chiling (Padu!)",
-    author: "SaraCamp",
-    category: "Camping",
-    timeAgo: "5 jam lepas",
-    votes: 120,
-    commentCount: 34,
-    excerpt: "Air sungai jernih, tapak pun bersih. Cuma hati-hati masa cross sungai...",
-    image: "https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=500&q=60"
-  },
-  {
-    id: 3,
-    title: "Mana nak cari kedai repair basikal area Shah Alam?",
-    author: "CyclingPro",
-    category: "Cycling",
-    timeAgo: "1 hari lepas",
-    votes: 10,
-    commentCount: 5,
-    excerpt: "Tayar basikal saya bocor tepi jalan, ada rekemen kedai yang buka Ahad?",
-    image: null
-  },
-  {
-    id: 4,
-    title: "Lesen Diving PADI atau SSI? Mana lagi okay?",
-    author: "DiverBaru",
-    category: "Scuba Diving",
-    timeAgo: "3 hari lepas",
-    votes: 32,
-    commentCount: 20,
-    excerpt: "Plan nak ambil lesen bulan depan di Tioman. Minta pendapat otai.",
-    image: null
+// Load Data dari Firebase
+onMounted(async () => {
+  try {
+    const q = query(collection(db, "forum_posts"), orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
+    
+    const fetchedPosts: any[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      fetchedPosts.push({
+        id: doc.id,
+        ...data,
+        excerpt: data.content, // Guna content sebagai excerpt
+        timeAgo: getTimeAgo(data.createdAt) // Proses tarikh di sini
+      });
+    });
+    
+    posts.value = fetchedPosts;
+  } catch (error) {
+    console.error("Error loading forum:", error);
+  } finally {
+    loading.value = false;
   }
-]);
+});
 
 const filteredPosts = computed(() => {
-  if (!selectedCategory.value) {
-    return posts.value;
-  }
+  if (!selectedCategory.value) return posts.value;
   return posts.value.filter(post => post.category === selectedCategory.value);
 });
 </script>
 
 <style scoped>
-/* ... CSS KEKAL SAMA ... */
+/* CSS KEKAL SAMA */
 .forum-page { background-color: #dae0e6; min-height: 100vh; }
 .forum-banner { background-color: #2c3e50; color: white; padding: 2rem 1rem; margin-bottom: 1.5rem; text-align: center; }
 .banner-content h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
@@ -199,7 +187,4 @@ const filteredPosts = computed(() => {
 .btn-create-post { width: 100%; padding: 0.6rem; background-color: #2c3e50; color: white; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; }
 .category-select-container label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #555; }
 .full-width-select { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9; margin-bottom: 1rem; }
-.label-small { font-size: 0.75rem; color: #999; margin-bottom: 0.5rem; text-transform: uppercase; font-weight: bold; }
-.categories-list a { display: block; padding: 0.5rem 0; text-decoration: none; color: #333; border-bottom: 1px solid #f0f0f0; transition: padding 0.2s; }
-.categories-list a:hover { padding-left: 5px; color: #0079d3; }
 </style>

@@ -44,7 +44,9 @@
         </div>
       </div>
       
-      <button class="btn-join">{{ t('components.viewDetails') }}</button>
+      <router-link :to="'/trips/' + trip.id" class="btn-join">
+       {{ t('components.viewDetails') }}
+      </router-link>
     </div>
   </div>
 </template>
@@ -81,4 +83,10 @@ h3 { margin: 0; font-size: 1.1rem; color: #2c3e50; line-height: 1.3; }
 .price { font-weight: 800; font-size: 1.1rem; color: #2c3e50; }
 .btn-join { width: 100%; padding: 0.6rem; background-color: #2c3e50; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
 .btn-join:hover { background-color: #1a252f; }
+.btn-join {
+  /* ... css lama ... */
+  text-decoration: none; /* Tambah ini sbb router-link jadi tag <a> */
+  display: block;        /* Tambah ini */
+  text-align: center;    /* Tambah ini */
+}
 </style>

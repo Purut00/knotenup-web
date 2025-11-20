@@ -1,5 +1,5 @@
 <template>
-  <div class="forum-card">
+  <div class="forum-card" @click="goToDetail">>
     
     <div class="vote-section">
       <button 
@@ -60,6 +60,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 // Terima data post dari parent
 const props = defineProps<{
@@ -67,8 +68,10 @@ const props = defineProps<{
 }>();
 
 // Logic Undian (Simulation)
+const router = useRouter();
 const voteScore = ref(props.post.votes);
 const userVote = ref(0); // 0 = Neutral, 1 = Upvote, -1 = Downvote
+const goToDetail = () => { router.push(`/forum/${props.post.id}`); };
 
 const handleVote = (type: number) => {
   if (userVote.value === type) {
@@ -98,6 +101,7 @@ const handleShare = () => {
   border-radius: 8px;
   margin-bottom: 1rem;
   transition: border 0.2s;
+  cursor: pointer;
 }
 
 .forum-card:hover {
@@ -175,6 +179,12 @@ const handleShare = () => {
   color: #333;
   line-height: 1.5;
   margin-bottom: 0.8rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; 
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .post-image-container img {

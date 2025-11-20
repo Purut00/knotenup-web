@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, FacebookAuthProvider, OAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // ⚠️ PENTING: Nanti anda perlu ganti kod ini dengan config dari Firebase Console anda sendiri.
 // Buat masa ni, kita letak placeholder supaya kod tak error.
@@ -18,10 +19,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // Setup Providers (Google, FB, Apple)
 const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
 
-export { auth, db, googleProvider, facebookProvider, appleProvider };
+export { auth, db, storage, googleProvider, facebookProvider, appleProvider };

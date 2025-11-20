@@ -7,6 +7,8 @@ import CreateTripPage from '../views/CreateTripPage.vue';
 import ForumCreatePostPage from '../views/ForumCreatePostPage.vue';
 import EditProfilePage from '../views/EditProfilePage.vue';
 import TripRequestPage from '../views/TripRequestPage.vue'
+import TripDetailPage from '../views/TripDetailPage.vue';
+import ForumDetailPage from '../views/ForumDetailPage.vue';
 
 const routes = [
   {
@@ -50,7 +52,17 @@ const routes = [
     path: '/requests',
     name: 'requests',
     component: TripRequestPage
-  }
+  },
+  {
+  path: '/trips/:id', // :id bermaksud ia boleh berubah-ubah
+  name: 'trip-detail',
+  component: TripDetailPage
+  },
+  {
+  path: '/forum/:id',
+  name: 'forum-detail',
+  component: ForumDetailPage
+  },
 ]
 
 const router = createRouter({

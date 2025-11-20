@@ -12,11 +12,13 @@
     <div class="content-container">
       <div class="results-meta">
         <span>Menunjukkan <strong>{{ trips.length }}</strong> trip aktif</span>
-        <div class="view-toggle">
-          </div>
+      </div>
+      
+      <div v-if="loading" style="text-align: center; padding: 2rem;">
+        <p>⏳ {{ t('common.loading') }}</p>
       </div>
 
-      <div class="trip-grid">
+      <div v-else class="trip-grid">
         <TripCard 
           v-for="trip in trips" 
           :key="trip.id" 
@@ -24,7 +26,11 @@
         />
       </div>
       
-      <div class="load-more">
+      <div v-if="!loading && trips.length === 0" style="text-align: center; margin-top: 2rem;">
+        <p>Belum ada trip buat masa ini.</p>
+      </div>
+      
+      <div v-if="trips.length > 0" class="load-more">
         <button>Lihat Banyak Lagi</button>
       </div>
     </div>
@@ -32,79 +38,38 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import TripFilter from '../components/trip/TripFilter.vue';
 import TripCard from '../components/trip/TripCard.vue';
-import { useI18n } from 'vue-i18n'; // Import
+import { db } from '../firebaseConfig';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
-const { t } = useI18n(); // Activate
+const { t } = useI18n();
+const trips = ref<any[]>([]); // Array kosong mula-mula
+const loading = ref(true);
 
-// Data Dummy untuk Trip
-const trips = [
-  {
-    id: 1,
-    title: 'Hiking Santai Bukit Tabur',
-    category: 'Hiking',
-    difficulty: 'Sederhana',
-    date: '24 Dis 2025',
-    duration: '4 Jam',
-    rating: 4.8,
-    price: 50,
-    organizerName: 'Kembara Malaya',
-    organizerImage: 'https://i.pravatar.cc/150?u=1',
-    image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400',
-    currentSlots: 15,
-    maxSlots: 20,
-    status: 'open'
-  },
-  {
-    id: 2,
-    title: 'Camping & Stargazing',
-    category: 'Camping',
-    difficulty: 'Santai',
-    date: '31 Dis 2025',
-    duration: '2H 1M',
-    rating: 5.0,
-    price: 150,
-    organizerName: 'Outdoor Pro',
-    organizerImage: 'https://i.pravatar.cc/150?u=2',
-    image: 'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=400',
-    currentSlots: 29,
-    maxSlots: 30,
-    status: 'open'
-  },
-  {
-    id: 3,
-    title: 'Scuba Open Water Course',
-    category: 'Diving',
-    difficulty: 'Sederhana',
-    date: '10 Jan 2026',
-    duration: '4H 3M',
-    rating: 4.9,
-    price: 1200,
-    organizerName: 'Blue Ocean',
-    organizerImage: 'https://i.pravatar.cc/150?u=3',
-    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400',
-    currentSlots: 5,
-    maxSlots: 5,
-    status: 'full'
-  },
-  {
-    id: 4,
-    title: 'Trans Titiwangsa V1',
-    category: 'Hiking',
-    difficulty: 'Hardcore',
-    date: '15 Feb 2026',
-    duration: '7H 6M',
-    rating: 4.7,
-    price: 450,
-    organizerName: 'Extreme Hikers',
-    organizerImage: 'https://i.pravatar.cc/150?u=4',
-    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400',
-    currentSlots: 8,
-    maxSlots: 15,
-    status: 'open'
+onMounted(async () => {
+  try {
+    // Query: Ambil semua trip, susun ikut tarikh create (descending)
+    const q = query(collection(db, "trips"), orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
+
+    const fetchedTrips: any[] = [];
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      // Masukkan ID document sekali
+      fetchedTrips.push({ id: doc.id, ...data });
+    });
+
+    trips.value = fetchedTrips;
+  } catch (error) {
+    console.error("Error fetching trips:", error);
+  } finally {
+    loading.value = false;
   }
-];
+});
 </script>
 
 <style scoped>
