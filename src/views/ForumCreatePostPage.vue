@@ -1,10 +1,11 @@
 <template>
   <div class="create-post-page">
     <div class="form-card">
-      <h2>✍️ {{ t('forum.createPost') }}</h2>
+      <h2>✍️ {{ isEditing ? 'Kemaskini Topik' : t('forum.createPost') }}</h2>
       
       <div class="form-group">
-        <label>{{ t('createTrip.tripTitle') }}</label> <input type="text" v-model="form.title" placeholder="Contoh: Di mana lokasi hiking terbaik untuk beginner?" />
+        <label>{{ t('createTrip.tripTitle') }}</label>
+        <input type="text" v-model="form.title" placeholder="Tajuk topik..." />
       </div>
 
       <div class="form-group">
@@ -18,13 +19,14 @@
       </div>
 
       <div class="form-group">
-        <label>Kandungan / Soalan</label> <textarea v-model="form.content" rows="6" placeholder="Tulis pertanyaan atau pengalaman anda di sini..."></textarea>
+        <label>Kandungan</label>
+        <textarea v-model="form.content" rows="6" placeholder="Tulis sesuatu..."></textarea>
       </div>
 
       <div class="form-actions">
         <button @click="$router.back()" class="btn-cancel">{{ t('common.cancel') }}</button>
         <button @click="submitPost" class="btn-submit" :disabled="loading">
-          {{ loading ? t('common.loading') : t('common.submit') }}
+          {{ loading ? t('common.loading') : (isEditing ? 'Kemaskini' : t('common.submit')) }}
         </button>
       </div>
     </div>
@@ -32,58 +34,80 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { reactive, ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ACTIVITY_CATEGORIES } from '../constants/data';
-
-// Firebase Imports
 import { auth, db } from '../firebaseConfig';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const { t } = useI18n();
 const router = useRouter();
+const route = useRoute(); // Untuk baca ID dari URL
 const loading = ref(false);
+const isEditing = ref(false); // Flag Edit Mode
+const postId = route.params.id as string;
 
-const form = reactive({ 
-  title: '', 
-  category: '', 
-  content: '' 
+const form = reactive({ title: '', category: '', content: '' });
+
+onMounted(async () => {
+  // Kalau ada ID di URL, maksudnya kita nak EDIT
+  if (postId) {
+    isEditing.value = true;
+    loading.value = true;
+    try {
+      const docSnap = await getDoc(doc(db, "forum_posts", postId));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        // Isi borang dengan data sedia ada
+        form.title = data.title;
+        form.category = data.category;
+        form.content = data.content;
+      }
+    } catch (e) {
+      console.error("Error fetch:", e);
+    } finally {
+      loading.value = false;
+    }
+  }
 });
 
 const submitPost = async () => {
-  if (!auth.currentUser) {
-    alert("Sila login untuk menulis di forum.");
-    return;
-  }
-  
-  if(!form.title || !form.category || !form.content) {
-    alert("Sila isi semua maklumat.");
-    return;
-  }
+  if (!auth.currentUser) return alert("Sila login.");
+  if(!form.title || !form.category || !form.content) return alert("Sila isi semua.");
 
   loading.value = true;
 
   try {
-    // Simpan ke collection 'forum_posts'
-    await addDoc(collection(db, "forum_posts"), {
-      title: form.title,
-      category: form.category,
-      content: form.content, // Isi post
-      authorId: auth.currentUser.uid,
-      author: auth.currentUser.displayName || 'Anonymous', // Nama penulis
-      authorAvatar: auth.currentUser.photoURL || '',
-      createdAt: serverTimestamp(), // Tarikh server
-      votes: 0, // Mula dengan 0 undi
-      commentCount: 0 // Mula dengan 0 komen
-    });
-
-    alert("Topik berjaya diterbitkan!");
-    router.push('/forum'); // Balik ke forum
+    if (isEditing.value) {
+      // MODE EDIT: Update doc sedia ada
+      await updateDoc(doc(db, "forum_posts", postId), {
+        title: form.title,
+        category: form.category,
+        content: form.content,
+        updatedAt: serverTimestamp() // Rekod masa update
+      });
+      alert("Topik berjaya dikemaskini!");
+    } else {
+      // MODE CREATE: Buat doc baru
+      await addDoc(collection(db, "forum_posts"), {
+        title: form.title,
+        category: form.category,
+        content: form.content,
+        authorId: auth.currentUser.uid,
+        author: auth.currentUser.displayName || 'Anonymous',
+        authorAvatar: auth.currentUser.photoURL || '',
+        createdAt: serverTimestamp(),
+        votes: 0,
+        commentCount: 0
+      });
+      alert("Topik berjaya diterbitkan!");
+    }
+    router.push('/forum');
 
   } catch (error) {
-    console.error("Error posting:", error);
-    alert("Gagal menerbitkan topik.");
+    console.error("Error:", error);
+    alert("Gagal.");
   } finally {
     loading.value = false;
   }

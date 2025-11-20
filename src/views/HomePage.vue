@@ -1,154 +1,161 @@
 <template>
   <div class="home">
-    <section class="hero">
-      <div class="hero-overlay">
-        <div class="hero-content">
-          <h1>{{ t('home.heroTitle') }}</h1>
-          <p>{{ t('home.heroSub') }}</p>
-          
-          <div style="margin-top: 2rem;">
-            <SearchBar 
-              :placeholder="t('home.searchPlaceholder')" 
-              searchScope="Global"
-              @handle-search="handleGlobalSearch"
-            />
+    
+    <div class="search-strip-container">
+      <div class="search-row">
+        <div class="category-dropdown">
+          <span>All Category</span>
+          <span class="arrow">▼</span>
+        </div>
+        
+        <div class="search-input-wrapper">
+           <input type="text" :placeholder="t('home.searchPlaceholder')" @keyup.enter="handleSearch" />
+        </div>
+
+        <button class="btn-search-strip" @click="handleSearch">
+          {{ t('common.search') }}
+        </button>
+      </div>
+    </div>
+
+    <div class="main-content-wrapper">
+      
+      <section class="hero-grid-section">
+        
+        <div class="banner-large" :style="{ backgroundImage: `url('https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=800')` }">
+          <div class="banner-text">
+            <h2>Hiking Adventure</h2>
+            <button>Lihat</button>
           </div>
-
         </div>
-      </div>
-    </section>
 
-    <section class="section-container">
-      <h2>{{ t('home.popularActivities') }}</h2>
-      <div class="icon-grid">
-        <div class="icon-item" v-for="item in popularActivities" :key="item.name">
-          <div class="icon-circle">{{ item.emoji }}</div>
-          <span>{{ item.name }}</span>
+        <div class="banner-stack">
+          <div class="banner-small" :style="{ backgroundImage: `url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500')` }">
+            <span>Diving Promo</span>
+          </div>
+          <div class="banner-small" :style="{ backgroundImage: `url('https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=500')` }">
+            <span>Camping Gear</span>
+          </div>
         </div>
-      </div>
-    </section>
 
-    <section class="section-container gray-bg">
-      <div class="content-wrapper">
+        <div class="icon-sidebar">
+          <div class="icon-box" v-for="item in popularActivities" :key="item.name" @click="filterBy(item.name)">
+            <div class="icon-circle">{{ item.emoji }}</div>
+            <span class="icon-label">{{ item.name }}</span>
+          </div>
+          <div class="icon-box">
+            <div class="icon-circle">...</div>
+            <span class="icon-label">More</span>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="section-container">
         <h2>{{ t('home.latestTrips') }}</h2>
-        <div class="trip-grid">
-          <div class="card trip-card" v-for="n in 12" :key="'trip-'+n">
-            <div class="card-image" :style="{ backgroundImage: `url('https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=400&q=80')` }">
-              <div class="img-overlay"></div>
-            </div>
-            <div class="card-content">
-              <span class="tag">Hiking</span>
-              <h3>Ekspedisi Gunung Tahan {{ n }}</h3>
-              <div class="meta-info">
-                <span>📅 12 Dis 2025</span>
-                <span>📍 Pahang</span>
-              </div>
-              <p>Jom sertai kami mendaki gunung tertinggi di Semenanjung.</p>
-              <div class="card-footer">
-                <span class="price">RM 250/pax</span>
-                <button class="btn-small">{{ t('common.view') }}</button>
-              </div>
-            </div>
-          </div>
+        
+        <div v-if="loadingTrips" class="loading-text">⏳ {{ t('common.loading') }}</div>
+        
+        <div v-else-if="latestTrips.length > 0" class="trip-grid">
+          <TripCard v-for="trip in latestTrips" :key="trip.id" :trip="trip" />
         </div>
-        <div class="center-btn">
-          <button class="btn-outline">{{ t('home.viewAllTrips') }}</button>
-        </div>
-      </div>
-    </section>
+        
+        <div v-else class="empty-text">Belum ada trip terkini.</div>
+      </section>
 
-    <section class="section-container">
-      <h2>{{ t('home.communityDiscuss') }}</h2>
-      <div class="forum-grid">
-        <div class="forum-card" v-for="n in 8" :key="'forum-'+n">
-          <div class="forum-content">
-            <div class="forum-header">
-              <span class="badge">Tips</span>
-              <span class="date">2 jam lepas</span>
-            </div>
-            <h3>Kasut hiking apa paling tahan lasak? #{{ n }}</h3>
-            <p>Saya merancang nak beli kasut baru bajet bawah RM300...</p>
-            <div class="forum-footer">
-              <div class="user-info">
-                <div class="avatar"></div>
-                <span>Ahmad Albab</span>
-              </div>
-              <div class="stats">
-                <span>💬 24</span>
-                <span>❤️ 15</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import SearchBar from '../components/common/SearchBar.vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import TripCard from '../components/trip/TripCard.vue'; 
+import { db } from '../firebaseConfig';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
 const { t } = useI18n();
+const router = useRouter();
+const latestTrips = ref<any[]>([]);
+const loadingTrips = ref(true);
 
-const handleGlobalSearch = (query: string) => {
-  console.log("Global Search:", query);
-  alert(`Mencari '${query}' di seluruh website...`);
-};
-
+// Ikon untuk Sidebar Kanan
 const popularActivities = [
   { name: 'Hiking', emoji: '⛰️' },
   { name: 'Camping', emoji: '⛺' },
-  { name: 'Kayaking', emoji: '🛶' },
   { name: 'Diving', emoji: '🤿' },
-  { name: 'Cycling', emoji: '🚴' },
-  { name: 'Climbing', emoji: '🧗' }
+  { name: 'Cycling', emoji: '🚴' }
 ];
+
+const formatDate = (dateString: string) => {
+  if(!dateString) return '';
+  return new Date(dateString).toLocaleDateString('en-MY', { day: 'numeric', month: 'short' });
+};
+
+const handleSearch = () => { alert("Searching..."); };
+const filterBy = (activity: string) => { router.push('/trips'); };
+
+onMounted(async () => {
+  try {
+    const qTrips = query(collection(db, "trips"), orderBy("createdAt", "desc"), limit(8));
+    const snapTrips = await getDocs(qTrips);
+    latestTrips.value = snapTrips.docs.map(doc => ({ id: doc.id, ...doc.data(), date: formatDate(doc.data().startDate) }));
+  } catch (e) { console.error(e); } 
+  finally { loadingTrips.value = false; }
+});
 </script>
 
 <style scoped>
-/* ... CSS KEKAL SAMA ... */
-.hero { height: 500px; background-image: url('https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-position: center; position: relative; }
-.hero-overlay { background: rgba(0, 0, 0, 0.4); height: 100%; display: flex; align-items: center; justify-content: center; }
-.hero-content { text-align: center; color: white; width: 100%; max-width: 800px; padding: 0 1rem; }
-.hero-content h1 { font-size: 3rem; font-weight: 900; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-.section-container { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
-.gray-bg { background-color: #f8f9fa; max-width: none; display: flex; justify-content: center; }
-.content-wrapper { max-width: 1200px; width: 100%; }
-h2 { text-align: center; margin-bottom: 3rem; font-size: 2.2rem; color: #2c3e50; }
-.icon-grid { display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; }
-.icon-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s; }
-.icon-item:hover { transform: translateY(-5px); }
-.icon-circle { width: 80px; height: 80px; background-color: #fff; border: 2px solid #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s; }
-.icon-item:hover .icon-circle { border-color: #e67e22; background-color: #fff8f0; }
-.icon-item span { font-weight: 600; color: #555; }
-.trip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
-@media (max-width: 900px) { .trip-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .trip-grid { grid-template-columns: 1fr; } }
-.card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s; border: 1px solid #eee; }
-.card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
-.card-image { height: 180px; background-color: #ddd; background-size: cover; background-position: center; }
-.card-content { padding: 1.5rem; }
-.tag { background-color: #fff3cd; color: #856404; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
-.card-content h3 { margin: 0.8rem 0; font-size: 1.2rem; color: #2c3e50; }
-.meta-info { display: flex; gap: 1rem; font-size: 0.85rem; color: #7f8c8d; margin-bottom: 1rem; }
-.card-footer { border-top: 1px solid #f1f1f1; padding-top: 1rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; }
-.price { font-weight: bold; color: #e67e22; font-size: 1.1rem; }
-.btn-small { padding: 0.4rem 1rem; background-color: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; }
-.forum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
-@media (max-width: 768px) { .forum-grid { grid-template-columns: 1fr; } }
-.forum-card { background: white; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1.5rem; transition: border-color 0.2s; }
-.forum-card:hover { border-color: #3498db; }
-.forum-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
-.badge { background-color: #e1f5fe; color: #0288d1; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
-.date { font-size: 0.8rem; color: #aaa; }
-.forum-card h3 { margin-bottom: 0.5rem; color: #333; }
-.forum-card p { color: #666; font-size: 0.95rem; line-height: 1.5; }
-.forum-footer { margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-.user-info { display: flex; align-items: center; gap: 0.5rem; }
-.avatar { width: 30px; height: 30px; background-color: #ccc; border-radius: 50%; }
-.stats { font-size: 0.85rem; color: #999; display: flex; gap: 1rem; }
-.center-btn { text-align: center; margin-top: 3rem; }
-.btn-outline { padding: 0.8rem 2rem; border: 2px solid #2c3e50; background: transparent; color: #2c3e50; font-weight: bold; border-radius: 50px; cursor: pointer; transition: all 0.3s; }
-.btn-outline:hover { background: #2c3e50; color: white; }
+.home { background-color: #f4f6f8; min-height: 100vh; }
+.main-content-wrapper { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+
+/* --- SEARCH STRIP --- */
+.search-strip-container { background: white; padding: 1rem 0; border-bottom: 1px solid #ddd; }
+.search-row { max-width: 1000px; margin: 0 auto; display: flex; border: 2px solid #2c3e50; border-radius: 8px; overflow: hidden; }
+
+.category-dropdown { background: #f9f9f9; padding: 0.8rem 1.5rem; border-right: 1px solid #ddd; cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: bold; color: #555; }
+.search-input-wrapper { flex-grow: 1; }
+.search-input-wrapper input { width: 100%; height: 100%; border: none; padding: 0 1rem; font-size: 1rem; outline: none; }
+.btn-search-strip { background: #2c3e50; color: white; border: none; padding: 0 2rem; font-weight: bold; cursor: pointer; font-size: 1rem; }
+.btn-search-strip:hover { background: #34495e; }
+
+/* --- HERO GRID LAYOUT --- */
+.hero-grid-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr 80px; /* Kiri (Besar), Tengah (Stack), Kanan (Icon) */
+  gap: 1rem;
+  margin-top: 1.5rem;
+  height: 400px;
+}
+
+/* Banner Besar */
+.banner-large { background-size: cover; background-position: center; border-radius: 12px; position: relative; display: flex; align-items: flex-end; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.banner-text { padding: 2rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); width: 100%; color: white; }
+.banner-text h2 { margin: 0 0 10px 0; font-size: 2rem; }
+.banner-text button { padding: 0.5rem 1.5rem; background: #e67e22; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+/* Banner Stack */
+.banner-stack { display: flex; flex-direction: column; gap: 1rem; }
+.banner-small { flex: 1; background-size: cover; background-position: center; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; text-shadow: 0 2px 5px rgba(0,0,0,0.5); font-size: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer; }
+.banner-small:hover { transform: scale(1.02); }
+
+/* Icon Sidebar */
+.icon-sidebar { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.icon-box { display: flex; flex-direction: column; align-items: center; cursor: pointer; width: 100%; }
+.icon-circle { width: 50px; height: 50px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 1px solid #ddd; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.icon-box:hover .icon-circle { border-color: #e67e22; background: #fff8f0; }
+.icon-label { font-size: 0.7rem; margin-top: 4px; color: #555; font-weight: 600; text-align: center; }
+
+/* Section Trip Bawah */
+.section-container { margin-top: 3rem; }
+.trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .hero-grid-section { grid-template-columns: 1fr; height: auto; }
+  .banner-large { height: 250px; }
+  .banner-stack { flex-direction: row; height: 150px; }
+  .icon-sidebar { flex-direction: row; justify-content: center; flex-wrap: wrap; }
+}
 </style>

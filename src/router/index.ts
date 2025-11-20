@@ -9,6 +9,8 @@ import EditProfilePage from '../views/EditProfilePage.vue';
 import TripRequestPage from '../views/TripRequestPage.vue'
 import TripDetailPage from '../views/TripDetailPage.vue';
 import ForumDetailPage from '../views/ForumDetailPage.vue';
+import AdminPage from '../views/AdminPage.vue';
+
 
 const routes = [
   {
@@ -63,6 +65,16 @@ const routes = [
   name: 'forum-detail',
   component: ForumDetailPage
   },
+  {
+  path: '/forum/edit/:id',
+  name: 'edit-post',
+  component: ForumCreatePostPage
+  },
+  {
+  path: '/admin',
+  name: 'admin',
+  component: AdminPage
+  }
 ]
 
 const router = createRouter({
