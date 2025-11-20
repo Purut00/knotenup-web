@@ -323,6 +323,65 @@ const shareCard = () => {
 .qr-label { font-weight: bold; margin-bottom: 15px; font-size: 0.7rem; letter-spacing: 2px; color: #555; }
 .qr-code { width: 140px; height: 140px; }
 .logo-watermark { margin-top: 15px; font-weight: 900; color: #2c3e50; font-size: 1.3rem; }
-@media (max-width: 768px) { .profile-info-container { flex-direction: column; align-items: center; text-align: center; margin-top: -70px; } .social-mini-links { justify-content: center; } .stats-row { justify-content: center; } .action-buttons { width: 100%; justify-content: center; } }
-@media (max-width: 600px) { .business-card { flex-direction: column; } .card-left { padding: 2rem; text-align: center; align-items: center; } .card-bio { border-left: none; padding-left: 0; } .card-socials { align-items: center; } .card-right { padding: 2rem; border-left: none; border-top: 1px dashed #eee; } .close-btn { color: #888; top: 5px; right: 10px; } }
+/* --- RESPONSIVE PROFILE --- */
+@media (max-width: 768px) {
+  /* Header Profile */
+  .profile-info-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: -70px;
+    padding: 0 1rem 2rem 1rem;
+  }
+
+  .info-text h1 {
+    justify-content: center; /* Centerkan nama */
+    font-size: 1.5rem;
+  }
+
+  /* Social Icons Center */
+  .social-mini-links {
+    justify-content: center;
+  }
+
+  /* Stats (Jumlah Trip) Center & Wrap */
+  .stats-row {
+    justify-content: center;
+    flex-wrap: wrap; /* Kalau panjang sangat, turun bawah */
+    gap: 1rem;
+  }
+
+  /* Butang Action */
+  .action-buttons {
+    width: 100%;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  /* Tabs (Scroll Tepi) */
+  .tabs-container {
+    justify-content: flex-start;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  /* Kad Bisnes Jadi Memanjang */
+  .business-card {
+    flex-direction: column;
+  }
+  .card-left {
+    text-align: center;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+  .card-bio {
+    border-left: none;
+    padding-left: 0;
+  }
+  .card-right {
+    border-left: none;
+    border-top: 1px dashed #eee;
+    padding: 2rem;
+  }
+}@media (max-width: 600px) { .business-card { flex-direction: column; } .card-left { padding: 2rem; text-align: center; align-items: center; } .card-bio { border-left: none; padding-left: 0; } .card-socials { align-items: center; } .card-right { padding: 2rem; border-left: none; border-top: 1px dashed #eee; } .close-btn { color: #888; top: 5px; right: 10px; } }
 </style>

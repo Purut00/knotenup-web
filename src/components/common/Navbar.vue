@@ -185,4 +185,30 @@ const handleLogout = async () => {
   background-color: #e74c3c;
   color: white;
 }
+
+/* --- RESPONSIVE NAVBAR --- */
+@media (max-width: 768px) {
+  .navbar-container {
+    flex-direction: column;
+    height: auto;
+    padding: 1rem 0;
+    gap: 1rem;
+  }
+
+  /* Menu Tengah: Scroll Tepi (Macam Instagram Story) */
+  .navbar-menu {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 5px;
+    justify-content: flex-start; /* Mula dari kiri */
+    padding-left: 1rem; /* Jarak sikit */
+  }
+
+  .navbar-right {
+    width: 100%;
+    justify-content: center; /* Centerkan butang login/create */
+    flex-wrap: wrap; /* Kalau tak muat, turun bawah */
+  }
+}
 </style>
