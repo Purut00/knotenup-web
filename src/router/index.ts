@@ -10,7 +10,7 @@ import TripRequestPage from '../views/TripRequestPage.vue'
 import TripDetailPage from '../views/TripDetailPage.vue';
 import ForumDetailPage from '../views/ForumDetailPage.vue';
 import AdminPage from '../views/AdminPage.vue';
-
+import SearchResultsPage from '../views/SearchResultsPage.vue';
 
 const routes = [
   {
@@ -74,7 +74,12 @@ const routes = [
   path: '/admin',
   name: 'admin',
   component: AdminPage
-  }
+  },
+  {
+  path: '/search',
+  name: 'search',
+  component: SearchResultsPage
+  },
 ]
 
 const router = createRouter({
