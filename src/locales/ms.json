@@ -73,7 +73,18 @@
     "sidebarAbout": "Tentang Komuniti",
     "sidebarTopic": "Saring Ikut Aktiviti",
     "comments": "Komen",
-    "share": "Kongsi"
+    "share": "Kongsi",
+    "postNotFound": "Post tidak dijumpai.",
+    "joinDiscussion": "Sertai Perbincangan",
+    "writeComment": "Tulis pendapat anda...",
+    "loginToComment": "Sila log masuk untuk komen.",
+    "discussionTitle": "Perbincangan",
+    "noComments": "Belum ada komen. Jadilah yang pertama!",
+    "replyBtn": "Balas",
+    "replyPlaceholder": "Balas komen ini...",
+    "loginToVote": "Sila log masuk untuk mengundi.",
+    "loginToReply": "Sila log masuk untuk membalas.",
+    "linkCopied": "Pautan disalin!"
   },
   "request": {
     "title": "Papan Permintaan Trip",

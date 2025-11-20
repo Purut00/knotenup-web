@@ -73,7 +73,18 @@
     "sidebarAbout": "About Community",
     "sidebarTopic": "Filter by Activity",
     "comments": "Comments",
-    "share": "Share"
+    "share": "Share",
+    "postNotFound": "Post not found.",
+    "joinDiscussion": "Join the Discussion",
+    "writeComment": "Write your thoughts...",
+    "loginToComment": "Please login to comment.",
+    "discussionTitle": "Discussion",
+    "noComments": "No comments yet. Be the first!",
+    "replyBtn": "Reply",
+    "replyPlaceholder": "Reply to this comment...",
+    "loginToVote": "Please login to vote.",
+    "loginToReply": "Please login to reply.",
+    "linkCopied": "Link copied!"
   },
   "request": {
     "title": "Trip Request Board",
