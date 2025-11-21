@@ -11,6 +11,7 @@
         <router-link to="/" class="navbar-item">{{ t('navbar.home') }}</router-link>
         <router-link to="/trips" class="navbar-item">{{ t('navbar.trips') }}</router-link>
         <router-link to="/forum" class="navbar-item">{{ t('navbar.forum') }}</router-link>
+        <router-link to="/directory" class="navbar-item">Direktori</router-link>
         
         <router-link v-if="currentUser" to="/profile" class="navbar-item user-name-link">
            👤 {{ getFirstName(currentUser.displayName) }}
@@ -144,7 +145,7 @@ const handleLogout = async () => {
 .logo-text {
   font-size: 1.3rem;       
   font-weight: 600;        
-  color: #ee4d2d;           /* Merah/Oren Shopee */
+  color:#155724;           /* Merah/Oren Shopee */
   letter-spacing: -1px;     /* Huruf rapat sikit macam logo */
   text-decoration: none;    /* Buang garis bawah */
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Font kemas */

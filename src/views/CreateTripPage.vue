@@ -5,11 +5,11 @@
       <div class="form-header">
         <h2>{{ t('createTrip.title') }}</h2>
         <div class="progress-bar">
-          <div class="step" :class="{ active: currentStep >= 1 }"><div class="step-circle">1</div></div>
+          <div class="step" :class="{ active: currentStep >= 1 }"><div class="step-circle">1</div><span>{{ t('createTrip.step1') }}</span></div>
           <div class="line" :class="{ filled: currentStep >= 2 }"></div>
-          <div class="step" :class="{ active: currentStep >= 2 }"><div class="step-circle">2</div></div>
+          <div class="step" :class="{ active: currentStep >= 2 }"><div class="step-circle">2</div><span>{{ t('createTrip.step2') }}</span></div>
           <div class="line" :class="{ filled: currentStep >= 3 }"></div>
-          <div class="step" :class="{ active: currentStep >= 3 }"><div class="step-circle">3</div></div>
+          <div class="step" :class="{ active: currentStep >= 3 }"><div class="step-circle">3</div><span>{{ t('createTrip.step3') }}</span></div>
         </div>
       </div>
 
@@ -25,6 +25,7 @@
             <div class="form-group half">
               <label>{{ t('createTrip.category') }}</label>
               <select v-model="form.category">
+                <option disabled value="">Pilih Kategori</option>
                 <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
                   <option v-for="item in group.items" :key="item" :value="item">{{ item }}</option>
                 </optgroup>
@@ -41,22 +42,35 @@
           </div>
           <div class="form-group">
             <label>{{ t('createTrip.location') }}</label>
-            <input type="text" v-model="form.location" placeholder="Contoh: Taman Negara" />
+            <input type="text" v-model="form.location" placeholder="Contoh: Taman Negara, Pahang" />
           </div>
         </div>
 
         <div v-if="currentStep === 2" class="step-content">
           <h3>{{ t('createTrip.datePrice') }}</h3>
+          
           <div class="row">
             <div class="form-group half">
               <label>{{ t('createTrip.startDate') }}</label>
               <input type="date" v-model="form.startDate" />
             </div>
             <div class="form-group half">
-              <label>{{ t('createTrip.duration') }}</label>
-              <input type="text" v-model="form.duration" placeholder="Cth: 3 Hari 2 Malam" />
+              <label>{{ t('createTrip.endDate') }}</label>
+              <input type="date" v-model="form.endDate" :min="form.startDate" />
             </div>
           </div>
+
+          <div class="form-group">
+            <label>{{ t('createTrip.calculatedDuration') }}</label>
+            <input 
+              type="text" 
+              :value="computedDuration" 
+              disabled 
+              class="disabled-input"
+              style="background-color: #f0f0f0; color: #2c3e50; font-weight: bold;"
+            />
+          </div>
+
           <div class="row">
             <div class="form-group half">
               <label>{{ t('createTrip.price') }}</label>
@@ -79,7 +93,6 @@
           <div class="form-group">
             <label>Gambar Utama</label>
             <img v-if="previewImage" :src="previewImage" class="img-preview" />
-            
             <div class="upload-box">
               <span>📸 Klik untuk upload gambar</span>
               <input type="file" accept="image/*" @change="handleImageSelect" /> 
@@ -117,13 +130,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ACTIVITY_CATEGORIES, TRIP_SERVICES } from '../constants/data';
-
-// Import Firebase
-import { auth, db, storage } from '../firebaseConfig'; // Pastikan import 'storage'
+import { auth, db, storage } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; 
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -132,35 +143,49 @@ const router = useRouter();
 const currentStep = ref(1);
 const loading = ref(false);
 const previewImage = ref('');
-const rawFile = ref<File | null>(null); // Simpan fail mentah di sini
+const rawFile = ref<File | null>(null);
 
 const form = reactive({
-  title: '',
-  category: '',
-  difficulty: '🟡 Sederhana (Moderate)',
-  location: '',
+  title: '', category: '', difficulty: '🟡 Sederhana (Moderate)', location: '',
   startDate: '',
-  duration: '',
-  price: null,
-  maxSlots: null,
-  groupLink: '',
-  description: '',
-  includes: [] as string[],
-  image: '' // Ini akan jadi URL nanti
+  endDate: '', // Tambah End Date
+  price: null, maxSlots: null, groupLink: '', description: '',
+  includes: [] as string[], image: ''
 });
 
-// Handle File Select (Cuma buat preview, jangan upload lagi)
+// 🔥 LOGIK PENGIRAAN DURASI 🔥
+const computedDuration = computed(() => {
+  if (!form.startDate || !form.endDate) return '-';
+
+  const start = new Date(form.startDate);
+  const end = new Date(form.endDate);
+  
+  // Kira beza masa (milisaat)
+  const diffTime = end.getTime() - start.getTime();
+  // Tukar ke hari (1000ms * 60s * 60m * 24h)
+  const diffDays = diffTime / (1000 * 3600 * 24);
+
+  if (diffDays < 0) return 'Tarikh Tidak Sah'; // Kalau end date sebelum start date
+
+  if (diffDays === 0) {
+    // Hari sama = Daytrip
+    return t('createTrip.dayTrip');
+  } else {
+    // Contoh: 2 hari 1 malam (Logic: Malam = diffDays, Hari = diffDays + 1)
+    const nights = diffDays;
+    const days = diffDays + 1;
+    // Format: 2h 1m (MS) atau 2d 1n (EN)
+    return `${days}${t('createTrip.days')} ${nights}${t('createTrip.nights')}`;
+  }
+});
+
 const handleImageSelect = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files[0]) {
     const file = target.files[0];
-    rawFile.value = file; // Simpan fail untuk upload nanti
-
-    // Buat preview
+    rawFile.value = file;
     const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) previewImage.value = e.target.result as string;
-    };
+    reader.onload = (e) => { if (e.target?.result) previewImage.value = e.target.result as string; };
     reader.readAsDataURL(file);
   }
 };
@@ -168,34 +193,22 @@ const handleImageSelect = (event: Event) => {
 const nextStep = () => { if (currentStep.value < 3) currentStep.value++; };
 const prevStep = () => { if (currentStep.value > 1) currentStep.value--; };
 
-// 🔥 FUNGSI SUBMIT (UPLOAD GAMBAR DULU) 🔥
 const submitForm = async () => {
-  if (!auth.currentUser) {
-    alert("Sila login dahulu!");
-    return;
-  }
-
+  if (!auth.currentUser) { alert("Sila login!"); return; }
   loading.value = true;
 
   try {
     let imageUrl = '';
-
-    // 1. Jika ada gambar dipilih, Upload ke Storage
     if (rawFile.value) {
-      // Nama fail unik: trips/userUID_timestamp.jpg
-      const fileName = `trips/${auth.currentUser.uid}_${Date.now()}.jpg`;
-      const imageRef = storageRef(storage, fileName);
-      
-      // Upload!
-      const snapshot = await uploadBytes(imageRef, rawFile.value);
-      // Dapatkan Link URL
+      const fileRef = storageRef(storage, `trips/${auth.currentUser.uid}_${Date.now()}.jpg`);
+      const snapshot = await uploadBytes(fileRef, rawFile.value);
       imageUrl = await getDownloadURL(snapshot.ref);
     }
 
-    // 2. Simpan Data Trip (bersama URL gambar) ke Database
     const tripData = {
       ...form,
-      image: imageUrl, // Masukkan URL, bukan Base64
+      image: imageUrl,
+      duration: computedDuration.value, // Simpan durasi yang dah dikira
       price: Number(form.price),
       maxSlots: Number(form.maxSlots),
       currentSlots: 0,
@@ -207,13 +220,12 @@ const submitForm = async () => {
     };
 
     await addDoc(collection(db, 'trips'), tripData);
-
     alert("Trip berjaya diterbitkan!");
     router.push('/trips');
 
   } catch (error) {
     console.error("Error:", error);
-    alert("Gagal: " + error); // Tunjuk error sebenar kalau ada
+    alert("Gagal: " + error);
   } finally {
     loading.value = false;
   }
@@ -221,7 +233,7 @@ const submitForm = async () => {
 </script>
 
 <style scoped>
-/* CSS KEKAL SAMA */
+/* CSS SAMA MACAM DULU */
 .create-page { background-color: #f4f6f8; min-height: 100vh; padding: 2rem; display: flex; justify-content: center; }
 .form-container { background: white; width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow: hidden; }
 .form-header { background-color: #2c3e50; color: white; padding: 2rem; text-align: center; }
@@ -254,4 +266,6 @@ button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
 .btn-secondary { background-color: #bdc3c7; color: #333; }
 .btn-primary { background-color: #3498db; color: white; }
 .btn-success { background-color: #2ecc71; color: white; }
+/* Style untuk input duration yang disable */
+.disabled-input { cursor: not-allowed; border-color: #eee; }
 </style>

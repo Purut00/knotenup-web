@@ -61,3 +61,24 @@ export const TRIP_SERVICES = [
   "Sijil Penyertaan",
   "Jurufoto (Photographer)"
 ];
+
+// ... (kod lama ACTIVITY_CATEGORIES dan TRIP_SERVICES kekal di atas) ...
+
+export const MALAYSIA_STATES = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Kuala Lumpur",
+  "Putrajaya",
+  "Labuan"
+];

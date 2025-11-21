@@ -11,6 +11,8 @@ import TripDetailPage from '../views/TripDetailPage.vue';
 import ForumDetailPage from '../views/ForumDetailPage.vue';
 import AdminPage from '../views/AdminPage.vue';
 import SearchResultsPage from '../views/SearchResultsPage.vue';
+import DirectoryPage from '../views/DirectoryPage.vue';
+import CreateServicePage from '../views/CreateServicePage.vue';
 
 const routes = [
   {
@@ -79,6 +81,19 @@ const routes = [
   path: '/search',
   name: 'search',
   component: SearchResultsPage
+  },
+  { path: '/directory', 
+  name: 'directory', 
+  component: DirectoryPage 
+  },
+  { path: '/create-service', 
+  name: 'create-service', 
+  component: CreateServicePage 
+  },
+  {
+  path: '/user/:id', // :id ini adalah User ID (UID) organizer tu
+  name: 'public-profile',
+  component: ProfilePage
   },
 ]
 

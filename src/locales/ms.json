@@ -60,7 +60,12 @@
     "includes": "Pakej Termasuk",
     "mediaInfo": "Media & Info Lanjut",
     "desc": "Deskripsi Penuh",
-    "submitBtn": "Terbitkan Trip!"
+    "submitBtn": "Terbitkan Trip!",
+    "endDate": "Tarikh Tamat",
+    "dayTrip": "Trip Hari",
+    "days": "h",
+    "nights": "m",
+    "calculatedDuration": "Tempoh (Auto)"
   },
   "forum": {
     "headerTitle": "Pusat Komuniti KnotenUp",
@@ -143,6 +148,39 @@
     "easy": "🟢 Santai (Easy)",
     "moderate": "🟡 Sederhana",
     "hard": "🔴 Hardcore"
+  },
+  "directory": {
+    "title": "Direktori & Servis",
+    "sub": "Cari campsite, malim gunung, dan sewaan peralatan.",
+    "advertiseBtn": "📢 Iklankan Servis Anda",
+    "allStates": "Semua Negeri",
+    "statePlaceholder": "Pilih Negeri",
+    "catAll": "Semua",
+    "expired": "TAMAT TEMPOH",
+    "inactive": "Servis Tidak Aktif",
+    "contactBtn": "Hubungi (WhatsApp)",
+    "empty": "Tiada servis dijumpai untuk pilihan ini.",
+    "renewTooltip": "Perbaharui 3 Bulan",
+    "deleteTooltip": "Padam Iklan"
+  },
+  "createService": {
+    "title": "Iklankan Servis / Tempat",
+    "sub": "Promosikan campsite, khidmat guide, atau sewaan anda di sini.",
+    "nameLabel": "Nama Servis / Tempat",
+    "namePlaceholder": "Cth: Campsite Sungai Chiling / Abang Mat Guide",
+    "catLabel": "Kategori",
+    "catPlaceholder": "Pilih Kategori",
+    "stateLabel": "Negeri",
+    "locLabel": "Kawasan / Bandar",
+    "locPlaceholder": "Cth: Janda Baik, Pahang",
+    "priceLabel": "Anggaran Harga",
+    "pricePlaceholder": "Cth: RM50 - RM100 / pax",
+    "waLabel": "No. WhatsApp (Tanpa sengkang)",
+    "imgLabel": "Gambar Utama",
+    "uploadText": "📸 Klik untuk upload gambar promosi",
+    "descLabel": "Info Lanjut / Fasiliti",
+    "descPlaceholder": "Senaraikan kemudahan (Toilet, Surau, Plug point) atau pengalaman anda...",
+    "submitBtn": "Terbitkan Iklan"
   }
   
 }

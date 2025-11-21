@@ -60,7 +60,12 @@
     "includes": "Package Includes",
     "mediaInfo": "Media & Details",
     "desc": "Full Description",
-    "submitBtn": "Publish Trip!"
+    "submitBtn": "Publish Trip!",
+    "endDate": "End Date",
+    "dayTrip": "Daytrip",
+    "days": "d",
+    "nights": "n",
+    "calculatedDuration": "Duration (Auto)"
   },
   "forum": {
     "headerTitle": "KnotenUp Community Hub",
@@ -143,5 +148,38 @@
     "easy": "🟢 Easy",
     "moderate": "🟡 Moderate",
     "hard": "🔴 Hardcore"
+  },
+  "directory": {
+    "title": "Directory & Services",
+    "sub": "Find campsites, guides, and equipment rentals.",
+    "advertiseBtn": "📢 Advertise Your Service",
+    "allStates": "All States",
+    "statePlaceholder": "Select State",
+    "catAll": "All",
+    "expired": "EXPIRED",
+    "inactive": "Service Inactive",
+    "contactBtn": "Contact (WhatsApp)",
+    "empty": "No services found for this selection.",
+    "renewTooltip": "Renew for 3 Months",
+    "deleteTooltip": "Delete Ad"
+  },
+  "createService": {
+    "title": "Advertise Service / Place",
+    "sub": "Promote your campsite, guide service, or rentals here.",
+    "nameLabel": "Service / Place Name",
+    "namePlaceholder": "E.g. Sungai Chiling Campsite / Abang Mat Guide",
+    "catLabel": "Category",
+    "catPlaceholder": "Select Category",
+    "stateLabel": "State",
+    "locLabel": "Area / City",
+    "locPlaceholder": "E.g. Janda Baik, Pahang",
+    "priceLabel": "Estimated Price",
+    "pricePlaceholder": "E.g. RM50 - RM100 / pax",
+    "waLabel": "WhatsApp No. (No dash)",
+    "imgLabel": "Main Image",
+    "uploadText": "📸 Click to upload promo image",
+    "descLabel": "Details / Facilities",
+    "descPlaceholder": "List facilities (Toilet, Surau, Plug point) or experience details...",
+    "submitBtn": "Publish Ad"
   }
 }
