@@ -21,13 +21,19 @@
       <div class="navbar-right">
         <LanguageSwitcher />
         
-        <router-link to="/create-trip" class="navbar-item" style="color: #e67e22;">
+        <router-link 
+          v-if="userRole === 'organizer'" 
+          to="/create-trip" 
+          class="navbar-item" 
+          style="color: #e67e22;"
+        >
           {{ t('navbar.createTrip') }}
         </router-link>
 
-        <router-link to="/requests" class="navbar-item" style="color: #e67e22;">
+        <router-link to="/requests" class="navbar-item" style="color: #2980b9;">
           {{ t('navbar.requests') }}
         </router-link>
+
 
         <div v-if="currentUser" class="user-actions">
           <button @click="handleLogout" class="button-logout">
@@ -52,13 +58,15 @@ import { RouterLink, useRouter } from 'vue-router';
 import LanguageSwitcher from './LanguageSwitcher.vue';
 import { useI18n } from 'vue-i18n';
 import LoginModal from './LoginModal.vue';
-import { auth } from '../../firebaseConfig';
+import { auth,db } from '../../firebaseConfig';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 const { t } = useI18n();
 const router = useRouter();
 const showLogin = ref(false);
 const currentUser = ref<User | null>(null);
+const userRole = ref('user');
 
 // Helper: Ambil nama depan sahaja supaya tak panjang sangat
 const getFirstName = (fullName: string | null) => {
@@ -67,11 +75,26 @@ const getFirstName = (fullName: string | null) => {
 };
 
 onMounted(() => {
-  onAuthStateChanged(auth, (user) => {
+  // Kita tambah 'async' sebab nak baca database
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser.value = user;
+      
+      // 🔥 LOGIC BARU: Cek Role User dari Database 🔥
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          userRole.value = data.role || 'user'; // Ambil role dari DB
+          console.log("User Role:", userRole.value); // Debugging
+        }
+      } catch (e) {
+        console.error("Gagal baca role:", e);
+      }
+
     } else {
       currentUser.value = null;
+      userRole.value = 'user'; // Reset balik jadi user biasa
     }
   });
 });

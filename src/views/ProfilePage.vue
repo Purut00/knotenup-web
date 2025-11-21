@@ -6,7 +6,7 @@
       <div class="profile-info-container">
         <div class="avatar-container">
           <img :src="user.avatar" alt="User Avatar" class="avatar" />
-          <span class="role-badge organizer">Organizer</span>
+          <span v-if="user.role === 'organizer'" class="role-badge organizer">Organizer</span>
         </div>
         <div class="info-text">
           <h1>{{ user.name }} <span class="verification">✅</span></h1>
@@ -27,6 +27,15 @@
         </div>
         
         <div class="action-buttons" v-if="isOwnProfile">
+          
+          <button 
+            v-if="user.role !== 'organizer'" 
+            class="btn-upgrade" 
+            @click="$router.push('/be-organizer')"
+          >
+            🏆 Aktifkan Akaun Organizer
+          </button>
+
           <button v-if="isAdmin" class="btn-admin" @click="$router.push('/admin')">⚡ Admin</button>
           
           <button class="btn-card" @click="showCard = true">🪪 {{ t('profile.myCard') }}</button>
@@ -50,6 +59,7 @@
     <div class="content-area">
       <div v-if="loadingData" style="text-align: center; padding: 3rem;"><p>⏳ {{ t('common.loading') }}</p></div>
       <div v-else>
+        
         <div v-if="activeTab === 'upcoming'" class="tab-panel">
           <h2>{{ t('profile.tabUpcoming') }} ({{ upcomingTrips.length }})</h2>
           <div v-if="upcomingTrips.length > 0" class="trip-list">
@@ -108,11 +118,21 @@
           <div class="card-left">
             <img :src="user.avatar" class="card-avatar" crossorigin="anonymous" />
             <h3>{{ user.name }}</h3>
-            <span class="card-role">OUTDOOR ORGANIZER</span>
+            <span class="card-role" v-if="user.role === 'organizer'">OUTDOOR ORGANIZER</span>
+            <span class="card-role" v-else>OUTDOOR ENTHUSIAST</span>
             <p class="card-bio">{{ user.bio }}</p>
+
+            <div v-if="user.role === 'organizer' && user.organizerDetails" class="org-details-box">
+               <p v-if="user.organizerDetails.orgName" class="org-name-card">{{ user.organizerDetails.orgName }}</p>
+               <p v-if="user.organizerDetails.ssm" class="org-meta">🏢 {{ user.organizerDetails.ssm }}</p>
+               <p v-if="user.organizerDetails.license" class="org-meta">📜 {{ user.organizerDetails.license }}</p>
+            </div>
+
             <div class="card-socials">
               <div v-if="user.whatsapp" class="social-row"><img src="https://cdn.simpleicons.org/whatsapp/white" class="card-icon"/> {{ user.whatsapp }}</div>
               <div v-if="user.facebook" class="social-row"><img src="https://cdn.simpleicons.org/facebook/white" class="card-icon"/> /{{ user.facebook }}</div>
+              <div v-if="user.instagram" class="social-row"><img src="https://cdn.simpleicons.org/instagram/white" class="card-icon"/> @{{ user.instagram }}</div>
+              <div v-if="user.tiktok" class="social-row"><img src="https://cdn.simpleicons.org/tiktok/white" class="card-icon"/> @{{ user.tiktok }}</div>
             </div>
           </div>
           <div class="card-right">
@@ -150,10 +170,9 @@ const activeTab = ref('upcoming');
 const showCard = ref(false);
 const loadingData = ref(true);
 const isOwnProfile = ref(false);
-const isAdmin = ref(false); // State Admin
+const isAdmin = ref(false); 
 const isDownloading = ref(false);
 
-// 🔥 PASTIKAN EMAIL INI SAMA DENGAN ADMIN PAGE 🔥
 const ADMIN_EMAIL = "knotenup@gmail.com"; 
 
 const upcomingTrips = ref<any[]>([]);
@@ -163,7 +182,10 @@ const myPosts = ref<any[]>([]);
 const user = reactive({
   id: '',
   name: 'Loading...', bio: '', avatar: 'https://i.pravatar.cc/300?img=3',
-  whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: ''
+  whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '',
+  role: 'user',
+  // 🔥 Tambah object kosong supaya tak error kalau data belum load
+  organizerDetails: { orgName: '', ssm: '', license: '' }
 });
 
 const organizedCount = computed(() => upcomingTrips.value.length + historyTrips.value.length);
@@ -178,7 +200,11 @@ const fetchUserData = async (targetUserId: string) => {
 
   try {
     const docSnap = await getDoc(doc(db, "users", targetUserId));
-    if (docSnap.exists()) { Object.assign(user, docSnap.data()); user.id = targetUserId; } 
+    if (docSnap.exists()) { 
+      Object.assign(user, docSnap.data()); 
+      user.id = targetUserId;
+      if (!user.role) user.role = 'user';
+    } 
     else { user.name = 'User Tidak Dijumpai'; }
 
     const qTrip = query(collection(db, "trips"), where("organizerId", "==", targetUserId));
@@ -203,7 +229,6 @@ const fetchUserData = async (targetUserId: string) => {
 onMounted(() => {
   onAuthStateChanged(auth, (currentUser) => {
     const routeId = route.params.id as string;
-    
     if (routeId) {
       fetchUserData(routeId);
       isOwnProfile.value = currentUser ? (currentUser.uid === routeId) : false;
@@ -211,11 +236,7 @@ onMounted(() => {
       if (currentUser) {
         fetchUserData(currentUser.uid);
         isOwnProfile.value = true;
-        
-        // 🔥 CEK ADMIN 🔥
-        if (currentUser.email === ADMIN_EMAIL) {
-          isAdmin.value = true;
-        }
+        if (currentUser.email === ADMIN_EMAIL) isAdmin.value = true;
       } else {
         router.push('/');
       }
@@ -270,15 +291,16 @@ const shareCard = () => {
 .social-mini-links { display: flex; gap: 12px; margin-top: 8px; }
 .social-mini-links img { width: 24px; height: 24px; transition: transform 0.2s; }
 .social-mini-links a:hover img { transform: scale(1.1); }
-.action-buttons { display: flex; gap: 10px; }
-.btn-edit, .btn-card, .btn-admin { padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 1rem; font-size: 0.9rem; transition: background 0.2s; }
+.action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-edit, .btn-card, .btn-admin, .btn-upgrade { padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 1rem; font-size: 0.9rem; transition: background 0.2s; }
 .btn-edit { border: 1px solid #ccc; background: white; color: #333; }
 .btn-edit:hover { background-color: #f9f9f9; }
 .btn-card { background-color: #2c3e50; color: white; border: none; }
 .btn-card:hover { background-color: #1a252f; }
-/* STYLE BUTTON ADMIN */
 .btn-admin { background-color: #e74c3c; color: white; border: none; }
 .btn-admin:hover { background-color: #c0392b; }
+.btn-upgrade { background-color: #27ae60; color: white; border: none; }
+.btn-upgrade:hover { background-color: #219150; }
 
 .tabs-container { background: white; padding: 0 2rem; border-bottom: 1px solid #eee; display: flex; justify-content: center; gap: 2rem; }
 .tab-btn { background: none; border: none; padding: 1rem 0.5rem; font-size: 1rem; color: #777; cursor: pointer; border-bottom: 3px solid transparent; font-weight: 600; }
@@ -312,6 +334,7 @@ const shareCard = () => {
 .forum-item h4 { margin: 0 0 5px 0; color: #0079d3; }
 .forum-item p { margin: 0; font-size: 0.8rem; color: #666; }
 .empty-text { text-align: center; color: #777; margin-top: 2rem; font-style: italic; }
+
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(5px); }
 .card-modal { background: white; padding: 0; border-radius: 15px; position: relative; max-width: 650px; width: 100%; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
 .close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #fff; z-index: 10; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
@@ -319,6 +342,7 @@ const shareCard = () => {
 .share-btn { padding: 0.6rem 1.5rem; border: 1px solid #ccc; background: white; border-radius: 50px; cursor: pointer; font-weight: bold; color: #555; transition: background 0.2s; }
 .share-btn:hover { background: #eee; }
 .share-btn.download { background-color: #e67e22; color: white; border: none; }
+
 .business-card { display: flex; min-height: 280px; }
 .card-left { flex: 1.6; padding: 2.5rem 2rem; background-color: #2c3e50; color: white; display: flex; flex-direction: column; justify-content: center; }
 .card-right { flex: 1; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; border-left: 1px dashed #eee; }
@@ -332,6 +356,22 @@ const shareCard = () => {
 .qr-label { font-weight: bold; margin-bottom: 15px; font-size: 0.7rem; letter-spacing: 2px; color: #555; }
 .qr-code { width: 140px; height: 140px; }
 .logo-watermark { margin-top: 15px; font-weight: 900; color: #2c3e50; font-size: 1.3rem; }
+
+/* 🔥 CSS BARU: Organizer Details 🔥 */
+.org-details-box {
+  margin-bottom: 1.5rem;
+  background: rgba(255,255,255,0.05);
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.org-name-card {
+  font-weight: bold; color: #f39c12; font-size: 1rem; margin-bottom: 5px;
+}
+.org-meta {
+  font-size: 0.8rem; color: #bdc3c7; margin: 2px 0;
+}
+
 @media (max-width: 768px) { .profile-info-container { flex-direction: column; align-items: center; text-align: center; margin-top: -70px; } .social-mini-links { justify-content: center; } .stats-row { justify-content: center; } .action-buttons { width: 100%; justify-content: center; } }
 @media (max-width: 600px) { .business-card { flex-direction: column; } .card-left { padding: 2rem; text-align: center; align-items: center; } .card-bio { border-left: none; padding-left: 0; } .card-socials { align-items: center; } .card-right { padding: 2rem; border-left: none; border-top: 1px dashed #eee; } .close-btn { color: #888; top: 5px; right: 10px; } }
 </style>

@@ -13,6 +13,7 @@ import AdminPage from '../views/AdminPage.vue';
 import SearchResultsPage from '../views/SearchResultsPage.vue';
 import DirectoryPage from '../views/DirectoryPage.vue';
 import CreateServicePage from '../views/CreateServicePage.vue';
+import OrganizerRegistrationPage from '../views/OrganizerRegistrationPage.vue';
 
 const routes = [
   {
@@ -94,6 +95,11 @@ const routes = [
   path: '/user/:id', // :id ini adalah User ID (UID) organizer tu
   name: 'public-profile',
   component: ProfilePage
+  },
+  {
+  path: '/be-organizer',
+  name: 'be-organizer',
+  component: OrganizerRegistrationPage
   },
 ]
 
