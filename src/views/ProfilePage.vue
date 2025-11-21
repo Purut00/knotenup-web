@@ -27,9 +27,12 @@
         </div>
         
         <div class="action-buttons" v-if="isOwnProfile">
-          <button class="btn-card" @click="showCard = true">🪪 Kad Saya</button>
-          <button class="btn-edit" @click="$router.push('/profile/edit')">⚙️ Edit</button>
+          <button v-if="isAdmin" class="btn-admin" @click="$router.push('/admin')">⚡ Admin</button>
+          
+          <button class="btn-card" @click="showCard = true">🪪 {{ t('profile.myCard') }}</button>
+          <button class="btn-edit" @click="$router.push('/profile/edit')">⚙️ {{ t('profile.editProfile') }}</button>
         </div>
+        
         <div class="action-buttons" v-else>
            <a v-if="user.whatsapp" :href="'https://wa.me/' + user.whatsapp" target="_blank" class="btn-card">
              💬 WhatsApp
@@ -39,50 +42,39 @@
     </div>
 
     <div class="tabs-container">
-      <button class="tab-btn" :class="{ active: activeTab === 'upcoming' }" @click="activeTab = 'upcoming'">
-        📅 Trip Akan Datang
-      </button>
-      <button class="tab-btn" :class="{ active: activeTab === 'history' }" @click="activeTab = 'history'">
-        📜 Sejarah Trip
-      </button>
-      <button class="tab-btn" :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">
-        💬 Topik Forum
-      </button>
+      <button class="tab-btn" :class="{ active: activeTab === 'upcoming' }" @click="activeTab = 'upcoming'">📅 {{ t('profile.tabUpcoming') }}</button>
+      <button class="tab-btn" :class="{ active: activeTab === 'history' }" @click="activeTab = 'history'">📜 {{ t('profile.tabHistory') }}</button>
+      <button class="tab-btn" :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">💬 {{ t('profile.tabPosts') }}</button>
     </div>
 
     <div class="content-area">
-      
-      <div v-if="loadingData" style="text-align: center; padding: 3rem;">
-        <p>⏳ Memuatkan data...</p>
-      </div>
-
+      <div v-if="loadingData" style="text-align: center; padding: 3rem;"><p>⏳ {{ t('common.loading') }}</p></div>
       <div v-else>
-        
         <div v-if="activeTab === 'upcoming'" class="tab-panel">
-          <h2>Trip Akan Datang ({{ upcomingTrips.length }})</h2>
+          <h2>{{ t('profile.tabUpcoming') }} ({{ upcomingTrips.length }})</h2>
           <div v-if="upcomingTrips.length > 0" class="trip-list">
             <div v-for="trip in upcomingTrips" :key="trip.id" class="mini-trip-card">
               <div class="date-box"><span class="day">{{ getDay(trip.startDate) }}</span><span class="month">{{ getMonth(trip.startDate) }}</span></div>
               <div class="trip-details">
                 <h3>{{ trip.title }}</h3>
                 <p>📍 {{ trip.location }} • 💰 RM {{ trip.price }}</p>
-                <span class="status confirmed">Buka</span>
+                <span class="status confirmed">{{ t('trip.open') }}</span>
               </div>
-              <button class="btn-view" @click="$router.push('/trips/' + trip.id)">Lihat</button>
+              <button class="btn-view" @click="$router.push('/trips/' + trip.id)">{{ t('components.viewDetails') }}</button>
             </div>
           </div>
           <p v-else class="empty-text">Tiada trip akan datang.</p>
         </div>
 
         <div v-if="activeTab === 'history'" class="tab-panel">
-          <h2>Sejarah Trip ({{ historyTrips.length }})</h2>
+          <h2>{{ t('profile.tabHistory') }} ({{ historyTrips.length }})</h2>
           <div v-if="historyTrips.length > 0" class="trip-list">
             <div v-for="trip in historyTrips" :key="trip.id" class="mini-trip-card faded">
               <div class="date-box"><span class="day">{{ getDay(trip.startDate) }}</span><span class="month">{{ getMonth(trip.startDate) }}</span></div>
               <div class="trip-details">
                 <h3>{{ trip.title }}</h3>
                 <p>📍 {{ trip.location }}</p>
-                <span class="status completed">Tamat</span>
+                <span class="status completed">Selesai</span>
               </div>
               <button class="btn-outline" @click="$router.push('/trips/' + trip.id)">Lihat</button>
             </div>
@@ -91,25 +83,30 @@
         </div>
 
         <div v-if="activeTab === 'forum'" class="tab-panel">
-          <h2>Topik Forum ({{ myPosts.length }})</h2>
+          <h2>{{ t('profile.tabPosts') }} ({{ myPosts.length }})</h2>
           <div v-if="myPosts.length > 0" class="forum-list">
             <div v-for="post in myPosts" :key="post.id" class="forum-item" @click="$router.push('/forum/' + post.id)">
-              <h4>{{ post.title }}</h4>
-              <p>💬 {{ post.commentCount || 0 }} Komen • ❤️ {{ post.votes || 0 }} Likes</p>
+              <div class="forum-content-left">
+                <h4>{{ post.title }}</h4>
+                <p>💬 {{ post.commentCount || 0 }} {{ t('forum.comments') }} • ❤️ {{ post.votes || 0 }} Likes</p>
+              </div>
+              <div class="forum-actions" v-if="isOwnProfile">
+                <button @click.stop="editPost(post.id)" class="action-icon edit">✏️</button>
+                <button @click.stop="deletePost(post.id)" class="action-icon delete">🗑️</button>
+              </div>
             </div>
           </div>
-          <p v-else class="empty-text">Tiada topik forum.</p>
+          <p v-else class="empty-text">Tiada post forum.</p>
         </div>
-
       </div>
     </div>
 
     <div v-if="showCard" class="modal-overlay" @click.self="showCard = false">
       <div class="card-modal">
         <button class="close-btn" @click="showCard = false">✖</button>
-        <div class="business-card">
+        <div class="business-card" id="capture-card">
           <div class="card-left">
-            <img :src="user.avatar" class="card-avatar" />
+            <img :src="user.avatar" class="card-avatar" crossorigin="anonymous" />
             <h3>{{ user.name }}</h3>
             <span class="card-role">OUTDOOR ORGANIZER</span>
             <p class="card-bio">{{ user.bio }}</p>
@@ -120,9 +117,15 @@
           </div>
           <div class="card-right">
             <span class="qr-label">SCAN ME</span>
-            <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/user/${user.name}`" class="qr-code" />
+            <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/user/${user.name}`" class="qr-code" crossorigin="anonymous" />
             <span class="logo-watermark">KnotenUp</span>
           </div>
+        </div>
+        <div class="modal-actions">
+          <button class="share-btn" @click="shareCard">🔗 Copy Link</button>
+          <button class="share-btn download" @click="downloadPDF">
+            {{ isDownloading ? 'Processing...' : '⬇️ Download PDF' }}
+          </button>
         </div>
       </div>
     </div>
@@ -132,17 +135,26 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router'; // Guna Route
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { auth, db } from '../firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, orderBy, deleteDoc } from 'firebase/firestore';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const activeTab = ref('upcoming');
 const showCard = ref(false);
 const loadingData = ref(true);
-const isOwnProfile = ref(false); // Flag penting!
+const isOwnProfile = ref(false);
+const isAdmin = ref(false); // State Admin
+const isDownloading = ref(false);
+
+// 🔥 PASTIKAN EMAIL INI SAMA DENGAN ADMIN PAGE 🔥
+const ADMIN_EMAIL = "knotenup@gmail.com"; 
 
 const upcomingTrips = ref<any[]>([]);
 const historyTrips = ref<any[]>([]);
@@ -158,7 +170,6 @@ const organizedCount = computed(() => upcomingTrips.value.length + historyTrips.
 const getDay = (dateString: string) => { if(!dateString) return '01'; return new Date(dateString).getDate(); };
 const getMonth = (dateString: string) => { if(!dateString) return 'JAN'; return new Date(dateString).toLocaleDateString('en-MY', { month: 'short' }).toUpperCase(); };
 
-// Fungsi Utama: Tarik data berdasarkan User ID
 const fetchUserData = async (targetUserId: string) => {
   loadingData.value = true;
   upcomingTrips.value = [];
@@ -166,73 +177,84 @@ const fetchUserData = async (targetUserId: string) => {
   myPosts.value = [];
 
   try {
-    // 1. Ambil Data User
     const docSnap = await getDoc(doc(db, "users", targetUserId));
-    if (docSnap.exists()) {
-      Object.assign(user, docSnap.data());
-      user.id = targetUserId;
-    } else {
-      user.name = 'User Tidak Dijumpai';
-    }
+    if (docSnap.exists()) { Object.assign(user, docSnap.data()); user.id = targetUserId; } 
+    else { user.name = 'User Tidak Dijumpai'; }
 
-    // 2. Ambil Trip (Organizer == TargetID)
     const qTrip = query(collection(db, "trips"), where("organizerId", "==", targetUserId));
     const snapTrip = await getDocs(qTrip);
     const today = new Date();
-    
     snapTrip.forEach(doc => {
       const data = doc.data();
       const trip = { id: doc.id, ...data };
       const tripDate = new Date(data.startDate);
-      if (tripDate >= today) upcomingTrips.value.push(trip);
-      else historyTrips.value.push(trip);
+      if (tripDate >= today) upcomingTrips.value.push(trip); else historyTrips.value.push(trip);
     });
-    // Sort
     upcomingTrips.value.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-    historyTrips.value.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
-    // 3. Ambil Post
     const qPost = query(collection(db, "forum_posts"), where("authorId", "==", targetUserId), orderBy("createdAt", "desc"));
     const snapPost = await getDocs(qPost);
     myPosts.value = snapPost.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-  } catch (e) {
-    console.error("Error loading profile:", e);
-  } finally {
-    loadingData.value = false;
-  }
+  } catch (e) { console.error("Error profile:", e); }
+  finally { loadingData.value = false; }
 };
 
 onMounted(() => {
   onAuthStateChanged(auth, (currentUser) => {
-    // Logic menentukan siapa user sasaran
     const routeId = route.params.id as string;
     
     if (routeId) {
-      // A. Ada ID di URL (Tengok profil orang)
       fetchUserData(routeId);
-      // Cek adakah ini profil sendiri walaupun guna URL /user/:id
       isOwnProfile.value = currentUser ? (currentUser.uid === routeId) : false;
     } else {
-      // B. Tiada ID di URL (Masuk ikut Navbar 'Profile')
       if (currentUser) {
         fetchUserData(currentUser.uid);
         isOwnProfile.value = true;
+        
+        // 🔥 CEK ADMIN 🔥
+        if (currentUser.email === ADMIN_EMAIL) {
+          isAdmin.value = true;
+        }
       } else {
-        router.push('/'); // Tak login, tendang balik
+        router.push('/');
       }
     }
   });
 });
 
-// Watch Route Change (Kalau user klik profil lain masa dah dalam page profil)
-watch(() => route.params.id, (newId) => {
-  if (newId) fetchUserData(newId as string);
-});
+watch(() => route.params.id, (newId) => { if (newId) fetchUserData(newId as string); });
+
+const editPost = (id: string) => { router.push(`/forum/edit/${id}`); };
+const deletePost = async (id: string) => {
+  if (confirm("Padam topik ini?")) {
+    try { await deleteDoc(doc(db, "forum_posts", id)); myPosts.value = myPosts.value.filter(p => p.id !== id); alert("Dipadam."); }
+    catch(e) { alert("Gagal."); }
+  }
+};
+
+const downloadPDF = async () => {
+  const element = document.getElementById('capture-card');
+  if (!element) return;
+  isDownloading.value = true;
+  try {
+    const canvas = await html2canvas(element, { scale: 3, useCORS: true });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.save(`KnotenUp-Card-${user.name}.pdf`);
+  } catch (error) { alert("Gagal download."); }
+  finally { isDownloading.value = false; }
+};
+
+const shareCard = () => {
+  navigator.clipboard.writeText(`https://knotenup.com/user/${user.name}`);
+  alert("Link disalin!");
+};
 </script>
 
 <style scoped>
-/* CSS SAMA SEPERTI PROFILE PAGE SEBELUM INI (Copy paste je) */
+/* CSS KEKAL SAMA */
 .profile-page { background-color: #f4f6f8; min-height: 100vh; }
 .profile-header { background: white; border-bottom: 1px solid #ddd; }
 .cover-photo { height: 200px; background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center; }
@@ -249,11 +271,15 @@ watch(() => route.params.id, (newId) => {
 .social-mini-links img { width: 24px; height: 24px; transition: transform 0.2s; }
 .social-mini-links a:hover img { transform: scale(1.1); }
 .action-buttons { display: flex; gap: 10px; }
-.btn-edit, .btn-card { padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 1rem; font-size: 0.9rem; transition: background 0.2s; }
+.btn-edit, .btn-card, .btn-admin { padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 1rem; font-size: 0.9rem; transition: background 0.2s; }
 .btn-edit { border: 1px solid #ccc; background: white; color: #333; }
 .btn-edit:hover { background-color: #f9f9f9; }
-.btn-card { background-color: #2c3e50; color: white; border: none; text-decoration: none; text-align: center; }
+.btn-card { background-color: #2c3e50; color: white; border: none; }
 .btn-card:hover { background-color: #1a252f; }
+/* STYLE BUTTON ADMIN */
+.btn-admin { background-color: #e74c3c; color: white; border: none; }
+.btn-admin:hover { background-color: #c0392b; }
+
 .tabs-container { background: white; padding: 0 2rem; border-bottom: 1px solid #eee; display: flex; justify-content: center; gap: 2rem; }
 .tab-btn { background: none; border: none; padding: 1rem 0.5rem; font-size: 1rem; color: #777; cursor: pointer; border-bottom: 3px solid transparent; font-weight: 600; }
 .tab-btn.active { color: #e67e22; border-bottom-color: #e67e22; }
@@ -276,19 +302,23 @@ watch(() => route.params.id, (newId) => {
 .btn-view { background-color: #3498db; color: white; border: none; }
 .btn-outline { background: white; border: 1px solid #ccc; }
 .forum-list { background: white; border-radius: 8px; border: 1px solid #eee; overflow: hidden; }
-.forum-item { padding: 1rem; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
-.forum-item:last-child { border-bottom: none; }
+.forum-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
 .forum-item:hover { background-color: #f9f9f9; }
+.forum-content-left { flex-grow: 1; }
+.forum-actions { display: flex; gap: 10px; }
+.action-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 5px; border-radius: 4px; transition: background 0.2s; }
+.action-icon.edit:hover { background-color: #d4edda; }
+.action-icon.delete:hover { background-color: #f8d7da; }
 .forum-item h4 { margin: 0 0 5px 0; color: #0079d3; }
 .forum-item p { margin: 0; font-size: 0.8rem; color: #666; }
 .empty-text { text-align: center; color: #777; margin-top: 2rem; font-style: italic; }
-/* Modal Styles */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(5px); }
 .card-modal { background: white; padding: 0; border-radius: 15px; position: relative; max-width: 650px; width: 100%; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
 .close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #fff; z-index: 10; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
 .modal-actions { padding: 1.5rem; display: flex; justify-content: center; background: #f9f9f9; gap: 10px; }
 .share-btn { padding: 0.6rem 1.5rem; border: 1px solid #ccc; background: white; border-radius: 50px; cursor: pointer; font-weight: bold; color: #555; transition: background 0.2s; }
 .share-btn:hover { background: #eee; }
+.share-btn.download { background-color: #e67e22; color: white; border: none; }
 .business-card { display: flex; min-height: 280px; }
 .card-left { flex: 1.6; padding: 2.5rem 2rem; background-color: #2c3e50; color: white; display: flex; flex-direction: column; justify-content: center; }
 .card-right { flex: 1; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; border-left: 1px dashed #eee; }
