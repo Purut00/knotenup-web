@@ -1,114 +1,133 @@
 <template>
   <div class="profile-page">
-    
-    <div class="profile-header">
-      <div class="cover-photo"></div>
-      <div class="profile-info-container">
-        <div class="avatar-container">
-          <img :src="user.avatar" alt="User Avatar" class="avatar" />
-          <span v-if="user.role === 'organizer'" class="role-badge organizer">Organizer</span>
-        </div>
-        <div class="info-text">
-          <h1>{{ user.name }} <span class="verification">✅</span></h1>
-          <p class="bio">{{ user.bio || 'Tiada bio.' }}</p>
+    <div class="container profile-layout">
+      
+      <aside class="profile-sidebar">
+        <div class="user-card">
+          <div class="avatar-wrapper">
+            <img :src="user.avatar" alt="Avatar" class="avatar" />
+            <span v-if="user.role === 'organizer'" class="role-badge">Organizer</span>
+          </div>
           
-          <div class="social-mini-links">
-             <a v-if="user.whatsapp" :href="'https://wa.me/' + user.whatsapp" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25D366" alt="WA"/></a>
-             <a v-if="user.facebook" :href="'https://facebook.com/' + user.facebook" target="_blank"><img src="https://cdn.simpleicons.org/facebook/1877F2" alt="FB"/></a>
-             <a v-if="user.instagram" :href="'https://instagram.com/' + user.instagram" target="_blank"><img src="https://cdn.simpleicons.org/instagram/E4405F" alt="IG"/></a>
-             <a v-if="user.tiktok" :href="'https://tiktok.com/@' + user.tiktok" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/000000" alt="TT"/></a>
-             <a v-if="user.youtube" :href="'https://youtube.com/' + user.youtube" target="_blank"><img src="https://cdn.simpleicons.org/youtube/FF0000" alt="YT"/></a>
+          <h2 class="user-name">{{ user.name }} <span class="verified-icon">✅</span></h2>
+          <p class="user-bio">{{ user.bio || 'Tiada bio.' }}</p>
+
+          <div class="stats-grid">
+             <div class="stat-item">
+               <strong>{{ organizedCount }}</strong>
+               <span>Trip</span>
+             </div>
+             <div class="stat-item">
+               <strong>{{ myPosts.length }}</strong>
+               <span>Post</span>
+             </div>
           </div>
 
-          <div class="stats-row">
-            <span><strong>{{ organizedCount }}</strong> Trip Dianjurkan</span>
-            <span><strong>{{ myPosts.length }}</strong> Post Forum</span>
+          <div class="social-links">
+             <a v-if="user.whatsapp" :href="'https://wa.me/' + user.whatsapp" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25D366" /></a>
+             <a v-if="user.facebook" :href="'https://facebook.com/' + user.facebook" target="_blank"><img src="https://cdn.simpleicons.org/facebook/1877F2" /></a>
+             <a v-if="user.instagram" :href="'https://instagram.com/' + user.instagram" target="_blank"><img src="https://cdn.simpleicons.org/instagram/E4405F" /></a>
+             <a v-if="user.tiktok" :href="'https://tiktok.com/@' + user.tiktok" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/000000" /></a>
+             <a v-if="user.youtube" :href="'https://youtube.com/' + user.youtube" target="_blank"><img src="https://cdn.simpleicons.org/youtube/FF0000" /></a>
+          </div>
+
+          <div class="action-stack" v-if="isOwnProfile">
+            <button v-if="user.role !== 'organizer'" class="btn-action upgrade" @click="$router.push('/be-organizer')">
+              🏆 Upgrade Organizer
+            </button>
+            <button v-if="isAdmin" class="btn-action admin" @click="$router.push('/admin')">
+              ⚡ Admin Panel
+            </button>
+            <button class="btn-action card" @click="showCard = true">
+              🪪 {{ t('profile.myCard') }}
+            </button>
+            <button class="btn-action edit" @click="$router.push('/profile/edit')">
+              ⚙️ {{ t('profile.editProfile') }}
+            </button>
+          </div>
+
+          <div class="action-stack" v-else>
+             <a v-if="user.whatsapp" :href="'https://wa.me/' + user.whatsapp" target="_blank" class="btn-action contact">
+               📞 WhatsApp
+             </a>
           </div>
         </div>
+      </aside>
+
+      <main class="profile-main">
         
-        <div class="action-buttons" v-if="isOwnProfile">
-          
-          <button 
-            v-if="user.role !== 'organizer'" 
-            class="btn-upgrade" 
-            @click="$router.push('/be-organizer')"
-          >
-            🏆 Aktifkan Akaun Organizer
+        <div class="tabs-strip">
+          <button :class="{ active: activeTab === 'upcoming' }" @click="activeTab = 'upcoming'">
+            📅 {{ t('profile.tabUpcoming') }}
           </button>
+          <button :class="{ active: activeTab === 'history' }" @click="activeTab = 'history'">
+            📜 {{ t('profile.tabHistory') }}
+          </button>
+          <button :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">
+            💬 {{ t('profile.tabPosts') }}
+          </button>
+        </div>
 
-          <button v-if="isAdmin" class="btn-admin" @click="$router.push('/admin')">⚡ Admin</button>
+        <div class="content-box">
+          <div v-if="loadingData" class="loading-text">⏳ {{ t('common.loading') }}</div>
           
-          <button class="btn-card" @click="showCard = true">🪪 {{ t('profile.myCard') }}</button>
-          <button class="btn-edit" @click="$router.push('/profile/edit')">⚙️ {{ t('profile.editProfile') }}</button>
-        </div>
-        
-        <div class="action-buttons" v-else>
-           <a v-if="user.whatsapp" :href="'https://wa.me/' + user.whatsapp" target="_blank" class="btn-card">
-             💬 WhatsApp
-           </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="tabs-container">
-      <button class="tab-btn" :class="{ active: activeTab === 'upcoming' }" @click="activeTab = 'upcoming'">📅 {{ t('profile.tabUpcoming') }}</button>
-      <button class="tab-btn" :class="{ active: activeTab === 'history' }" @click="activeTab = 'history'">📜 {{ t('profile.tabHistory') }}</button>
-      <button class="tab-btn" :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">💬 {{ t('profile.tabPosts') }}</button>
-    </div>
-
-    <div class="content-area">
-      <div v-if="loadingData" style="text-align: center; padding: 3rem;"><p>⏳ {{ t('common.loading') }}</p></div>
-      <div v-else>
-        
-        <div v-if="activeTab === 'upcoming'" class="tab-panel">
-          <h2>{{ t('profile.tabUpcoming') }} ({{ upcomingTrips.length }})</h2>
-          <div v-if="upcomingTrips.length > 0" class="trip-list">
-            <div v-for="trip in upcomingTrips" :key="trip.id" class="mini-trip-card">
-              <div class="date-box"><span class="day">{{ getDay(trip.startDate) }}</span><span class="month">{{ getMonth(trip.startDate) }}</span></div>
-              <div class="trip-details">
-                <h3>{{ trip.title }}</h3>
-                <p>📍 {{ trip.location }} • 💰 RM {{ trip.price }}</p>
-                <span class="status confirmed">{{ t('trip.open') }}</span>
+          <div v-else>
+            <div v-if="activeTab === 'upcoming'">
+              <div v-if="upcomingTrips.length > 0" class="grid-layout">
+                <div v-for="trip in upcomingTrips" :key="trip.id" class="compact-card">
+                  <div class="cc-date">
+                    <span class="d">{{ getDay(trip.startDate) }}</span>
+                    <span class="m">{{ getMonth(trip.startDate) }}</span>
+                  </div>
+                  <div class="cc-info">
+                    <h4>{{ trip.title }}</h4>
+                    <p>📍 {{ trip.location }}</p>
+                    <span class="status-pill open">{{ t('trip.open') }}</span>
+                  </div>
+                  <button class="btn-mini" @click="$router.push('/trips/' + trip.id)">{{ t('components.view') }}</button>
+                </div>
               </div>
-              <button class="btn-view" @click="$router.push('/trips/' + trip.id)">{{ t('components.viewDetails') }}</button>
+              <div v-else class="empty-text">Tiada trip akan datang.</div>
             </div>
+
+            <div v-if="activeTab === 'history'">
+              <div v-if="historyTrips.length > 0" class="grid-layout">
+                <div v-for="trip in historyTrips" :key="trip.id" class="compact-card faded">
+                  <div class="cc-date">
+                    <span class="d">{{ getDay(trip.startDate) }}</span>
+                    <span class="m">{{ getMonth(trip.startDate) }}</span>
+                  </div>
+                  <div class="cc-info">
+                    <h4>{{ trip.title }}</h4>
+                    <p>📍 {{ trip.location }}</p>
+                    <span class="status-pill closed">Tamat</span>
+                  </div>
+                  <button class="btn-mini outline" @click="$router.push('/trips/' + trip.id)">{{ t('components.view') }}</button>
+                </div>
+              </div>
+              <div v-else class="empty-text">Tiada sejarah trip.</div>
+            </div>
+
+            <div v-if="activeTab === 'forum'">
+              <div v-if="myPosts.length > 0" class="forum-layout">
+                <div v-for="post in myPosts" :key="post.id" class="forum-row" @click="$router.push('/forum/' + post.id)">
+                   <div class="fr-content">
+                     <h4>{{ post.title }}</h4>
+                     <span>💬 {{ post.commentCount || 0 }} • ❤️ {{ post.votes || 0 }}</span>
+                   </div>
+                   <div class="fr-actions" v-if="isOwnProfile">
+                      <button @click.stop="editPost(post.id)">✏️</button>
+                      <button @click.stop="deletePost(post.id)" class="del">🗑️</button>
+                   </div>
+                </div>
+              </div>
+              <div v-else class="empty-text">Tiada post forum.</div>
+            </div>
+
           </div>
-          <p v-else class="empty-text">Tiada trip akan datang.</p>
         </div>
 
-        <div v-if="activeTab === 'history'" class="tab-panel">
-          <h2>{{ t('profile.tabHistory') }} ({{ historyTrips.length }})</h2>
-          <div v-if="historyTrips.length > 0" class="trip-list">
-            <div v-for="trip in historyTrips" :key="trip.id" class="mini-trip-card faded">
-              <div class="date-box"><span class="day">{{ getDay(trip.startDate) }}</span><span class="month">{{ getMonth(trip.startDate) }}</span></div>
-              <div class="trip-details">
-                <h3>{{ trip.title }}</h3>
-                <p>📍 {{ trip.location }}</p>
-                <span class="status completed">Selesai</span>
-              </div>
-              <button class="btn-outline" @click="$router.push('/trips/' + trip.id)">Lihat</button>
-            </div>
-          </div>
-          <p v-else class="empty-text">Tiada sejarah trip.</p>
-        </div>
-
-        <div v-if="activeTab === 'forum'" class="tab-panel">
-          <h2>{{ t('profile.tabPosts') }} ({{ myPosts.length }})</h2>
-          <div v-if="myPosts.length > 0" class="forum-list">
-            <div v-for="post in myPosts" :key="post.id" class="forum-item" @click="$router.push('/forum/' + post.id)">
-              <div class="forum-content-left">
-                <h4>{{ post.title }}</h4>
-                <p>💬 {{ post.commentCount || 0 }} {{ t('forum.comments') }} • ❤️ {{ post.votes || 0 }} Likes</p>
-              </div>
-              <div class="forum-actions" v-if="isOwnProfile">
-                <button @click.stop="editPost(post.id)" class="action-icon edit">✏️</button>
-                <button @click.stop="deletePost(post.id)" class="action-icon delete">🗑️</button>
-              </div>
-            </div>
-          </div>
-          <p v-else class="empty-text">Tiada post forum.</p>
-        </div>
-      </div>
+      </main>
     </div>
 
     <div v-if="showCard" class="modal-overlay" @click.self="showCard = false">
@@ -131,8 +150,6 @@
             <div class="card-socials">
               <div v-if="user.whatsapp" class="social-row"><img src="https://cdn.simpleicons.org/whatsapp/white" class="card-icon"/> {{ user.whatsapp }}</div>
               <div v-if="user.facebook" class="social-row"><img src="https://cdn.simpleicons.org/facebook/white" class="card-icon"/> /{{ user.facebook }}</div>
-              <div v-if="user.instagram" class="social-row"><img src="https://cdn.simpleicons.org/instagram/white" class="card-icon"/> @{{ user.instagram }}</div>
-              <div v-if="user.tiktok" class="social-row"><img src="https://cdn.simpleicons.org/tiktok/white" class="card-icon"/> @{{ user.tiktok }}</div>
             </div>
           </div>
           <div class="card-right">
@@ -172,19 +189,16 @@ const loadingData = ref(true);
 const isOwnProfile = ref(false);
 const isAdmin = ref(false); 
 const isDownloading = ref(false);
+const ADMIN_EMAILS = ["knotenup@gmail.com", "admin@knotenup.com"]; 
 
-const ADMIN_EMAIL = "knotenup@gmail.com"; 
 
 const upcomingTrips = ref<any[]>([]);
 const historyTrips = ref<any[]>([]);
 const myPosts = ref<any[]>([]);
 
 const user = reactive({
-  id: '',
-  name: 'Loading...', bio: '', avatar: 'https://i.pravatar.cc/300?img=3',
-  whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '',
-  role: 'user',
-  // 🔥 Tambah object kosong supaya tak error kalau data belum load
+  id: '', name: 'Loading...', bio: '', avatar: 'https://i.pravatar.cc/300?img=3',
+  whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '', role: 'user',
   organizerDetails: { orgName: '', ssm: '', license: '' }
 });
 
@@ -194,18 +208,14 @@ const getMonth = (dateString: string) => { if(!dateString) return 'JAN'; return 
 
 const fetchUserData = async (targetUserId: string) => {
   loadingData.value = true;
-  upcomingTrips.value = [];
-  historyTrips.value = [];
-  myPosts.value = [];
+  upcomingTrips.value = []; historyTrips.value = []; myPosts.value = [];
 
   try {
     const docSnap = await getDoc(doc(db, "users", targetUserId));
     if (docSnap.exists()) { 
-      Object.assign(user, docSnap.data()); 
-      user.id = targetUserId;
+      Object.assign(user, docSnap.data()); user.id = targetUserId;
       if (!user.role) user.role = 'user';
-    } 
-    else { user.name = 'User Tidak Dijumpai'; }
+    } else { user.name = 'User Tidak Dijumpai'; }
 
     const qTrip = query(collection(db, "trips"), where("organizerId", "==", targetUserId));
     const snapTrip = await getDocs(qTrip);
@@ -236,23 +246,16 @@ onMounted(() => {
       if (currentUser) {
         fetchUserData(currentUser.uid);
         isOwnProfile.value = true;
-        if (currentUser.email === ADMIN_EMAIL) isAdmin.value = true;
-      } else {
-        router.push('/');
-      }
+        if (currentUser.email && ADMIN_EMAILS.includes(currentUser.email)) {
+        isAdmin.value = true;}
+      } else { router.push('/'); }
     }
   });
 });
 
 watch(() => route.params.id, (newId) => { if (newId) fetchUserData(newId as string); });
-
 const editPost = (id: string) => { router.push(`/forum/edit/${id}`); };
-const deletePost = async (id: string) => {
-  if (confirm("Padam topik ini?")) {
-    try { await deleteDoc(doc(db, "forum_posts", id)); myPosts.value = myPosts.value.filter(p => p.id !== id); alert("Dipadam."); }
-    catch(e) { alert("Gagal."); }
-  }
-};
+const deletePost = async (id: string) => { if (confirm("Padam?")) { try { await deleteDoc(doc(db, "forum_posts", id)); myPosts.value = myPosts.value.filter(p => p.id !== id); } catch(e) {} } };
 
 const downloadPDF = async () => {
   const element = document.getElementById('capture-card');
@@ -267,74 +270,77 @@ const downloadPDF = async () => {
   } catch (error) { alert("Gagal download."); }
   finally { isDownloading.value = false; }
 };
-
-const shareCard = () => {
-  navigator.clipboard.writeText(`https://knotenup.com/user/${user.name}`);
-  alert("Link disalin!");
-};
+const shareCard = () => { navigator.clipboard.writeText(`https://knotenup.com/user/${user.name}`); alert("Link disalin!"); };
 </script>
 
 <style scoped>
-/* CSS KEKAL SAMA */
-.profile-page { background-color: #f4f6f8; min-height: 100vh; }
-.profile-header { background: white; border-bottom: 1px solid #ddd; }
-.cover-photo { height: 200px; background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center; }
-.profile-info-container { max-width: 1000px; margin: 0 auto; padding: 0 2rem 2rem 2rem; display: flex; align-items: flex-end; gap: 2rem; margin-top: -50px; position: relative; }
-.avatar-container { position: relative; }
-.avatar { width: 140px; height: 140px; border-radius: 50%; border: 5px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); background: #fff; object-fit: cover; }
-.role-badge { position: absolute; bottom: 10px; right: 0; background-color: #e67e22; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; border: 2px solid white; }
-.info-text { flex-grow: 1; padding-bottom: 0.5rem; }
-.info-text h1 { margin: 0; color: #2c3e50; display: flex; align-items: center; gap: 5px; font-size: 1.8rem; }
-.verification { font-size: 1rem; }
-.bio { color: #666; margin: 5px 0 10px 0; font-size: 0.95rem; }
-.stats-row { display: flex; gap: 1.5rem; font-size: 0.9rem; color: #555; margin-top: 1rem; }
-.social-mini-links { display: flex; gap: 12px; margin-top: 8px; }
-.social-mini-links img { width: 24px; height: 24px; transition: transform 0.2s; }
-.social-mini-links a:hover img { transform: scale(1.1); }
-.action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-.btn-edit, .btn-card, .btn-admin, .btn-upgrade { padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 1rem; font-size: 0.9rem; transition: background 0.2s; }
-.btn-edit { border: 1px solid #ccc; background: white; color: #333; }
-.btn-edit:hover { background-color: #f9f9f9; }
-.btn-card { background-color: #2c3e50; color: white; border: none; }
-.btn-card:hover { background-color: #1a252f; }
-.btn-admin { background-color: #e74c3c; color: white; border: none; }
-.btn-admin:hover { background-color: #c0392b; }
-.btn-upgrade { background-color: #27ae60; color: white; border: none; }
-.btn-upgrade:hover { background-color: #219150; }
+.profile-page { background-color: #f5f5f5; min-height: 100vh; padding: 2rem 0; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
 
-.tabs-container { background: white; padding: 0 2rem; border-bottom: 1px solid #eee; display: flex; justify-content: center; gap: 2rem; }
-.tab-btn { background: none; border: none; padding: 1rem 0.5rem; font-size: 1rem; color: #777; cursor: pointer; border-bottom: 3px solid transparent; font-weight: 600; }
-.tab-btn.active { color: #e67e22; border-bottom-color: #e67e22; }
-.content-area { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
-.tab-panel h2 { font-size: 1.2rem; margin-bottom: 1rem; color: #333; }
-.trip-list { display: flex; flex-direction: column; gap: 1rem; }
-.mini-trip-card { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 1rem; border: 1px solid #eee; }
-.faded { opacity: 0.7; }
-.date-box { background-color: #f0f3f4; padding: 0.5rem 1rem; border-radius: 8px; text-align: center; min-width: 60px; }
-.date-box .day { display: block; font-size: 1.2rem; font-weight: bold; color: #2c3e50; }
-.date-box .month { display: block; font-size: 0.8rem; color: #7f8c8d; }
-.trip-details { flex-grow: 1; }
-.trip-details h3 { margin: 0 0 5px 0; color: #333; }
-.trip-details p { margin: 0; font-size: 0.9rem; color: #666; }
-.status { display: inline-block; margin-top: 5px; font-size: 0.75rem; font-weight: bold; padding: 2px 8px; border-radius: 4px; }
-.status.confirmed { background-color: #d4edda; color: #155724; }
-.status.pending { background-color: #fff3cd; color: #856404; }
-.status.completed { background-color: #e2e3e5; color: #383d41; }
-.btn-view, .btn-outline { padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
-.btn-view { background-color: #3498db; color: white; border: none; }
-.btn-outline { background: white; border: 1px solid #ccc; }
-.forum-list { background: white; border-radius: 8px; border: 1px solid #eee; overflow: hidden; }
-.forum-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
-.forum-item:hover { background-color: #f9f9f9; }
-.forum-content-left { flex-grow: 1; }
-.forum-actions { display: flex; gap: 10px; }
-.action-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 5px; border-radius: 4px; transition: background 0.2s; }
-.action-icon.edit:hover { background-color: #d4edda; }
-.action-icon.delete:hover { background-color: #f8d7da; }
-.forum-item h4 { margin: 0 0 5px 0; color: #0079d3; }
-.forum-item p { margin: 0; font-size: 0.8rem; color: #666; }
-.empty-text { text-align: center; color: #777; margin-top: 2rem; font-style: italic; }
+/* LAYOUT */
+.profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; }
 
+/* SIDEBAR (User Info) */
+.profile-sidebar { background: white; border-radius: 8px; border: 1px solid #eee; padding: 2rem; text-align: center; height: fit-content; }
+.avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #eee; object-fit: cover; margin-bottom: 10px; }
+.role-badge { background: #e67e22; color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+.user-name { font-size: 1.3rem; color: #2c3e50; margin: 0; }
+.user-bio { color: #777; font-size: 0.9rem; margin-top: 5px; line-height: 1.4; }
+
+.stats-grid { display: flex; justify-content: center; gap: 20px; margin: 1.5rem 0; border-top: 1px dashed #eee; border-bottom: 1px dashed #eee; padding: 10px 0; }
+.stat-item { display: flex; flex-direction: column; }
+.stat-item strong { font-size: 1.2rem; color: #27ae60; }
+.stat-item span { font-size: 0.8rem; color: #999; }
+
+.social-links { display: flex; justify-content: center; gap: 10px; margin-bottom: 1.5rem; }
+.social-links img { width: 20px; transition: transform 0.2s; }
+.social-links a:hover img { transform: scale(1.2); }
+
+.action-stack { display: flex; flex-direction: column; gap: 8px; }
+.btn-action { width: 100%; padding: 0.6rem; border: 1px solid #ddd; background: white; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+.btn-action:hover { background: #f9f9f9; border-color: #ccc; }
+.btn-action.upgrade { background: #27ae60; color: white; border: none; }
+.btn-action.upgrade:hover { background: #219150; }
+.btn-action.admin { background: #e74c3c; color: white; border: none; }
+.btn-action.contact { background: #25D366; color: white; border: none; }
+
+/* MAIN CONTENT */
+.profile-main { display: flex; flex-direction: column; gap: 1rem; }
+.tabs-strip { background: white; padding: 0 1rem; border-radius: 8px 8px 0 0; border-bottom: 1px solid #eee; display: flex; gap: 20px; }
+.tabs-strip button { background: none; border: none; padding: 1rem 0; font-size: 0.95rem; color: #777; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; }
+.tabs-strip button.active { color: #e67e22; border-bottom-color: #e67e22; }
+
+.content-box { background: white; padding: 1.5rem; border-radius: 0 0 8px 8px; min-height: 300px; border: 1px solid #eee; border-top: none; }
+
+/* Compact Card (Trip) */
+.grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+.compact-card { border: 1px solid #eee; border-radius: 6px; padding: 10px; display: flex; align-items: center; gap: 10px; background: #fff; }
+.compact-card.faded { opacity: 0.7; }
+.cc-date { background: #f0f8ff; padding: 5px 10px; border-radius: 4px; text-align: center; min-width: 50px; }
+.d { display: block; font-weight: bold; font-size: 1.1rem; color: #2c3e50; }
+.m { font-size: 0.7rem; color: #7f8c8d; }
+.cc-info { flex: 1; }
+.cc-info h4 { margin: 0 0 3px 0; font-size: 0.95rem; color: #333; }
+.cc-info p { margin: 0; font-size: 0.8rem; color: #777; }
+.status-pill { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-top: 3px; display: inline-block; }
+.status-pill.open { background: #d4edda; color: #155724; }
+.status-pill.closed { background: #e2e3e5; color: #383d41; }
+.btn-mini { padding: 5px 10px; font-size: 0.8rem; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+.btn-mini.outline { background: transparent; border: 1px solid #ccc; color: #555; }
+
+/* Forum Row */
+.forum-layout { display: flex; flex-direction: column; gap: 0; }
+.forum-row { padding: 1rem 0; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.forum-row:last-child { border: none; }
+.forum-row:hover h4 { color: #e67e22; }
+.fr-content h4 { margin: 0 0 5px 0; font-size: 1rem; }
+.fr-content span { font-size: 0.8rem; color: #888; }
+.fr-actions button { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 5px; }
+.fr-actions button.del:hover { background: #ffebee; border-radius: 4px; }
+
+.empty-text, .loading-text { text-align: center; color: #999; padding: 2rem; font-style: italic; }
+
+/* Modal CSS (Kekal) */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(5px); }
 .card-modal { background: white; padding: 0; border-radius: 15px; position: relative; max-width: 650px; width: 100%; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
 .close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #fff; z-index: 10; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
@@ -342,7 +348,6 @@ const shareCard = () => {
 .share-btn { padding: 0.6rem 1.5rem; border: 1px solid #ccc; background: white; border-radius: 50px; cursor: pointer; font-weight: bold; color: #555; transition: background 0.2s; }
 .share-btn:hover { background: #eee; }
 .share-btn.download { background-color: #e67e22; color: white; border: none; }
-
 .business-card { display: flex; min-height: 280px; }
 .card-left { flex: 1.6; padding: 2.5rem 2rem; background-color: #2c3e50; color: white; display: flex; flex-direction: column; justify-content: center; }
 .card-right { flex: 1; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; border-left: 1px dashed #eee; }
@@ -356,22 +361,22 @@ const shareCard = () => {
 .qr-label { font-weight: bold; margin-bottom: 15px; font-size: 0.7rem; letter-spacing: 2px; color: #555; }
 .qr-code { width: 140px; height: 140px; }
 .logo-watermark { margin-top: 15px; font-weight: 900; color: #2c3e50; font-size: 1.3rem; }
+/* Organizer Details on Card */
+.org-details-box { margin-bottom: 1.5rem; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
+.org-name-card { font-weight: bold; color: #f39c12; font-size: 1rem; margin-bottom: 5px; }
+.org-meta { font-size: 0.8rem; color: #bdc3c7; margin: 2px 0; }
 
-/* 🔥 CSS BARU: Organizer Details 🔥 */
-.org-details-box {
-  margin-bottom: 1.5rem;
-  background: rgba(255,255,255,0.05);
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.1);
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .profile-layout { grid-template-columns: 1fr; }
+  .tabs-strip { justify-content: flex-start; overflow-x: auto; }
 }
-.org-name-card {
-  font-weight: bold; color: #f39c12; font-size: 1rem; margin-bottom: 5px;
+@media (max-width: 600px) {
+  .business-card { flex-direction: column; }
+  .card-left { padding: 2rem; text-align: center; align-items: center; }
+  .card-bio { border-left: none; padding-left: 0; }
+  .card-socials { align-items: center; }
+  .card-right { padding: 2rem; border-left: none; border-top: 1px dashed #eee; }
+  .close-btn { color: #888; top: 5px; right: 10px; }
 }
-.org-meta {
-  font-size: 0.8rem; color: #bdc3c7; margin: 2px 0;
-}
-
-@media (max-width: 768px) { .profile-info-container { flex-direction: column; align-items: center; text-align: center; margin-top: -70px; } .social-mini-links { justify-content: center; } .stats-row { justify-content: center; } .action-buttons { width: 100%; justify-content: center; } }
-@media (max-width: 600px) { .business-card { flex-direction: column; } .card-left { padding: 2rem; text-align: center; align-items: center; } .card-bio { border-left: none; padding-left: 0; } .card-socials { align-items: center; } .card-right { padding: 2rem; border-left: none; border-top: 1px dashed #eee; } .close-btn { color: #888; top: 5px; right: 10px; } }
 </style>

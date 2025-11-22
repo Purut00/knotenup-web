@@ -94,7 +94,7 @@
 import { reactive, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebaseConfig';
-import { doc, getDoc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, deleteDoc, } from 'firebase/firestore';
 import { onAuthStateChanged, deleteUser } from 'firebase/auth';
 
 const router = useRouter();

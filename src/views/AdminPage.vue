@@ -142,7 +142,7 @@ const banners = reactive({
 });
 
 // 🔥 GANTI DENGAN EMAIL ADMIN ANDA 🔥
-const ADMIN_EMAIL = "knotenup@gmail.com";
+const ADMIN_EMAILS = ["knotenup@gmail.com", "admin@knotenup.com"];
 
 const filteredTrips = computed(() => {
   if (!searchQuery.value) return trips.value;
@@ -155,12 +155,12 @@ const filteredTrips = computed(() => {
 onMounted(() => {
   adminNote.value = localStorage.getItem('adminNote') || '';
   onAuthStateChanged(auth, async (user) => {
-    if (user && user.email === ADMIN_EMAIL) {
+    if (user && user.email && ADMIN_EMAILS.includes(user.email)) {
       isAdmin.value = true;
       loadData();
       loadBanners();
     } else {
-      alert("Maaf, kawasan larangan. Anda bukan Admin.");
+      alert("ko bukan admin, memandai nak masuk pulak, mendee!!");
       router.push('/');
     }
   });
