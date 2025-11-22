@@ -40,6 +40,8 @@ import { useI18n } from 'vue-i18n';
 import { ACTIVITY_CATEGORIES } from '../constants/data';
 import { auth, db } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { isSpam, getDetectedSpamWord } from '../utils/spamFilter';
+import { checkRateLimit } from '../utils/rateLimiter';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -74,6 +76,13 @@ onMounted(async () => {
 
 const submitPost = async () => {
   if (!auth.currentUser) return alert("Sila login.");
+
+const limitCheck = checkRateLimit('create_post'); // Guna kunci lain 'create_post'
+  if (!limitCheck.allowed) {
+    alert(limitCheck.message);
+    return;
+  }
+
   if(!form.title || !form.category || !form.content) return alert("Sila isi semua.");
 
   loading.value = true;
@@ -111,6 +120,18 @@ const submitPost = async () => {
   } finally {
     loading.value = false;
   }
+
+const combinedText = `${form.title} ${form.content}`;
+
+if (isSpam(combinedText)) {
+    const badWord = getDetectedSpamWord(combinedText);
+    alert(`⚠️ MAAF: Post anda mengandungi perkataan yang dilarang ("${badWord}"). Sila patuhi etika komuniti.`);
+    return; // Stop! Jangan hantar ke database.
+  }
+  // --- 🤖 BOT PENAPIS SPAM TAMAT ---
+
+  loading.value = true;
+  
 };
 </script>
 

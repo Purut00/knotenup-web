@@ -124,6 +124,8 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
+import { isSpam } from '../utils/spamFilter';
+import { checkRateLimit } from '../utils/rateLimiter';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -168,8 +170,20 @@ onMounted(async () => {
 
 const submitComment = async (parentId: string | null) => {
   if (!auth.currentUser) return;
+  
+  const limitCheck = checkRateLimit('comment'); // 'comment' ialah nama kunci
+  if (!limitCheck.allowed) {
+    alert(limitCheck.message);
+    return;
+  }
+  
   const text = parentId ? replyText.value : mainCommentText.value;
   if (!text.trim()) return;
+
+  if (isSpam(text)) {
+    alert("⚠️ Komen ditolak: Mengandungi perkataan yang dilarang/spam.");
+    return;
+  }
 
   try {
     await addDoc(collection(db, "forum_posts", postId, "comments"), {

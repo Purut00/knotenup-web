@@ -170,7 +170,7 @@ const handleLogout = async () => {
   font-weight: 600;        
   color:#155724;           /* Merah/Oren Shopee */
   letter-spacing: -1px;     /* Huruf rapat sikit macam logo */
-  text-decoration: none;    /* Buang garis bawah */
+  text-decoration: none;   /* Buang garis bawah */
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Font kemas */
 }
 

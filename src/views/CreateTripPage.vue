@@ -137,6 +137,7 @@ import { ACTIVITY_CATEGORIES, TRIP_SERVICES } from '../constants/data';
 import { auth, db, storage } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; 
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { isSpam } from '../utils/spamFilter';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -197,6 +198,15 @@ const submitForm = async () => {
   if (!auth.currentUser) { alert("Sila login!"); return; }
   loading.value = true;
 
+const checkText = `${form.title} ${form.description} ${form.location}`;
+  if (isSpam(checkText)) {
+    alert("⚠️ Trip ditolak: Kandungan mencurigakan dikesan. Sila semak semula.");
+    return;
+  }
+
+  loading.value = true;
+
+  
   try {
     let imageUrl = '';
     if (rawFile.value) {
