@@ -1,26 +1,33 @@
 <template>
   <div class="forum-page">
     
-    <div class="forum-header-strip">
-      <div class="container header-flex">
-        <div class="title-area">
-          <h1>{{ t('forum.headerTitle') }}</h1>
-          <p>{{ t('forum.headerSub') }}</p>
-        </div>
-        
-        <div class="forum-search-wrapper">
-          <input type="text" :placeholder="t('forum.searchPlaceholder')" v-model="searchQuery" @keyup.enter="handleSearch" />
-          <button @click="handleSearch">{{ t('common.search') }}</button>
+    <div class="search-strip-container">
+      <div class="container">
+        <div class="search-row">
+          <div class="search-input-wrapper">
+             <input 
+               type="text" 
+               v-model="searchQuery"
+               :placeholder="t('forum.searchPlaceholder')" 
+               @keyup.enter="handleSearch" 
+             />
+             <button class="btn-search-strip" @click="handleSearch">
+               {{ t('common.search') }}
+             </button>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="forum-container container">
+      
       <div class="feed-column">
         
         <div class="feed-filter">
-          <button class="filter-tab" :class="{ active: filterSort === 'hot' }" @click="filterSort = 'hot'">🔥 {{ t('forum.filterHot') }}</button>
-          <button class="filter-tab" :class="{ active: filterSort === 'new' }" @click="filterSort = 'new'">🆕 {{ t('forum.filterNew') }}</button>
+          <div class="left-tabs">
+            <button class="filter-tab" :class="{ active: filterSort === 'hot' }" @click="filterSort = 'hot'">🔥 {{ t('forum.filterHot') }}</button>
+            <button class="filter-tab" :class="{ active: filterSort === 'new' }" @click="filterSort = 'new'">🆕 {{ t('forum.filterNew') }}</button>
+          </div>
           
           <div v-if="selectedCategory" class="active-tag">
             {{ selectedCategory }} <span @click="selectedCategory = ''">✖</span>
@@ -85,7 +92,9 @@ const loading = ref(true);
 
 const popularCats = ['Hiking', 'Camping', 'Diving', 'Cycling', 'Climbing'];
 
-const handleSearch = () => { alert(`Mencari: ${searchQuery.value}`); };
+const handleSearch = () => { 
+  if(searchQuery.value.trim()) alert(`Mencari: ${searchQuery.value}`); 
+};
 
 // Helpers
 const getTimeAgo = (timestamp: any) => {
@@ -129,25 +138,75 @@ onMounted(async () => {
 
 <style scoped>
 .forum-page { background-color: #f5f5f5; min-height: 100vh; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
 
-/* HEADER STRIP (Theme Hijau) */
-.forum-header-strip { background: white; border-bottom: 1px solid #eee; padding: 1.5rem 0; margin-bottom: 1.5rem; }
-.header-flex { display: flex; justify-content: space-between; align-items: center; }
-.title-area h1 { margin: 0; font-size: 1.5rem; color: #27ae60; font-weight: 800; }
-.title-area p { margin: 5px 0 0; color: #777; font-size: 0.9rem; }
+/* --- SEARCH STRIP (SAMA DESIGN HOMEPAGE) --- */
+.search-strip-container { 
+  background: white; 
+  padding: 0.8rem 0; 
+  border-bottom: 1px solid #eaeaea; 
+  margin-bottom: 1.5rem; 
+  
+  /* 🔥 MELEKAT BILA SCROLL 🔥 */
+  position: sticky; 
+  top: 0; 
+  z-index: 999; 
+}
 
-.forum-search-wrapper { display: flex; width: 400px; border: 2px solid #27ae60; border-radius: 4px; overflow: hidden; }
-.forum-search-wrapper input { flex: 1; border: none; padding: 0.6rem; outline: none; }
-.forum-search-wrapper button { background: #27ae60; color: white; border: none; padding: 0 1.5rem; font-weight: bold; cursor: pointer; }
+.search-row { 
+  display: flex; 
+  justify-content: center; 
+}
 
-/* LAYOUT */
-.forum-container { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; padding-bottom: 2rem; }
+.search-input-wrapper { 
+  display: flex; 
+  width: 100%; 
+  max-width: 800px; /* Lebar sama macam Homepage */
+  border: 2px solid #27ae60; 
+  border-radius: 4px; /* Petak sikit (border-radius kecil) */
+  overflow: hidden; 
+}
+
+.search-input-wrapper input { 
+  flex: 1; 
+  border: none; 
+  padding: 0.5rem 1rem; 
+  outline: none; 
+  font-size: 0.9rem; 
+}
+
+.btn-search-strip { 
+  background: #27ae60; 
+  color: white; 
+  border: none; 
+  padding: 0 1.5rem; /* Padding lebar untuk teks */
+  font-weight: bold; 
+  cursor: pointer; 
+  font-size: 1rem; 
+  transition: background 0.2s;
+}
+
+.btn-search-strip:hover { 
+  background: #219150; 
+}
+
+/* --- LAYOUT FORUM --- */
+.forum-container {
+  max-width: 960px; /* Lebar standard Reddit */
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 312px; /* Kiri bebas, Kanan fix 312px */
+  gap: 24px;
+  padding-bottom: 2rem;
+}
 
 /* FEED */
-.feed-filter { background: white; padding: 0.8rem; border-radius: 4px; border: 1px solid #eee; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
-.filter-tab { background: none; border: none; font-weight: bold; color: #888; cursor: pointer; padding: 5px 12px; border-radius: 20px; transition: all 0.2s; }
+.feed-filter { background: white; padding: 0.8rem; border-radius: 4px; border: 1px solid #eee; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.left-tabs { display: flex; gap: 10px; }
+.filter-tab { background: none; border: none; font-weight: bold; color: #888; cursor: pointer; padding: 5px 10px; border-radius: 20px; transition: all 0.2s; }
 .filter-tab:hover, .filter-tab.active { background: #f0f9f4; color: #27ae60; }
-.active-tag { background: #27ae60; color: white; padding: 3px 10px; border-radius: 15px; font-size: 0.8rem; cursor: pointer; }
+.active-filter-badge { background-color: #e1f5fe; color: #0288d1; padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+.btn-clear { background: none; border: none; color: #0288d1; cursor: pointer; font-weight: bold; }
 
 .post-list { display: flex; flex-direction: column; gap: 10px; }
 .loading-box, .empty-box { text-align: center; padding: 3rem; background: white; color: #999; }
@@ -171,9 +230,12 @@ onMounted(async () => {
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .forum-container { grid-template-columns: 1fr; }
-  .sidebar-column { order: -1; }
-  .header-flex { flex-direction: column; gap: 1rem; text-align: center; }
-  .forum-search-wrapper { width: 100%; }
+  .forum-container { 
+    grid-template-columns: 1fr; 
+    padding: 10px; 
+  }
+  .sidebar-column { display: none; }
+  
+  .search-input-wrapper { width: 100%; }
 }
 </style>

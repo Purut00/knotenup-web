@@ -122,9 +122,10 @@
     "saveSuccess": "Profile saved successfully!"
   },
   "footer": {
-    "desc": "Your platform for recreational adventures.",
-    "quickLinks": "Quick Links",
-    "contact": "Contact Us",
+    "desc": "Malaysia's #1 outdoor community platform. Find trips, rent gear, and share experiences.",
+    "quickLinks": "Main Menu",
+    "support": "Support & Info",
+    "contact": "Follow Us",
     "rights": "All Rights Reserved."
   },
   "auth": {

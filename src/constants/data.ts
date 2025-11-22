@@ -6,7 +6,6 @@ export const ACTIVITY_CATEGORIES = [
       "Hiking",
       "Climbing",
       "Camping",
-      "Skiing",
       "Caving",
       "Rappelling",
       "Trail Running",

@@ -14,7 +14,7 @@
         <router-link to="/directory" class="navbar-item">Direktori</router-link>
         
         <router-link v-if="currentUser" to="/profile" class="navbar-item user-name-link">
-           👤 {{ getFirstName(currentUser.displayName) }}
+            {{ (currentUser.displayName) }}
         </router-link>
       </div>  
 
@@ -69,10 +69,6 @@ const currentUser = ref<User | null>(null);
 const userRole = ref('user');
 
 // Helper: Ambil nama depan sahaja supaya tak panjang sangat
-const getFirstName = (fullName: string | null) => {
-  if (!fullName) return 'Profile';
-  return fullName.split(' ')[0]; // Ambil perkataan pertama
-};
 
 onMounted(() => {
   // Kita tambah 'async' sebab nak baca database

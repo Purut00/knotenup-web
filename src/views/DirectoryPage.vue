@@ -1,73 +1,113 @@
 <template>
   <div class="directory-page">
-    <div class="header-section">
-      <h1>{{ t('directory.title') }}</h1>
-      <p>{{ t('directory.sub') }}</p>
-      
-      <button class="btn-create-service" @click="$router.push('/create-service')">
-        {{ t('directory.advertiseBtn') }}
-      </button>
-
-      <div class="filter-container">
-        <div class="state-select-wrapper">
-          <select v-model="selectedState" class="state-select">
-            <option value="">{{ t('directory.allStates') }}</option>
-            <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
-          </select>
+    
+    <div class="top-header-strip">
+      <div class="container header-flex">
+        <div class="title-area">
+          <h1>{{ t('directory.title') }}</h1>
+          <p>{{ t('directory.sub') }}</p>
         </div>
-        <div class="category-pills">
-          <button :class="{ active: selectedCat === 'Semua' }" @click="selectedCat = 'Semua'">{{ t('directory.catAll') }}</button>
-          <button v-for="cat in categories.filter(c => c !== 'Semua')" :key="cat" :class="{ active: selectedCat === cat }" @click="selectedCat = cat">{{ cat }}</button>
+        
+        <button 
+          v-if="userRole === 'organizer'" 
+          class="btn-create-service" 
+          @click="$router.push('/create-service')"
+        >
+          {{ t('directory.advertiseBtn') }}
+        </button>
+      </div>
+    </div>
+
+    <div class="search-strip-container">
+      <div class="container">
+        <div class="search-row">
+          
+          <div class="state-dropdown">
+            <select v-model="selectedState">
+              <option value="">{{ t('directory.allStates') }}</option>
+              <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
+            </select>
+            <span class="arrow">▼</span>
+          </div>
+          
+          <div class="search-input-wrapper">
+             <input 
+               type="text" 
+               v-model="searchQuery"
+               placeholder="Cari nama tempat, servis..." 
+             />
+          </div>
+
+          <button class="btn-search-strip">
+            {{ t('common.search') }}
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="service-grid">
-      <div v-if="loading" style="text-align: center; width: 100%;">⏳ {{ t('common.loading') }}</div>
-      
-      <div v-else v-for="service in filteredServices" :key="service.id" class="service-card" :class="{ 'expired-card': isExpired(service) }">
-        
-        <div v-if="isExpired(service)" class="expired-overlay">⚠️ {{ t('directory.expired') }}</div>
+    <div class="container">
+      <section class="category-section">
+        <div class="category-list">
+          <div class="cat-item" @click="selectedCat = 'Semua'">
+            <div class="cat-circle" :class="{ active: selectedCat === 'Semua' }">🌐</div>
+            <span class="cat-label">{{ t('directory.catAll') }}</span>
+          </div>
 
-        <div class="card-img" :style="{ backgroundImage: `url(${service.image || 'https://via.placeholder.com/300'})` }">
-          <span class="cat-badge">{{ service.category }}</span>
-          <span class="state-badge" v-if="service.state">{{ service.state }}</span>
+          <div class="cat-item" v-for="cat in categoryIcons" :key="cat.name" @click="selectedCat = cat.name">
+            <div class="cat-circle" :class="{ active: selectedCat === cat.name }">{{ cat.emoji }}</div>
+            <span class="cat-label">{{ cat.name }}</span>
+          </div>
         </div>
+      </section>
+
+      <div class="content-area">
+        <div v-if="loading" class="loading-box">⏳ {{ t('common.loading') }}</div>
         
-        <div class="card-body">
-          <div class="title-row">
-            <h3>{{ service.name }}</h3>
+        <div v-else class="service-grid">
+          <div v-for="service in filteredServices" :key="service.id" class="service-card" :class="{ 'expired-card': isExpired(service) }">
             
-            <div v-if="auth.currentUser && auth.currentUser.uid === service.ownerId" class="owner-actions">
-              <button @click.stop="renewService(service)" class="btn-renew" :title="t('directory.renewTooltip')">🔄</button>
-              <button @click.stop="deleteService(service.id)" class="btn-delete" :title="t('directory.deleteTooltip')">🗑️</button>
+            <div v-if="isExpired(service)" class="expired-overlay">⚠️ {{ t('directory.expired') }}</div>
+
+            <div class="card-img" :style="{ backgroundImage: `url(${service.image || 'https://via.placeholder.com/300'})` }">
+              <span class="cat-badge">{{ service.category }}</span>
+              <span class="state-badge" v-if="service.state">{{ service.state }}</span>
+            </div>
+            
+            <div class="card-body">
+              <div class="title-row">
+                <h3>{{ service.name }}</h3>
+                <div v-if="auth.currentUser && auth.currentUser.uid === service.ownerId" class="owner-actions">
+                  <button @click.stop="renewService(service)" class="btn-renew">🔄</button>
+                  <button @click.stop="deleteService(service.id)" class="btn-delete">🗑️</button>
+                </div>
+              </div>
+
+              <p class="loc">📍 {{ service.location }}</p>
+              <p class="price">{{ service.priceRange }}</p>
+              <p class="desc">{{ service.description }}</p>
+              
+              <p v-if="auth.currentUser && auth.currentUser.uid === service.ownerId" class="expiry-date">
+                Luput: {{ formatDate(service.expiryDate) }}
+              </p>
+
+              <div class="owner-row" @click.stop="goToProfile(service.ownerId)">
+                <img :src="service.ownerAvatar || 'https://i.pravatar.cc/150'" />
+                <span class="owner-name">{{ service.ownerName }}</span>
+                <span class="view-profile-text">({{ t('common.view') }})</span>
+              </div>
+
+              <a :href="`https://wa.me/${service.whatsapp}`" target="_blank" class="btn-contact" v-if="!isExpired(service)">
+                📞 {{ t('directory.contactBtn') }}
+              </a>
+              <button v-else class="btn-contact disabled" disabled>{{ t('directory.inactive') }}</button>
             </div>
           </div>
-
-          <p class="loc">📍 {{ service.location }}</p>
-          <p class="price">{{ service.priceRange }}</p>
-          <p class="desc">{{ service.description }}</p>
-          
-          <p v-if="auth.currentUser && auth.currentUser.uid === service.ownerId" class="expiry-date">
-            Luput: {{ formatDate(service.expiryDate) }}
-          </p>
-
-          <div class="owner-row" @click.stop="goToProfile(service.ownerId)">
-            <img :src="service.ownerAvatar || 'https://i.pravatar.cc/150'" />
-            <span class="owner-name">{{ service.ownerName }}</span>
-            <span class="view-profile-text">({{ t('common.view') }})</span>
-          </div>
-
-          <a :href="`https://wa.me/${service.whatsapp}`" target="_blank" class="btn-contact" v-if="!isExpired(service)">
-            📞 {{ t('directory.contactBtn') }}
-          </a>
-          <button v-else class="btn-contact disabled" disabled>{{ t('directory.inactive') }}</button>
+        </div>
+        
+        <div v-if="!loading && filteredServices.length === 0" class="empty-box">
+          {{ t('directory.empty') }}
         </div>
       </div>
-    </div>
-    
-    <div v-if="!loading && filteredServices.length === 0" class="empty">
-      {{ t('directory.empty') }}
     </div>
   </div>
 </template>
@@ -77,7 +117,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { auth, db } from '../firebaseConfig';
-import { collection, getDocs, query, orderBy, deleteDoc, doc, updateDoc, Timestamp } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth'; // Import Auth Listener
+import { collection, getDocs, query, orderBy, deleteDoc, doc, updateDoc, Timestamp, getDoc } from 'firebase/firestore';
 import { MALAYSIA_STATES } from '../constants/data';
 
 const { t } = useI18n();
@@ -86,14 +127,21 @@ const loading = ref(true);
 const services = ref<any[]>([]);
 const selectedCat = ref('Semua');
 const selectedState = ref('');
+const searchQuery = ref('');
+const userRole = ref('user'); // State untuk simpan role
 
-const categories = ['Semua', 'Campsite (Tapak Khemah)', 'Guide / Malim Gunung', 'Boathouse / Pengangkutan', 'Equipment Rental (Sewaan)', 'Chalet / Homestay'];
+const categoryIcons = [
+  { name: 'Campsite (Tapak Khemah)', emoji: '⛺' },
+  { name: 'Guide / Malim Gunung', emoji: '🧗' },
+  { name: 'Boathouse / Pengangkutan', emoji: '🚤' },
+  { name: 'Equipment Rental (Sewaan)', emoji: '🎒' },
+  { name: 'Chalet / Homestay', emoji: '🏡' }
+];
 
 const isExpired = (service: any) => {
   if (!service.expiryDate) return false;
   const now = new Date();
-  const expiry = service.expiryDate.toDate();
-  return now > expiry;
+  return now > service.expiryDate.toDate();
 };
 
 const formatDate = (timestamp: any) => {
@@ -105,91 +153,142 @@ const filteredServices = computed(() => {
   return services.value.filter(s => {
     const matchCat = selectedCat.value === 'Semua' || s.category === selectedCat.value;
     const matchState = selectedState.value === '' || s.state === selectedState.value;
+    const matchSearch = !searchQuery.value || s.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || s.location.toLowerCase().includes(searchQuery.value.toLowerCase());
     const isMyService = auth.currentUser && auth.currentUser.uid === s.ownerId;
     const active = !isExpired(s);
-    return matchCat && matchState && (active || isMyService);
+    return matchCat && matchState && matchSearch && (active || isMyService);
   });
 });
 
 const goToProfile = (id: string) => { if (id) router.push(`/user/${id}`); };
-
 const deleteService = async (id: string) => {
   if(confirm("Padam servis ini?")) {
-    try {
-      await deleteDoc(doc(db, 'services', id));
-      services.value = services.value.filter(s => s.id !== id);
-    } catch (e) { alert("Gagal memadam."); }
+    try { await deleteDoc(doc(db, 'services', id)); services.value = services.value.filter(s => s.id !== id); } catch (e) { alert("Gagal."); }
   }
 };
-
 const renewService = async (service: any) => {
   if(confirm("Perbaharui 3 bulan?")) {
     try {
-      const newExpiry = new Date();
-      newExpiry.setDate(newExpiry.getDate() + 90);
+      const newExpiry = new Date(); newExpiry.setDate(newExpiry.getDate() + 90);
       await updateDoc(doc(db, 'services', service.id), { expiryDate: Timestamp.fromDate(newExpiry) });
-      service.expiryDate = Timestamp.fromDate(newExpiry);
-    } catch (e) { alert("Gagal renew."); }
+      service.expiryDate = Timestamp.fromDate(newExpiry); alert("Berjaya renew.");
+    } catch (e) { alert("Gagal."); }
   }
 };
 
 onMounted(async () => {
+  // 1. Cek User Role (Organizer ke tak?)
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        userRole.value = snap.data().role || 'user';
+      }
+    } else {
+      userRole.value = 'user';
+    }
+  });
+
+  // 2. Load Services
   try {
     const q = query(collection(db, 'services'), orderBy('createdAt', 'desc'));
     const snap = await getDocs(q);
-    services.value = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    services.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (e) {}
   finally { loading.value = false; }
 });
 </script>
 
 <style scoped>
-.directory-page { background: #f4f6f8; min-height: 100vh; padding: 2rem; }
-.header-section { text-align: center; margin-bottom: 2rem; }
-.header-section h1 { color: #2c3e50; margin-bottom: 0.5rem; }
-.btn-create-service { margin-top: 1rem; background-color: #e67e22; color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 50px; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+.directory-page { background-color: #f5f5f5; min-height: 100vh; padding-bottom: 2rem; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+
+/* 1. TOP HEADER */
+.top-header-strip { background: white; padding: 1.5rem 0 0.5rem 0; }
+.header-flex { display: flex; justify-content: space-between; align-items: center; }
+.title-area h1 { margin: 0; font-size: 1.8rem; color: #2c3e50; font-weight: 800; }
+.title-area p { margin: 5px 0 0; color: #777; font-size: 0.9rem; }
+
+/* Button Iklan (PETAK) */
+.btn-create-service { 
+  background-color: #e67e22; color: white; border: none; 
+  padding: 0.7rem 1.5rem; border-radius: 4px; /* Petak (4px) */
+  font-weight: bold; cursor: pointer; transition: transform 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
 .btn-create-service:hover { transform: translateY(-2px); background-color: #d35400; }
 
-.filter-container { margin-top: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-.state-select { padding: 0.5rem 1rem; border-radius: 50px; border: 1px solid #27ae60; font-size: 1rem; outline: none; color: #2c3e50; background: white; min-width: 200px; text-align: center; font-weight: bold; }
-.category-pills { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-.category-pills button { background: white; border: 1px solid #ddd; padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.9rem; color: #555; transition: all 0.2s; }
-.category-pills button.active { background: #27ae60; color: white; border-color: #27ae60; }
+/* 2. SEARCH STRIP (Petak & Hijau) */
+.search-strip-container { 
+  background: white; padding: 1rem 0; border-bottom: 1px solid #eaeaea; 
+  margin-bottom: 1rem; position: sticky; top: 0; z-index: 999; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+/* Border Radius 4px = Petak */
+.search-row { max-width: 900px; margin: 0 auto; display: flex; border: 2px solid #27ae60; border-radius: 4px; overflow: hidden; height: 45px; }
 
-.service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto; }
-.service-card { background: white; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #eee; display: flex; flex-direction: column; position: relative; transition: transform 0.2s; }
-.service-card:hover { transform: translateY(-2px); border-color: #27ae60; }
-.service-card.expired-card { opacity: 0.7; border: 2px solid #e74c3c; }
-.expired-overlay { position: absolute; top: 0; left: 0; width: 100%; background: #e74c3c; color: white; text-align: center; font-size: 0.7rem; padding: 3px; z-index: 10; }
+.state-dropdown { position: relative; background: #f9f9f9; border-right: 1px solid #ddd; min-width: 160px; display: flex; align-items: center; }
+.state-dropdown select { width: 100%; height: 100%; border: none; background: transparent; padding: 0 2rem 0 1.5rem; appearance: none; cursor: pointer; font-weight: bold; color: #555; z-index: 2; }
+.state-dropdown .arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.7rem; color: #888; z-index: 1; pointer-events: none; }
 
-.card-img { height: 150px; background-size: cover; background-position: center; position: relative; }
-.cat-badge { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 2px; font-size: 0.65rem; }
-.state-badge { position: absolute; bottom: 5px; right: 5px; background: #27ae60; color: white; padding: 2px 6px; border-radius: 2px; font-size: 0.65rem; font-weight: bold; }
+.search-input-wrapper { flex-grow: 1; }
+.search-input-wrapper input { width: 100%; height: 100%; border: none; padding: 0 1.5rem; outline: none; font-size: 0.95rem; }
 
-.card-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
+.btn-search-strip { background: #27ae60; color: white; border: none; padding: 0 2rem; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+.btn-search-strip:hover { background: #219150; }
+
+
+/* 3. KATEGORI */
+.category-section { margin-bottom: 2rem; }
+.category-list { display: flex; justify-content: flex-start; gap: 1.5rem; overflow-x: auto; padding: 10px 5px; scrollbar-width: none; }
+.category-list::-webkit-scrollbar { display: none; }
+
+.cat-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 80px; transition: transform 0.1s; }
+.cat-item:hover { transform: translateY(-3px); }
+.cat-circle { width: 50px; height: 50px; border: 1px solid #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 8px; background: #fff; transition: all 0.2s; }
+.cat-circle.active { border-color: #27ae60; background: #e8f5e9; }
+.cat-label { font-size: 0.75rem; color: #555; text-align: center; line-height: 1.2; max-width: 90px; }
+
+/* 4. GRID & CARDS */
+.service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem; }
+.service-card { background: white; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; position: relative; transition: transform 0.2s; }
+.service-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.service-card.expired-card { opacity: 0.7; filter: grayscale(100%); }
+
+.expired-overlay { position: absolute; top: 0; left: 0; width: 100%; background: #e74c3c; color: white; text-align: center; font-size: 0.7rem; padding: 3px; z-index: 10; font-weight: bold; }
+.card-img { height: 160px; background-size: cover; background-position: center; position: relative; }
+.cat-badge { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; }
+.state-badge { position: absolute; bottom: 8px; right: 8px; background: #27ae60; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
+
+.card-body { padding: 1rem; flex-grow: 1; display: flex; flex-direction: column; }
 .title-row { display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px; }
-.title-row h3 { margin: 0; font-size: 1rem; color: #333; line-height: 1.3; flex: 1; }
-
-/* Owner Action Buttons */
+.title-row h3 { margin: 0; font-size: 1rem; color: #2c3e50; font-weight: 700; line-height: 1.3; flex: 1; }
 .owner-actions { display: flex; gap: 5px; }
 .btn-delete { background: #fee; border: 1px solid #e74c3c; cursor: pointer; border-radius: 2px; padding: 2px 5px; font-size: 0.8rem; }
 .btn-renew { background: #e8f5e9; border: 1px solid #27ae60; cursor: pointer; border-radius: 2px; padding: 2px 5px; font-size: 0.8rem; }
 
-.loc { font-size: 0.8rem; color: #999; margin-bottom: 5px; }
-.price { font-size: 1rem; color: #e67e22; font-weight: bold; margin-bottom: 5px; }
-.desc { font-size: 0.8rem; color: #555; line-height: 1.4; flex-grow: 1; margin-bottom: 1rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
-.expiry-date { font-size: 0.7rem; color: #e74c3c; font-weight: bold; margin-bottom: 5px; text-align: right; }
+.loc { font-size: 0.85rem; color: #777; margin-bottom: 5px; }
+.price { font-size: 1rem; color: #e67e22; font-weight: bold; margin-bottom: 8px; }
+.desc { font-size: 0.85rem; color: #555; line-height: 1.4; flex-grow: 1; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.expiry-date { font-size: 0.7rem; color: #e74c3c; font-weight: bold; margin-bottom: 8px; text-align: right; }
 
-.owner-row { display: flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 8px; border-top: 1px dashed #eee; cursor: pointer; }
-.owner-row img { width: 20px; height: 20px; border-radius: 50%; }
-.owner-name { font-size: 0.75rem; color: #555; font-weight: bold; }
+.owner-row { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 10px; border-top: 1px dashed #eee; cursor: pointer; }
+.owner-row:hover { background-color: #f9f9f9; border-radius: 4px; }
+.owner-row img { width: 24px; height: 24px; border-radius: 50%; }
+.owner-name { font-size: 0.8rem; color: #333; font-weight: 600; }
 .view-profile-text { font-size: 0.65rem; color: #3498db; margin-left: auto; }
 
-.btn-contact { margin-top: 10px; display: block; text-align: center; background: #25D366; color: white; padding: 6px; border-radius: 2px; text-decoration: none; font-size: 0.85rem; font-weight: bold; }
+.btn-contact { margin-top: 12px; display: block; text-align: center; background: #25D366; color: white; padding: 8px; border-radius: 4px; text-decoration: none; font-size: 0.9rem; font-weight: bold; transition: background 0.2s; }
 .btn-contact:hover { background: #1ebc57; }
 .btn-contact.disabled { background: #ccc; cursor: not-allowed; }
-.empty { text-align: center; color: #999; font-style: italic; margin-top: 2rem; }
+.empty-box { text-align: center; padding: 3rem; color: #999; font-style: italic; }
 
 @media (max-width: 1024px) { .service-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 768px) { .service-grid { grid-template-columns: repeat(2, 1fr); } .filter-container { gap: 10px; } }
+@media (max-width: 768px) { 
+  .header-flex { flex-direction: column; text-align: center; gap: 1rem; } 
+  .search-row { flex-direction: column; height: auto; border-radius: 8px; } /* Mobile radius lebih besar sikit utk asingkan */
+  .state-dropdown { border-right: none; border-bottom: 1px solid #eee; width: 100%; padding: 0.5rem; }
+  .search-input-wrapper input { padding: 0.8rem; }
+  .btn-search-strip { width: 100%; padding: 0.8rem; }
+  .service-grid { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); }
+}
 </style>

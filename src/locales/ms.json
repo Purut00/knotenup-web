@@ -122,9 +122,10 @@
     "saveSuccess": "Profil berjaya disimpan!"
   },
   "footer": {
-    "desc": "Platform anda untuk pengembaraan rekreasi.",
-    "quickLinks": "Pautan Pantas",
-    "contact": "Hubungi Kami",
+    "desc": "Platform komuniti outdoor #1 di Malaysia. Cari trip, sewa peralatan, dan berkongsi pengalaman.",
+    "quickLinks": "Menu Utama",
+    "support": "Bantuan & Info",
+    "contact": "Ikuti Kami",
     "rights": "Hak Cipta Terpelihara."
   },
   "auth": {
