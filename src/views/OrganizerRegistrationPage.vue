@@ -47,11 +47,11 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'; // Import router
 import { auth, db } from '../firebaseConfig';
 import { doc, updateDoc } from 'firebase/firestore';
 
-const router = useRouter();
+const router = useRouter(); // Kita akan guna ni sekarang!
 const loading = ref(false);
 const useProfileName = ref(false);
 const currentUserName = ref('');
@@ -88,7 +88,6 @@ const submitUpgrade = async () => {
     
     await updateDoc(userRef, {
       role: 'organizer',
-      // Simpan data extra dalam object organizerDetails
       organizerDetails: {
         orgName: form.orgName,
         ssm: form.ssm,
@@ -98,7 +97,13 @@ const submitUpgrade = async () => {
     });
 
     alert("Tahniah! Akaun anda telah dinaik taraf.");
-    window.location.href = "/profile"; 
+    
+    // 🔥 PEMBETULAN: Guna router.push (bukan window.location)
+    router.push('/profile');
+    // Kita reload sikit page lepas redirect utk update Navbar (sbb state change)
+    setTimeout(() => {
+       window.location.reload();
+    }, 100);
 
   } catch (e) {
     console.error(e);
@@ -119,15 +124,12 @@ h2 { color: #2c3e50; text-align: center; margin-bottom: 0.5rem; }
 .form-group input { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px; }
 .form-group input:focus { border-color: #e67e22; outline: none; }
 .form-group input:disabled { background-color: #eee; color: #888; }
-
 .checkbox-wrapper { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .sm-label { font-weight: normal !important; font-size: 0.8rem !important; margin: 0 !important; cursor: pointer; }
-
 .tnc-box { background: #fff8e1; padding: 1rem; border-radius: 6px; border: 1px solid #ffe0b2; margin-bottom: 1.5rem; }
 .checkbox-container { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
 .checkbox-container input { width: auto; margin-top: 4px; }
 .checkbox-container .text { font-size: 0.8rem; color: #5d4037; line-height: 1.4; }
-
 .btn-submit { width: 100%; padding: 1rem; background: #e67e22; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; }
 .btn-submit:hover { background: #d35400; }
 .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
