@@ -12,14 +12,13 @@
         <router-link to="/trips" class="navbar-item">{{ t('navbar.trips') }}</router-link>
         <router-link to="/forum" class="navbar-item">{{ t('navbar.forum') }}</router-link>
         <router-link to="/directory" class="navbar-item">Direktori</router-link>
-        
+        <router-link to="/spots" class="navbar-item">Lokasi</router-link>
         <router-link v-if="currentUser" to="/profile" class="navbar-item user-name-link">
             {{ (currentUser.displayName) }}
         </router-link>
       </div>  
 
       <div class="navbar-right">
-        <LanguageSwitcher />
         
         <router-link 
           v-if="userRole === 'organizer'" 
@@ -55,7 +54,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import LanguageSwitcher from './LanguageSwitcher.vue';
 import { useI18n } from 'vue-i18n';
 import LoginModal from './LoginModal.vue';
 import { auth,db } from '../../firebaseConfig';
@@ -104,8 +102,8 @@ const handleLogout = async () => {
 <style scoped lang="css">
 .navbar {
   width: 100%;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
   padding: 0 2rem;
   box-sizing: border-box; /* Penting untuk padding */
 }
@@ -131,7 +129,7 @@ const handleLogout = async () => {
 
 .navbar-item {
   text-decoration: none;
-  color: #333;
+  color: var(--text-primary);
   font-weight: 500;
   padding: 0.5rem;
 }

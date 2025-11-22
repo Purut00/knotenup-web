@@ -14,6 +14,9 @@ import SearchResultsPage from '../views/SearchResultsPage.vue';
 import DirectoryPage from '../views/DirectoryPage.vue';
 import CreateServicePage from '../views/CreateServicePage.vue';
 import OrganizerRegistrationPage from '../views/OrganizerRegistrationPage.vue';
+import SpotsPage from '../views/SpotsPage.vue';
+import SpotDetailPage from '../views/SpotDetailPage.vue';
+import CreateSpotPage from '../views/CreateSpotPage.vue';
 
 const routes = [
   {
@@ -100,6 +103,18 @@ const routes = [
   path: '/be-organizer',
   name: 'be-organizer',
   component: OrganizerRegistrationPage
+  },
+  { path: '/spots',  
+    name: 'spots', 
+    component: SpotsPage 
+  },
+  { path: '/spots/:id', 
+    name: 'spot-detail', 
+    component: SpotDetailPage 
+  },
+  { path: '/create-spot', 
+    name: 'create-spot', 
+    component: CreateSpotPage 
   },
 ]
 
