@@ -13,8 +13,9 @@
         <router-link to="/forum" class="navbar-item">{{ t('navbar.forum') }}</router-link>
         <router-link to="/directory" class="navbar-item">Direktori</router-link>
         <router-link to="/spots" class="navbar-item">Lokasi</router-link>
+        
         <router-link v-if="currentUser" to="/profile" class="navbar-item user-name-link">
-            {{ (currentUser.displayName) }}
+             {{ displayName }}
         </router-link>
       </div>  
 
@@ -56,39 +57,52 @@ import { ref, onMounted } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import LoginModal from './LoginModal.vue';
-import { auth,db } from '../../firebaseConfig';
+import { auth, db } from '../../firebaseConfig';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+// UBAH SINI: Guna 'onSnapshot' ganti 'getDoc'
+import { doc, onSnapshot } from 'firebase/firestore'; 
 
 const { t } = useI18n();
 const router = useRouter();
 const showLogin = ref(false);
 const currentUser = ref<User | null>(null);
 const userRole = ref('user');
+// UBAH SINI: Variable baru untuk nama
+const displayName = ref('Profile');
 
-// Helper: Ambil nama depan sahaja supaya tak panjang sangat
-
+// UBAH SINI: Helper Function
+// Kita tambah ': string' untuk paksa function ni pulangkan string
+const getFirstName = (name: string | null | undefined): string => {
+  if (!name) return 'Profile';
+  // Tambah "|| 'Profile'" di hujung sebagai backup jika split gagal
+  return name.split(' ')[0] || 'Profile'; 
+};
 onMounted(() => {
-  // Kita tambah 'async' sebab nak baca database
-  onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser.value = user;
       
-      // 🔥 LOGIC BARU: Cek Role User dari Database 🔥
-      try {
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (snap.exists()) {
-          const data = snap.data();
-          userRole.value = data.role || 'user'; // Ambil role dari DB
-          console.log("User Role:", userRole.value); // Debugging
+      // 🔥 LOGIC BARU: Real-time Listener (CCTV) 🔥
+      onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          
+          // 1. Update Role
+          userRole.value = data.role || 'user'; 
+          
+          // 2. Update Nama (Real-time)
+          // Check field 'name' atau 'fullName' dalam DB
+          const dbName = data.name || data.fullName; 
+          
+          // Set nama guna helper
+          displayName.value = getFirstName(dbName || user.displayName);
         }
-      } catch (e) {
-        console.error("Gagal baca role:", e);
-      }
+      });
 
     } else {
       currentUser.value = null;
-      userRole.value = 'user'; // Reset balik jadi user biasa
+      userRole.value = 'user';
+      displayName.value = 'Profile';
     }
   });
 });
@@ -163,7 +177,7 @@ const handleLogout = async () => {
   font-size: 1.3rem;       
   font-weight: 600;        
   color:#155724;           /* Merah/Oren Shopee */
-  letter-spacing: -1px;     /* Huruf rapat sikit macam logo */
+  letter-spacing: -1px;    /* Huruf rapat sikit macam logo */
   text-decoration: none;   /* Buang garis bawah */
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Font kemas */
 }

@@ -32,9 +32,15 @@
             <button v-if="isAdmin" class="btn-action admin" @click="$router.push('/admin')">
               ⚡ Admin Panel
             </button>
-            <button class="btn-action card" @click="showCard = true">
-              🪪 {{ t('profile.myCard') }}
+            
+            <button v-if="user.role === 'organizer'" class="btn-action card" @click="showCard = true">
+              🪪 Business Card
             </button>
+
+            <button class="btn-action emergency" @click="openEmergency">
+              ⛑️ Emergency Card
+            </button>
+
             <button class="btn-action edit" @click="$router.push('/profile/edit')">
               ⚙️ {{ t('profile.editProfile') }}
             </button>
@@ -48,13 +54,10 @@
 
           <div class="settings-box">
             <h3>Tetapan Aplikasi</h3>
-            
             <div class="setting-row">
               <span>Bahasa:</span>
               <LanguageSwitcher />
             </div>
-
-            
           </div>
 
         </div>
@@ -134,38 +137,95 @@
     </div>
 
     <div v-if="showCard" class="modal-overlay" @click.self="showCard = false">
-      <div class="card-modal">
+      <div class="card-modal-wrapper">
         <button class="close-btn" @click="showCard = false">✖</button>
-        <div class="business-card" id="capture-card">
-          <div class="card-left">
-            <img :src="user.avatar" class="card-avatar" crossorigin="anonymous" />
-            <h3>{{ user.name }}</h3>
-            <span class="card-role" v-if="user.role === 'organizer'">OUTDOOR ORGANIZER</span>
-            <span class="card-role" v-else>OUTDOOR ENTHUSIAST</span>
-            <p class="card-bio">{{ user.bio }}</p>
-            
-            <div v-if="user.role === 'organizer' && user.organizerDetails" class="org-details-box">
-               <p v-if="user.organizerDetails.orgName" class="org-name-card">{{ user.organizerDetails.orgName }}</p>
-               <p v-if="user.organizerDetails.ssm" class="org-meta">🏢 {{ user.organizerDetails.ssm }}</p>
-               <p v-if="user.organizerDetails.license" class="org-meta">📜 {{ user.organizerDetails.license }}</p>
-            </div>
-
-            <div class="card-socials">
-              <div v-if="user.whatsapp" class="social-row"><img src="https://cdn.simpleicons.org/whatsapp/white" class="card-icon"/> {{ user.whatsapp }}</div>
-              <div v-if="user.facebook" class="social-row"><img src="https://cdn.simpleicons.org/facebook/white" class="card-icon"/> /{{ user.facebook }}</div>
-            </div>
+        
+        <div class="standard-card business-card" id="capture-business">
+          <div class="bc-left-panel">
+             <div class="bc-profile-header">
+                <img :src="user.avatar" class="bc-avatar-square" crossorigin="anonymous" />
+                <div class="bc-texts">
+                   <h3 class="bc-name">{{ user.name }}</h3>
+                   <span class="bc-role">OUTDOOR ORGANIZER</span>
+                   <p v-if="user.organizerDetails.orgName && user.organizerDetails.orgName !== user.name" class="bc-company">
+                      {{ user.organizerDetails.orgName }}
+                   </p>
+                   <p v-if="user.organizerDetails.ssm" class="bc-ssm">
+                      {{ user.organizerDetails.ssm }}
+                   </p>
+                </div>
+             </div>
+             <div class="bc-socials-list">
+                <div v-if="user.whatsapp" class="bc-soc-row"><img src="https://cdn.simpleicons.org/whatsapp/white" /> {{ user.whatsapp }}</div>
+                <div v-if="user.facebook" class="bc-soc-row"><img src="https://cdn.simpleicons.org/facebook/white" /> /{{ user.facebook }}</div>
+                <div v-if="user.instagram" class="bc-soc-row"><img src="https://cdn.simpleicons.org/instagram/white" /> /{{ user.instagram }}</div>
+                <div v-if="user.tiktok" class="bc-soc-row"><img src="https://cdn.simpleicons.org/tiktok/white" /> @{{ user.tiktok }}</div>
+                <div v-if="user.youtube" class="bc-soc-row"><img src="https://cdn.simpleicons.org/youtube/white" /> /{{ user.youtube }}</div>
+             </div>
           </div>
-          <div class="card-right">
-            <span class="qr-label">SCAN ME</span>
-            <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/user/${user.name}`" class="qr-code" crossorigin="anonymous" />
-            <span class="logo-watermark">KnotenUp</span>
+          <div class="bc-right-panel">
+             <div class="qr-container">
+               <span class="scan-text">SCAN ME</span>
+               <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/user/${user.name}`" class="bc-qr" crossorigin="anonymous" />
+               <span class="bc-brand">KnotenUp</span>
+             </div>
           </div>
         </div>
+
         <div class="modal-actions">
           <button class="share-btn" @click="shareCard">🔗 Copy Link</button>
-          <button class="share-btn download" @click="downloadPDF">
-            {{ isDownloading ? 'Processing...' : '⬇️ Download PDF' }}
+          <button class="share-btn download" @click="downloadCard('capture-business', `BusinessCard-${user.name}`)">
+            {{ isDownloading ? 'Prosessing...' : '⬇️ Download PDF' }}
           </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showEmergency" class="modal-overlay" @click.self="showEmergency = false">
+      <div class="card-modal-wrapper">
+        <button class="close-btn" @click="showEmergency = false">✖</button>
+        
+        <div class="standard-card emergency-card" id="capture-emergency">
+           <div class="ec-header">
+              <h2>EMERGENCY INFO</h2>
+              <span>ID: {{ user.name }}</span>
+           </div>
+           
+           <div class="ec-body">
+              <div class="ec-main">
+                 <div class="ec-row">
+                    <label>NAMA:</label>
+                    <strong>{{ user.name }}</strong>
+                 </div>
+                 <div class="ec-grid">
+                    <div class="ec-col">
+                       <label>JENIS DARAH:</label>
+                       <strong class="blood-type">{{ user.bloodType || '-' }}</strong>
+                    </div>
+                    <div class="ec-col">
+                       <label>ALAHAN:</label>
+                       <strong>{{ user.allergies || 'Tiada' }}</strong>
+                    </div>
+                 </div>
+                 <div class="ec-alert-box">
+                    <label>HUBUNGI KECEMASAN (WARIS):</label>
+                    <strong style="color: #c0392b;">{{ user.emergencyContact || 'Belum ditetapkan' }}</strong>
+                 </div>
+              </div>
+              <div class="ec-side">
+                 <img :src="user.avatar" class="ec-avatar" crossorigin="anonymous" />
+                 <div class="ec-qr-box">
+                    <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://knotenup.com/user/${user.name}`" class="ec-qr" crossorigin="anonymous" />
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="share-btn download" style="background:#c0392b;" @click="downloadCard('capture-emergency', `EmergencyCard-${user.name}`)">
+            {{ isDownloading ? 'Prosessing...' : '⬇️ Download PDF' }}
+          </button>
+          <button class="share-btn" @click="$router.push('/profile/edit')">✏️ Edit Info</button>
         </div>
       </div>
     </div>
@@ -182,18 +242,22 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, deleteDoc } from 'firebase/firestore';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import LanguageSwitcher from '../components/common/LanguageSwitcher.vue'; // Import Switcher
+import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+
+// STATE MODALS
 const activeTab = ref('upcoming');
 const showCard = ref(false);
+const showEmergency = ref(false); // Pastikan variable ni ada!
+
 const loadingData = ref(true);
 const isOwnProfile = ref(false);
 const isAdmin = ref(false);
 const isDownloading = ref(false);
-const isDark = ref(false); // State Dark Mode
+const isDark = ref(false);
 
 const ADMIN_EMAIL = "knotenup@gmail.com"; 
 
@@ -204,21 +268,26 @@ const myPosts = ref<any[]>([]);
 const user = reactive({
   id: '', name: 'Loading...', bio: '', avatar: 'https://i.pravatar.cc/300?img=3',
   whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '', role: 'user',
-  organizerDetails: { orgName: '', ssm: '', license: '' }
+  organizerDetails: { orgName: '', ssm: '', license: '' },
+  bloodType: '', allergies: '', emergencyContact: ''
 });
 
 const organizedCount = computed(() => upcomingTrips.value.length + historyTrips.value.length);
 const getDay = (dateString: string) => { if(!dateString) return '01'; return new Date(dateString).getDate(); };
 const getMonth = (dateString: string) => { if(!dateString) return 'JAN'; return new Date(dateString).toLocaleDateString('en-MY', { month: 'short' }).toUpperCase(); };
 
-
-
 const fetchUserData = async (targetUserId: string) => {
   loadingData.value = true;
   upcomingTrips.value = []; historyTrips.value = []; myPosts.value = [];
   try {
     const docSnap = await getDoc(doc(db, "users", targetUserId));
-    if (docSnap.exists()) { Object.assign(user, docSnap.data()); user.id = targetUserId; if (!user.role) user.role = 'user'; } 
+    if (docSnap.exists()) { 
+        const data = docSnap.data();
+        Object.assign(user, data); 
+        user.id = targetUserId; 
+        if (!user.role) user.role = 'user'; 
+        if (!user.organizerDetails) user.organizerDetails = { orgName: '', ssm: '', license: '' };
+    } 
     else { user.name = 'User Tidak Dijumpai'; }
 
     const qTrip = query(collection(db, "trips"), where("organizerId", "==", targetUserId));
@@ -238,7 +307,6 @@ const fetchUserData = async (targetUserId: string) => {
 };
 
 onMounted(() => {
-  // Cek theme
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme === 'dark') { isDark.value = true; document.body.classList.add('dark-mode'); }
 
@@ -260,11 +328,32 @@ onMounted(() => {
 watch(() => route.params.id, (newId) => { if (newId) fetchUserData(newId as string); });
 const editPost = (id: string) => { router.push(`/forum/edit/${id}`); };
 const deletePost = async (id: string) => { if (confirm("Padam?")) { try { await deleteDoc(doc(db, "forum_posts", id)); myPosts.value = myPosts.value.filter(p => p.id !== id); } catch(e) {} } };
-const downloadPDF = async () => {
-  const element = document.getElementById('capture-card');
-  if (!element) return; isDownloading.value = true;
-  try { const canvas = await html2canvas(element, { scale: 3, useCORS: true }); const imgData = canvas.toDataURL('image/png'); const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] }); pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height); pdf.save(`KnotenUp-Card-${user.name}.pdf`); } catch (error) { alert("Gagal download."); } finally { isDownloading.value = false; }
+
+const openEmergency = () => {
+    console.log("Button Emergency ditekan!"); 
+    showEmergency.value = true;
 };
+
+// DOWNLOAD PDF
+const downloadCard = async (elementId: string, fileName: string) => {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+  
+  isDownloading.value = true;
+  try {
+    const canvas = await html2canvas(element, { scale: 3, useCORS: true, backgroundColor: null });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.save(`${fileName}.pdf`);
+  } catch (error) { 
+    console.error("Error download:", error);
+    alert("Gagal download. Sila pastikan 'html2canvas' & 'jspdf' diinstall."); 
+  } finally { 
+    isDownloading.value = false; 
+  }
+};
+
 const shareCard = () => { navigator.clipboard.writeText(`https://knotenup.com/user/${user.name}`); alert("Link disalin!"); };
 </script>
 
@@ -280,46 +369,34 @@ const shareCard = () => { navigator.clipboard.writeText(`https://knotenup.com/us
 .role-badge { background: #e67e22; color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
 .user-name { font-size: 1.3rem; color: var(--heading-color, #2c3e50); margin: 0; }
 .user-bio { color: #777; font-size: 0.9rem; margin-top: 5px; line-height: 1.4; }
-
 .stats-grid { display: flex; justify-content: center; gap: 20px; margin: 1.5rem 0; border-top: 1px dashed #eee; border-bottom: 1px dashed #eee; padding: 10px 0; }
 .stat-item { display: flex; flex-direction: column; }
 .stat-item strong { font-size: 1.2rem; color: #27ae60; }
 .stat-item span { font-size: 0.8rem; color: #999; }
-
 .social-links { display: flex; justify-content: center; gap: 10px; margin-bottom: 1.5rem; }
 .social-links img { width: 20px; transition: transform 0.2s; }
 .social-links a:hover img { transform: scale(1.2); }
-
 .action-stack { display: flex; flex-direction: column; gap: 8px; }
 .btn-action { width: 100%; padding: 0.6rem; border: 1px solid #ddd; background: white; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
 .btn-action:hover { background: #f9f9f9; border-color: #ccc; }
 .btn-action.upgrade { background: #27ae60; color: white; border: none; }
 .btn-action.admin { background: #e74c3c; color: white; border: none; }
 .btn-action.contact { background: #25D366; color: white; border: none; }
+.btn-action.emergency { background: #fff; border: 1px solid #c0392b; color: #c0392b; }
+.btn-action.emergency:hover { background: #c0392b; color: white; }
 
-/* --- SETTINGS BOX (NEW) --- */
+/* --- SETTINGS BOX --- */
 .settings-box { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee; text-align: left; }
 .settings-box h3 { font-size: 1rem; color: var(--heading-color, #333); margin-bottom: 1rem; }
 .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-color, #555); }
-
-/* Toggle Switch */
-.switch { position: relative; display: inline-block; width: 40px; height: 22px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-.slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: #2c3e50; }
-input:checked + .slider:before { transform: translateX(18px); }
 
 /* --- MAIN CONTENT --- */
 .profile-main { display: flex; flex-direction: column; gap: 1rem; }
 .tabs-strip { background: var(--card-bg, white); padding: 0 1rem; border-radius: 8px 8px 0 0; border-bottom: 1px solid #eee; display: flex; gap: 20px; }
 .tabs-strip button { background: none; border: none; padding: 1rem 0; font-size: 0.95rem; color: #777; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; }
 .tabs-strip button.active { color: #e67e22; border-bottom-color: #e67e22; }
-
 .content-box { background: var(--card-bg, white); padding: 1.5rem; border-radius: 0 0 8px 8px; min-height: 300px; border: 1px solid var(--border-color, #eee); border-top: none; }
 .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
-
-/* Compact Card */
 .compact-card { border: 1px solid #eee; border-radius: 6px; padding: 10px; display: flex; align-items: center; gap: 10px; background: #fff; }
 .compact-card.faded { opacity: 0.7; }
 .cc-date { background: #f0f8ff; padding: 5px 10px; border-radius: 4px; text-align: center; min-width: 50px; }
@@ -333,8 +410,6 @@ input:checked + .slider:before { transform: translateX(18px); }
 .status-pill.closed { background: #e2e3e5; color: #383d41; }
 .btn-mini { padding: 5px 10px; font-size: 0.8rem; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; }
 .btn-mini.outline { background: transparent; border: 1px solid #ccc; color: #555; }
-
-/* Forum Row */
 .forum-layout { display: flex; flex-direction: column; gap: 0; }
 .forum-row { padding: 1rem 0; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
 .forum-row:last-child { border: none; }
@@ -346,40 +421,69 @@ input:checked + .slider:before { transform: translateX(18px); }
 .empty-text, .loading-text { text-align: center; color: #999; padding: 2rem; font-style: italic; }
 
 /* --- MODAL & CARD --- */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(5px); }
-.card-modal { background: white; padding: 0; border-radius: 15px; position: relative; max-width: 650px; width: 100%; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(5px); }
+.card-modal-wrapper { background: transparent; padding: 1rem; }
 .close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #fff; z-index: 10; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-.modal-actions { padding: 1.5rem; display: flex; justify-content: center; background: #f9f9f9; gap: 10px; }
+.modal-actions { padding: 1.5rem; display: flex; justify-content: center; gap: 10px; }
 .share-btn { padding: 0.6rem 1.5rem; border: 1px solid #ccc; background: white; border-radius: 50px; cursor: pointer; font-weight: bold; color: #555; transition: background 0.2s; }
 .share-btn:hover { background: #eee; }
 .share-btn.download { background-color: #e67e22; color: white; border: none; }
-.business-card { display: flex; min-height: 280px; }
-.card-left { flex: 1.6; padding: 2.5rem 2rem; background-color: #2c3e50; color: white; display: flex; flex-direction: column; justify-content: center; }
-.card-right { flex: 1; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; border-left: 1px dashed #eee; }
-.card-avatar { width: 70px; height: 70px; border-radius: 50%; border: 3px solid white; margin-bottom: 1rem; object-fit: cover; }
-.card-left h3 { margin: 0; font-size: 1.6rem; font-weight: 700; line-height: 1.2; }
-.card-role { color: #e67e22; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1rem; display: block; }
-.card-bio { font-size: 0.85rem; color: #bdc3c7; margin-bottom: 1.5rem; line-height: 1.5; border-left: 3px solid #e67e22; padding-left: 10px; }
-.card-socials { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
-.social-row { display: flex; align-items: center; gap: 10px; opacity: 0.9; }
-.card-icon { width: 18px; height: 18px; }
-.qr-label { font-weight: bold; margin-bottom: 15px; font-size: 0.7rem; letter-spacing: 2px; color: #555; }
-.qr-code { width: 140px; height: 140px; }
-.logo-watermark { margin-top: 15px; font-weight: 900; color: #2c3e50; font-size: 1.3rem; }
-.org-details-box { margin-bottom: 1.5rem; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
-.org-name-card { font-weight: bold; color: #f39c12; font-size: 1rem; margin-bottom: 5px; }
-.org-meta { font-size: 0.8rem; color: #bdc3c7; margin: 2px 0; }
 
+/* 🔥 STANDARD CARD CSS (Fixed Size 600x340) 🔥 */
+.standard-card { width: 600px; height: 340px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; position: relative; display: flex; font-family: 'Helvetica Neue', sans-serif; }
+
+/* 1. BUSINESS CARD STYLE */
+.business-card { background: #2c3e50; color: white; }
+.bc-left-panel { flex: 2; padding: 30px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+.bc-profile-header { display: flex; align-items: center; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+.bc-avatar-square { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; border: 3px solid #e67e22; background: #fff; }
+.bc-texts { display: flex; flex-direction: column; }
+.bc-name { font-size: 1.5rem; font-weight: 800; margin: 0; line-height: 1.1; color: white; }
+.bc-role { color: #e67e22; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; margin-top: 5px; }
+.bc-company { font-size: 0.9rem; color: #bdc3c7; margin: 5px 0 0 0; font-style: italic; }
+.bc-ssm { font-size: 0.65rem; color: #7f8c8d; margin: 0; }
+.bc-socials-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bc-soc-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #ecf0f1; }
+.bc-soc-row img { width: 16px; height: 16px; opacity: 0.9; }
+.bc-right-panel { flex: 1; background: white; display: flex; align-items: center; justify-content: center; position: relative; clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%); margin-left: -20px; }
+.qr-container { display: flex; flex-direction: column; align-items: center; text-align: center; margin-left: 15px; }
+.scan-text { font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; color: #2c3e50; margin-bottom: 5px; }
+.bc-qr { width: 110px; height: 110px; }
+.bc-brand { font-weight: 900; font-size: 1.1rem; color: #2c3e50; margin-top: 5px; }
+
+/* 2. EMERGENCY CARD STYLE */
+.emergency-card { background: #ecf0f1; border: 4px solid #c0392b; flex-direction: column; }
+.ec-header { background: #c0392b; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 50px; }
+.ec-header h2 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
+.ec-header span { font-size: 0.8rem; opacity: 0.8; }
+.ec-body { display: flex; padding: 20px; height: calc(100% - 50px); }
+.ec-main { flex: 2; display: flex; flex-direction: column; justify-content: space-around; padding-right: 10px; }
+.ec-side { flex: 0.8; display: flex; flex-direction: column; align-items: center; border-left: 1px dashed #bdc3c7; padding-left: 10px; }
+.ec-row { border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; margin-bottom: 5px; }
+.ec-row label { font-size: 0.65rem; color: #7f8c8d; display: block; }
+.ec-row strong { font-size: 1rem; color: #2c3e50; }
+.ec-grid { display: flex; gap: 15px; margin-bottom: 5px; }
+.ec-col label { font-size: 0.65rem; color: #7f8c8d; display: block; }
+.blood-type { color: #c0392b; font-size: 1.4rem; font-weight: 900; }
+.ec-alert-box { background: #fadbd8; padding: 8px; border-radius: 5px; border: 1px solid #f5b7b1; }
+.ec-alert-box label { font-size: 0.65rem; color: #c0392b; font-weight: bold; display: block; }
+.ec-avatar { width: 80px; height: 80px; border-radius: 4px; border: 1px solid #bdc3c7; object-fit: cover; margin-bottom: 10px; }
+.ec-qr-box img { width: 80px; height: 80px; opacity: 0.8; }
+
+/* RESPONSIVE FOR MOBILE */
 @media (max-width: 768px) { 
   .profile-layout { grid-template-columns: 1fr; } 
-  .tabs-strip { justify-content: flex-start; overflow-x: auto; } 
 }
-@media (max-width: 600px) { 
-  .business-card { flex-direction: column; } 
-  .card-left { padding: 2rem; text-align: center; align-items: center; } 
-  .card-bio { border-left: none; padding-left: 0; } 
-  .card-socials { align-items: center; } 
-  .card-right { padding: 2rem; border-left: none; border-top: 1px dashed #eee; } 
+@media (max-width: 650px) {
+  .standard-card { width: 340px; height: auto; flex-direction: column; }
+  .business-card { height: auto; }
+  .bc-left-panel { padding: 20px; }
+  .bc-right-panel { clip-path: none; margin-left: 0; padding: 20px; border-top: 5px solid #e67e22; }
+  .qr-container { margin-left: 0; }
+  .bc-socials-list { grid-template-columns: 1fr; }
+  .emergency-card { height: auto; }
+  .ec-body { flex-direction: column-reverse; gap: 15px; }
+  .ec-side { border-left: none; border-bottom: 1px dashed #bdc3c7; padding-bottom: 15px; margin-bottom: 10px; flex-direction: row; justify-content: space-around; }
   .close-btn { color: #888; top: 5px; right: 10px; } 
 }
 </style>

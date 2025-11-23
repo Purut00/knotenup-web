@@ -24,6 +24,31 @@
         </div>
       </div>
 
+      <div class="section">
+        <h3>🏥 Info Kecemasan (Private)</h3>
+        <div class="info-text">Maklumat ini hanya untuk Emergency Card anda.</div>
+        
+        <div class="form-group">
+          <label>Jenis Darah</label>
+          <select v-model="form.bloodType" class="custom-select">
+            <option value="">- Pilih -</option>
+            <option value="A+">A+</option><option value="A-">A-</option>
+            <option value="B+">B+</option><option value="B-">B-</option>
+            <option value="O+">O+</option><option value="O-">O-</option>
+            <option value="AB+">AB+</option><option value="AB-">AB-</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Alahan (Allergies)</label>
+          <input type="text" v-model="form.allergies" placeholder="Cth: Kacang, Seafood, Ubat Penicillin" />
+        </div>
+
+        <div class="form-group">
+          <label>No. Kecemasan (Waris/Kawan)</label>
+          <input type="text" v-model="form.emergencyContact" placeholder="Cth: 012-3456789 (Isteri)" />
+        </div>
+      </div>
       <div class="section" v-if="form.role === 'organizer'">
         <h3 style="color: #e67e22;">Maklumat Penganjur</h3>
         <div class="form-group">
@@ -104,10 +129,15 @@ const wantToDelete = ref(false);
 const showDeleteModal = ref(false);
 const confirmEmail = ref('');
 
+// 🔥 UPDATE SINI: Tambah field baru (bloodType, allergies, emergencyContact)
 const form = reactive({
   name: '', bio: '', avatar: '', role: 'user',
   whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '',
-  organizerDetails: { orgName: '', ssm: '', license: '' }
+  organizerDetails: { orgName: '', ssm: '', license: '' },
+  // Field Baru untuk Emergency Card
+  bloodType: '',
+  allergies: '',
+  emergencyContact: ''
 });
 
 onMounted(() => {
@@ -116,9 +146,14 @@ onMounted(() => {
       const docSnap = await getDoc(doc(db, "users", currentUser.uid));
       if (docSnap.exists()) {
         const data = docSnap.data();
+        // Assign data database ke form
         Object.assign(form, data);
-        // Pastikan object organizerDetails wujud
+        
+        // Pastikan object structure wujud kalau user lama
         if (!form.organizerDetails) form.organizerDetails = { orgName: '', ssm: '', license: '' };
+        if (!form.bloodType) form.bloodType = '';
+        if (!form.allergies) form.allergies = '';
+        if (!form.emergencyContact) form.emergencyContact = '';
       }
     } else { router.push('/'); }
   });
@@ -151,7 +186,7 @@ const handleSave = async () => {
       // Reset detail organizer jika perlu, atau biarkan sebagai sejarah
     }
 
-    // 3. Simpan Update Biasa
+    // 3. Simpan Update Biasa (Termasuk field emergency baru sebab guna 'form' object)
     await setDoc(doc(db, "users", auth.currentUser.uid), form, { merge: true });
     
     alert(wantToDowngrade.value ? "Akaun berjaya diturunkan ke User Biasa." : "Profil berjaya dikemaskini!");
@@ -195,6 +230,11 @@ const confirmDeleteAccount = async () => {
 h2 { margin-bottom: 1.5rem; color: #2c3e50; text-align: center; }
 .section { margin-bottom: 2rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
 .section h3 { margin-bottom: 1rem; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
+
+/* CSS untuk text info kecil */
+.info-text { font-size: 0.8rem; color: #888; margin-bottom: 10px; font-style: italic; }
+/* CSS untuk dropdown darah */
+.custom-select { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; background: white; }
 
 /* Avatar & Inputs (Sama macam dulu) */
 .avatar-wrapper { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 1rem; }
