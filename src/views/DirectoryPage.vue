@@ -21,26 +21,23 @@
     <div class="search-strip-container">
       <div class="container">
         <div class="search-row">
-          
-          <div class="state-dropdown">
-            <select v-model="selectedState">
+          <div class="search-input-wrapper">
+            
+            <select v-model="selectedState" class="search-select">
               <option value="">{{ t('directory.allStates') }}</option>
               <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
             </select>
-            <span class="arrow">▼</span>
-          </div>
-          
-          <div class="search-input-wrapper">
-             <input 
-               type="text" 
-               v-model="searchQuery"
-               :placeholder="t('common.search') + '...'" 
-             />
-          </div>
+            
+            <input 
+              type="text" 
+              v-model="searchQuery"
+              :placeholder="t('common.search') + '...'" 
+            />
 
-          <button class="btn-search-strip">
-            {{ t('common.search') }}
-          </button>
+            <button class="btn-search-strip">
+              {{ t('common.search') }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -188,7 +185,6 @@ const renewService = async (service: any) => {
 };
 
 onMounted(async () => {
-  // Cek User Role
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       const snap = await getDoc(doc(db, 'users', user.uid));
@@ -198,7 +194,6 @@ onMounted(async () => {
     }
   });
 
-  // Load Services
   try {
     const q = query(collection(db, 'services'), orderBy('createdAt', 'desc'));
     const snap = await getDocs(q);
@@ -226,26 +221,77 @@ onMounted(async () => {
 }
 .btn-create-service:hover { transform: translateY(-2px); background-color: #d35400; }
 
-/* 2. SEARCH STRIP */
+/* --- 2. SEARCH STRIP (DIKEMASKINI SAMA SEPERTI HOME) --- */
+/* Nota: Padding dan margin diselaraskan mengikut Home */
+
 .search-strip-container { 
-  background: white; padding: 1rem 0; border-bottom: 1px solid #eaeaea; 
-  margin-bottom: 1rem; position: sticky; top: 0; z-index: 999; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  background: white; 
+  padding: 0.8rem 0; 
+  border-bottom: 1px solid #eaeaea; 
+  margin-bottom: 1rem; 
+  position: sticky; 
+  top: 0; 
+  z-index: 99; 
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
 }
-.search-row { max-width: 900px; margin: 0 auto; display: flex; border: 2px solid #27ae60; border-radius: 4px; overflow: hidden; height: 45px; }
 
-.state-dropdown { position: relative; background: #f9f9f9; border-right: 1px solid #ddd; min-width: 160px; display: flex; align-items: center; }
-.state-dropdown select { width: 100%; height: 100%; border: none; background: transparent; padding: 0 2rem 0 1.5rem; appearance: none; cursor: pointer; font-weight: bold; color: #555; z-index: 2; }
-.state-dropdown .arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.7rem; color: #888; z-index: 1; pointer-events: none; }
+.search-row { 
+  display: flex; 
+  justify-content: center; 
+  padding: 0 1rem;
+}
 
-.search-input-wrapper { flex-grow: 1; }
-.search-input-wrapper input { width: 100%; height: 100%; border: none; padding: 0 1.5rem; outline: none; font-size: 0.95rem; }
+.search-input-wrapper { 
+  display: flex; 
+  width: 100%; 
+  max-width: 800px; 
+  border: 2px solid #27ae60; /* SAMA SEPERTI HOME */
+  border-radius: 4px; 
+  overflow: hidden; 
+  background: white;
+}
 
-.btn-search-strip { background: #27ae60; color: white; border: none; padding: 0 2rem; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+/* Dropdown Negeri (Disesuaikan agar muat dengan height input Home) */
+.search-select {
+  border: none;
+  border-right: 1px solid #eee;
+  padding: 0.5rem 1rem; /* Padding dikurangkan ke 0.5rem (asal 0.8rem) */
+  background: #fdfdfd;
+  color: #555;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+  max-width: 150px;
+  /* Appearance standard */
+  appearance: auto; 
+}
+
+/* Input Teks */
+.search-input-wrapper input { 
+  flex: 1; 
+  border: none; 
+  padding: 0.5rem 1rem; /* DIUBAH: 0.8rem -> 0.5rem (SAMA SEPERTI HOME) */
+  outline: none; 
+  font-size: 0.9rem; 
+}
+
+/* Button Search */
+.btn-search-strip { 
+  background: #27ae60; 
+  color: white; 
+  border: none; 
+  padding: 0 2rem; /* SAMA SEPERTI HOME */
+  cursor: pointer; 
+  font-size: 0.95rem; 
+  font-weight: bold; 
+  white-space: nowrap;
+}
 .btn-search-strip:hover { background: #219150; }
 
 
 /* 3. KATEGORI */
-.category-section { margin-bottom: 2rem; }
+.category-section { margin-bottom: 2rem; margin-top: 1rem;}
 .category-list { 
   display: flex; justify-content: flex-start; gap: 1.5rem; 
   overflow-x: auto; padding: 10px 5px; scrollbar-width: none; 
@@ -263,7 +309,7 @@ onMounted(async () => {
 .cat-label { font-size: 0.75rem; color: #555; text-align: center; line-height: 1.2; max-width: 90px; }
 
 
-/* 4. GRID & CARDS */
+/* 4. GRID & CARDS (KEKAL SAMA) */
 .service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem; }
 
 .service-card { background: white; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; position: relative; transition: transform 0.2s; }
@@ -302,10 +348,8 @@ onMounted(async () => {
 @media (max-width: 1024px) { .service-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 768px) { 
   .header-flex { flex-direction: column; text-align: center; gap: 1rem; } 
-  .search-row { flex-direction: column; height: auto; border-radius: 8px; }
-  .state-dropdown { border-right: none; border-bottom: 1px solid #eee; width: 100%; padding: 0.5rem; }
-  .search-input-wrapper input { padding: 0.8rem; }
-  .btn-search-strip { width: 100%; padding: 0.8rem; }
+  .search-select { display: none; } /* Hide dropdown on mobile if too small, or adjust width */
+  .btn-search-strip { padding: 0 1rem; }
   .service-grid { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); }
 }
 </style>

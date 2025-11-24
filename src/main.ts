@@ -7,14 +7,18 @@ import router from './router' // <-- Import router kita
 // Import fail-fail terjemahan kita
 import ms from './locales/ms.json'
 import en from './locales/en.json'
+import zhCN from './locales/zh-CN.json'
+
 
 // 1. Setup I18n (Dwi-bahasa)
 const i18n = createI18n({
-  locale: localStorage.getItem('locale') || 'ms', // Guna bahasa terakhir atau 'ms'
+  legacy: false,
+  locale: localStorage.getItem('locale') || 'en', // Guna bahasa terakhir atau 'ms'
   fallbackLocale: 'en',
   messages: {
     ms: ms,
-    en: en
+    en: en,
+    'zh-CN': zhCN
   }
 })
 

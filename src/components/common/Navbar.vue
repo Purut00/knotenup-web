@@ -34,7 +34,6 @@
           {{ t('navbar.requests') }}
         </router-link>
 
-
         <div v-if="currentUser" class="user-actions">
           <button @click="handleLogout" class="button-logout">
             Logout
@@ -45,6 +44,14 @@
           {{ t('navbar.login') }}
         </button>
 
+        <div class="lang-wrapper">
+          <select v-model="currentLang" @change="switchLanguage" class="lang-select">
+            <option value="en">🇬🇧 EN</option>
+            <option value="ms">🇲🇾 MY</option>
+            <option value="zh-CN">🇨🇳 CN</option>
+          </select>
+        </div>
+        
       </div>
     </div>
 
@@ -53,52 +60,65 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import LoginModal from './LoginModal.vue';
 import { auth, db } from '../../firebaseConfig';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-// UBAH SINI: Guna 'onSnapshot' ganti 'getDoc'
 import { doc, onSnapshot } from 'firebase/firestore'; 
 
-const { t } = useI18n();
+const { t, locale } = useI18n(); 
 const router = useRouter();
 const showLogin = ref(false);
 const currentUser = ref<User | null>(null);
 const userRole = ref('user');
-// UBAH SINI: Variable baru untuk nama
 const displayName = ref('Profile');
 
-// UBAH SINI: Helper Function
-// Kita tambah ': string' untuk paksa function ni pulangkan string
+// Variable khas untuk handle dropdown supaya lebih stabil
+const currentLang = ref(locale.value);
+
 const getFirstName = (name: string | null | undefined): string => {
   if (!name) return 'Profile';
-  // Tambah "|| 'Profile'" di hujung sebagai backup jika split gagal
   return name.split(' ')[0] || 'Profile'; 
 };
+
+// 🔥 FUNGSI TUKAR BAHASA (FIXED) 🔥
+const switchLanguage = () => {
+  // 1. Update i18n locale
+  locale.value = currentLang.value;
+  // 2. Simpan dalam localStorage
+  localStorage.setItem('user_lang', currentLang.value);
+  // 3. (Optional) Log untuk check jika ada error
+  console.log("Bahasa ditukar ke:", currentLang.value);
+};
+
+// 🔥 MONITOR PERUBAHAN 🔥
+// Kalau locale berubah dari tempat lain (contoh: Profile page), dropdown navbar pun ikut berubah
+watch(locale, (newVal) => {
+  currentLang.value = newVal;
+});
+
 onMounted(() => {
+  // Load bahasa dari memory
+  const savedLang = localStorage.getItem('user_lang');
+  if (savedLang) {
+    locale.value = savedLang;
+    currentLang.value = savedLang;
+  }
+
+  // Auth Logic
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser.value = user;
-      
-      // 🔥 LOGIC BARU: Real-time Listener (CCTV) 🔥
       onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          
-          // 1. Update Role
           userRole.value = data.role || 'user'; 
-          
-          // 2. Update Nama (Real-time)
-          // Check field 'name' atau 'fullName' dalam DB
           const dbName = data.name || data.fullName; 
-          
-          // Set nama guna helper
           displayName.value = getFirstName(dbName || user.displayName);
         }
       });
-
     } else {
       currentUser.value = null;
       userRole.value = 'user';
@@ -119,7 +139,7 @@ const handleLogout = async () => {
   background-color: var(--bg-card);
   border-bottom: 1px solid var(--border-color);
   padding: 0 2rem;
-  box-sizing: border-box; /* Penting untuk padding */
+  box-sizing: border-box; 
 }
 
 .navbar-container {
@@ -128,7 +148,7 @@ const handleLogout = async () => {
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-  height: 70px; /* Ketinggian Navbar */
+  height: 70px; 
 }
 
 .navbar-brand .logo {
@@ -149,7 +169,7 @@ const handleLogout = async () => {
 }
 
 .navbar-item:hover, .navbar-item.router-link-active {
-  color: #007bff; /* Warna untuk link aktif */
+  color: #007bff; 
   border-bottom: 2px solid #007bff;
 }
 
@@ -176,44 +196,20 @@ const handleLogout = async () => {
 .logo-text {
   font-size: 1.3rem;       
   font-weight: 600;        
-  color:#155724;           /* Merah/Oren Shopee */
-  letter-spacing: -1px;    /* Huruf rapat sikit macam logo */
-  text-decoration: none;   /* Buang garis bawah */
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Font kemas */
+  color:#155724;           
+  letter-spacing: -1px;    
+  text-decoration: none;   
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
 }
 
-/* Optional: Kalau nak tambah kesan hover */
 .navbar-brand a:hover .logo-text {
   opacity: 0.9;
-
-}
-.btn-create {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background-color: #e67e22; /* Warna Oren */
-  color: white;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  font-weight: bold;
-  font-size: 0.9rem;
-  transition: background 0.2s;
-}
-
-.btn-create:hover {
-  background-color: #d35400;
-}
-
-.plus-icon {
-  font-size: 1.2rem;
-  line-height: 1;
 }
 
 .button-logout {
   padding: 0.5rem 1rem;
   background-color: transparent;
-  color: #e74c3c; /* Merah */
+  color: #e74c3c; 
   border: 1px solid #e74c3c;
   border-radius: 5px;
   cursor: pointer;
@@ -227,6 +223,36 @@ const handleLogout = async () => {
   color: white;
 }
 
+/* 🔥 STYLE DROPDOWN BAHASA 🔥 */
+.lang-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lang-select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.lang-select:hover {
+  border-color: #007bff;
+  background-color: #fff;
+}
+
+.lang-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.1);
+}
+
 /* --- RESPONSIVE NAVBAR --- */
 @media (max-width: 768px) {
   .navbar-container {
@@ -236,20 +262,19 @@ const handleLogout = async () => {
     gap: 1rem;
   }
 
-  /* Menu Tengah: Scroll Tepi (Macam Instagram Story) */
   .navbar-menu {
     width: 100%;
     overflow-x: auto;
     white-space: nowrap;
     padding-bottom: 5px;
-    justify-content: flex-start; /* Mula dari kiri */
-    padding-left: 1rem; /* Jarak sikit */
+    justify-content: flex-start; 
+    padding-left: 1rem; 
   }
 
   .navbar-right {
     width: 100%;
-    justify-content: center; /* Centerkan butang login/create */
-    flex-wrap: wrap; /* Kalau tak muat, turun bawah */
+    justify-content: center; 
+    flex-wrap: wrap; 
   }
 }
 </style>
