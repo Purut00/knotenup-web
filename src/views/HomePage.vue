@@ -118,9 +118,13 @@ import { db } from '../firebaseConfig';
 import { collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 
 // 🔥 IMPORT SWIPER 🔥
+// IMPORT SWIPER
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay, Pagination } from 'swiper/modules';
+
+// @ts-ignore
 import 'swiper/css';
+// @ts-ignore
 import 'swiper/css/pagination';
 
 const { t } = useI18n();
