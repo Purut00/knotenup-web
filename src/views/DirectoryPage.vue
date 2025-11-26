@@ -18,15 +18,18 @@
       </div>
     </div>
 
-    <div class="search-strip-container">
+    <div class="sticky-search-navbar">
       <div class="container">
         <div class="search-row">
           <div class="search-input-wrapper">
             
-            <select v-model="selectedState" class="search-select">
-              <option value="">{{ t('directory.allStates') }}</option>
-              <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
-            </select>
+            <div class="dropdown-wrapper">
+               <select v-model="selectedState" class="search-select">
+                  <option value="">{{ t('directory.allStates') }}</option>
+                  <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
+               </select>
+               <span class="down-arrow">▼</span>
+            </div>
             
             <input 
               type="text" 
@@ -34,8 +37,8 @@
               :placeholder="t('common.search') + '...'" 
             />
 
-            <button class="btn-search-strip">
-              {{ t('common.search') }}
+            <button class="btn-search-nav">
+              🔍 <span class="btn-text">{{ t('common.search') }}</span>
             </button>
           </div>
         </div>
@@ -45,12 +48,10 @@
     <div class="container">
       <section class="category-section">
         <div class="category-list">
-          
           <div class="cat-item" @click="selectedCat = 'Semua'">
             <div class="cat-circle" :class="{ active: selectedCat === 'Semua' }">🌐</div>
             <span class="cat-label">{{ t('directory.catAll') }}</span>
           </div>
-
           <div 
             class="cat-item" 
             v-for="cat in categoryIcons" 
@@ -67,7 +68,14 @@
         <div v-if="loading" class="loading-box">⏳ {{ t('common.loading') }}</div>
         
         <div v-else class="service-grid">
-          <div v-for="service in filteredServices" :key="service.id" class="service-card" :class="{ 'expired-card': isExpired(service) }">
+          
+          <div 
+            v-for="service in filteredServices" 
+            :key="service.id" 
+            class="service-card" 
+            :class="{ 'expired-card': isExpired(service) }"
+            @click="$router.push(`/service/${service.id}`)"
+          >
             
             <div v-if="isExpired(service)" class="expired-overlay">⚠️ {{ t('directory.expired') }}</div>
 
@@ -87,25 +95,28 @@
               </div>
 
               <p class="loc">📍 {{ service.location }}</p>
-              <p class="price">{{ service.priceRange }}</p>
-              <p class="desc">{{ service.description }}</p>
               
-              <p v-if="auth.currentUser && auth.currentUser.uid === service.ownerId" class="expiry-date">
-                Luput: {{ formatDate(service.expiryDate) }}
+              <p class="price" v-if="service.details && service.details.priceDisplay">
+                {{ service.details.priceDisplay }}
+              </p>
+              <p class="price" v-else-if="service.details && service.details.price">
+                RM {{ service.details.price }} {{ service.details.priceType ? '/' + service.details.priceType : '' }}
               </p>
 
+              <p class="desc">{{ service.description }}</p>
+              
               <div class="owner-row" @click.stop="goToProfile(service.ownerId)">
                 <img :src="service.ownerAvatar || 'https://i.pravatar.cc/150'" />
                 <span class="owner-name">{{ service.ownerName }}</span>
-                <span class="view-profile-text">({{ t('common.view') }})</span>
               </div>
 
-              <a :href="`https://wa.me/${service.whatsapp}`" target="_blank" class="btn-contact" v-if="!isExpired(service)">
+              <a :href="`https://wa.me/60${service.whatsapp}`" target="_blank" class="btn-contact" v-if="!isExpired(service)" @click.stop>
                 📞 {{ t('directory.contactBtn') }}
               </a>
               <button v-else class="btn-contact disabled" disabled>{{ t('directory.inactive') }}</button>
             </div>
           </div>
+
         </div>
         
         <div v-if="!loading && filteredServices.length === 0" class="empty-box">
@@ -135,11 +146,12 @@ const searchQuery = ref('');
 const userRole = ref('user'); 
 
 const categoryIcons = [
-  { name: 'Campsite (Tapak Khemah)', emoji: '⛺' },
-  { name: 'Guide / Malim Gunung', emoji: '🧗' },
-  { name: 'Boathouse / Pengangkutan', emoji: '🚤' },
-  { name: 'Equipment Rental (Sewaan)', emoji: '🎒' },
-  { name: 'Chalet / Homestay', emoji: '🏡' }
+  { name: 'Campsite', emoji: '⛺' },
+  { name: 'Guide', emoji: '🧗' },
+  { name: 'Transport', emoji: '🚙' },
+  { name: 'Rental', emoji: '🎒' },
+  { name: 'Chalet', emoji: '🏡' },
+  { name: 'Event', emoji: '🚩' }
 ];
 
 const isExpired = (service: any) => {
@@ -148,14 +160,11 @@ const isExpired = (service: any) => {
   return now > service.expiryDate.toDate();
 };
 
-const formatDate = (timestamp: any) => {
-  if(!timestamp) return '-';
-  return timestamp.toDate().toLocaleDateString('en-MY');
-};
-
 const filteredServices = computed(() => {
   return services.value.filter(s => {
-    const matchCat = selectedCat.value === 'Semua' || s.category === selectedCat.value;
+    // Kategori Logic: Check 'Semua' atau match tepat ATAU support nama lama
+    const matchCat = selectedCat.value === 'Semua' || s.category === selectedCat.value || s.category.includes(selectedCat.value);
+    
     const matchState = selectedState.value === '' || s.state === selectedState.value;
     const matchSearch = !searchQuery.value || s.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || s.location.toLowerCase().includes(searchQuery.value.toLowerCase());
 
@@ -208,148 +217,97 @@ onMounted(async () => {
 .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
 
 /* 1. TOP HEADER */
-.top-header-strip { background: white; padding: 1.5rem 0 0.5rem 0; }
-.header-flex { display: flex; justify-content: space-between; align-items: center; }
-.title-area h1 { margin: 0; font-size: 1.8rem; color: #2c3e50; font-weight: 800; }
-.title-area p { margin: 5px 0 0; color: #777; font-size: 0.9rem; }
-
-.btn-create-service { 
-  background-color: #e67e22; color: white; border: none; 
-  padding: 0.7rem 1.5rem; border-radius: 4px; 
-  font-weight: bold; cursor: pointer; transition: transform 0.2s;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+.top-header-strip { background: #f5f5f5; padding: 2rem 0 1rem 0; }
+.header-flex { display: flex; justify-content: space-between; align-items: flex-end; }
+.title-area h1 { margin: 0; font-size: 2rem; color: #2c3e50; font-weight: 900; letter-spacing: -1px; }
+.title-area p { margin: 5px 0 0; color: #666; font-size: 1rem; }
+.btn-create-service { background-color: #e67e22; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 50px; font-weight: bold; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3); }
 .btn-create-service:hover { transform: translateY(-2px); background-color: #d35400; }
 
-/* --- 2. SEARCH STRIP (DIKEMASKINI SAMA SEPERTI HOME) --- */
-/* Nota: Padding dan margin diselaraskan mengikut Home */
-
-.search-strip-container { 
-  background: white; 
-  padding: 0.8rem 0; 
+/* --- 2. STICKY SEARCH NAVBAR --- */
+.sticky-search-navbar { 
+  background: rgba(255, 255, 255, 0.95); 
+  backdrop-filter: blur(10px);
+  padding: 1rem 0; 
   border-bottom: 1px solid #eaeaea; 
-  margin-bottom: 1rem; 
+  margin-bottom: 1.5rem; 
   position: sticky; 
   top: 0; 
   z-index: 99; 
-  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
-.search-row { 
-  display: flex; 
-  justify-content: center; 
-  padding: 0 1rem;
-}
+.search-row { display: flex; justify-content: center; padding: 0 1rem; }
 
 .search-input-wrapper { 
-  display: flex; 
-  width: 100%; 
-  max-width: 800px; 
-  border: 2px solid #27ae60; /* SAMA SEPERTI HOME */
-  border-radius: 4px; 
-  overflow: hidden; 
-  background: white;
+  display: flex; width: 100%; max-width: 800px; border: 2px solid #27ae60; 
+  border-radius: 50px; overflow: hidden; background: white; height: 50px; align-items: center;
 }
 
-/* Dropdown Negeri (Disesuaikan agar muat dengan height input Home) */
-.search-select {
-  border: none;
-  border-right: 1px solid #eee;
-  padding: 0.5rem 1rem; /* Padding dikurangkan ke 0.5rem (asal 0.8rem) */
-  background: #fdfdfd;
-  color: #555;
-  font-weight: bold;
-  font-size: 0.9rem;
-  cursor: pointer;
-  outline: none;
-  max-width: 150px;
-  /* Appearance standard */
-  appearance: auto; 
-}
+.dropdown-wrapper { position: relative; border-right: 1px solid #eee; height: 100%; display: flex; align-items: center; background: #fdfdfd; }
+.search-select { border: none; background: transparent; padding: 0 2rem 0 1.5rem; font-weight: bold; font-size: 0.9rem; color: #555; cursor: pointer; outline: none; appearance: none; height: 100%; z-index: 2; }
+.down-arrow { position: absolute; right: 10px; font-size: 0.7rem; color: #888; pointer-events: none; z-index: 1; }
 
-/* Input Teks */
-.search-input-wrapper input { 
-  flex: 1; 
-  border: none; 
-  padding: 0.5rem 1rem; /* DIUBAH: 0.8rem -> 0.5rem (SAMA SEPERTI HOME) */
-  outline: none; 
-  font-size: 0.9rem; 
-}
+.search-input-wrapper input { flex: 1; border: none; padding: 0 1.5rem; outline: none; font-size: 1rem; height: 100%; }
 
-/* Button Search */
-.btn-search-strip { 
-  background: #27ae60; 
-  color: white; 
-  border: none; 
-  padding: 0 2rem; /* SAMA SEPERTI HOME */
-  cursor: pointer; 
-  font-size: 0.95rem; 
-  font-weight: bold; 
-  white-space: nowrap;
+.btn-search-nav { 
+  background: #27ae60; color: white; border: none; padding: 0 2rem; height: 100%; 
+  cursor: pointer; font-size: 1rem; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: background 0.2s;
 }
-.btn-search-strip:hover { background: #219150; }
-
+.btn-search-nav:hover { background: #219150; }
 
 /* 3. KATEGORI */
-.category-section { margin-bottom: 2rem; margin-top: 1rem;}
-.category-list { 
-  display: flex; justify-content: flex-start; gap: 1.5rem; 
-  overflow-x: auto; padding: 10px 5px; scrollbar-width: none; 
-}
+.category-section { margin-bottom: 2rem; }
+.category-list { display: flex; justify-content: flex-start; gap: 1.5rem; overflow-x: auto; padding: 10px 5px; scrollbar-width: none; }
 .category-list::-webkit-scrollbar { display: none; }
-
 .cat-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 80px; transition: transform 0.1s; }
 .cat-item:hover { transform: translateY(-3px); }
-.cat-circle { 
-  width: 50px; height: 50px; border: 1px solid #eee; border-radius: 12px; 
-  display: flex; align-items: center; justify-content: center; 
-  font-size: 1.5rem; margin-bottom: 8px; background: #fff; transition: all 0.2s; 
-}
+.cat-circle { width: 50px; height: 50px; border: 1px solid #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 8px; background: #fff; transition: all 0.2s; }
 .cat-circle.active { border-color: #27ae60; background: #e8f5e9; }
-.cat-label { font-size: 0.75rem; color: #555; text-align: center; line-height: 1.2; max-width: 90px; }
+.cat-label { font-size: 0.75rem; color: #555; text-align: center; }
 
+/* 4. GRID & CARDS */
+.service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; }
 
-/* 4. GRID & CARDS (KEKAL SAMA) */
-.service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem; }
-
-.service-card { background: white; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; position: relative; transition: transform 0.2s; }
-.service-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+/* 🔥 CARD STYLE UPDATED: Cursor Pointer 🔥 */
+.service-card { 
+  background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+  border: 1px solid #f0f0f0; display: flex; flex-direction: column; position: relative; 
+  transition: transform 0.2s; cursor: pointer; /* Menunjukkan boleh klik */
+}
+.service-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 .service-card.expired-card { opacity: 0.7; filter: grayscale(100%); }
 
 .expired-overlay { position: absolute; top: 0; left: 0; width: 100%; background: #e74c3c; color: white; text-align: center; font-size: 0.7rem; padding: 3px; z-index: 10; font-weight: bold; }
-.card-img { height: 160px; background-size: cover; background-position: center; position: relative; }
-.cat-badge { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; }
-.state-badge { position: absolute; bottom: 8px; right: 8px; background: #27ae60; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
+.card-img { height: 180px; background-size: cover; background-position: center; position: relative; }
+.cat-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; }
+.state-badge { position: absolute; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-.card-body { padding: 1rem; flex-grow: 1; display: flex; flex-direction: column; }
-.title-row { display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px; }
-.title-row h3 { margin: 0; font-size: 1rem; color: #2c3e50; font-weight: 700; line-height: 1.3; flex: 1; }
-.owner-actions { display: flex; gap: 5px; }
-.btn-delete { background: #fee; border: 1px solid #e74c3c; cursor: pointer; border-radius: 2px; padding: 2px 5px; font-size: 0.8rem; }
-.btn-renew { background: #e8f5e9; border: 1px solid #27ae60; cursor: pointer; border-radius: 2px; padding: 2px 5px; font-size: 0.8rem; }
+.card-body { padding: 1.2rem; flex-grow: 1; display: flex; flex-direction: column; }
+.title-row { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; }
+.title-row h3 { margin: 0; font-size: 1.1rem; color: #2c3e50; font-weight: 700; line-height: 1.3; flex: 1; }
+.owner-actions { display: flex; gap: 5px; z-index: 2; /* Supaya button delete boleh tekan */ }
+.btn-delete, .btn-renew { border: 1px solid #ddd; cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 0.9rem; background: #fff; z-index: 5; }
 
-.loc { font-size: 0.85rem; color: #777; margin-bottom: 5px; }
-.price { font-size: 1rem; color: #e67e22; font-weight: bold; margin-bottom: 8px; }
-.desc { font-size: 0.85rem; color: #555; line-height: 1.4; flex-grow: 1; margin-bottom: 1rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
-.expiry-date { font-size: 0.7rem; color: #e74c3c; font-weight: bold; margin-bottom: 8px; text-align: right; }
+.loc { font-size: 0.9rem; color: #777; margin-bottom: 5px; }
+.price { font-size: 1.1rem; color: #e67e22; font-weight: 800; margin-bottom: 10px; }
+.desc { font-size: 0.9rem; color: #666; line-height: 1.5; flex-grow: 1; margin-bottom: 1.2rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
 
-.owner-row { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 10px; border-top: 1px dashed #eee; cursor: pointer; }
-.owner-row:hover { background-color: #f9f9f9; border-radius: 4px; }
-.owner-row img { width: 24px; height: 24px; border-radius: 50%; }
-.owner-name { font-size: 0.8rem; color: #333; font-weight: 600; }
-.view-profile-text { font-size: 0.65rem; color: #3498db; margin-left: auto; }
+.owner-row { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 12px; border-top: 1px solid #f5f5f5; cursor: pointer; z-index: 2; }
+.owner-row img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+.owner-name { font-size: 0.85rem; color: #333; font-weight: 600; }
 
-.btn-contact { margin-top: 12px; display: block; text-align: center; background: #25D366; color: white; padding: 8px; border-radius: 4px; text-decoration: none; font-size: 0.9rem; font-weight: bold; transition: background 0.2s; }
+.btn-contact { margin-top: 15px; display: block; text-align: center; background: #25D366; color: white; padding: 10px; border-radius: 8px; text-decoration: none; font-size: 0.95rem; font-weight: bold; transition: background 0.2s; position: relative; z-index: 5; }
 .btn-contact:hover { background: #1ebc57; }
 .btn-contact.disabled { background: #ccc; cursor: not-allowed; }
 
 .loading-box, .empty-box { text-align: center; padding: 3rem; color: #999; font-style: italic; }
 
-@media (max-width: 1024px) { .service-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 768px) { 
   .header-flex { flex-direction: column; text-align: center; gap: 1rem; } 
-  .search-select { display: none; } /* Hide dropdown on mobile if too small, or adjust width */
-  .btn-search-strip { padding: 0 1rem; }
+  .dropdown-wrapper { display: none; } 
+  .btn-text { display: none; } 
+  .btn-search-nav { padding: 0 1.5rem; }
   .service-grid { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); }
 }
 </style>

@@ -17,6 +17,7 @@ import OrganizerRegistrationPage from '../views/OrganizerRegistrationPage.vue';
 import SpotsPage from '../views/SpotsPage.vue';
 import SpotDetailPage from '../views/SpotDetailPage.vue';
 import CreateSpotPage from '../views/CreateSpotPage.vue';
+import ServiceDetailPage from '../views/ServiceDetailPage.vue';
 
 const routes = [
   {
@@ -115,6 +116,11 @@ const routes = [
   { path: '/create-spot', 
     name: 'create-spot', 
     component: CreateSpotPage 
+  },
+  {
+  path: '/service/:id',
+  name: 'service-detail',
+  component: ServiceDetailPage
   },
 ]
 

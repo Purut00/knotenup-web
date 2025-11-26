@@ -21,7 +21,8 @@
     "selectState": "Pilih Negeri",
     "submit": "Hantar",
     "uploading": "Memuat naik ...",
-    "view": "Lihat"
+    "view": "Lihat",
+    "add": "Tambah"
   },
   "components": {
     "allLevels": "Semua peringkat",
@@ -56,7 +57,29 @@
     "submitBtn": "Menerbitkan iklan",
     "title": "Mengiklankan perkhidmatan / tempat",
     "uploadText": "📸 Klik untuk memuat naik gambar promo",
-    "waLabel": "WhatsApp No. (tiada sengkang)"
+    "waLabel": "WhatsApp No. (tiada sengkang)",
+    "errorBasic": "Sila lengkapkan maklumat asas.",
+    "errorImage": "Sila muat naik sekurang -kurangnya 1 gambar.",
+    "facilitiesLabel": "Kemudahan",
+    "galleryLabel": "Galeri",
+    "heroSub": "Bantu komuniti menemui perkhidmatan terbaik untuk aktiviti luar mereka.",
+    "heroTitle": "Mengiklankan perkhidmatan anda.",
+    "perDay": "Sehari",
+    "perGroup": "Setiap kumpulan",
+    "perPax": "Setiap pax",
+    "priceType": "Jenis caj",
+    "rateLabel": "Kadar (rm)",
+    "rentalPlaceholder": "Misalnya: khemah 4 lelaki: rm30/malam",
+    "section1Sub": "Apakah jenis perkhidmatan yang anda tawarkan?",
+    "section1Title": "Mulakan di sini",
+    "section2Sub": "Isi butiran khusus untuk {kategori}.",
+    "section2Title": "Butiran Perkhidmatan",
+    "section3Sub": "Muat naik gambar yang menarik (maksimum 10)",
+    "section3Title": "Galeri",
+    "step1": "Kategori",
+    "step2": "Butiran Perkhidmatan",
+    "step3": "Galeri",
+    "successMsg": "Perkhidmatan berjaya diiklankan!"
   },
   "createTrip": {
     "basicInfo": "Maklumat asas",
@@ -131,7 +154,13 @@
     "renewTooltip": "Perbaharui selama 3 bulan",
     "statePlaceholder": "Pilih Negeri",
     "sub": "Cari tapak perkhemahan, panduan gunung, dan sewa peralatan.",
-    "title": "Direktori"
+    "title": "Direktori",
+    "catCampsite": "Perkhemahan",
+    "catChalet": "Chalet / Homestay",
+    "catEvent": "Bangunan Acara / Pasukan",
+    "catGuide": "Panduan",
+    "catRental": "Sewa peralatan",
+    "catTransport": "Pengangkutan / 4x4"
   },
   "footer": {
     "contact": "Ikuti kami",
@@ -242,5 +271,30 @@
     "taken": "diambil",
     "viewPhotos": "Lihat semua gambar",
     "viewProfile": "Lihat profil"
+  },
+  "service": {
+    "accommodationInfo": "Butiran Penginapan",
+    "backToDirectory": "Kembali ke direktori",
+    "cert": "Cert / kepakaran",
+    "checkIn": "Daftar masuk",
+    "checkOut": "Daftar keluar",
+    "contactForPrice": "Hubungi harga",
+    "coverage": "Kawasan liputan",
+    "editAd": "Edit iklan",
+    "facilities": "Kemudahan",
+    "guideInfo": "Butiran panduan",
+    "hostedBy": "Disediakan oleh",
+    "info": "Maklumat Perkhidmatan",
+    "maxPax": "Kapasiti maksimum",
+    "notFound": "Perkhidmatan tidak dijumpai.",
+    "pax": "Pax",
+    "pickup": "Lokasi pikap",
+    "ratio": "Nisbah (panduan: pax)",
+    "rentalList": "Senarai Sewa",
+    "startingPrice": "Bermula dari",
+    "transportInfo": "Perincian pengangkutan",
+    "vehicleType": "Jenis Kenderaan",
+    "whatsappAction": "WhatsApp sekarang",
+    "whatsappNote": "Klik untuk berurusan secara langsung dengan pemilik."
   }
 }
