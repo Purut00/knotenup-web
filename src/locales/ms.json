@@ -27,10 +27,10 @@
     "allLevels": "Semua peringkat",
     "anyDate": "Bila -bila masa",
     "comments": "Komen",
-    "easy": "🟢 sejuk (mudah)",
-    "hard": "🔴 tegar",
+    "easy": "Santai",
+    "hard": "Susah",
     "join": "Menyertai",
-    "moderate": "🟡 Sederhana",
+    "moderate": "Sederhana",
     "nextMonth": "Bulan depan",
     "postedBy": "Dihantar oleh",
     "reset": "Tetapkan semula",
@@ -104,7 +104,20 @@
     "tipsPlaceholder": "Mis.: Bawa powerbank, kasut yang sesuai ...",
     "title": "Buat perjalanan baru",
     "tripTitle": "Tajuk perjalanan",
-    "uploadImages": "Memuat naik gambar"
+    "uploadImages": "Memuat naik gambar",
+    "coverPhoto": "Foto penutup",
+    "dateError": "Tarikh tidak sah",
+    "galleryLabel": "Galeri Perjalanan (Max 5)",
+    "groupLinkHint": "Pautan ini hanya dapat dilihat oleh peserta.",
+    "heroSub": "Setiap perjalanan bermula dengan satu langkah (dan bentuk).",
+    "heroTitle": "Buat pengalaman baru.",
+    "mobileStep": "Langkah {langkah} / 3",
+    "section1Sub": "Ke mana kita akan pergi kali ini?",
+    "section1Title": "Mulakan dengan asas -asas",
+    "section2Sub": "Bilakah dan berapa?",
+    "section2Title": "Tetapan logistik",
+    "section3Sub": "Menarik peserta dengan gambar yang menakjubkan.",
+    "section3Title": "Galeri"
   },
   "directory": {
     "advertiseBtn": "📢 Iklankan perkhidmatan anda",
@@ -161,14 +174,14 @@
     "viewAllTrips": "Lihat semua perjalanan"
   },
   "levels": {
-    "easy": "Bersantai (Mudah)",
-    "hard": "Tegar (keras)",
+    "easy": "Santai",
+    "hard": "Susah",
     "moderate": "Sederhana"
   },
   "navbar": {
     "createTrip": "Buat perjalanan",
     "forum": "Forum",
-    "home": "Rumah",
+    "home": "Laman utama",
     "login": "Log masuk",
     "profile": "Profil",
     "requests": "Perjalanan Permintaan",
@@ -214,6 +227,20 @@
     "headerTitle": "Terokai perjalanan rekreasi",
     "open": "Buka",
     "perPax": "/pax",
-    "slotsLeft": "{Count} slot kiri!"
+    "slotsLeft": "{Count} slot kiri!",
+    "about": "Mengenai perjalanan ini",
+    "backList": "Kembali ke senarai",
+    "empty": "slot kiri",
+    "end": "Akhir",
+    "joinChat": "Sertailah kumpulan WhatsApp",
+    "noLink": "Pautan tidak siap",
+    "notFound": "Perjalanan tidak dijumpai",
+    "organizedBy": "Dianjurkan oleh",
+    "paymentNote": "Klik butang di atas untuk menyertai kumpulan WhatsApp. \nPembayaran dikendalikan secara langsung dengan penganjur.",
+    "schedule": "Jadual perjalanan",
+    "start": "Mula",
+    "taken": "diambil",
+    "viewPhotos": "Lihat semua gambar",
+    "viewProfile": "Lihat profil"
   }
 }
