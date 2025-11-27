@@ -20,10 +20,13 @@
   "navbar": {
     "home": "Home",
     "trips": "Trips",
-    "requests": "Request Trip",
+    "requests": "Trip Requests",
     "forum": "Forum",
+    "services": "Services",
+    "spots": "Spots",
     "profile": "Profile",
     "login": "Login",
+    "logout": "Logout",
     "createTrip": "Create Trip"
   },
   "home": {

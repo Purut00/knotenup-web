@@ -11,7 +11,7 @@ import TripDetailPage from '../views/TripDetailPage.vue';
 import ForumDetailPage from '../views/ForumDetailPage.vue';
 import AdminPage from '../views/AdminPage.vue';
 import SearchResultsPage from '../views/SearchResultsPage.vue';
-import DirectoryPage from '../views/DirectoryPage.vue';
+import ServicePage from '../views/ServicePage.vue';
 import CreateServicePage from '../views/CreateServicePage.vue';
 import OrganizerRegistrationPage from '../views/OrganizerRegistrationPage.vue';
 import SpotsPage from '../views/SpotsPage.vue';
@@ -87,9 +87,9 @@ const routes = [
   name: 'search',
   component: SearchResultsPage
   },
-  { path: '/directory', 
-  name: 'directory', 
-  component: DirectoryPage 
+  { path: '/service', 
+  name: 'service', 
+  component: ServicePage 
   },
   { path: '/create-service', 
   name: 'create-service', 

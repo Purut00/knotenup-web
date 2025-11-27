@@ -11,8 +11,10 @@
         <router-link to="/" class="navbar-item">{{ t('navbar.home') }}</router-link>
         <router-link to="/trips" class="navbar-item">{{ t('navbar.trips') }}</router-link>
         <router-link to="/forum" class="navbar-item">{{ t('navbar.forum') }}</router-link>
-        <router-link to="/directory" class="navbar-item">Direktori</router-link>
-        <router-link to="/spots" class="navbar-item">Lokasi</router-link>
+        
+        <router-link to="/service" class="navbar-item">{{ t('navbar.services') }}</router-link>
+        
+        <router-link to="/spots" class="navbar-item">{{ t('navbar.spots') }}</router-link>
         
         <router-link v-if="currentUser" to="/profile" class="navbar-item user-name-link">
              {{ displayName }}
@@ -36,7 +38,7 @@
 
         <div v-if="currentUser" class="user-actions">
           <button @click="handleLogout" class="button-logout">
-            Logout
+            {{ t('navbar.logout') }}
           </button>
         </div>
 
