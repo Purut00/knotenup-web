@@ -164,7 +164,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
@@ -184,7 +184,6 @@ import 'swiper/css/navigation';
 
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 const trip = ref<any>(null);
 const loading = ref(true);
 
