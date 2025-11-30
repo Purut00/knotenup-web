@@ -22,9 +22,7 @@
           <div class="info-box">
             <div class="header-row">
                <h3>{{ t('spotDetail.locationInfo') }}</h3>
-               
                <button class="btn-flag" @click="reportSpot" title="Report this spot">🚩</button>
-
                <div class="avg-rating" v-if="reviews.length > 0">
                   ⭐ {{ averageRating }} <small>({{ reviews.length }})</small>
                </div>
@@ -94,7 +92,7 @@
                         <span class="vote-count" :class="{ positive: (review.votes||0)>0 }">{{ review.votes || 0 }}</span>
                         <button class="vote-btn down" @click="voteReview(review, -1)">▼</button>
                      </div>
-                     <button v-if="auth.currentUser && auth.currentUser.uid === review.userId" @click="deleteReview(review.id)" class="btn-delete-review">🗑️ Padam</button>
+                     <button v-if="(auth.currentUser && auth.currentUser.uid === review.userId) || isAdmin" @click="deleteReview(review.id)" class="btn-delete-review">🗑️ Padam</button>
                   </div>
                </div>
                <p v-if="reviews.length === 0" class="no-reviews">Belum ada ulasan.</p>
@@ -109,7 +107,14 @@
              <div v-for="sugg in suggestions" :key="sugg.id" class="suggestion-card">
                 <p class="sugg-author">Oleh: {{ sugg.suggestedBy }}</p>
                 <div class="progress-bar"><div class="progress-fill" :style="{ width: (sugg.votes / 5) * 100 + '%' }"></div></div>
-                <div class="sugg-actions"><span>{{ sugg.votes }}/5 Pengesahan</span><button @click="verifySuggestion(sugg)" class="btn-verify">✅ Verify</button></div>
+                <div class="sugg-actions">
+                   <span>{{ sugg.votes }}/5 Pengesahan</span>
+                   <button @click="verifySuggestion(sugg)" class="btn-verify">✅ Verify</button>
+                </div>
+                <div v-if="isAdmin" class="admin-bypass-actions">
+                   <button class="btn-approve-admin" @click="adminApprove(sugg)">⚡ Admin Approve</button>
+                   <button class="btn-reject-admin" @click="adminReject(sugg)">✖ Reject</button>
+                </div>
              </div>
           </div>
 
@@ -130,13 +135,21 @@
             <a :href="spot.gpxUrl" download class="btn-gpx">📥 {{ t('spotDetail.downloadGpx') }}</a>
           </div>
 
+          <div class="map-card" v-else>
+             <h3>{{ t('spotDetail.mapLocation') }}</h3>
+             <span class="no-gpx">{{ t('spotDetail.noGpx') }}</span>
+          </div>
+
           <div class="map-card nav-card">
             <h3>Navigasi</h3>
             <p>{{ t('spotDetail.mapDesc') }}</p>
             <a :href="spot.mapsLink" target="_blank" class="btn-waze">🗺️ {{ t('spotDetail.openMap') }}</a>
           </div>
 
-          <button class="btn-edit-spot" @click="$router.push('/spots/edit/' + route.params.id)">{{ t('spotDetail.editSpot') }}</button>
+          <button class="btn-edit-spot" @click="$router.push('/spots/edit/' + route.params.id)">
+             {{ t('spotDetail.editSpot') }}
+          </button>
+
         </div>
       </div>
     </div>
@@ -169,6 +182,7 @@ const spotId = route.params.id as string;
 
 const spot = ref<any>(null);
 const loading = ref(true);
+const isAdmin = ref(false);
 let mapInstance: any = null;
 const reviews = ref<any[]>([]);
 const newReviewText = ref('');
@@ -176,6 +190,7 @@ const newRating = ref(0);
 const suggestions = ref<any[]>([]);
 
 const gpxData = reactive({ distance: '0.00', elevationGain: '0', elevationLoss: '0', maxElevation: '0', minElevation: '0', movingTime: '-' });
+const ADMIN_EMAILS = ["knotenup@gmail.com", "admin@knotenup.com"];
 
 const getLevelLabel = (level: string) => { if (!level) return ''; const key = level.toLowerCase(); return t(`components.${key}`) !== `components.${key}` ? t(`components.${key}`) : level; };
 const getGuideLabel = (val: string) => { 
@@ -188,6 +203,20 @@ const formatDate = (timestamp: any) => { if (!timestamp) return ''; return new D
 const averageRating = computed(() => { if (reviews.value.length === 0) return 0; const total = reviews.value.reduce((acc, curr) => acc + (curr.rating || 0), 0); return (total / reviews.value.length).toFixed(1); });
 const sortedReviews = computed(() => { return [...reviews.value].sort((a, b) => (b.votes || 0) - (a.votes || 0)); });
 const goToProfile = (userId: string) => { if (userId) router.push(`/user/${userId}`); };
+
+// 🔥 ADMIN FUNCTIONS 🔥
+const adminApprove = async (sugg: any) => {
+   if(!confirm("Admin Force Approve?")) return;
+   await updateDoc(doc(db, "spots", spotId), { ...sugg, lastEditedBy: sugg.suggestedBy + " (Admin Approved)", lastEditedAt: serverTimestamp() });
+   await deleteDoc(doc(db, "spots", spotId, "suggestions", sugg.id));
+   alert("Dikemaskini oleh Admin!"); window.location.reload();
+};
+
+const adminReject = async (sugg: any) => {
+   if(!confirm("Tolak cadangan ini?")) return;
+   await deleteDoc(doc(db, "spots", spotId, "suggestions", sugg.id));
+   alert("Cadangan ditolak.");
+};
 
 const verifySuggestion = async (sugg: any) => {
   if (!auth.currentUser) return alert("Sila login.");
@@ -205,23 +234,15 @@ const verifySuggestion = async (sugg: any) => {
 
 const viewImage = (url: string) => { window.open(url, '_blank'); };
 
-// 🔥 FUNGSI REPORT / FLAG 🔥
 const reportSpot = async () => {
    if (!auth.currentUser) return alert("Sila login untuk lapor.");
-   const reason = prompt("Kenapa anda lapor lokasi ini? (Spam / Salah Info / Lain-lain)");
+   const reason = prompt("Kenapa anda lapor lokasi ini?");
    if (reason) {
-      await addDoc(collection(db, "reports"), {
-         targetId: spotId,
-         targetType: 'spot',
-         reason: reason,
-         reportedBy: auth.currentUser.uid,
-         createdAt: serverTimestamp()
-      });
+      await addDoc(collection(db, "reports"), { targetId: spotId, targetType: 'spot', reason: reason, reportedBy: auth.currentUser.uid, createdAt: serverTimestamp() });
       alert(t('spotDetail.reportSuccess'));
    }
 };
 
-// ... (Submit Review, Vote, Init Map kekal sama - dipendekkan utk jimat ruang) ...
 const submitReview = async () => { if (!auth.currentUser) return alert("Sila login."); if (newRating.value === 0) return alert("Sila rating."); try { await addDoc(collection(db, "spots", spotId, "reviews"), { text: newReviewText.value, rating: newRating.value, userId: auth.currentUser.uid, userName: auth.currentUser.displayName || 'User', userAvatar: auth.currentUser.photoURL || '', createdAt: serverTimestamp(), votes: 0 }); newReviewText.value = ''; newRating.value = 0; } catch (e) { console.error(e); } };
 const voteReview = async (review: any, val: number) => { if (!auth.currentUser) return alert(t('forum.loginToVote')); const reviewRef = doc(db, "spots", spotId, "reviews", review.id); await updateDoc(reviewRef, { votes: increment(val) }); };
 const deleteReview = async (reviewId: string) => { if (!confirm("Padam?")) return; try { await deleteDoc(doc(db, "spots", spotId, "reviews", reviewId)); } catch (e) { alert("Gagal."); } };
@@ -234,6 +255,9 @@ onMounted(async () => {
       spot.value = docSnap.data();
       if (spot.value.gpxUrl) setTimeout(() => initMap(), 100);
     }
+    // Check Admin
+    if (auth.currentUser && ADMIN_EMAILS.includes(auth.currentUser.email!)) isAdmin.value = true;
+
     const qReview = query(collection(db, "spots", spotId, "reviews"), orderBy("createdAt", "desc"));
     onSnapshot(qReview, (snap) => { reviews.value = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
     const qSugg = query(collection(db, "spots", spotId, "suggestions"));
@@ -245,7 +269,7 @@ onUnmounted(() => { if (mapInstance) { mapInstance.remove(); mapInstance = null;
 </script>
 
 <style scoped>
-/* CSS ASAL */
+/* CSS SAMA SEPERTI SEBELUM INI + ADMIN BUTTONS */
 .spot-detail-page { background: #f5f5f5; min-height: 100vh; }
 .container { max-width: 1000px; margin: 0 auto; padding: 2rem 1rem; }
 .hero-image { height: 400px; background-size: cover; background-position: center; position: relative; }
@@ -256,29 +280,21 @@ h1 { font-size: 3rem; margin: 0 0 1rem 0; text-shadow: 2px 2px 5px black; }
 .content-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: -50px; position: relative; z-index: 10; }
 .main-info { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 2rem; }
 .info-box h3 { margin-top: 0; }
-.header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; } /* Update flex start utk flag btn */
+.header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
 .avg-rating { background: #fdf2e9; padding: 5px 10px; border-radius: 20px; font-weight: bold; color: #e67e22; border: 1px solid #f9dcc4; margin-left: auto; }
 .desc { line-height: 1.8; color: #444; white-space: pre-line; font-size: 1.1rem; }
 .permit-alert { background: #fff3e0; color: #e65100; padding: 1rem; border-radius: 6px; margin-top: 2rem; border: 1px solid #ffcc80; }
 .free-alert { background: #e8f5e9; color: #2e7d32; padding: 1rem; border-radius: 6px; margin-top: 2rem; border: 1px solid #a5d6a7; }
-
-/* STYLE BARU UTK EXTRA INFO */
 .extra-info-grid { display: flex; gap: 20px; margin-top: 1rem; border-bottom: 1px dashed #eee; padding-bottom: 1rem; }
 .info-item { background: #f9f9f9; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; color: #555; }
 .text-red { color: #e74c3c; font-weight: bold; }
 .text-green { color: #27ae60; font-weight: bold; }
-
-/* STYLE GALERI */
 .gallery-section h3 { margin-bottom: 10px; }
 .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .gallery-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; cursor: pointer; transition: transform 0.2s; }
 .gallery-img:hover { transform: scale(1.05); }
-
-/* FLAG BUTTON */
 .btn-flag { background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.5; transition: opacity 0.2s; margin-left: 10px; }
 .btn-flag:hover { opacity: 1; }
-
-/* REVIEW (Kekal Sama) */
 .review-section { border-top: 2px dashed #eee; padding-top: 2rem; }
 .review-form { background: #f9f9f9; padding: 1.5rem; border-radius: 8px; border: 1px solid #eee; margin-bottom: 2rem; }
 .star-input { font-size: 1.5rem; color: #ccc; cursor: pointer; margin-bottom: 10px; }
@@ -304,7 +320,6 @@ h1 { font-size: 3rem; margin: 0 0 1rem 0; text-shadow: 2px 2px 5px black; }
 .vote-count.negative { color: #7193ff; }
 .btn-delete-review { background: none; border: none; color: #e74c3c; font-size: 0.8rem; cursor: pointer; text-decoration: underline; margin-left: auto; }
 .no-reviews { text-align: center; color: #888; font-style: italic; }
-
 .contributor-box { margin-top: 2rem; padding-top: 1rem; border-top: 1px dashed #eee; color: #777; font-size: 0.9rem; }
 .label-text { display: block; margin-bottom: 8px; font-size: 0.8rem; }
 .contributor-badge { display: inline-block; cursor: pointer; padding: 5px 10px; background: #f9f9f9; border-radius: 30px; border: 1px solid #eee; transition: background 0.2s; }
@@ -320,6 +335,8 @@ h1 { font-size: 3rem; margin: 0 0 1rem 0; text-shadow: 2px 2px 5px black; }
 .stat-box .label { font-size: 0.7rem; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
 .stat-box .value { font-size: 1.1rem; font-weight: 800; color: #2c3e50; }
 .stat-box .value small { font-size: 0.8rem; font-weight: normal; color: #777; }
+.text-green { color: #27ae60 !important; }
+.text-red { color: #c0392b !important; }
 .gpx-map-container { height: 300px; width: 100%; background: #f0f0f0; border-radius: 8px; margin: 10px 0; border: 1px solid #ddd; z-index: 0; position: relative; }
 .btn-waze { display: block; background: #3498db; color: white; padding: 1rem; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 1rem; transition: transform 0.2s; }
 .btn-waze:hover { transform: translateY(-3px); background: #2980b9; }
@@ -338,6 +355,11 @@ h1 { font-size: 3rem; margin: 0 0 1rem 0; text-shadow: 2px 2px 5px black; }
 .btn-verify { background: #27ae60; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
 .btn-verify:hover { background: #219150; }
 .loading, .empty { text-align: center; padding: 5rem; font-size: 1.5rem; color: #888; }
+
+/* 🔥 ADMIN ACTIONS 🔥 */
+.admin-bypass-actions { display: flex; gap: 5px; margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px; }
+.btn-approve-admin { background: #27ae60; color: white; border: none; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; }
+.btn-reject-admin { background: #e74c3c; color: white; border: none; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; }
 
 @media (max-width: 768px) {
   .content-wrapper { grid-template-columns: 1fr; margin-top: 0; }
