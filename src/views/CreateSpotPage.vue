@@ -3,7 +3,7 @@
     <div class="form-container">
       
       <div class="form-header">
-        <h2>📍 {{ t('createSpot.title') }}</h2>
+        <h2>📍 {{ isEditMode ? t('createSpot.editTitle') : t('createSpot.title') }}</h2>
         <p>{{ t('createSpot.sub') }}</p>
       </div>
 
@@ -11,7 +11,15 @@
         
         <div class="form-group">
           <label>{{ t('createSpot.nameLabel') }}</label>
-          <input type="text" v-model="form.name" :placeholder="t('createSpot.namePlaceholder')" />
+          <input 
+            type="text" 
+            v-model="form.name" 
+            :placeholder="t('createSpot.namePlaceholder')" 
+            @blur="checkDuplicate"
+          />
+          <small v-if="duplicateWarning" class="warning-text">
+             {{ t('createSpot.duplicateWarn') }}
+          </small>
         </div>
 
         <div class="row">
@@ -53,6 +61,15 @@
         </div>
 
         <div class="form-group">
+          <label>{{ t('createSpot.gpxLabel') }}</label>
+          <div class="file-upload-row">
+            <input type="file" accept=".gpx" @change="handleGpxSelect" />
+            <span v-if="form.gpxUrl && !gpxFile" class="gpx-badge">{{ t('createSpot.gpxExisting') }}</span>
+          </div>
+          <small class="hint">{{ t('createSpot.gpxHint') }}</small>
+        </div>
+
+        <div class="form-group">
           <label>{{ t('createSpot.imgLabel') }}</label>
           <div class="upload-box">
             <input type="file" accept="image/*" @change="handleImageSelect" />
@@ -71,7 +88,7 @@
       <div class="form-footer">
         <button class="btn-cancel" @click="$router.back()">{{ t('common.cancel') }}</button>
         <button class="btn-submit" @click="submitSpot" :disabled="loading">
-          {{ loading ? t('createSpot.uploading') : t('createSpot.submitBtn') }}
+          {{ loading ? t('createSpot.uploading') : (isEditMode ? t('createSpot.updateBtn') : t('createSpot.submitBtn')) }}
         </button>
       </div>
 
@@ -80,29 +97,54 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n'; // 🔥 Import i18n
+import { ref, reactive, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router'; // Tambah useRoute
+import { useI18n } from 'vue-i18n';
 import { auth, db, storage } from '../firebaseConfig';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { MALAYSIA_STATES } from '../constants/data';
 
-const { t } = useI18n(); // 🔥 Init i18n
+const { t } = useI18n();
 const router = useRouter();
+const route = useRoute(); // Ambil ID dari URL
+
 const loading = ref(false);
 const previewImage = ref('');
 const rawFile = ref<File | null>(null);
+const gpxFile = ref<File | null>(null);
+
+const duplicateWarning = ref(false);
+const isEditMode = ref(false);
+const spotId = route.params.id as string; 
 
 const form = reactive({
   name: '',
   state: '',
   height: null,
-  difficulty: 'Moderate', // Default value simplifiied
+  difficulty: 'Moderate',
   permit: 'No',
   mapsLink: '',
   description: '',
-  image: ''
+  image: '',
+  gpxUrl: '' // Simpan link GPX
+});
+
+// LOAD DATA JIKA EDIT MODE
+onMounted(async () => {
+  if (spotId) {
+    isEditMode.value = true;
+    loading.value = true;
+    try {
+      const docSnap = await getDoc(doc(db, 'spots', spotId));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        Object.assign(form, data);
+        previewImage.value = data.image;
+      }
+    } catch (e) { console.error(e); }
+    finally { loading.value = false; }
+  }
 });
 
 const handleImageSelect = (event: Event) => {
@@ -115,29 +157,74 @@ const handleImageSelect = (event: Event) => {
   }
 };
 
+const handleGpxSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    gpxFile.value = target.files[0];
+  }
+};
+
+// CHECK DUPLICATE NAMA (Hanya bila Create)
+const checkDuplicate = async () => {
+  if (!form.name || isEditMode.value) return; 
+  
+  const q = query(collection(db, 'spots'), where('name_lowercase', '==', form.name.toLowerCase().trim()));
+  const snap = await getDocs(q);
+  
+  if (!snap.empty) duplicateWarning.value = true;
+  else duplicateWarning.value = false;
+};
+
 const submitSpot = async () => {
   if (!auth.currentUser) return alert(t('auth.loginRequired'));
   if (!form.name || !form.state) return alert(t('createSpot.errorMsg'));
+  if (duplicateWarning.value) return alert("Sila guna nama lain, lokasi ini dah wujud.");
 
   loading.value = true;
 
   try {
-    let imageUrl = '';
+    // 1. Upload Gambar (Jika ada)
+    let imageUrl = form.image;
     if (rawFile.value) {
       const fileRef = storageRef(storage, `spots/${auth.currentUser.uid}_${Date.now()}.jpg`);
       const snapshot = await uploadBytes(fileRef, rawFile.value);
       imageUrl = await getDownloadURL(snapshot.ref);
     }
 
-    await addDoc(collection(db, 'spots'), {
+    // 2. Upload GPX (Jika ada)
+    let gpxDownloadUrl = form.gpxUrl;
+    if (gpxFile.value) {
+      const gpxRef = storageRef(storage, `spots/gpx/${auth.currentUser.uid}_${Date.now()}.gpx`);
+      const snap = await uploadBytes(gpxRef, gpxFile.value);
+      gpxDownloadUrl = await getDownloadURL(snap.ref);
+    }
+
+    const spotData = {
       ...form,
       image: imageUrl,
-      contributorId: auth.currentUser.uid,
-      contributorName: auth.currentUser.displayName || 'User',
-      createdAt: serverTimestamp()
-    });
+      gpxUrl: gpxDownloadUrl,
+      name_lowercase: form.name.toLowerCase().trim() // Untuk search & duplicate check
+    };
 
-    alert(t('createSpot.successMsg'));
+    if (isEditMode.value) {
+      // UPDATE DATA
+      await updateDoc(doc(db, 'spots', spotId), {
+        ...spotData,
+        lastEditedBy: auth.currentUser.displayName || 'User',
+        lastEditedAt: serverTimestamp()
+      });
+      alert("Lokasi berjaya dikemaskini!");
+    } else {
+      // CREATE BARU
+      await addDoc(collection(db, 'spots'), {
+        ...spotData,
+        contributorId: auth.currentUser.uid,
+        contributorName: auth.currentUser.displayName || 'User',
+        createdAt: serverTimestamp()
+      });
+      alert(t('createSpot.successMsg'));
+    }
+
     router.push('/spots');
 
   } catch (e) {
@@ -169,6 +256,12 @@ input:focus, select:focus, textarea:focus { border-color: #27ae60; box-shadow: 0
 .btn-submit { background: #27ae60; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
 .btn-submit:hover { background: #219150; }
 .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+/* STYLE BARU */
+.warning-text { color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block; font-weight: bold;}
+.file-upload-row { display: flex; align-items: center; gap: 10px; }
+.hint { font-size: 0.8rem; color: #888; }
+.gpx-badge { color: #27ae60; font-weight: bold; font-size: 0.9rem; }
 
 @media (max-width: 600px) {
   .row { flex-direction: column; gap: 0; }

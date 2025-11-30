@@ -324,7 +324,12 @@
   "mapLocation": "Map Location",
   "mapDesc": "Click to navigate to parking/trailhead.",
   "openMap": "Open Google Maps / Waze",
-  "notFound": "Location not found."
+  "notFound": "Location not found.",
+  "downloadGpx": "Muat Turun Fail GPX",
+  "noGpx": "Tiada fail GPX.",
+  "editSpot": "✏️ Edit Info Lokasi",
+  "lastEdited": "Info dikemaskini oleh:"
+
 },
 "createSpot": {
   "title": "Add New Spot",
@@ -345,6 +350,12 @@
   "submitBtn": "Save Location",
   "successMsg": "Location added successfully!",
   "errorMsg": "Please fill in name and state.",
-  "uploading": "Uploading..."
+  "uploading": "Uploading...",
+  "editTitle": "Edit Lokasi",
+  "duplicateWarn": "⚠️ Lokasi dengan nama ini mungkin sudah wujud!",
+  "gpxLabel": "Fail GPX (Peta Trail)",
+  "gpxHint": "Upload fail .gpx untuk bantu pendaki lain.",
+  "gpxExisting": "✅ GPX Sedia Ada",
+  "updateBtn": "Kemaskini Lokasi"
 }
 }
