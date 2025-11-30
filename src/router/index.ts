@@ -63,64 +63,77 @@ const routes = [
     component: TripRequestPage
   },
   {
-  path: '/trips/:id', // :id bermaksud ia boleh berubah-ubah
-  name: 'trip-detail',
-  component: TripDetailPage
+    path: '/trips/:id', 
+    name: 'trip-detail',
+    component: TripDetailPage
   },
   {
-  path: '/forum/:id',
-  name: 'forum-detail',
-  component: ForumDetailPage
+    path: '/forum/:id',
+    name: 'forum-detail',
+    component: ForumDetailPage
   },
   {
-  path: '/forum/edit/:id',
-  name: 'edit-post',
-  component: ForumCreatePostPage
+    path: '/forum/edit/:id',
+    name: 'edit-post',
+    component: ForumCreatePostPage
   },
   {
-  path: '/admin',
-  name: 'admin',
-  component: AdminPage
+    path: '/admin',
+    name: 'admin',
+    component: AdminPage
   },
   {
-  path: '/search',
-  name: 'search',
-  component: SearchResultsPage
+    path: '/search',
+    name: 'search',
+    component: SearchResultsPage
   },
-  { path: '/service', 
-  name: 'service', 
-  component: ServicePage 
+  { 
+    path: '/service', 
+    name: 'service', 
+    component: ServicePage 
   },
-  { path: '/create-service', 
-  name: 'create-service', 
-  component: CreateServicePage 
-  },
-  {
-  path: '/user/:id', // :id ini adalah User ID (UID) organizer tu
-  name: 'public-profile',
-  component: ProfilePage
+  { 
+    path: '/create-service', 
+    name: 'create-service', 
+    component: CreateServicePage 
   },
   {
-  path: '/be-organizer',
-  name: 'be-organizer',
-  component: OrganizerRegistrationPage
+    path: '/user/:id', 
+    name: 'public-profile',
+    component: ProfilePage
   },
-  { path: '/spots',  
+  {
+    path: '/be-organizer',
+    name: 'be-organizer',
+    component: OrganizerRegistrationPage
+  },
+  { 
+    path: '/spots',  
     name: 'spots', 
     component: SpotsPage 
   },
-  { path: '/spots/:id', 
+  { 
+    path: '/spots/:id', 
     name: 'spot-detail', 
     component: SpotDetailPage 
   },
-  { path: '/create-spot', 
+  { 
+    path: '/create-spot', 
     name: 'create-spot', 
     component: CreateSpotPage 
   },
+  
+  // 🔥 INI LALUAN YANG KITA TAMBAH 🔥
+  { 
+    path: '/spots/edit/:id', 
+    name: 'edit-spot', 
+    component: CreateSpotPage // Guna component yang sama dengan create
+  },
+
   {
-  path: '/service/:id',
-  name: 'service-detail',
-  component: ServiceDetailPage
+    path: '/service/:id',
+    name: 'service-detail',
+    component: ServiceDetailPage
   },
 ]
 

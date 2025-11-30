@@ -22,6 +22,9 @@
           <div class="info-box">
             <div class="header-row">
                <h3>{{ t('spotDetail.locationInfo') }}</h3>
+               
+               <button class="btn-flag" @click="reportSpot" title="Report this spot">🚩</button>
+
                <div class="avg-rating" v-if="reviews.length > 0">
                   ⭐ {{ averageRating }} <small>({{ reviews.length }})</small>
                </div>
@@ -29,6 +32,18 @@
 
             <p class="desc">{{ spot.description }}</p>
             
+            <div class="extra-info-grid">
+               <div class="info-item" v-if="spot.via">
+                  <strong>🛤️ {{ t('spotDetail.via') }}</strong> {{ spot.via }}
+               </div>
+               <div class="info-item">
+                  <strong>👮 {{ t('spotDetail.guideStatus') }}</strong> 
+                  <span :class="{'text-red': spot.guideRequired === 'Yes', 'text-green': spot.guideRequired === 'No'}">
+                     {{ getGuideLabel(spot.guideRequired) }}
+                  </span>
+               </div>
+            </div>
+
             <div class="permit-alert" v-if="spot.permit && spot.permit !== 'Tidak Perlu' && spot.permit !== 'No'">
               ⚠️ <strong>{{ t('spotDetail.permitRequired') }}</strong> {{ spot.permit }}
             </div>
@@ -36,16 +51,19 @@
               ✅ <strong>{{ t('spotDetail.free') }}</strong> {{ t('spotDetail.noPermitNeeded') }}
             </div>
           </div>
+
+          <div class="gallery-section" v-if="spot.images && spot.images.length > 1">
+             <h3>📷 {{ t('spotDetail.gallery') }}</h3>
+             <div class="gallery-grid">
+                <img v-for="(img, idx) in spot.images" :key="idx" :src="img" class="gallery-img" @click="viewImage(img)"/>
+             </div>
+          </div>
           
           <div class="contributor-box">
              <span class="label-text">{{ t('spotDetail.contributedBy') }}</span>
              <div class="contributor-badge" @click="goToProfile(spot.contributorId)">
-                <AuthorBadge 
-                   :userId="spot.contributorId" 
-                   :fallbackName="spot.contributorName"
-                />
+                <AuthorBadge :userId="spot.contributorId" :fallbackName="spot.contributorName" />
              </div>
-             
              <p v-if="spot.lastEditedBy" class="edited-text">
                 🔄 {{ t('spotDetail.lastEdited') }} <strong>{{ spot.lastEditedBy }}</strong>
              </p>
@@ -53,72 +71,50 @@
 
           <div class="review-section">
             <h3>💬 Ulasan & Pengalaman</h3>
-
             <div class="review-form" v-if="auth.currentUser">
                <div class="star-input">
                   <span v-for="n in 5" :key="n" @click="newRating = n" :class="{ filled: n <= newRating }">★</span>
                </div>
-               <textarea v-model="newReviewText" placeholder="Kongsi pengalaman anda (trek, view, pacat?)..."></textarea>
-               <button @click="submitReview" :disabled="!newReviewText || newRating === 0" class="btn-submit-review">
-                 Hantar Review
-               </button>
+               <textarea v-model="newReviewText" placeholder="Kongsi pengalaman anda..."></textarea>
+               <button @click="submitReview" :disabled="!newReviewText || newRating === 0" class="btn-submit-review">Hantar Review</button>
             </div>
             <div v-else class="login-alert">🔒 Sila login untuk tulis review.</div>
-
             <div class="review-list">
                <div v-for="review in sortedReviews" :key="review.id" class="review-item">
-                  
                   <div class="review-header" @click="goToProfile(review.userId)">
-                     <AuthorBadge 
-                        :userId="review.userId" 
-                        :fallbackName="review.userName" 
-                        :fallbackAvatar="review.userAvatar"
-                     >
-                        <template #subtext>
-                           <span class="review-date">{{ formatDate(review.createdAt) }}</span>
-                        </template>
+                     <AuthorBadge :userId="review.userId" :fallbackName="review.userName" :fallbackAvatar="review.userAvatar">
+                        <template #subtext><span class="review-date">{{ formatDate(review.createdAt) }}</span></template>
                      </AuthorBadge>
-                     
-                     <div class="review-stars">
-                        <span v-for="n in 5" :key="n" :class="{ filled: n <= review.rating }">★</span>
-                     </div>
+                     <div class="review-stars"><span v-for="n in 5" :key="n" :class="{ filled: n <= review.rating }">★</span></div>
                   </div>
-                  
                   <p class="review-text">{{ review.text }}</p>
-                  
                   <div class="review-footer">
                      <div class="vote-pill">
-                        <button class="vote-btn up" @click="voteReview(review, 1)">
-                           <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4L3 15h6v5h6v-5h6z"/></svg>
-                        </button>
-                        <span class="vote-count" :class="{ positive: (review.votes || 0) > 0, negative: (review.votes || 0) < 0 }">
-                           {{ review.votes || 0 }}
-                        </span>
-                        <button class="vote-btn down" @click="voteReview(review, -1)">
-                           <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20L21 9h-6V4h-6v5H3z"/></svg>
-                        </button>
+                        <button class="vote-btn up" @click="voteReview(review, 1)">▲</button>
+                        <span class="vote-count" :class="{ positive: (review.votes||0)>0 }">{{ review.votes || 0 }}</span>
+                        <button class="vote-btn down" @click="voteReview(review, -1)">▼</button>
                      </div>
-
-                     <button v-if="auth.currentUser && auth.currentUser.uid === review.userId" 
-                             @click="deleteReview(review.id)" 
-                             class="btn-delete-review">
-                        🗑️ Padam
-                     </button>
+                     <button v-if="auth.currentUser && auth.currentUser.uid === review.userId" @click="deleteReview(review.id)" class="btn-delete-review">🗑️ Padam</button>
                   </div>
-
                </div>
-
                <p v-if="reviews.length === 0" class="no-reviews">Belum ada ulasan.</p>
             </div>
           </div>
-
         </div>
 
         <div class="sidebar-info">
           
+          <div class="pending-updates-box" v-if="suggestions.length > 0">
+             <div class="update-header">🚧 Cadangan Kemaskini</div>
+             <div v-for="sugg in suggestions" :key="sugg.id" class="suggestion-card">
+                <p class="sugg-author">Oleh: {{ sugg.suggestedBy }}</p>
+                <div class="progress-bar"><div class="progress-fill" :style="{ width: (sugg.votes / 5) * 100 + '%' }"></div></div>
+                <div class="sugg-actions"><span>{{ sugg.votes }}/5 Pengesahan</span><button @click="verifySuggestion(sugg)" class="btn-verify">✅ Verify</button></div>
+             </div>
+          </div>
+
           <div class="map-card" v-if="spot.gpxUrl">
             <h3>Peta Trail (GPX)</h3>
-            
             <div class="gpx-stats" v-if="gpxData.distance !== '0.00'">
                <div class="stat-row">
                  <div class="stat-box"><span class="label">📏 Jarak</span><span class="value">{{ gpxData.distance }} <small>km</small></span></div>
@@ -130,15 +126,8 @@
                  <div class="stat-box"><span class="label">🏔️ Max</span><span class="value">{{ gpxData.maxElevation }}m</span></div>
                </div>
             </div>
-
             <div id="gpx-map" class="gpx-map-container"></div>
-            
             <a :href="spot.gpxUrl" download class="btn-gpx">📥 {{ t('spotDetail.downloadGpx') }}</a>
-          </div>
-
-          <div class="map-card" v-else>
-             <h3>{{ t('spotDetail.mapLocation') }}</h3>
-             <span class="no-gpx">{{ t('spotDetail.noGpx') }}</span>
           </div>
 
           <div class="map-card nav-card">
@@ -147,10 +136,7 @@
             <a :href="spot.mapsLink" target="_blank" class="btn-waze">🗺️ {{ t('spotDetail.openMap') }}</a>
           </div>
 
-          <button class="btn-edit-spot" @click="$router.push('/spots/edit/' + route.params.id)">
-             {{ t('spotDetail.editSpot') }}
-          </button>
-
+          <button class="btn-edit-spot" @click="$router.push('/spots/edit/' + route.params.id)">{{ t('spotDetail.editSpot') }}</button>
         </div>
       </div>
     </div>
@@ -164,24 +150,17 @@ import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n'; 
 import { auth, db } from '../firebaseConfig';
-import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, updateDoc, increment, arrayUnion } from 'firebase/firestore';
 import AuthorBadge from '../components/common/AuthorBadge.vue'; 
-
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-gpx';
-
-// Icon Fix
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow });
 
 const { t } = useI18n(); 
 const route = useRoute();
@@ -191,127 +170,62 @@ const spotId = route.params.id as string;
 const spot = ref<any>(null);
 const loading = ref(true);
 let mapInstance: any = null;
-
-// Review State
 const reviews = ref<any[]>([]);
 const newReviewText = ref('');
 const newRating = ref(0);
+const suggestions = ref<any[]>([]);
 
-const gpxData = reactive({
-  distance: '0.00',
-  elevationGain: '0',
-  elevationLoss: '0',
-  maxElevation: '0',
-  minElevation: '0',
-  movingTime: '-'
-});
+const gpxData = reactive({ distance: '0.00', elevationGain: '0', elevationLoss: '0', maxElevation: '0', minElevation: '0', movingTime: '-' });
 
-const getLevelLabel = (level: string) => {
-  if (!level) return '';
-  const key = level.toLowerCase();
-  return t(`components.${key}`) !== `components.${key}` ? t(`components.${key}`) : level;
+const getLevelLabel = (level: string) => { if (!level) return ''; const key = level.toLowerCase(); return t(`components.${key}`) !== `components.${key}` ? t(`components.${key}`) : level; };
+const getGuideLabel = (val: string) => { 
+   if(val === 'Yes') return t('createSpot.guideYes') || 'Wajib';
+   if(val === 'Optional') return t('createSpot.guideOptional') || 'Pilihan';
+   return t('createSpot.guideNo') || 'Tidak Perlu';
 };
+const formatTime = (ms: number) => { if (!ms || ms === 0) return '-'; const totalSeconds = ms / 1000; const hours = Math.floor(totalSeconds / 3600); const minutes = Math.floor((totalSeconds % 3600) / 60); if (hours > 0) return `${hours}j ${minutes}m`; return `${minutes} min`; };
+const formatDate = (timestamp: any) => { if (!timestamp) return ''; return new Date(timestamp.seconds * 1000).toLocaleDateString("en-MY", { day: 'numeric', month: 'short', year: 'numeric' }); };
+const averageRating = computed(() => { if (reviews.value.length === 0) return 0; const total = reviews.value.reduce((acc, curr) => acc + (curr.rating || 0), 0); return (total / reviews.value.length).toFixed(1); });
+const sortedReviews = computed(() => { return [...reviews.value].sort((a, b) => (b.votes || 0) - (a.votes || 0)); });
+const goToProfile = (userId: string) => { if (userId) router.push(`/user/${userId}`); };
 
-const formatTime = (ms: number) => {
-  if (!ms || ms === 0) return '-';
-  const totalSeconds = ms / 1000;
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  if (hours > 0) return `${hours}j ${minutes}m`;
-  return `${minutes} min`;
-};
-
-const formatDate = (timestamp: any) => {
-  if (!timestamp) return '';
-  return new Date(timestamp.seconds * 1000).toLocaleDateString("en-MY", {
-    day: 'numeric', month: 'short', year: 'numeric'
-  });
-};
-
-const averageRating = computed(() => {
-  if (reviews.value.length === 0) return 0;
-  const total = reviews.value.reduce((acc, curr) => acc + (curr.rating || 0), 0);
-  return (total / reviews.value.length).toFixed(1);
-});
-
-const sortedReviews = computed(() => {
-  return [...reviews.value].sort((a, b) => (b.votes || 0) - (a.votes || 0));
-});
-
-const goToProfile = (userId: string) => {
-  if (userId) router.push(`/user/${userId}`);
-};
-
-const submitReview = async () => {
+const verifySuggestion = async (sugg: any) => {
   if (!auth.currentUser) return alert("Sila login.");
-  if (newRating.value === 0) return alert("Sila bagi rating bintang.");
-
-  try {
-    await addDoc(collection(db, "spots", spotId, "reviews"), {
-      text: newReviewText.value,
-      rating: newRating.value,
-      userId: auth.currentUser.uid,
-      userName: auth.currentUser.displayName || 'User',
-      userAvatar: auth.currentUser.photoURL || '',
-      createdAt: serverTimestamp(),
-      votes: 0 
-    });
-    newReviewText.value = '';
-    newRating.value = 0;
-  } catch (e) { console.error(e); }
+  if (sugg.verifiedUsers && sugg.verifiedUsers.includes(auth.currentUser.uid)) return alert("Anda sudah mengesahkan.");
+  const newVotes = (sugg.votes || 0) + 1;
+  const suggRef = doc(db, "spots", spotId, "suggestions", sugg.id);
+  if (newVotes >= 5) {
+     await updateDoc(doc(db, "spots", spotId), { ...sugg, lastEditedBy: sugg.suggestedBy, lastEditedAt: serverTimestamp() });
+     await deleteDoc(suggRef); alert("Info dikemaskini!"); window.location.reload();
+  } else {
+     await updateDoc(suggRef, { votes: increment(1), verifiedUsers: arrayUnion(auth.currentUser.uid) });
+     alert("Terima kasih atas pengesahan!");
+  }
 };
 
-const voteReview = async (review: any, val: number) => {
-  if (!auth.currentUser) return alert(t('forum.loginToVote'));
-  const reviewRef = doc(db, "spots", spotId, "reviews", review.id);
-  await updateDoc(reviewRef, { votes: increment(val) });
+const viewImage = (url: string) => { window.open(url, '_blank'); };
+
+// 🔥 FUNGSI REPORT / FLAG 🔥
+const reportSpot = async () => {
+   if (!auth.currentUser) return alert("Sila login untuk lapor.");
+   const reason = prompt("Kenapa anda lapor lokasi ini? (Spam / Salah Info / Lain-lain)");
+   if (reason) {
+      await addDoc(collection(db, "reports"), {
+         targetId: spotId,
+         targetType: 'spot',
+         reason: reason,
+         reportedBy: auth.currentUser.uid,
+         createdAt: serverTimestamp()
+      });
+      alert(t('spotDetail.reportSuccess'));
+   }
 };
 
-const deleteReview = async (reviewId: string) => {
-  if (!confirm("Padam review ini?")) return;
-  try {
-    await deleteDoc(doc(db, "spots", spotId, "reviews", reviewId));
-  } catch (e) { alert("Gagal padam."); }
-};
-
-const initMap = () => {
-  if (!spot.value.gpxUrl) return;
-  nextTick(() => {
-    const mapElement = document.getElementById('gpx-map');
-    if (!mapElement) return;
-    if (mapInstance) { mapInstance.remove(); mapInstance = null; }
-
-    mapInstance = L.map('gpx-map', { scrollWheelZoom: false }).setView([4.2105, 101.9758], 6); 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-      maxZoom: 19
-    }).addTo(mapInstance);
-
-    setTimeout(() => { if(mapInstance) mapInstance.invalidateSize(); }, 300);
-
-    new (L as any).GPX(spot.value.gpxUrl, {
-      async: true,
-      marker_options: {
-        startIconUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-icon-start.png',
-        endIconUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-icon-end.png',
-        shadowUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-shadow.png'
-      },
-      polyline_options: { color: '#e67e22', opacity: 0.8, weight: 5, lineCap: 'round' }
-    }).on('loaded', function(e: any) {
-      if(mapInstance) {
-        mapInstance.fitBounds(e.target.getBounds()); 
-        setTimeout(() => { mapInstance.invalidateSize(); }, 200); 
-        const gpx = e.target;
-        gpxData.distance = (gpx.get_distance() / 1000).toFixed(2);
-        gpxData.elevationGain = gpx.get_elevation_gain().toFixed(0);
-        gpxData.elevationLoss = gpx.get_elevation_loss().toFixed(0);
-        gpxData.maxElevation = gpx.get_elevation_max().toFixed(0);
-        gpxData.minElevation = gpx.get_elevation_min().toFixed(0);
-        gpxData.movingTime = formatTime(gpx.get_moving_time());
-      }
-    }).addTo(mapInstance);
-  });
-};
+// ... (Submit Review, Vote, Init Map kekal sama - dipendekkan utk jimat ruang) ...
+const submitReview = async () => { if (!auth.currentUser) return alert("Sila login."); if (newRating.value === 0) return alert("Sila rating."); try { await addDoc(collection(db, "spots", spotId, "reviews"), { text: newReviewText.value, rating: newRating.value, userId: auth.currentUser.uid, userName: auth.currentUser.displayName || 'User', userAvatar: auth.currentUser.photoURL || '', createdAt: serverTimestamp(), votes: 0 }); newReviewText.value = ''; newRating.value = 0; } catch (e) { console.error(e); } };
+const voteReview = async (review: any, val: number) => { if (!auth.currentUser) return alert(t('forum.loginToVote')); const reviewRef = doc(db, "spots", spotId, "reviews", review.id); await updateDoc(reviewRef, { votes: increment(val) }); };
+const deleteReview = async (reviewId: string) => { if (!confirm("Padam?")) return; try { await deleteDoc(doc(db, "spots", spotId, "reviews", reviewId)); } catch (e) { alert("Gagal."); } };
+const initMap = () => { if (!spot.value.gpxUrl) return; nextTick(() => { const mapElement = document.getElementById('gpx-map'); if (!mapElement) return; if (mapInstance) { mapInstance.remove(); mapInstance = null; } mapInstance = L.map('gpx-map', { scrollWheelZoom: false }).setView([4.2105, 101.9758], 6); L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM &copy; CARTO', maxZoom: 19 }).addTo(mapInstance); setTimeout(() => { if(mapInstance) mapInstance.invalidateSize(); }, 300); new (L as any).GPX(spot.value.gpxUrl, { async: true, marker_options: { startIconUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-icon-start.png', endIconUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-icon-end.png', shadowUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-shadow.png' }, polyline_options: { color: '#e67e22', opacity: 0.8, weight: 5, lineCap: 'round' } }).on('loaded', function(e: any) { if(mapInstance) { mapInstance.fitBounds(e.target.getBounds()); setTimeout(() => { mapInstance.invalidateSize(); }, 200); const gpx = e.target; gpxData.distance = (gpx.get_distance() / 1000).toFixed(2); gpxData.elevationGain = gpx.get_elevation_gain().toFixed(0); gpxData.elevationLoss = gpx.get_elevation_loss().toFixed(0); gpxData.maxElevation = gpx.get_elevation_max().toFixed(0); gpxData.minElevation = gpx.get_elevation_min().toFixed(0); gpxData.movingTime = formatTime(gpx.get_moving_time()); } }).addTo(mapInstance); }); };
 
 onMounted(async () => {
   try {
@@ -320,40 +234,51 @@ onMounted(async () => {
       spot.value = docSnap.data();
       if (spot.value.gpxUrl) setTimeout(() => initMap(), 100);
     }
-    const q = query(collection(db, "spots", spotId, "reviews"), orderBy("createdAt", "desc"));
-    onSnapshot(q, (snap) => { reviews.value = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
+    const qReview = query(collection(db, "spots", spotId, "reviews"), orderBy("createdAt", "desc"));
+    onSnapshot(qReview, (snap) => { reviews.value = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
+    const qSugg = query(collection(db, "spots", spotId, "suggestions"));
+    onSnapshot(qSugg, (snap) => { suggestions.value = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
   } catch (e) { console.error(e); }
   finally { loading.value = false; }
 });
-
-onUnmounted(() => {
-  if (mapInstance) { mapInstance.remove(); mapInstance = null; }
-});
+onUnmounted(() => { if (mapInstance) { mapInstance.remove(); mapInstance = null; } });
 </script>
 
 <style scoped>
+/* CSS ASAL */
 .spot-detail-page { background: #f5f5f5; min-height: 100vh; }
 .container { max-width: 1000px; margin: 0 auto; padding: 2rem 1rem; }
-
 .hero-image { height: 400px; background-size: cover; background-position: center; position: relative; }
 .overlay { height: 100%; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; color: white; text-align: center; }
 h1 { font-size: 3rem; margin: 0 0 1rem 0; text-shadow: 2px 2px 5px black; }
-
 .badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .badge { padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.5); text-transform: uppercase;}
-
 .content-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: -50px; position: relative; z-index: 10; }
 .main-info { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 2rem; }
 .info-box h3 { margin-top: 0; }
-.header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.avg-rating { background: #fdf2e9; padding: 5px 10px; border-radius: 20px; font-weight: bold; color: #e67e22; border: 1px solid #f9dcc4; }
-
+.header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; } /* Update flex start utk flag btn */
+.avg-rating { background: #fdf2e9; padding: 5px 10px; border-radius: 20px; font-weight: bold; color: #e67e22; border: 1px solid #f9dcc4; margin-left: auto; }
 .desc { line-height: 1.8; color: #444; white-space: pre-line; font-size: 1.1rem; }
+.permit-alert { background: #fff3e0; color: #e65100; padding: 1rem; border-radius: 6px; margin-top: 2rem; border: 1px solid #ffcc80; }
+.free-alert { background: #e8f5e9; color: #2e7d32; padding: 1rem; border-radius: 6px; margin-top: 2rem; border: 1px solid #a5d6a7; }
 
-.permit-alert { background: #fff3e0; color: #e65100; padding: 1rem; border-radius: 6px; margin-top: 1rem; border: 1px solid #ffcc80; }
-.free-alert { background: #e8f5e9; color: #2e7d32; padding: 1rem; border-radius: 6px; margin-top: 1rem; border: 1px solid #a5d6a7; }
+/* STYLE BARU UTK EXTRA INFO */
+.extra-info-grid { display: flex; gap: 20px; margin-top: 1rem; border-bottom: 1px dashed #eee; padding-bottom: 1rem; }
+.info-item { background: #f9f9f9; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; color: #555; }
+.text-red { color: #e74c3c; font-weight: bold; }
+.text-green { color: #27ae60; font-weight: bold; }
 
-/* REVIEW STYLE BARU (HORIZONTAL PILL) */
+/* STYLE GALERI */
+.gallery-section h3 { margin-bottom: 10px; }
+.gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.gallery-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; cursor: pointer; transition: transform 0.2s; }
+.gallery-img:hover { transform: scale(1.05); }
+
+/* FLAG BUTTON */
+.btn-flag { background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.5; transition: opacity 0.2s; margin-left: 10px; }
+.btn-flag:hover { opacity: 1; }
+
+/* REVIEW (Kekal Sama) */
 .review-section { border-top: 2px dashed #eee; padding-top: 2rem; }
 .review-form { background: #f9f9f9; padding: 1.5rem; border-radius: 8px; border: 1px solid #eee; margin-bottom: 2rem; }
 .star-input { font-size: 1.5rem; color: #ccc; cursor: pointer; margin-bottom: 10px; }
@@ -362,50 +287,29 @@ h1 { font-size: 3rem; margin: 0 0 1rem 0; text-shadow: 2px 2px 5px black; }
 .btn-submit-review { background: #2c3e50; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .btn-submit-review:disabled { background: #ccc; }
 .login-alert { background: #eee; padding: 1rem; text-align: center; border-radius: 6px; color: #555; }
-
 .review-list { display: flex; flex-direction: column; gap: 1.5rem; }
 .review-item { border-bottom: 1px solid #f0f0f0; padding-bottom: 1rem; }
-
-/* Header Review (Atas) */
-.review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; cursor: pointer; }
+.review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; cursor: pointer; }
 .review-stars { color: #f1c40f; font-size: 0.9rem; }
 .review-stars span { color: #e0e0e0; }
 .review-stars span.filled { color: #f1c40f; }
 .review-date { font-size: 0.7rem; color: #999; margin-left: 5px; }
-
-/* Text Review */
-.review-text { font-size: 0.95rem; color: #333; line-height: 1.5; margin: 0 0 10px 0; }
-
-/* Footer Review (Bawah - Vote & Delete) */
-.review-footer { display: flex; align-items: center; gap: 10px; }
-
-/* Vote Pill (Macam Forum) */
-.vote-pill {
-  display: flex;
-  align-items: center;
-  background-color: #f6f7f8;
-  border-radius: 20px;
-  padding: 2px 5px;
-  border: 1px solid #eee;
-}
+.review-text { font-size: 0.95rem; color: #333; line-height: 1.5; margin: 5px 0 0 0; }
+.review-footer { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.vote-pill { display: flex; align-items: center; background-color: #f6f7f8; border-radius: 20px; padding: 2px 5px; border: 1px solid #eee; }
 .vote-btn { background: none; border: none; cursor: pointer; color: #878a8c; padding: 4px; border-radius: 50%; display: flex; align-items: center; }
 .vote-btn:hover { background-color: #e2e2e2; color: #e67e22; }
 .vote-count { font-weight: bold; font-size: 12px; margin: 0 6px; color: #333; min-width: 15px; text-align: center; }
 .vote-count.positive { color: #e67e22; }
 .vote-count.negative { color: #7193ff; }
-.icon-sm { width: 16px; height: 16px; }
-
 .btn-delete-review { background: none; border: none; color: #e74c3c; font-size: 0.8rem; cursor: pointer; text-decoration: underline; margin-left: auto; }
 .no-reviews { text-align: center; color: #888; font-style: italic; }
 
-/* CONTRIBUTOR STYLE */
 .contributor-box { margin-top: 2rem; padding-top: 1rem; border-top: 1px dashed #eee; color: #777; font-size: 0.9rem; }
 .label-text { display: block; margin-bottom: 8px; font-size: 0.8rem; }
 .contributor-badge { display: inline-block; cursor: pointer; padding: 5px 10px; background: #f9f9f9; border-radius: 30px; border: 1px solid #eee; transition: background 0.2s; }
 .contributor-badge:hover { background: #eee; }
 .edited-text { font-size: 0.8rem; color: #999; margin-top: 10px; }
-
-/* SIDEBAR & MAP */
 .sidebar-info { display: flex; flex-direction: column; gap: 1rem; }
 .map-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: center; }
 .nav-card { margin-top: 0; }
@@ -416,8 +320,6 @@ h1 { font-size: 3rem; margin: 0 0 1rem 0; text-shadow: 2px 2px 5px black; }
 .stat-box .label { font-size: 0.7rem; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
 .stat-box .value { font-size: 1.1rem; font-weight: 800; color: #2c3e50; }
 .stat-box .value small { font-size: 0.8rem; font-weight: normal; color: #777; }
-.text-green { color: #27ae60 !important; }
-.text-red { color: #c0392b !important; }
 .gpx-map-container { height: 300px; width: 100%; background: #f0f0f0; border-radius: 8px; margin: 10px 0; border: 1px solid #ddd; z-index: 0; position: relative; }
 .btn-waze { display: block; background: #3498db; color: white; padding: 1rem; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 1rem; transition: transform 0.2s; }
 .btn-waze:hover { transform: translateY(-3px); background: #2980b9; }
@@ -426,11 +328,21 @@ h1 { font-size: 3rem; margin: 0 0 1rem 0; text-shadow: 2px 2px 5px black; }
 .no-gpx { display: block; margin-top: 10px; color: #999; font-size: 0.8rem; font-style: italic; }
 .btn-edit-spot { width: 100%; margin-top: 0; background: white; border: 1px solid #2c3e50; color: #2c3e50; padding: 0.8rem; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
 .btn-edit-spot:hover { background: #f0f0f0; }
+.pending-updates-box { background: #fff3e0; border: 1px solid #ffcc80; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.update-header { font-weight: bold; color: #e65100; margin-bottom: 10px; border-bottom: 1px dashed #ffcc80; padding-bottom: 5px; }
+.suggestion-card { background: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #f9dcc4; }
+.sugg-author { font-size: 0.8rem; color: #666; margin: 0 0 5px 0; }
+.progress-bar { height: 6px; background: #eee; border-radius: 10px; overflow: hidden; margin-bottom: 8px; }
+.progress-fill { height: 100%; background: #27ae60; transition: width 0.3s; }
+.sugg-actions { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
+.btn-verify { background: #27ae60; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+.btn-verify:hover { background: #219150; }
 .loading, .empty { text-align: center; padding: 5rem; font-size: 1.5rem; color: #888; }
 
 @media (max-width: 768px) {
   .content-wrapper { grid-template-columns: 1fr; margin-top: 0; }
   .hero-image { height: 300px; }
   h1 { font-size: 2rem; }
+  .gallery-grid { grid-template-columns: repeat(3, 1fr); }
 }
 </style>
