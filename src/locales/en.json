@@ -301,5 +301,50 @@
     "notFound": "Service not found.",
     "backToDirectory": "Back to Directory",
     "editAd": "Edit Ads"
-  }
+  },
+
+  "spots": {
+  "title": "Spots Database",
+  "sub": "Discover hills, rivers, and waterfalls for Free & Easy (F&E) trips.",
+  "addBtn": "Add New Spot",
+  "searchPlaceholder": "Search location name...",
+  "allStates": "All States",
+  "permit": "Permit Required",
+  "noPermit": "No Permit",
+  "height": "Height",
+  "difficulty": "Difficulty",
+  "empty": "No spots found."
+},
+"spotDetail": {
+  "locationInfo": "Location Info",
+  "permitRequired": "PERMIT REQUIRED:",
+  "free": "FREE:",
+  "noPermitNeeded": "No permit needed.",
+  "contributedBy": "Contributed by:",
+  "mapLocation": "Map Location",
+  "mapDesc": "Click to navigate to parking/trailhead.",
+  "openMap": "Open Google Maps / Waze",
+  "notFound": "Location not found."
+},
+"createSpot": {
+  "title": "Add New Spot",
+  "sub": "Share information about hills, mountains, or recreational spots.",
+  "nameLabel": "Location Name",
+  "namePlaceholder": "E.g.: Bukit Wawasan, Puchong",
+  "stateLabel": "State",
+  "heightLabel": "Height (Meter)",
+  "heightPlaceholder": "E.g.: 400",
+  "diffLabel": "Difficulty Level",
+  "permitLabel": "Permit Required?",
+  "mapLabel": "Google Maps / Waze Link (Parking)",
+  "mapPlaceholder": "https://maps.google.com/...",
+  "imgLabel": "Location Photo",
+  "uploadText": "📸 Upload Scenery Photo",
+  "descLabel": "Additional Info (Tips, Parking, Checkpoint)",
+  "descPlaceholder": "Tell us a bit about this place...",
+  "submitBtn": "Save Location",
+  "successMsg": "Location added successfully!",
+  "errorMsg": "Please fill in name and state.",
+  "uploading": "Uploading..."
+}
 }

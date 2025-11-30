@@ -1,15 +1,16 @@
 <template>
   <div class="spot-detail-page">
-    <div v-if="loading" class="loading">⏳ Memuatkan...</div>
+    <div v-if="loading" class="loading">⏳ {{ t('common.loading') }}</div>
     
     <div v-else-if="spot" class="spot-container">
+      
       <div class="hero-image" :style="{ backgroundImage: `url(${spot.image || 'https://via.placeholder.com/800x400'})` }">
         <div class="overlay">
           <h1>{{ spot.name }}</h1>
           <div class="badges">
             <span class="badge state">📍 {{ spot.state }}</span>
             <span class="badge height">🏔️ {{ spot.height }}m</span>
-            <span class="badge diff">{{ spot.difficulty }}</span>
+            <span class="badge diff">{{ getLevelLabel(spot.difficulty) }}</span>
           </div>
         </div>
       </div>
@@ -17,43 +18,56 @@
       <div class="content-wrapper container">
         <div class="main-info">
           <div class="info-box">
-            <h3>Info Lokasi</h3>
+            <h3>{{ t('spotDetail.locationInfo') }}</h3>
             <p class="desc">{{ spot.description }}</p>
             
-            <div class="permit-alert" v-if="spot.permit !== 'Tidak Perlu'">
-              ⚠️ <strong>PERMIT DIPERLUKAN:</strong> {{ spot.permit }}
+            <div class="permit-alert" v-if="spot.permit && spot.permit !== 'Tidak Perlu' && spot.permit !== 'No'">
+              ⚠️ <strong>{{ t('spotDetail.permitRequired') }}</strong> {{ spot.permit }}
             </div>
             <div class="free-alert" v-else>
-              ✅ <strong>PERCUMA:</strong> Tiada permit diperlukan.
+              ✅ <strong>{{ t('spotDetail.free') }}</strong> {{ t('spotDetail.noPermitNeeded') }}
             </div>
           </div>
           
-          <p class="contributor">Disumbangkan oleh: <strong>{{ spot.contributorName }}</strong></p>
+          <p class="contributor">
+            {{ t('spotDetail.contributedBy') }} <strong>{{ spot.contributorName }}</strong>
+          </p>
         </div>
 
         <div class="sidebar-info">
           <div class="map-card">
-            <h3>Lokasi Peta</h3>
-            <p>Klik untuk navigasi ke parking/trailhead.</p>
-            <a :href="spot.mapsLink" target="_blank" class="btn-waze">🗺️ Buka Google Maps / Waze</a>
+            <h3>{{ t('spotDetail.mapLocation') }}</h3>
+            <p>{{ t('spotDetail.mapDesc') }}</p>
+            <a :href="spot.mapsLink" target="_blank" class="btn-waze">
+              🗺️ {{ t('spotDetail.openMap') }}
+            </a>
           </div>
         </div>
       </div>
     </div>
 
-    <div v-else class="empty">Lokasi tidak dijumpai.</div>
+    <div v-else class="empty">{{ t('spotDetail.notFound') }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n'; // 🔥 Import I18n
 import { db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 
+const { t } = useI18n(); // 🔥 Init I18n
 const route = useRoute();
 const spot = ref<any>(null);
 const loading = ref(true);
+
+// Helper untuk translate level (sama macam page lain)
+const getLevelLabel = (level: string) => {
+  if (!level) return '';
+  const key = level.toLowerCase();
+  return t(`components.${key}`) !== `components.${key}` ? t(`components.${key}`) : level;
+};
 
 onMounted(async () => {
   const spotId = route.params.id as string;
@@ -74,7 +88,7 @@ onMounted(async () => {
 h1 { font-size: 3rem; margin: 0 0 1rem 0; text-shadow: 2px 2px 5px black; }
 
 .badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-.badge { padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.5); }
+.badge { padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.5); text-transform: uppercase;}
 
 .content-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: -50px; position: relative; z-index: 10; }
 .main-info { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }

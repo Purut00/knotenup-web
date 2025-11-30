@@ -300,5 +300,49 @@
     "taken": "已报",
     "viewPhotos": "查看所有照片",
     "viewProfile": "查看主页"
-  }
+  },
+  "spots": {
+  "title": "景点数据库",
+  "sub": "探索适合自由行 (F&E) 的山丘、河流和瀑布。",
+  "addBtn": "添加地点",
+  "searchPlaceholder": "搜索地点名称...",
+  "allStates": "所有州属",
+  "permit": "需要准证",
+  "noPermit": "无需准证",
+  "height": "高度",
+  "difficulty": "难度",
+  "empty": "未找到地点。"
+},
+"spotDetail": {
+  "locationInfo": "地点信息",
+  "permitRequired": "需要准证:",
+  "free": "免费:",
+  "noPermitNeeded": "无需准证。",
+  "contributedBy": "贡献者:",
+  "mapLocation": "地图位置",
+  "mapDesc": "点击导航至停车场/登山口。",
+  "openMap": "打开 Google Maps / Waze",
+  "notFound": "未找到地点。"
+},
+"createSpot": {
+  "title": "添加新地点",
+  "sub": "分享有关山丘、山脉或休闲胜地的信息。",
+  "nameLabel": "地点名称",
+  "namePlaceholder": "例如：Bukit Wawasan, Puchong",
+  "stateLabel": "州属",
+  "heightLabel": "高度 (米)",
+  "heightPlaceholder": "例如：400",
+  "diffLabel": "难度等级",
+  "permitLabel": "需要准证吗？",
+  "mapLabel": "Google Maps / Waze 链接 (停车场)",
+  "mapPlaceholder": "https://maps.google.com/...",
+  "imgLabel": "地点照片",
+  "uploadText": "📸 上传风景照片",
+  "descLabel": "附加信息 (提示, 停车, 检查站)",
+  "descPlaceholder": "告诉我们关于这个地方...",
+  "submitBtn": "保存地点",
+  "successMsg": "地点添加成功！",
+  "errorMsg": "请填写名称和州属。",
+  "uploading": "上传中..."
+}
 }

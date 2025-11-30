@@ -301,5 +301,49 @@
     "vehicleType": "Jenis Kenderaan",
     "whatsappAction": "WhatsApp Sekarang",
     "whatsappNote": "Klik untuk berurusan terus dengan pemilik."
-  }
+  },
+  "spots": {
+  "title": "Pangkalan Data Lokasi",
+  "sub": "Cari bukit, sungai, dan air terjun menarik (F&E).",
+  "addBtn": "Tambah Lokasi",
+  "searchPlaceholder": "Cari nama lokasi...",
+  "allStates": "Semua Negeri",
+  "permit": "Perlu Permit",
+  "noPermit": "Tanpa Permit",
+  "height": "Ketinggian",
+  "difficulty": "Kesukaran",
+  "empty": "Tiada lokasi dijumpai."
+},
+"spotDetail": {
+  "locationInfo": "Info Lokasi",
+  "permitRequired": "PERMIT DIPERLUKAN:",
+  "free": "PERCUMA:",
+  "noPermitNeeded": "Tiada permit diperlukan.",
+  "contributedBy": "Disumbangkan oleh:",
+  "mapLocation": "Lokasi Peta",
+  "mapDesc": "Klik untuk navigasi ke parking/trailhead.",
+  "openMap": "Buka Google Maps / Waze",
+  "notFound": "Lokasi tidak dijumpai."
+},
+"createSpot": {
+  "title": "Tambah Lokasi Baru",
+  "sub": "Kongsi maklumat bukit, gunung, atau tempat rekreasi menarik.",
+  "nameLabel": "Nama Lokasi",
+  "namePlaceholder": "Cth: Bukit Wawasan, Puchong",
+  "stateLabel": "Negeri",
+  "heightLabel": "Ketinggian (Meter)",
+  "heightPlaceholder": "Cth: 400",
+  "diffLabel": "Tahap Kesukaran",
+  "permitLabel": "Perlu Permit?",
+  "mapLabel": "Link Google Maps / Waze (Parking)",
+  "mapPlaceholder": "https://maps.google.com/...",
+  "imgLabel": "Gambar Lokasi",
+  "uploadText": "📸 Upload Gambar Pemandangan",
+  "descLabel": "Info Tambahan (Tips, Parking, Checkpoint)",
+  "descPlaceholder": "Ceritakan sikit pasal tempat ni...",
+  "submitBtn": "Simpan Lokasi",
+  "successMsg": "Lokasi berjaya ditambah!",
+  "errorMsg": "Sila isi nama dan negeri.",
+  "uploading": "Sedang Upload..."
+}
 }
