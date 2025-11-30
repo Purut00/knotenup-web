@@ -17,8 +17,18 @@
           <div class="post-content">
             <div class="meta">
               <span class="tag">{{ post.category }}</span> • 
-              <span class="author">{{ t('components.postedBy') }} {{ post.author }}</span> • 
-              <span class="time">{{ formatDate(post.createdAt) }}</span>
+              
+              <span class="author-wrapper">
+                 <span style="margin-right: 5px; color: #787c7e;">{{ t('components.postedBy') }}</span>
+                 
+                 <AuthorBadge 
+                   :userId="post.userId || post.authorId" 
+                   :fallbackName="post.author || post.userName"
+                   :fallbackAvatar="post.authorAvatar || post.userAvatar"
+                 />
+              </span>
+              
+              • <span class="time">{{ formatDate(post.createdAt) }}</span>
             </div>
             
             <h1>{{ post.title }}</h1>
@@ -61,11 +71,17 @@
                 </div>
 
                 <div class="comment-body-wrapper">
+                  
                   <div class="comment-meta">
-                    <img :src="comment.userAvatar || 'https://i.pravatar.cc/150?img=3'" class="comment-avatar">
-                    <strong>{{ comment.userName }}</strong>
-                    <span class="dot">•</span>
-                    <span class="time">{{ formatDate(comment.createdAt) }}</span>
+                    <AuthorBadge 
+                      :userId="comment.userId"
+                      :fallbackName="comment.userName"
+                      :fallbackAvatar="comment.userAvatar"
+                    >
+                       <template #subtext>
+                          <span class="time">{{ formatDate(comment.createdAt) }}</span>
+                       </template>
+                    </AuthorBadge>
                   </div>
                   
                   <p class="comment-text">{{ comment.text }}</p>
@@ -93,12 +109,19 @@
                   </div>
 
                   <div class="comment-body-wrapper">
+                    
                     <div class="comment-meta">
-                      <img :src="reply.userAvatar || 'https://i.pravatar.cc/150?img=3'" class="comment-avatar">
-                      <strong>{{ reply.userName }}</strong>
-                      <span class="dot">•</span>
-                      <span class="time">{{ formatDate(reply.createdAt) }}</span>
+                      <AuthorBadge 
+                        :userId="reply.userId"
+                        :fallbackName="reply.userName"
+                        :fallbackAvatar="reply.userAvatar"
+                      >
+                         <template #subtext>
+                            <span class="time">{{ formatDate(reply.createdAt) }}</span>
+                         </template>
+                      </AuthorBadge>
                     </div>
+
                     <p class="comment-text">{{ reply.text }}</p>
                   </div>
                 </div>
@@ -126,6 +149,7 @@ import { auth, db } from '../firebaseConfig';
 import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
 import { isSpam } from '../utils/spamFilter';
 import { checkRateLimit } from '../utils/rateLimiter';
+import AuthorBadge from '../components/common/AuthorBadge.vue'; // ✅ Import component
 
 const { t } = useI18n();
 const route = useRoute();
@@ -171,7 +195,7 @@ onMounted(async () => {
 const submitComment = async (parentId: string | null) => {
   if (!auth.currentUser) return;
   
-  const limitCheck = checkRateLimit('comment'); // 'comment' ialah nama kunci
+  const limitCheck = checkRateLimit('comment');
   if (!limitCheck.allowed) {
     alert(limitCheck.message);
     return;
@@ -189,6 +213,7 @@ const submitComment = async (parentId: string | null) => {
     await addDoc(collection(db, "forum_posts", postId, "comments"), {
       text: text,
       userId: auth.currentUser.uid,
+      // Simpan nama asal sebagai backup jika Firestore user tak jumpa
       userName: auth.currentUser.displayName || 'User',
       userAvatar: auth.currentUser.photoURL || '',
       createdAt: serverTimestamp(),
@@ -206,13 +231,13 @@ const submitComment = async (parentId: string | null) => {
 
   } catch (e) {
     console.error("Error comment:", e);
-    alert(t('forum.commentFailed') || "Error sending comment.");
+    // Guna key translation yang betul
+    alert(t('forum.commentFailed') || "Gagal hantar komen.");
   }
 };
 
 const voteComment = async (comment: any, val: number) => {
   if (!auth.currentUser) return alert(t('forum.loginToVote'));
-  comment.votes = (comment.votes || 0) + val;
   const commentRef = doc(db, "forum_posts", postId, "comments", comment.id);
   await updateDoc(commentRef, { votes: increment(val) });
 };
@@ -236,7 +261,6 @@ const copyLink = () => {
 </script>
 
 <style scoped>
-/* CSS KEKAL SAMA */
 .forum-detail-page { background-color: #dae0e6; min-height: 100vh; padding: 2rem 0; }
 .container { max-width: 800px; margin: 0 auto; padding: 0 1rem; }
 .main-post { background: white; border-radius: 4px; display: flex; overflow: hidden; border: 1px solid #ccc; margin-bottom: 1rem; }
@@ -245,7 +269,8 @@ const copyLink = () => {
 .vote-btn:hover { color: #e67e22; background: #eee; border-radius: 4px; }
 .score { font-weight: bold; margin: 5px 0; font-size: 0.9rem; }
 .post-content { padding: 1rem; flex: 1; }
-.meta { font-size: 0.75rem; color: #787c7e; margin-bottom: 0.5rem; }
+.meta { font-size: 0.75rem; color: #787c7e; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.author-wrapper { display: inline-flex; align-items: center; } /* Wrapper untuk AuthorBadge */
 .tag { background: #e1f5fe; color: #0288d1; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
 h1 { margin: 0 0 1rem 0; font-size: 1.4rem; color: #222; }
 .body-text { font-size: 1rem; line-height: 1.6; color: #1c1c1c; margin-bottom: 2rem; white-space: pre-line; }
@@ -265,10 +290,8 @@ textarea { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 
 .comment-vote button:hover { color: #e67e22; }
 .comment-vote span { font-size: 0.8rem; font-weight: bold; }
 .comment-body-wrapper { flex: 1; }
-.comment-meta { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; margin-bottom: 5px; }
-.comment-avatar { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; }
-.time { color: #999; font-size: 0.75rem; }
-.dot { color: #ccc; }
+.comment-meta { margin-bottom: 8px; }
+.time { color: #999; font-size: 0.7rem; font-weight: normal; margin-top: 2px;}
 .comment-text { font-size: 0.95rem; line-height: 1.4; margin-bottom: 0.5rem; color: #333; }
 .comment-actions button { border: none; background: none; color: #888; font-weight: bold; font-size: 0.8rem; cursor: pointer; padding: 0; }
 .comment-actions button:hover { text-decoration: underline; color: #333; }

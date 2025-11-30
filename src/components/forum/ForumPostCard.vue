@@ -19,7 +19,20 @@
       
       <div class="post-meta">
         <span class="category-tag" v-if="post.category">r/{{ post.category }}</span>
-        <span class="meta-text">Posted by u/{{ post.author }} {{ post.timeAgo }}</span>
+        
+        <span class="meta-wrapper">
+           <span style="margin-right: 4px;">• Posted by</span>
+           
+           <AuthorBadge 
+             :userId="post.userId || post.authorId" 
+             :fallbackName="post.author || post.userName"
+             :fallbackAvatar="post.authorAvatar || post.userAvatar"
+           >
+              <template #subtext>
+                 <span class="time-ago">{{ post.timeAgo }}</span>
+              </template>
+           </AuthorBadge>
+        </span>
       </div>
 
       <h3 class="post-title">{{ post.title }}</h3>
@@ -31,7 +44,6 @@
       </div>
 
       <div class="action-bar">
-        
         <button class="action-btn">
           <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
           {{ post.commentCount || 0 }} Comments
@@ -46,7 +58,6 @@
           <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
           Save
         </button>
-      
       </div>
     </div>
   </div>
@@ -55,6 +66,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import AuthorBadge from '../common/AuthorBadge.vue'; // Pastikan path betul
 
 const router = useRouter();
 const props = defineProps<{ post: any }>();
@@ -67,7 +79,6 @@ const goToDetail = () => {
 };
 
 const handleVote = (val: number) => {
-  // Logic vote (frontend simulation)
   if (userVote.value === val) {
     voteScore.value -= val;
     userVote.value = 0;
@@ -83,113 +94,24 @@ const handleShare = () => {
 </script>
 
 <style scoped>
-.forum-card {
-  display: flex;
-  background: white;
-  border: 1px solid #ccc; /* Border nipis macam Reddit */
-  border-radius: 4px; /* Radius sikit je */
-  margin-bottom: 10px; /* Jarak antara post */
-  cursor: pointer;
-  transition: border 0.2s;
-}
-
-.forum-card:hover {
-  border-color: #898989; /* Highlight bila hover */
-}
-
-/* VOTE SECTION (Kiri) */
-.vote-section {
-  width: 40px;
-  background-color: #f8f9fa;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 8px;
-  border-right: 1px solid #eee; /* Garis pemisah */
-}
-
-.vote-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #878a8c;
-  padding: 2px;
-  border-radius: 4px;
-}
-
+.forum-card { display: flex; background: white; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; cursor: pointer; transition: border 0.2s; }
+.forum-card:hover { border-color: #898989; }
+.vote-section { width: 40px; background-color: #f8f9fa; display: flex; flex-direction: column; align-items: center; padding-top: 8px; border-right: 1px solid #eee; }
+.vote-btn { background: none; border: none; cursor: pointer; color: #878a8c; padding: 2px; border-radius: 4px; }
 .vote-btn:hover { background-color: #e9ecef; }
-.vote-btn.up.active { color: #ff4500; } /* Reddit Orange */
-.vote-btn.down.active { color: #7193ff; } /* Reddit Blue */
-
-.icon { width: 24px; height: 24px; } /* Saiz arrow */
+.vote-btn.up.active { color: #ff4500; } 
+.vote-btn.down.active { color: #7193ff; } 
+.icon { width: 24px; height: 24px; } 
 .vote-count { font-weight: bold; font-size: 12px; margin: 4px 0; color: #1a1a1b; }
-
-/* CONTENT SECTION (Kanan) */
-.content-section {
-  padding: 8px 16px 8px 8px; /* Reddit padding */
-  flex-grow: 1;
-}
-
-.post-meta {
-  font-size: 12px;
-  color: #787c7e;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.category-tag {
-  font-weight: bold;
-  color: #1c1c1c;
-}
-.meta-text { color: #787c7e; }
-
-.post-title {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #222;
-  line-height: 22px;
-}
-
-.post-excerpt {
-  font-size: 14px;
-  color: #1c1c1c;
-  line-height: 21px;
-  margin-bottom: 10px;
-  
-  /* Line Clamp */
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Action Icons (Footer) */
-.action-bar {
-  display: flex;
-  gap: 4px;
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  color: #878a8c;
-  font-weight: 700;
-  font-size: 12px;
-  padding: 8px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.action-btn:hover {
-  background-color: #e8e8e8;
-}
-
+.content-section { padding: 8px 16px 8px 8px; flex-grow: 1; }
+.post-meta { font-size: 12px; color: #787c7e; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.meta-wrapper { display: flex; align-items: center; color: #787c7e; }
+.time-ago { font-size: 11px; color: #999; margin-left: 5px; }
+.category-tag { font-weight: bold; color: #1c1c1c; }
+.post-title { margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #222; line-height: 22px; }
+.post-excerpt { font-size: 14px; color: #1c1c1c; line-height: 21px; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.action-bar { display: flex; gap: 4px; }
+.action-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: #878a8c; font-weight: 700; font-size: 12px; padding: 8px; border-radius: 4px; cursor: pointer; }
+.action-btn:hover { background-color: #e8e8e8; }
 .icon-sm { width: 20px; height: 20px; }
 </style>

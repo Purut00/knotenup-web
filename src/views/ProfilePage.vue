@@ -92,7 +92,9 @@
                     <p>📍 {{ trip.location }}</p>
                     <span class="status-pill open">{{ t('trip.open') }}</span>
                   </div>
-                  <button class="btn-mini" @click="$router.push('/trips/' + trip.id)">{{ t('components.view') }}</button>
+                  <button class="btn-mini" @click="$router.push('/trips/' + trip.id)">
+                    {{ t('common.view') }}
+                  </button>
                 </div>
               </div>
               <div v-else class="empty-text">Tiada trip akan datang.</div>
@@ -110,7 +112,9 @@
                     <p>📍 {{ trip.location }}</p>
                     <span class="status-pill closed">Tamat</span>
                   </div>
-                  <button class="btn-mini outline" @click="$router.push('/trips/' + trip.id)">{{ t('components.view') }}</button>
+                  <button class="btn-mini outline" @click="$router.push('/trips/' + trip.id)">
+                    {{ t('common.view') }}
+                  </button>
                 </div>
               </div>
               <div v-else class="empty-text">Tiada sejarah trip.</div>
@@ -124,8 +128,8 @@
                      <span>💬 {{ post.commentCount || 0 }} • ❤️ {{ post.votes || 0 }}</span>
                    </div>
                    <div class="fr-actions" v-if="isOwnProfile">
-                      <button @click.stop="editPost(post.id)">✏️</button>
-                      <button @click.stop="deletePost(post.id)" class="del">🗑️</button>
+                     <button @click.stop="editPost(post.id)">✏️</button>
+                     <button @click.stop="deletePost(post.id)" class="del">🗑️</button>
                    </div>
                 </div>
               </div>
@@ -148,10 +152,10 @@
                    <h3 class="bc-name">{{ user.name }}</h3>
                    <span class="bc-role">OUTDOOR ORGANIZER</span>
                    <p v-if="user.organizerDetails.orgName && user.organizerDetails.orgName !== user.name" class="bc-company">
-                      {{ user.organizerDetails.orgName }}
+                     {{ user.organizerDetails.orgName }}
                    </p>
                    <p v-if="user.organizerDetails.ssm" class="bc-ssm">
-                      {{ user.organizerDetails.ssm }}
+                     {{ user.organizerDetails.ssm }}
                    </p>
                 </div>
              </div>
@@ -187,12 +191,12 @@
         
         <div class="standard-card emergency-card" id="capture-emergency">
            <div class="ec-header">
-              <h2>EMERGENCY INFO</h2>
-              <span>ID: {{ user.name }}</span>
+             <h2>EMERGENCY INFO</h2>
+             <span>ID: {{ user.name }}</span>
            </div>
            
            <div class="ec-body">
-              <div class="ec-main">
+             <div class="ec-main">
                  <div class="ec-row">
                     <label>NAMA:</label>
                     <strong>{{ user.name }}</strong>
@@ -211,13 +215,13 @@
                     <label>HUBUNGI KECEMASAN (WARIS):</label>
                     <strong style="color: #c0392b;">{{ user.emergencyContact || 'Belum ditetapkan' }}</strong>
                  </div>
-              </div>
-              <div class="ec-side">
+             </div>
+             <div class="ec-side">
                  <img :src="user.avatar" class="ec-avatar" crossorigin="anonymous" />
                  <div class="ec-qr-box">
                     <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://knotenup.com/user/${user.name}`" class="ec-qr" crossorigin="anonymous" />
                  </div>
-              </div>
+             </div>
            </div>
         </div>
 
@@ -251,7 +255,7 @@ const router = useRouter();
 // STATE MODALS
 const activeTab = ref('upcoming');
 const showCard = ref(false);
-const showEmergency = ref(false); // Pastikan variable ni ada!
+const showEmergency = ref(false); 
 
 const loadingData = ref(true);
 const isOwnProfile = ref(false);

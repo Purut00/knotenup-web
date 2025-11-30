@@ -191,7 +191,8 @@
     "share": "分享",
     "sidebarAbout": "关于社区",
     "sidebarTopic": "按活动筛选",
-    "writeComment": "写下你的看法..."
+    "writeComment": "写下你的看法...",
+    "commentFailed": "发布评论失败。请重试。"
   },
   "home": {
     "communityDiscuss": "社区讨论",

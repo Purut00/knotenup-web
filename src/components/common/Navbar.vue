@@ -85,18 +85,13 @@ const getFirstName = (name: string | null | undefined): string => {
   return name.split(' ')[0] || 'Profile'; 
 };
 
-// 🔥 FUNGSI TUKAR BAHASA (FIXED) 🔥
+// 🔥 FUNGSI TUKAR BAHASA 🔥
 const switchLanguage = () => {
-  // 1. Update i18n locale
   locale.value = currentLang.value;
-  // 2. Simpan dalam localStorage
   localStorage.setItem('user_lang', currentLang.value);
-  // 3. (Optional) Log untuk check jika ada error
-  console.log("Bahasa ditukar ke:", currentLang.value);
 };
 
-// 🔥 MONITOR PERUBAHAN 🔥
-// Kalau locale berubah dari tempat lain (contoh: Profile page), dropdown navbar pun ikut berubah
+// 🔥 MONITOR PERUBAHAN BAHASA 🔥
 watch(locale, (newVal) => {
   currentLang.value = newVal;
 });
@@ -113,14 +108,26 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser.value = user;
+      
+      // 🔥 CCTV DATABASE (REAL-TIME UPDATE) 🔥
       onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           userRole.value = data.role || 'user'; 
-          const dbName = data.name || data.fullName; 
-          displayName.value = getFirstName(dbName || user.displayName);
+          
+          // --- LOGIK "FIRESTORE FIRST" ---
+          // 1. Cari nama dalam database dulu (name atau fullName)
+          const firestoreName = data.name || data.fullName;
+          
+          // 2. Kalau database kosong, baru guna nama Google (user.displayName)
+          // 3. Kalau Google pun kosong, letak 'Profile'
+          const finalName = firestoreName ? firestoreName : (user.displayName || 'Profile');
+
+          // Set nama di navbar
+          displayName.value = getFirstName(finalName);
         }
       });
+      
     } else {
       currentUser.value = null;
       userRole.value = 'user';

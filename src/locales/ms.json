@@ -191,7 +191,9 @@
     "share": "Kongsi",
     "sidebarAbout": "Mengenai Komuniti",
     "sidebarTopic": "Tapis ikut Aktiviti",
-    "writeComment": "Tulis pendapat anda..."
+    "writeComment": "Tulis pendapat anda...",
+    "commentFailed": "Gagal menghantar komen. Sila cuba lagi."
+    
   },
   "home": {
     "communityDiscuss": "Perbincangan Komuniti",

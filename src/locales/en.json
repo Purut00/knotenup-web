@@ -152,7 +152,9 @@
     "replyPlaceholder": "Reply to this comment...",
     "loginToVote": "Please login to vote.",
     "loginToReply": "Please login to reply.",
-    "linkCopied": "Link copied!"
+    "linkCopied": "Link copied!",
+    "commentFailed": "Failed to post comment. Please try again."
+    
   },
   "request": {
     "title": "Trip Request Board",
