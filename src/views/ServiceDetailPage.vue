@@ -8,12 +8,30 @@
 
     <div v-else-if="service" class="content-container">
       
+      <!-- 🔥 HERO GALLERY (SAMA MACAM TRIP & SPOT) 🔥 -->
       <div class="hero-gallery-wrapper">
+        
+        <!-- Desktop Bento Grid -->
         <div class="desktop-gallery">
-          <div class="gallery-item main-item" :style="{ backgroundImage: `url(${displayImages[0]})` }"></div>
-          <div class="sub-gallery">
-            <div class="gallery-item" v-for="(img, index) in displayImages.slice(1, 5)" :key="index" :style="{ backgroundImage: `url(${img})` }"></div>
+          <div class="gallery-item main-item" 
+               :style="{ backgroundImage: `url(${displayImages[0]})` }"
+               @click="openLightbox(0)">
           </div>
+          <div class="sub-gallery">
+            <div class="gallery-item" 
+                 v-for="(img, index) in displayImages.slice(1, 5)" 
+                 :key="index" 
+                 :style="{ backgroundImage: `url(${img})` }"
+                 @click="openLightbox(index + 1)">
+            </div>
+          </div>
+          
+          <!-- Butang View Photos -->
+          <button class="btn-show-all" @click="openLightbox(0)">
+            🖼️ {{ t('service.viewPhotos') || 'Lihat Gambar' }}
+          </button>
+
+          <!-- Overlay Info -->
           <div class="gallery-overlay">
             <span class="badge-cat">{{ service.category }}</span>
             <h1>{{ service.name }}</h1>
@@ -21,10 +39,15 @@
           </div>
         </div>
 
+        <!-- Mobile Swiper -->
         <div class="mobile-gallery">
-          <swiper :modules="[Pagination]" :pagination="{ clickable: true }" class="detail-swiper">
+          <swiper 
+            :modules="[Pagination, Navigation]" 
+            :pagination="{ clickable: true }" 
+            class="detail-swiper"
+          >
             <swiper-slide v-for="(img, index) in displayImages" :key="index">
-              <div class="slide-bg" :style="{ backgroundImage: `url(${img})` }"></div>
+              <div class="slide-bg" :style="{ backgroundImage: `url(${img})` }" @click="openLightbox(index)"></div>
             </swiper-slide>
           </swiper>
           <div class="mobile-overlay">
@@ -159,6 +182,14 @@
       <button @click="$router.push('/directory')" class="btn-back">{{ t('service.backToDirectory') }}</button>
     </div>
 
+    <!-- 🔥 LIGHTBOX COMPONENT 🔥 -->
+    <VueEasyLightbox
+      :visible="visibleRef"
+      :imgs="displayImages"
+      :index="indexRef"
+      @hide="onHide"
+    />
+
   </div>
 </template>
 
@@ -168,29 +199,40 @@ import { useRoute } from 'vue-router';
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { useI18n } from 'vue-i18n'; // IMPORT I18N
+import { useI18n } from 'vue-i18n'; 
+
+// 🔥 Import VueEasyLightbox 🔥
+// @ts-ignore
+import VueEasyLightbox from 'vue-easy-lightbox';
 
 // Swiper
 // @ts-ignore
 import { Swiper, SwiperSlide } from 'swiper/vue';
 // @ts-ignore
-import { Pagination } from 'swiper/modules';
+import { Pagination, Navigation } from 'swiper/modules';
 // @ts-ignore
 import 'swiper/css';
 // @ts-ignore
 import 'swiper/css/pagination';
+// @ts-ignore
+import 'swiper/css/navigation';
 
-const { t } = useI18n(); // INIT I18N
+const { t } = useI18n(); 
 const route = useRoute();
 const serviceId = route.params.id as string;
 const service = ref<any>(null);
 const loading = ref(true);
 const currentUser = ref<any>(null);
 
+// 🔥 LIGHTBOX STATE 🔥
+const visibleRef = ref(false);
+const indexRef = ref(0);
+
 // Gambar Logic
 const displayImages = computed(() => {
   if (service.value?.images && service.value.images.length > 0) {
     let imgs = [...service.value.images];
+    // Pastikan grid sentiasa penuh (5 petak) walaupun gambar kurang
     while (imgs.length < 5) imgs.push(imgs[0]); 
     return imgs;
   }
@@ -207,6 +249,16 @@ const whatsappUrl = computed(() => {
 const isOwner = computed(() => {
   return currentUser.value && service.value && currentUser.value.uid === service.value.ownerId;
 });
+
+// 🔥 LIGHTBOX FUNCTIONS 🔥
+const openLightbox = (index: number) => {
+  indexRef.value = index;
+  visibleRef.value = true;
+};
+
+const onHide = () => {
+  visibleRef.value = false;
+};
 
 onMounted(async () => {
   onAuthStateChanged(auth, (user) => { currentUser.value = user; });
@@ -228,17 +280,25 @@ onMounted(async () => {
 .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* HERO GALLERY (Bento Style) */
+/* 🔥 HERO GALLERY (Bento Style - Updated CSS) 🔥 */
 .hero-gallery-wrapper { position: relative; margin-bottom: 2rem; padding: 1rem; }
-.desktop-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 400px; border-radius: 16px; overflow: hidden; position: relative; }
-.main-item { width: 100%; height: 100%; background-size: cover; background-position: center; }
+
+.desktop-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 400px; border-radius: 16px; overflow: hidden; position: relative; background: #000; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+.main-item { width: 100%; height: 100%; background-size: cover; background-position: center; cursor: pointer; transition: filter 0.2s; }
+.main-item:hover { filter: brightness(0.9); }
 .sub-gallery { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; }
-.gallery-item { background-size: cover; background-position: center; cursor: pointer; transition: 0.2s; }
+.gallery-item { background-size: cover; background-position: center; cursor: pointer; transition: filter 0.2s; position: relative; }
 .gallery-item:hover { filter: brightness(0.9); }
 
-.gallery-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 2rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; pointer-events: none; }
-.badge-cat { background: #e67e22; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
-h1 { margin: 10px 0; font-size: 2.5rem; font-weight: 800; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+/* Butang View Photos */
+.btn-show-all { position: absolute; bottom: 20px; right: 20px; background: white; border: 1px solid #333; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 5; transition: transform 0.2s; }
+.btn-show-all:hover { transform: scale(1.05); }
+
+/* Overlay */
+.gallery-overlay { position: absolute; bottom: 0; left: 0; width: 50%; padding: 2rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; pointer-events: none; }
+.badge-cat { background: #e67e22; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; display: inline-block; margin-bottom: 5px; }
+h1 { margin: 5px 0; font-size: 2.5rem; font-weight: 800; text-shadow: 0 2px 5px rgba(0,0,0,0.5); line-height: 1.2; }
+.hero-meta { font-size: 1rem; opacity: 0.9; }
 
 /* Mobile Gallery */
 .mobile-gallery { display: none; }
@@ -269,7 +329,8 @@ h1 { margin: 10px 0; font-size: 2.5rem; font-weight: 800; text-shadow: 0 2px 5px
 .alert-box { background: #e3f2fd; padding: 1rem; border-radius: 8px; color: #0d47a1; }
 
 /* Organizer */
-.organizer-card { background: white; padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem; border: 1px solid #eee; }
+.organizer-card { background: white; padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem; border: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+.organizer-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
 .org-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
 .org-info h4 { margin: 0; font-size: 1.1rem; }
 .btn-view-profile { margin-left: auto; border: 1px solid #ccc; background: white; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
@@ -292,10 +353,11 @@ h1 { margin: 10px 0; font-size: 2.5rem; font-weight: 800; text-shadow: 0 2px 5px
 
 /* MOBILE */
 @media (max-width: 768px) {
+  .hero-gallery-wrapper { padding: 0; margin-bottom: 1rem; }
   .desktop-gallery { display: none; }
-  .mobile-gallery { display: block; height: 250px; position: relative; }
+  .mobile-gallery { display: block; height: 300px; position: relative; }
   .detail-swiper, .slide-bg { height: 100%; background-size: cover; background-position: center; }
-  .mobile-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 1rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; z-index: 10; }
+  .mobile-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 1.5rem 1rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; z-index: 10; pointer-events: none; }
   .main-layout { grid-template-columns: 1fr; }
   .right-sidebar { position: static; margin-top: 2rem; }
 }

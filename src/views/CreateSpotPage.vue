@@ -1,29 +1,56 @@
 <template>
   <div class="create-layout">
     
+    <!-- LEFT PANEL: STEPS INDICATOR -->
     <div class="left-panel">
       <div class="overlay-content">
         <h1>{{ isEditMode ? t('createSpot.editTitle') : t('createSpot.title') }}</h1>
-        <p>{{ isEditMode ? 'Kemaskini maklumat lokasi untuk komuniti.' : t('createSpot.sub') }}</p>
+        <p>{{ isEditMode ? t('createSpot.editSub') : t('createSpot.sub') }}</p>
         
-        <div class="info-box">
-          <p>📍 Pastikan nama lokasi tepat.</p>
-          <p>📸 Gambar mestilah jelas & relevan.</p>
-          <p>🗺️ Fail GPX sangat membantu pendaki lain.</p>
+        <!-- Vertical Steps -->
+        <div class="steps-vertical">
+          <div class="step-item" :class="{ active: currentStep === 1, done: currentStep > 1 }">
+            <div class="dot">1</div>
+            <!-- FIX: Guna t() untuk langkah -->
+            <span>{{ t('createSpot.steps.step1') }}</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item" :class="{ active: currentStep === 2, done: currentStep > 2 }">
+            <div class="dot">2</div>
+            <!-- FIX: Guna t() untuk langkah -->
+            <span>{{ t('createSpot.steps.step2') }}</span>
+          </div>
+        </div>
+
+        <div class="info-box mt-8">
+          <!-- FIX: Guna t() untuk info box -->
+          <p>{{ t('createSpot.infoBox.name') }}</p>
+          <p>{{ t('createSpot.infoBox.photo') }}</p>
+          <p>{{ t('createSpot.infoBox.gpx') }}</p>
         </div>
       </div>
     </div>
 
+    <!-- RIGHT PANEL: FORM -->
     <div class="right-panel">
       <div class="form-wrapper">
         
         <div class="mobile-header">
-          <h2>{{ isEditMode ? 'Edit Lokasi' : 'Tambah Lokasi Baru' }}</h2>
+          <!-- FIX: Mobile header dynamic translation -->
+          <h2>
+            {{ t('createSpot.steps.mobileStep', { 
+              current: currentStep, 
+              total: 2, 
+              label: currentStep === 1 ? t('createSpot.steps.step1') : t('createSpot.steps.step2') 
+            }) }}
+          </h2>
         </div>
 
-        <div class="form-section fade-up">
-          <h2 class="section-title">Info Asas</h2>
-          <p class="section-subtitle">Maklumat penting tentang tempat ini.</p>
+        <!-- STEP 1: INFO ASAS -->
+        <div v-if="currentStep === 1" class="form-section fade-up">
+          <!-- FIX: Tajuk & Subtajuk Step 1 -->
+          <h2 class="section-title">{{ t('createSpot.section1.title') }}</h2>
+          <p class="section-subtitle">{{ t('createSpot.section1.subtitle') }}</p>
 
           <div class="input-wrap">
             <label>{{ t('createSpot.nameLabel') }}</label>
@@ -55,7 +82,7 @@
               </select>
             </div>
             <div class="input-wrap">
-              <label>{{ t('createSpot.heightLabel') }} (m)</label>
+              <label>{{ t('createSpot.heightLabel') }}</label>
               <input type="number" v-model="form.height" :placeholder="t('createSpot.heightPlaceholder')" class="clean-input" />
             </div>
           </div>
@@ -73,8 +100,8 @@
               <label>{{ t('createSpot.permitLabel') }}</label>
               <select v-model="form.permit" class="clean-input">
                 <option value="No">{{ t('spots.noPermit') }}</option>
-                <option value="Perlu (Pejabat Hutan)">Perlu (Pejabat Hutan)</option>
-                <option value="Perlu (Polis)">Perlu (Polis)</option>
+                <option value="Perlu (Pejabat Hutan)">{{ t('createSpot.permitOptions.forestry') }}</option>
+                <option value="Perlu (Polis)">{{ t('createSpot.permitOptions.police') }}</option>
               </select>
             </div>
           </div>
@@ -84,15 +111,15 @@
             <div class="radio-group">
                <label class="radio-card" :class="{ active: form.guideRequired === 'No' }">
                  <input type="radio" v-model="form.guideRequired" value="No" hidden>
-                 <span>Bebas (Sendiri)</span>
+                 <span>{{ t('createSpot.guideOptions.no') }}</span>
                </label>
                <label class="radio-card" :class="{ active: form.guideRequired === 'Optional' }">
                  <input type="radio" v-model="form.guideRequired" value="Optional" hidden>
-                 <span>Pilihan (Optional)</span>
+                 <span>{{ t('createSpot.guideOptions.optional') }}</span>
                </label>
                <label class="radio-card" :class="{ active: form.guideRequired === 'Yes' }">
                  <input type="radio" v-model="form.guideRequired" value="Yes" hidden>
-                 <span>Wajib Guide</span>
+                 <span>{{ t('createSpot.guideOptions.yes') }}</span>
                </label>
             </div>
           </div>
@@ -108,21 +135,32 @@
                <span class="icon">🗺️</span>
                <div class="file-info">
                  <span v-if="gpxFile">{{ gpxFile.name }}</span>
-                 <span v-else-if="form.gpxUrl" class="existing-file">Fail GPX sedia ada disimpan.</span>
-                 <span v-else>Klik untuk upload fail .gpx</span>
+                 <!-- FIX: Teks GPX sedia ada -->
+                 <span v-else-if="form.gpxUrl" class="existing-file">{{ t('createSpot.gpx.existing') }}</span>
+                 <span v-else>{{ t('createSpot.gpx.prompt') }}</span>
                </div>
                <input type="file" accept=".gpx" @change="handleGpxSelect" class="file-input-hidden" />
-               <button class="btn-browse">Pilih Fail</button>
+               <!-- FIX: Butang Pilih Fail -->
+               <button class="btn-browse">{{ t('createSpot.gpx.choose') }}</button>
             </div>
           </div>
+        </div>
 
-          <div class="form-group mt-4">
+        <!-- STEP 2: DETAIL & FOTO -->
+        <div v-if="currentStep === 2" class="form-section fade-up">
+          <!-- FIX: Tajuk & Subtajuk Step 2 -->
+          <h2 class="section-title">{{ t('createSpot.section2.title') }}</h2>
+          <p class="section-subtitle">{{ t('createSpot.section2.subtitle') }}</p>
+
+          <!-- IMAGE UPLOAD SECTION -->
+          <div class="form-group mb-8">
             <label class="section-title-small">📸 {{ t('createSpot.imagesLabel') }} (Max 10)</label>
             
-            <div class="multi-upload-grid">
+            <div class="multi-upload-grid mt-2">
               <div class="add-img-box" @click="triggerMultiUpload" v-if="previewImages.length < 10">
                 <span class="plus">+</span>
-                <span>Tambah</span>
+                <!-- FIX: Teks 'Tambah' -->
+                <span>{{ t('createSpot.addPhoto') }}</span>
               </div>
               <input type="file" ref="multiFileInput" multiple accept="image/*" @change="handleImageSelect" hidden />
 
@@ -133,18 +171,75 @@
             </div>
           </div>
 
-          <div class="input-wrap mt-4">
-            <label>{{ t('createSpot.descLabel') }}</label>
-            <textarea v-model="form.description" rows="5" :placeholder="t('createSpot.descPlaceholder')" class="clean-input"></textarea>
-          </div>
+          <hr class="separator my-6 border-gray-100" />
 
+          <!-- INFO SECTIONS -->
+          <div class="details-stack space-y-6">
+            
+            <!-- 1. Tips -->
+            <div class="input-wrap">
+              <!-- FIX: Label Tips -->
+              <label>💡 {{ t('createSpot.labels.tips') }}</label>
+              <textarea 
+                v-model="form.tips" 
+                rows="2" 
+                :placeholder="t('createSpot.placeholders.tips')" 
+                class="clean-input"
+              ></textarea>
+            </div>
+
+            <!-- 2. Parking -->
+            <div class="input-wrap">
+              <!-- FIX: Label Parking -->
+              <label>🚗 {{ t('createSpot.labels.parking') }}</label>
+              <input 
+                type="text" 
+                v-model="form.parking" 
+                :placeholder="t('createSpot.placeholders.parking')" 
+                class="clean-input" 
+              />
+            </div>
+
+            <!-- 3. Checkpoint Detail -->
+            <div class="input-wrap">
+              <!-- FIX: Label Checkpoint -->
+              <label>📍 {{ t('createSpot.labels.checkpoint') }}</label>
+              <textarea 
+                v-model="form.checkpointDetail" 
+                rows="3" 
+                :placeholder="t('createSpot.placeholders.checkpoint')" 
+                class="clean-input"
+              ></textarea>
+            </div>
+
+            <!-- 4. Additional Info -->
+            <div class="input-wrap">
+              <!-- FIX: Label Lain-lain -->
+              <label>📝 {{ t('createSpot.labels.other') }}</label>
+              <textarea 
+                v-model="form.description" 
+                rows="4" 
+                :placeholder="t('createSpot.descPlaceholder')" 
+                class="clean-input"
+              ></textarea>
+            </div>
+
+          </div>
         </div>
 
+        <!-- ACTION BAR -->
         <div class="action-bar">
-          <button class="btn-text" @click="$router.back()">{{ t('common.cancel') }}</button>
+          <button v-if="currentStep === 1" class="btn-text" @click="$router.back()">{{ t('common.cancel') }}</button>
+          <button v-if="currentStep === 2" class="btn-text" @click="prevStep">{{ t('common.back') }}</button>
+          
           <div class="spacer"></div>
-          <button class="btn-pill finish" @click="submitSpot" :disabled="loading">
-            {{ loading ? t('createSpot.uploading') : (isEditMode ? 'Hantar Cadangan' : t('createSpot.submitBtn')) }}
+          
+          <button v-if="currentStep === 1" class="btn-pill" @click="nextStep">
+            {{ t('common.next') }} &rarr;
+          </button>
+          
+          <button v-if="currentStep === 2" class="btn-pill finish" @click="submitSpot" :disabled="loading">
+            {{ loading ? t('createSpot.uploading') : (isEditMode ? t('createSpot.editTitle') : t('createSpot.submitBtn')) }}
           </button>
         </div>
 
@@ -167,6 +262,7 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 
+const currentStep = ref(1); 
 const loading = ref(false);
 const duplicateWarning = ref(false);
 const isEditMode = ref(false);
@@ -180,9 +276,23 @@ const existingImageUrls = ref<string[]>([]);
 const gpxFile = ref<File | null>(null);
 
 const form = reactive({
-  name: '', via: '', state: '', height: null, difficulty: 'Moderate',
-  permit: 'No', guideRequired: 'No', mapsLink: '', description: '',
-  images: [] as string[], gpxUrl: ''
+  name: '', 
+  via: '', 
+  state: '', 
+  height: null, 
+  difficulty: 'Moderate',
+  permit: 'No', 
+  guideRequired: 'No', 
+  mapsLink: '', 
+  
+  // New Fields
+  tips: '',
+  parking: '',
+  checkpointDetail: '',
+  description: '', 
+
+  images: [] as string[], 
+  gpxUrl: ''
 });
 
 onMounted(async () => {
@@ -202,6 +312,21 @@ onMounted(async () => {
     finally { loading.value = false; }
   }
 });
+
+// Navigation Functions
+const nextStep = () => {
+  if (!form.name || !form.state) {
+    alert(t('createSpot.alerts.fillNameState'));
+    return;
+  }
+  currentStep.value = 2;
+  window.scrollTo(0, 0);
+};
+
+const prevStep = () => {
+  currentStep.value = 1;
+  window.scrollTo(0, 0);
+};
 
 const triggerMultiUpload = () => { multiFileInput.value?.click(); };
 
@@ -247,8 +372,7 @@ const checkDuplicate = async () => {
 
 const submitSpot = async () => {
   if (!auth.currentUser) return alert(t('auth.loginRequired'));
-  if (!form.name || !form.state) return alert(t('createSpot.errorMsg'));
-  if (duplicateWarning.value && !isEditMode.value) return alert("Lokasi sudah wujud.");
+  
   if (isSpam(form.name) || isSpam(form.description) || isSpam(form.via)) return alert(t('createSpot.spamDetected'));
 
   loading.value = true;
@@ -272,7 +396,7 @@ const submitSpot = async () => {
     }
 
     const spotData = {
-      ...form,
+      ...form, 
       images: finalImages,
       image: finalImages[0] || '',
       gpxUrl: gpxDownloadUrl,
@@ -288,7 +412,7 @@ const submitSpot = async () => {
         votes: 0,
         verifiedUsers: []
       });
-      alert("Cadangan kemaskini dihantar! Perlu 5 pengesahan.");
+      alert(t('createSpot.alerts.suggestionSent'));
       router.push('/spots/' + spotId);
     } else {
       await addDoc(collection(db, 'spots'), {
@@ -310,12 +434,13 @@ const submitSpot = async () => {
 </script>
 
 <style scoped>
-/* 🔥 SPLIT SCREEN THEME 🔥 */
+/* 🔥 SPLIT SCREEN THEME (Sama macam Create Trip) 🔥 */
 .create-layout { display: flex; min-height: 100vh; background: #fff; overflow: hidden; }
 
+/* LEFT PANEL */
 .left-panel {
   width: 40%;
-  background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000&auto=format&fit=crop'); /* Gambar Gunung */
+  background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000&auto=format&fit=crop');
   background-size: cover; background-position: center; height: 100vh;
   display: flex; flex-direction: column; justify-content: flex-start; 
   padding: 4rem; padding-top: 20vh; color: white; position: relative;
@@ -325,9 +450,18 @@ const submitSpot = async () => {
 .left-panel h1 { font-size: 3rem; margin: 0 0 15px 0; line-height: 1.1; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
 .left-panel p { opacity: 0.9; font-size: 1.1rem; }
 
-.info-box { margin-top: 2rem; background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); }
+/* STEPS VERTICAL (From Create Trip) */
+.steps-vertical { margin-top: 3rem; display: flex; flex-direction: column; gap: 0; }
+.step-item { display: flex; align-items: center; gap: 15px; opacity: 0.5; transition: opacity 0.3s; min-height: 40px; }
+.step-item.active { opacity: 1; font-weight: bold; }
+.step-item.done .dot { background: #2ecc71; border-color: #2ecc71; color: #2c3e50; font-weight: bold; }
+.dot { width: 32px; height: 32px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); }
+.step-line { width: 2px; height: 30px; background: rgba(255,255,255,0.3); margin-left: 15px; }
+
+.info-box { background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); }
 .info-box p { font-size: 0.9rem; margin-bottom: 5px; opacity: 1; }
 
+/* RIGHT PANEL */
 .right-panel { width: 60%; height: 100vh; overflow-y: auto; position: relative; background: #ffffff; }
 .form-wrapper { max-width: 650px; margin: 0 auto; padding: 4rem 3rem 120px 3rem; }
 .mobile-header { display: none; }
