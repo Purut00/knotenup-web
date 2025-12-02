@@ -1,7 +1,7 @@
 // Senarai Kategori Mengikut Group
 export const ACTIVITY_CATEGORIES = [
   {
-    group: "⛰️ Land & Mountain",
+    group: " Land & Mountain",
     items: [
       "Hiking",
       "Climbing",
@@ -14,7 +14,7 @@ export const ACTIVITY_CATEGORIES = [
     ]
   },
   {
-    group: "🌊 Water & Coast",
+    group: " Water & Coast",
     items: [
       "Kayaking",
       "Rafting",
@@ -26,7 +26,7 @@ export const ACTIVITY_CATEGORIES = [
     ]
   },
   {
-    group: "💨 Air & Extreme",
+    group: " Air & Extreme",
     items: [
       "Skydiving",
       "Paragliding",
@@ -36,12 +36,14 @@ export const ACTIVITY_CATEGORIES = [
     ]
   },
   {
-    group: "🎓 Course & Skills",
+    group: " Course & Skills",
     items: [
       "First Aid / CPR",
       "Survival Skills",
       "Outrec (Outdoor Recreation)",
-      "Rope Management"
+      "Rope Management",
+      "Wilderness Navigation",
+      "Team Building"
     ]
   }
 ];

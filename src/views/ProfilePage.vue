@@ -89,7 +89,12 @@
                   </div>
                   <div class="cc-info">
                     <h4>{{ trip.title }}</h4>
-                    <p>📍 {{ trip.location }}</p>
+                    <p>📍 {{ trip.destination || trip.location }}</p>
+                    
+                    <!-- Badge Khas -->
+                    <span v-if="trip.organizerId === user.id" class="status-pill organizer">Organizer</span>
+                    <span v-else class="status-pill participant">Peserta</span>
+                    
                     <span class="status-pill open">{{ t('trip.open') }}</span>
                   </div>
                   <button class="btn-mini" @click="$router.push('/trips/' + trip.id)">
@@ -109,7 +114,7 @@
                   </div>
                   <div class="cc-info">
                     <h4>{{ trip.title }}</h4>
-                    <p>📍 {{ trip.location }}</p>
+                    <p>📍 {{ trip.destination || trip.location }}</p>
                     <span class="status-pill closed">Tamat</span>
                   </div>
                   <button class="btn-mini outline" @click="$router.push('/trips/' + trip.id)">
@@ -284,6 +289,7 @@ const fetchUserData = async (targetUserId: string) => {
   loadingData.value = true;
   upcomingTrips.value = []; historyTrips.value = []; myPosts.value = [];
   try {
+    // 1. Fetch User Data
     const docSnap = await getDoc(doc(db, "users", targetUserId));
     if (docSnap.exists()) { 
         const data = docSnap.data();
@@ -294,18 +300,44 @@ const fetchUserData = async (targetUserId: string) => {
     } 
     else { user.name = 'User Tidak Dijumpai'; }
 
-    const qTrip = query(collection(db, "trips"), where("organizerId", "==", targetUserId));
-    const snapTrip = await getDocs(qTrip);
-    const today = new Date();
-    snapTrip.forEach(doc => {
-      const data = doc.data(); const trip = { id: doc.id, ...data }; const tripDate = new Date(data.startDate);
-      if (tripDate >= today) upcomingTrips.value.push(trip); else historyTrips.value.push(trip);
-    });
-    upcomingTrips.value.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    // 2. 🔥 FETCH TRIPS (GABUNGAN ORGANIZER + PARTICIPANT) 🔥
+    // Kita guna Map untuk elak duplikasi kalau user adalah organizer DAN participant (walaupun jarang berlaku)
+    const tripMap = new Map();
 
+    // A. Cari Trip di mana user adalah Organizer
+    const qOrganizer = query(collection(db, "trips"), where("organizerId", "==", targetUserId));
+    const snapOrganizer = await getDocs(qOrganizer);
+    snapOrganizer.forEach(doc => tripMap.set(doc.id, { id: doc.id, ...doc.data() }));
+
+    // B. Cari Trip di mana user adalah Peserta (Request Accepted)
+    const qParticipant = query(collection(db, "trips"), where("participants", "array-contains", targetUserId));
+    const snapParticipant = await getDocs(qParticipant);
+    snapParticipant.forEach(doc => tripMap.set(doc.id, { id: doc.id, ...doc.data() }));
+
+    const today = new Date();
+    // Convert Map kembali ke Array dan filter ikut tarikh
+    Array.from(tripMap.values()).forEach((trip: any) => {
+      const tripDate = new Date(trip.startDate);
+      // Reset jam supaya perbandingan tarikh adil
+      tripDate.setHours(0,0,0,0);
+      today.setHours(0,0,0,0);
+
+      if (tripDate >= today) {
+        upcomingTrips.value.push(trip);
+      } else {
+        historyTrips.value.push(trip);
+      }
+    });
+
+    // Sort: Upcoming (Terdekat dulu), History (Terbaru dulu)
+    upcomingTrips.value.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    historyTrips.value.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+
+    // 3. Fetch Forum Posts
     const qPost = query(collection(db, "forum_posts"), where("authorId", "==", targetUserId), orderBy("createdAt", "desc"));
     const snapPost = await getDocs(qPost);
     myPosts.value = snapPost.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
   } catch (e) { console.error("Error profile:", e); } 
   finally { loadingData.value = false; }
 };
@@ -409,9 +441,13 @@ const shareCard = () => { navigator.clipboard.writeText(`https://knotenup.com/us
 .cc-info { flex: 1; }
 .cc-info h4 { margin: 0 0 3px 0; font-size: 0.95rem; color: #333; }
 .cc-info p { margin: 0; font-size: 0.8rem; color: #777; }
-.status-pill { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-top: 3px; display: inline-block; }
+/* 🔥 NEW STATUS PILL STYLE 🔥 */
+.status-pill { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-top: 3px; display: inline-block; margin-right: 5px; }
 .status-pill.open { background: #d4edda; color: #155724; }
 .status-pill.closed { background: #e2e3e5; color: #383d41; }
+.status-pill.organizer { background: #cce5ff; color: #004085; }
+.status-pill.participant { background: #fff3cd; color: #856404; }
+
 .btn-mini { padding: 5px 10px; font-size: 0.8rem; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; }
 .btn-mini.outline { background: transparent; border: 1px solid #ccc; color: #555; }
 .forum-layout { display: flex; flex-direction: column; gap: 0; }

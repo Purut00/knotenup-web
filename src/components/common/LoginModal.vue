@@ -13,17 +13,8 @@
           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G" />
           {{ t('auth.continueWith', { provider: 'Google' }) }}
         </button>
-
-        <button class="social-btn facebook" @click="loginWith('facebook')">
-          <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" alt="F" />
-          {{ t('auth.continueWith', { provider: 'Facebook' }) }}
-        </button>
-
-        <button class="social-btn apple" @click="loginWith('apple')">
-          <img src="https://www.svgrepo.com/show/445606/apple-logo.svg" alt="A" />
-          {{ t('auth.continueWith', { provider: 'Apple' }) }}
-        </button>
-      </div>
+        
+        </div>
 
       <p class="disclaimer">
         {{ t('auth.disclaimer') }}
@@ -34,11 +25,12 @@
 
 <script setup lang="ts">
 import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider, facebookProvider, appleProvider } from "../../firebaseConfig";
+import { auth, googleProvider, facebookProvider, appleProvider, db } from "../../firebaseConfig";
 import { useRouter } from "vue-router";
-import { useI18n } from 'vue-i18n'; // Import
+import { useI18n } from 'vue-i18n';
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 
-const { t } = useI18n(); // Activate
+const { t } = useI18n();
 const emit = defineEmits(['close']);
 const router = useRouter();
 
@@ -53,10 +45,8 @@ const loginWith = async (providerName: string) => {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
     
-    // Simpan info user
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userName', user.displayName || 'User');
-    localStorage.setItem('userPhoto', user.photoURL || '');
+    // Simpan User ke Firestore
+    await saveUserToDB(user);
 
     alert(`Welcome, ${user.displayName}!`);
     emit('close'); 
@@ -64,13 +54,37 @@ const loginWith = async (providerName: string) => {
 
   } catch (error: any) {
     console.error("Login Error:", error);
-    alert("Login failed / API Key not set yet.");
+    alert("Login failed.");
+  }
+};
+
+// Fungsi Simpan ke Database
+const saveUserToDB = async (user: any) => {
+  try {
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      // User Baru: Cipta dokumen
+      await setDoc(userRef, {
+        name: user.displayName || 'User',
+        email: user.email,
+        avatar: user.photoURL || '',
+        role: 'user', // Default role
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp()
+      });
+    } else {
+      // User Lama: Update masa login
+      await setDoc(userRef, { lastLogin: serverTimestamp() }, { merge: true });
+    }
+  } catch (e) {
+    console.error("Error saving user:", e);
   }
 };
 </script>
 
 <style scoped>
-/* CSS KEKAL SAMA - Copy dari sebelum ini */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(3px); }
 .login-card { background: white; width: 100%; max-width: 400px; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; position: relative; }
 .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #999; }
@@ -80,9 +94,5 @@ const loginWith = async (providerName: string) => {
 .social-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 0.8rem; border-radius: 50px; font-weight: 600; font-size: 1rem; cursor: pointer; border: 1px solid #ddd; background: white; color: #333; transition: transform 0.1s, background 0.2s; }
 .social-btn:hover { background-color: #f7f7f7; transform: scale(1.02); }
 .social-btn img { width: 20px; height: 20px; }
-.social-btn.facebook { border-color: #1877F2; color: #1877F2; }
-.social-btn.facebook:hover { background: #1877F2; color: white; }
-.social-btn.apple { border-color: #000; color: #000; }
-.social-btn.apple:hover { background: #000; color: white; }
 .disclaimer { margin-top: 2rem; font-size: 0.75rem; color: #999; }
 </style>
