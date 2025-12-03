@@ -49,6 +49,35 @@
             <p v-else class="empty-text">Tiada laporan baru.</p>
           </div>
         </div>
+
+        <div class="pending-organizers-section" style="margin-top: 2rem; background: #2c3e50; padding: 1.5rem; border-radius: 8px;">
+          <h3 style="color: #f1c40f;">⏳ Permohonan Organizer (Pending)</h3>
+          
+          <div v-if="pendingOrganizers.length > 0" class="data-table-wrapper" style="margin-top: 1rem;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nama User</th>
+                  <th>Nama Organisasi</th>
+                  <th>SSM / Lesen</th>
+                  <th>Tindakan</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="user in pendingOrganizers" :key="user.id">
+                  <td>{{ user.name }}</td>
+                  <td>{{ user.organizerDetails?.orgName }}</td>
+                  <td>{{ user.organizerDetails?.ssm || user.organizerDetails?.license }}</td>
+                  <td>
+                    <button class="btn-save" @click="approveOrganizer(user)">✅ Luluskan</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p v-else class="empty-text">Tiada permohonan baru.</p>
+        </div>
+
       </div>
 
       <div v-if="activeTab === 'spots'" class="tab-content">
@@ -156,7 +185,7 @@
       </div>
 
     </div>
-    <div v-else class="loading"><p>Checking access...</p></div>
+    <div v-else class="loading"><p>Semakan akses...</p></div>
   </div>
 </template>
 
@@ -165,7 +194,7 @@ import { ref, reactive, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db, storage } from '../firebaseConfig'; 
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, getDocs, deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const router = useRouter();
@@ -175,14 +204,13 @@ const searchQuery = ref('');
 const adminNote = ref('');
 
 const trips = ref<any[]>([]);
-const spots = ref<any[]>([]); // Data Spots
+const spots = ref<any[]>([]); 
 const users = ref<any[]>([]);
 const reports = ref<any[]>([]); 
-const requests = ref<any[]>([]); // Trip Requests
+const requests = ref<any[]>([]); 
 
 const loading = reactive({ slide: false, saveAll: false, small1: false, small2: false });
 
-// Banner Data Structure
 const banners = reactive({
   largeSlides: [] as any[], 
   small1: { imageUrl: '', linkUrl: '', file: null as File | null },
@@ -191,9 +219,7 @@ const banners = reactive({
 
 const newSlide = reactive({ file: null as File | null, title: '', linkUrl: '' });
 
-const ADMIN_EMAILS = ["knotenup@gmail.com", "admin@knotenup.com"];
-
-// --- COMPUTED PROPERTIES ---
+// 🔥 COMPUTED: Pending Organizers (Untuk Table Kelulusan) 🔥
 const filteredTrips = computed(() => {
   if (!searchQuery.value) return trips.value;
   return trips.value.filter(t => t.title.toLowerCase().includes(searchQuery.value.toLowerCase()));
@@ -204,15 +230,33 @@ const filteredSpots = computed(() => {
   return spots.value.filter(s => s.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
 });
 
+const pendingOrganizers = computed(() => {
+  return users.value.filter(u => u.organizerStatus === 'pending');
+});
+
 onMounted(() => {
   adminNote.value = localStorage.getItem('adminNote') || '';
+  
   onAuthStateChanged(auth, async (user) => {
-    if (user && user.email && ADMIN_EMAILS.includes(user.email)) {
-      isAdmin.value = true;
-      loadData();
-      loadBanners();
+    if (user) {
+      try {
+        // 🔥 UPDATE: Cek Admin dari Database (Bukan Hardcoded) 🔥
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists() && userDoc.data().role === 'admin') {
+          isAdmin.value = true;
+          loadData();
+          loadBanners();
+        } else {
+          alert("Akses Ditolak. Halaman ini hanya untuk Admin.");
+          router.push('/');
+        }
+      } catch (e) {
+        console.error("Ralat cek admin:", e);
+        router.push('/');
+      }
     } else {
-      alert("Akses Ditolak.");
       router.push('/');
     }
   });
@@ -229,7 +273,7 @@ const loadData = async () => {
   reports.value = repSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
   const userSnap = await getDocs(collection(db, "users"));
-  users.value = userSnap.docs.map(d => d.data());
+  users.value = userSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
   const reqSnap = await getDocs(collection(db, "trip_requests"));
   requests.value = reqSnap.docs.map(d => d.data());
@@ -256,13 +300,36 @@ const deleteTrip = async (id: string) => {
   } 
 };
 
-// 🔥 FUNGSI ADMIN DELETE SPOT 🔥
 const deleteSpot = async (id: string) => {
    if(confirm("AMARAN: Anda pasti mahu memadam lokasi ini? Tindakan ini kekal.")) {
       await deleteDoc(doc(db, "spots", id));
       spots.value = spots.value.filter(s => s.id !== id);
       alert("Lokasi dipadam.");
    }
+};
+
+// 🔥 FUNGSI APPROVE ORGANIZER (Dari Fix No. 1) 🔥
+const approveOrganizer = async (targetUser: any) => {
+  if(!confirm(`Luluskan ${targetUser.name} sebagai Organizer?`)) return;
+  
+  try {
+    await updateDoc(doc(db, "users", targetUser.id), {
+      role: 'organizer', 
+      organizerStatus: 'approved',
+      'organizerDetails.verifiedAt': new Date()
+    });
+    
+    alert("Berjaya diluluskan!");
+    // Update data setempat tanpa reload
+    const index = users.value.findIndex(u => u.id === targetUser.id);
+    if (index !== -1) {
+      users.value[index].role = 'organizer';
+      users.value[index].organizerStatus = 'approved';
+    }
+  } catch (e) {
+    console.error(e);
+    alert("Gagal update.");
+  }
 };
 
 // --- BANNER LOGIC ---

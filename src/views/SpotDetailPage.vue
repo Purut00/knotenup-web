@@ -4,10 +4,8 @@
     
     <div v-else-if="spot" class="spot-container">
       
-      <!-- 🔥 HEADER GALLERY 🔥 -->
       <div class="hero-gallery-wrapper">
         
-        <!-- Desktop Gallery -->
         <div class="desktop-gallery">
           <div class="gallery-item main-item" 
                :style="{ backgroundImage: `url(${displayImages[0]})` }"
@@ -23,7 +21,6 @@
           </div>
           
           <button class="btn-show-all" @click="openLightbox(0)">
-            <!-- UPDATED: Guna key baru -->
             🖼️ {{ t('spotDetail.viewPhotos') }}
           </button>
           
@@ -37,7 +34,6 @@
           </div>
         </div>
 
-        <!-- Mobile Gallery -->
         <div class="mobile-gallery">
           <swiper
             :modules="[Pagination, Navigation]"
@@ -59,7 +55,6 @@
         </div>
       </div>
 
-      <!-- Content Wrapper -->
       <div class="content-wrapper container">
         
         <div class="main-info">
@@ -71,7 +66,6 @@
                  <button class="btn-translate" @click="toggleTranslation" :disabled="translating">
                     <span v-if="translating">⏳...</span>
                     <span v-else>
-                      <!-- UPDATED -->
                       {{ showingTranslation ? t('spotDetail.original') : t('spotDetail.translate') }}
                     </span>
                  </button>
@@ -85,7 +79,6 @@
             <p class="desc">
               {{ showingTranslation ? translatedDesc : spot.description }}
             </p>
-            <!-- UPDATED -->
             <p v-if="translationError" class="trans-error"><small>⚠️ {{ t('spotDetail.translationError') }}</small></p>
             
             <div class="extra-info-grid">
@@ -117,30 +110,25 @@
                     </div>
                  </div>
                  
-                 <!-- UPDATED -->
                  <button class="btn-history" @click="showHistory = true">📜 {{ t('spotDetail.viewHistory') }}</button>
               </div>
 
               <p v-if="spot.lastEditedBy" class="edited-text">
-                  <!-- UPDATED -->
                   🔄 {{ t('spotDetail.lastUpdatedBy') }}: <strong>{{ spot.lastEditedBy }}</strong>
               </p>
           </div>
 
           <div class="review-section">
-            <!-- UPDATED -->
             <h3>💬 {{ t('spotDetail.reviewsTitle') }}</h3>
             <div class="review-form" v-if="auth.currentUser">
                <div class="star-input">
                   <span v-for="n in 5" :key="n" @click="newRating = n" :class="{ filled: n <= newRating }">★</span>
                </div>
-               <!-- UPDATED: Placeholder -->
                <textarea v-model="newReviewText" :placeholder="t('spotDetail.shareExperiencePlaceholder')"></textarea>
-               <!-- UPDATED -->
                <button @click="submitReview" :disabled="!newReviewText || newRating === 0" class="btn-submit-review">{{ t('spotDetail.submitReview') }}</button>
             </div>
-            <!-- UPDATED -->
             <div v-else class="login-alert">🔒 {{ t('spotDetail.loginToReview') }}</div>
+            
             <div class="review-list">
                <div v-for="review in sortedReviews" :key="review.id" class="review-item">
                   <div class="review-header" @click="goToProfile(review.userId)">
@@ -156,11 +144,9 @@
                           <span class="vote-count" :class="{ positive: (review.votes||0)>0 }">{{ review.votes || 0 }}</span>
                           <button class="vote-btn down" @click="voteReview(review, -1)">▼</button>
                       </div>
-                      <!-- UPDATED -->
                       <button v-if="(auth.currentUser && auth.currentUser.uid === review.userId) || isAdmin" @click="deleteReview(review.id)" class="btn-delete-review">🗑️ {{ t('common.delete') }}</button>
                   </div>
                </div>
-               <!-- UPDATED -->
                <p v-if="reviews.length === 0" class="no-reviews">{{ t('spotDetail.noReviews') }}</p>
             </div>
           </div>
@@ -169,10 +155,8 @@
         <div class="sidebar-info">
           
           <div class="pending-updates-box" v-if="suggestions.length > 0">
-              <!-- UPDATED -->
               <div class="update-header">🚧 {{ t('spotDetail.pendingUpdates') }}</div>
               <div v-for="sugg in suggestions" :key="sugg.id" class="suggestion-card">
-                 <!-- UPDATED -->
                  <p class="sugg-author">{{ t('spotDetail.suggestedBy') }}: <strong>{{ sugg.suggestedBy }}</strong></p>
                  <div class="progress-bar">
                    <div class="progress-fill" :style="{ width: (sugg.votes / 5) * 100 + '%' }"></div>
@@ -183,11 +167,9 @@
                        <span class="text-green">✅ {{ sugg.votes || 0 }}</span> / 
                        <span class="text-red">❌ {{ sugg.rejectVotes || 0 }}</span>
                     </span>
-                    <!-- UPDATED -->
                     <button @click="openCheckModal(sugg)" class="btn-verify">🔍 {{ t('spotDetail.verifyVote') }}</button>
                  </div>
                  <div v-if="isAdmin" class="admin-bypass-actions">
-                    <!-- UPDATED -->
                     <button class="btn-approve-admin" @click="finalizeUpdate(sugg, true)">⚡ {{ t('spotDetail.force') }}</button>
                     <button class="btn-reject-admin" @click="adminReject(sugg)">✖ {{ t('common.reject') }}</button>
                  </div>
@@ -195,17 +177,14 @@
           </div>
 
           <div class="map-card" v-if="spot.gpxUrl">
-            <!-- UPDATED -->
             <h3>{{ t('spotDetail.trailMapGpx') }}</h3>
             <div class="gpx-stats" v-if="gpxData.distance !== '0.00'">
                <div class="stat-row">
-                 <!-- UPDATED -->
                  <div class="stat-box"><span class="label">📏 {{ t('spotDetail.distance') }}</span><span class="value">{{ gpxData.distance }} <small>km</small></span></div>
                  <div class="stat-box"><span class="label">⏱️ {{ t('spotDetail.time') }}</span><span class="value">{{ gpxData.movingTime }}</span></div>
                </div>
                <div class="divider"></div>
                <div class="stat-row">
-                 <!-- UPDATED -->
                  <div class="stat-box"><span class="label">🔺 {{ t('spotDetail.elevationGain') }}</span><span class="value text-green">+{{ gpxData.elevationGain }}m</span></div>
                  <div class="stat-box"><span class="label">🏔️ {{ t('spotDetail.maxHeight') }}</span><span class="value">{{ gpxData.maxElevation }}m</span></div>
                </div>
@@ -220,7 +199,6 @@
           </div>
 
           <div class="map-card nav-card">
-            <!-- UPDATED -->
             <h3>{{ t('spotDetail.navigation') }}</h3>
             <p>{{ t('spotDetail.mapDesc') }}</p>
             <a :href="spot.mapsLink" target="_blank" class="btn-waze">🗺️ {{ t('spotDetail.openMap') }}</a>
@@ -233,11 +211,9 @@
                 :disabled="suggestions.length > 0"
                 @click="$router.push('/spots/edit/' + route.params.id)"
              >
-                <!-- UPDATED -->
                 {{ suggestions.length > 0 ? '🔒 ' + t('spotDetail.pendingVerification') : t('spotDetail.editSpot') }}
              </button>
              <p v-if="suggestions.length > 0" class="lock-hint">
-                <!-- UPDATED -->
                 <small>{{ t('spotDetail.editLockedMsg') }}</small>
              </p>
           </div>
@@ -248,7 +224,6 @@
 
     <div v-else class="empty">{{ t('spotDetail.notFound') }}</div>
 
-    <!-- VUE EASY LIGHTBOX -->
     <VueEasyLightbox
       :visible="visibleRef"
       :imgs="displayImages"
@@ -256,10 +231,8 @@
       @hide="onHide"
     />
 
-    <!-- DIFF MODAL -->
     <div v-if="showDiffModal && selectedSugg" class="modal-overlay">
        <div class="diff-modal card-modal-wrapper">
-         <!-- UPDATED -->
          <h3>🔍 {{ t('spotDetail.diffTitle') }}</h3>
          <p>{{ t('spotDetail.diffInstructions') }}</p>
          
@@ -267,7 +240,6 @@
             <table class="diff-table">
                <thead>
                   <tr>
-                     <!-- UPDATED -->
                      <th>{{ t('spotDetail.infoLabel') }}</th>
                      <th>{{ t('spotDetail.current') }}</th>
                      <th>{{ t('spotDetail.newSuggestion') }}</th>
@@ -294,15 +266,12 @@
          </div>
 
          <div class="modal-actions-spread">
-            <!-- UPDATED -->
             <button class="btn-cancel" @click="showDiffModal = false">{{ t('common.close') }}</button>
             <div class="vote-actions">
                <button class="btn-reject" @click="confirmVote(selectedSugg, 'reject')">
-                 <!-- UPDATED -->
                  ❌ {{ t('common.reject') }}
                </button>
                <button class="btn-confirm" @click="confirmVote(selectedSugg, 'approve')">
-                 <!-- UPDATED -->
                  ✅ {{ t('common.approve') }}
                </button>
             </div>
@@ -310,10 +279,8 @@
        </div>
     </div>
 
-    <!-- HISTORY MODAL -->
     <div v-if="showHistory" class="modal-overlay" @click.self="showHistory = false">
        <div class="history-modal card-modal-wrapper">
-         <!-- UPDATED -->
          <h3>📜 {{ t('spotDetail.editHistoryTitle') }}</h3>
          <button class="close-btn-hist" @click="showHistory = false">✖</button>
          <div class="history-list">
@@ -322,10 +289,8 @@
                   <strong>{{ log.editorName }}</strong>
                   <span class="hist-date">{{ formatDate(log.timestamp) }}</span>
                </div>
-               <!-- UPDATED -->
                <p class="hist-desc">{{ t('spotDetail.updateLocationLog') }}</p>
             </div>
-            <!-- UPDATED -->
             <p v-if="historyLogs.length === 0" class="no-hist">{{ t('spotDetail.noHistory') }}</p>
          </div>
        </div>
@@ -394,7 +359,6 @@ const translationError = ref('');
 const gpxData = reactive({ distance: '0.00', elevationGain: '0', elevationLoss: '0', maxElevation: '0', minElevation: '0', movingTime: '-' });
 const ADMIN_EMAILS = ["knotenup@gmail.com", "admin@knotenup.com"];
 
-// 🔥 UPDATED: Gunakan computed supaya label bertukar bila bahasa bertukar 🔥
 const compareKeys = computed(() => [
    { field: 'image', label: t('spotDetail.fieldImage') },
    { field: 'via', label: t('spotDetail.fieldVia') },
@@ -457,7 +421,6 @@ const toggleTranslation = async () => {
      }
   } catch (e) {
      console.error(e);
-     // UPDATED
      translationError.value = t('spotDetail.translationError');
   } finally {
      translating.value = false;
@@ -504,26 +467,22 @@ const finalizeUpdate = async (sugg: any, forceAdmin = false) => {
 
    await deleteDoc(doc(db, "spots", spotId, "suggestions", sugg.id));
    
-   // UPDATED
    alert(t('spotDetail.infoUpdatedAlert')); 
    window.location.reload();
 };
 
 const rejectSuggestion = async (suggId: string) => {
     await deleteDoc(doc(db, "spots", spotId, "suggestions", suggId));
-    // UPDATED
     alert(t('spotDetail.suggestionCancelledAlert'));
     showDiffModal.value = false;
 };
 
 const confirmVote = async (sugg: any, voteType: 'approve' | 'reject') => {
-  // UPDATED
   if (!auth.currentUser) return alert(t('common.pleaseLogin'));
   
   const hasVoted = (sugg.votedUsers && sugg.votedUsers.includes(auth.currentUser.uid)) || 
                    (sugg.verifiedUsers && sugg.verifiedUsers.includes(auth.currentUser.uid));
 
-  // UPDATED
   if (hasVoted) return alert(t('spotDetail.alreadyVotedAlert'));
   
   const suggRef = doc(db, "spots", spotId, "suggestions", sugg.id);
@@ -537,7 +496,6 @@ const confirmVote = async (sugg: any, voteType: 'approve' | 'reject') => {
              votes: increment(1), 
              votedUsers: arrayUnion(auth.currentUser.uid) 
           });
-          // UPDATED
           alert(t('spotDetail.voteApprovedAlert'));
           showDiffModal.value = false;
       }
@@ -550,7 +508,6 @@ const confirmVote = async (sugg: any, voteType: 'approve' | 'reject') => {
              rejectVotes: increment(1), 
              votedUsers: arrayUnion(auth.currentUser.uid) 
           });
-          // UPDATED
           alert(t('spotDetail.voteRejectedAlert'));
           showDiffModal.value = false;
       }
@@ -558,15 +515,12 @@ const confirmVote = async (sugg: any, voteType: 'approve' | 'reject') => {
 };
 
 const adminReject = async (sugg: any) => {
-   // UPDATED
    if(!confirm(t('spotDetail.forceRejectConfirm'))) return;
    await deleteDoc(doc(db, "spots", spotId, "suggestions", sugg.id));
-   // UPDATED
    alert(t('spotDetail.suggestionRejectedAlert'));
 };
 
 const reportSpot = async () => { 
-    // UPDATED
     if (!auth.currentUser) return alert(t('common.loginToReport')); 
     const reason = prompt(t('spotDetail.reportReasonPrompt')); 
     if (reason) { 
@@ -576,11 +530,20 @@ const reportSpot = async () => {
 };
 
 const submitReview = async () => { 
-    // UPDATED
     if (!auth.currentUser) return alert(t('common.pleaseLogin')); 
     if (newRating.value === 0) return alert(t('spotDetail.pleaseRate')); 
     try { 
-        await addDoc(collection(db, "spots", spotId, "reviews"), { text: newReviewText.value, rating: newRating.value, userId: auth.currentUser.uid, userName: auth.currentUser.displayName || 'User', userAvatar: auth.currentUser.photoURL || '', createdAt: serverTimestamp(), votes: 0 }); 
+        // 🔥 UPDATE: Tambah votedUsers: [] semasa create review
+        await addDoc(collection(db, "spots", spotId, "reviews"), { 
+            text: newReviewText.value, 
+            rating: newRating.value, 
+            userId: auth.currentUser.uid, 
+            userName: auth.currentUser.displayName || 'User', 
+            userAvatar: auth.currentUser.photoURL || '', 
+            createdAt: serverTimestamp(), 
+            votes: 0,
+            votedUsers: [] // Init empty array
+        }); 
         newReviewText.value = ''; 
         newRating.value = 0; 
     } catch (e) { 
@@ -588,9 +551,31 @@ const submitReview = async () => {
     } 
 };
 
-const voteReview = async (review: any, val: number) => { if (!auth.currentUser) return alert(t('forum.loginToVote')); const reviewRef = doc(db, "spots", spotId, "reviews", review.id); await updateDoc(reviewRef, { votes: increment(val) }); };
+// 🔥 UPDATE: Fungsi Vote Review dengan Anti-Spam 🔥
+const voteReview = async (review: any, val: number) => { 
+    if (!auth.currentUser) return alert(t('common.pleaseLogin')); 
+    
+    // 1. Check Local State (Array votedUsers)
+    const uid = auth.currentUser.uid;
+    const hasVoted = review.votedUsers && review.votedUsers.includes(uid);
+
+    if (hasVoted) {
+        return alert("Anda sudah mengundi ulasan ini.");
+    }
+
+    // 2. Execute Update
+    const reviewRef = doc(db, "spots", spotId, "reviews", review.id); 
+    try {
+        await updateDoc(reviewRef, { 
+            votes: increment(val),
+            votedUsers: arrayUnion(uid) // Kunci ID user dalam array
+        });
+    } catch (e) {
+        console.error("Gagal vote:", e);
+    }
+};
+
 const deleteReview = async (reviewId: string) => { 
-    // UPDATED
     if (!confirm(t('common.confirmDelete'))) return; 
     try { 
         await deleteDoc(doc(db, "spots", spotId, "reviews", reviewId)); 

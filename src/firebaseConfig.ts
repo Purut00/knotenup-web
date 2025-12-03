@@ -1,7 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider, OAuthProvider } from "firebase/auth";
+import { GoogleAuthProvider, FacebookAuthProvider, OAuthProvider } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+
+//import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+//import { getAuth, connectAuthEmulator } from "firebase/auth";
+//import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 // ⚠️ PENTING: Nanti anda perlu ganti kod ini dengan config dari Firebase Console anda sendiri.
 // Buat masa ni, kita letak placeholder supaya kod tak error.
@@ -20,6 +25,23 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+
+//const db = getFirestore(app);
+//const auth = getAuth(app);
+//const storage = getStorage(app);
+
+// Connect to Emulators if in development mode
+
+if (location.hostname === "localhost") {
+  console.log("🔥 Sedang guna Emulator!");
+  
+  // Port ni MESTI sama dengan screenshot anda tadi
+  //connectAuthEmulator(auth, "http://127.0.0.1:9099");     
+  //connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  //onnectStorageEmulator(storage, "127.0.0.1", 9199);
+}
+
 
 // Setup Providers (Google, FB, Apple)
 const googleProvider = new GoogleAuthProvider();

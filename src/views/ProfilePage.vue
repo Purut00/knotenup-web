@@ -91,7 +91,6 @@
                     <h4>{{ trip.title }}</h4>
                     <p>📍 {{ trip.destination || trip.location }}</p>
                     
-                    <!-- Badge Khas -->
                     <span v-if="trip.organizerId === user.id" class="status-pill organizer">Organizer</span>
                     <span v-else class="status-pill participant">Peserta</span>
                     
@@ -288,8 +287,9 @@ const getMonth = (dateString: string) => { if(!dateString) return 'JAN'; return 
 const fetchUserData = async (targetUserId: string) => {
   loadingData.value = true;
   upcomingTrips.value = []; historyTrips.value = []; myPosts.value = [];
+  
   try {
-    // 1. Fetch User Data
+    // 1. Fetch PUBLIC User Data (Sesiapa boleh baca)
     const docSnap = await getDoc(doc(db, "users", targetUserId));
     if (docSnap.exists()) { 
         const data = docSnap.data();
@@ -300,40 +300,52 @@ const fetchUserData = async (targetUserId: string) => {
     } 
     else { user.name = 'User Tidak Dijumpai'; }
 
-    // 2. 🔥 FETCH TRIPS (GABUNGAN ORGANIZER + PARTICIPANT) 🔥
-    // Kita guna Map untuk elak duplikasi kalau user adalah organizer DAN participant (walaupun jarang berlaku)
-    const tripMap = new Map();
+    // 🔥 2. Fetch PRIVATE Data (Hanya jika Owner atau Admin)
+    // Reset data sensitif dulu supaya tak paparkan data user sebelum ni
+    user.bloodType = ''; user.allergies = ''; user.emergencyContact = '';
 
+    const currentUser = auth.currentUser;
+    // Cek: Adakah yang login ni Owner atau Admin?
+    if (currentUser && (currentUser.uid === targetUserId || isAdmin.value)) {
+       try {
+         const privateRef = doc(db, "users", targetUserId, "private_data", "info");
+         const privateSnap = await getDoc(privateRef);
+         if(privateSnap.exists()) {
+            const pData = privateSnap.data();
+            user.bloodType = pData.bloodType;
+            user.allergies = pData.allergies;
+            user.emergencyContact = pData.emergencyContact;
+         }
+       } catch (err) {
+         // Kalau permission denied (Rules block), dia akan masuk sini. Selamat.
+         console.log("Akses data peribadi disekat (Bukan Owner).");
+       }
+    }
+
+    // 3. FETCH TRIPS (GABUNGAN ORGANIZER + PARTICIPANT)
+    const tripMap = new Map();
     // A. Cari Trip di mana user adalah Organizer
     const qOrganizer = query(collection(db, "trips"), where("organizerId", "==", targetUserId));
     const snapOrganizer = await getDocs(qOrganizer);
     snapOrganizer.forEach(doc => tripMap.set(doc.id, { id: doc.id, ...doc.data() }));
 
-    // B. Cari Trip di mana user adalah Peserta (Request Accepted)
+    // B. Cari Trip di mana user adalah Peserta
     const qParticipant = query(collection(db, "trips"), where("participants", "array-contains", targetUserId));
     const snapParticipant = await getDocs(qParticipant);
     snapParticipant.forEach(doc => tripMap.set(doc.id, { id: doc.id, ...doc.data() }));
 
     const today = new Date();
-    // Convert Map kembali ke Array dan filter ikut tarikh
     Array.from(tripMap.values()).forEach((trip: any) => {
       const tripDate = new Date(trip.startDate);
-      // Reset jam supaya perbandingan tarikh adil
-      tripDate.setHours(0,0,0,0);
-      today.setHours(0,0,0,0);
-
-      if (tripDate >= today) {
-        upcomingTrips.value.push(trip);
-      } else {
-        historyTrips.value.push(trip);
-      }
+      tripDate.setHours(0,0,0,0); today.setHours(0,0,0,0);
+      if (tripDate >= today) upcomingTrips.value.push(trip);
+      else historyTrips.value.push(trip);
     });
 
-    // Sort: Upcoming (Terdekat dulu), History (Terbaru dulu)
     upcomingTrips.value.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
     historyTrips.value.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
-    // 3. Fetch Forum Posts
+    // 4. Fetch Forum Posts
     const qPost = query(collection(db, "forum_posts"), where("authorId", "==", targetUserId), orderBy("createdAt", "desc"));
     const snapPost = await getDocs(qPost);
     myPosts.value = snapPost.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -349,13 +361,15 @@ onMounted(() => {
   onAuthStateChanged(auth, (currentUser) => {
     const routeId = route.params.id as string;
     if (routeId) {
+      // Periksa admin status
+      if (currentUser && currentUser.email === ADMIN_EMAIL) isAdmin.value = true;
       fetchUserData(routeId);
       isOwnProfile.value = currentUser ? (currentUser.uid === routeId) : false;
     } else {
       if (currentUser) {
+        if (currentUser.email === ADMIN_EMAIL) isAdmin.value = true;
         fetchUserData(currentUser.uid);
         isOwnProfile.value = true;
-        if (currentUser.email === ADMIN_EMAIL) isAdmin.value = true;
       } else { router.push('/'); }
     }
   });
@@ -366,7 +380,6 @@ const editPost = (id: string) => { router.push(`/forum/edit/${id}`); };
 const deletePost = async (id: string) => { if (confirm("Padam?")) { try { await deleteDoc(doc(db, "forum_posts", id)); myPosts.value = myPosts.value.filter(p => p.id !== id); } catch(e) {} } };
 
 const openEmergency = () => {
-    console.log("Button Emergency ditekan!"); 
     showEmergency.value = true;
 };
 

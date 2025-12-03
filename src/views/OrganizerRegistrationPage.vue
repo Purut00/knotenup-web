@@ -37,7 +37,7 @@
         </div>
 
         <button class="btn-submit" :disabled="!form.agreed || loading" @click="submitUpgrade">
-          {{ loading ? 'Sedang Proses...' : 'Aktifkan Akaun Organizer' }}
+          {{ loading ? 'Sedang Proses...' : 'Hantar Permohonan' }}
         </button>
 
       </div>
@@ -47,11 +47,11 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { useRouter } from 'vue-router'; // Import router
+import { useRouter } from 'vue-router'; 
 import { auth, db } from '../firebaseConfig';
 import { doc, updateDoc } from 'firebase/firestore';
 
-const router = useRouter(); // Kita akan guna ni sekarang!
+const router = useRouter(); 
 const loading = ref(false);
 const useProfileName = ref(false);
 const currentUserName = ref('');
@@ -86,28 +86,29 @@ const submitUpgrade = async () => {
   try {
     const userRef = doc(db, "users", auth.currentUser.uid);
     
+    // 🔥 SECURITY FIX: Kita TIDAK set 'role: organizer' di sini.
+    // Kita hanya hantar permohonan 'pending'. Admin akan approve nanti.
     await updateDoc(userRef, {
-      role: 'organizer',
+      organizerStatus: 'pending',
       organizerDetails: {
         orgName: form.orgName,
         ssm: form.ssm,
         license: form.license,
-        verifiedAt: new Date()
+        submittedAt: new Date()
       }
     });
 
-    alert("Tahniah! Akaun anda telah dinaik taraf.");
+    alert("Permohonan dihantar! Sila tunggu pengesahan daripada Admin.");
     
-    // 🔥 PEMBETULAN: Guna router.push (bukan window.location)
     router.push('/profile');
-    // Kita reload sikit page lepas redirect utk update Navbar (sbb state change)
+    // Reload sedikit untuk update state jika perlu
     setTimeout(() => {
        window.location.reload();
     }, 100);
 
   } catch (e) {
     console.error(e);
-    alert("Gagal menaik taraf.");
+    alert("Gagal menghantar permohonan.");
   } finally {
     loading.value = false;
   }

@@ -7,7 +7,7 @@
         <h3>Info Peribadi</h3>
         <div class="form-group avatar-section">
           <div class="avatar-wrapper">
-            <img :src="form.avatar" class="avatar-preview" />
+            <img :src="form.avatar || 'https://i.pravatar.cc/150?img=3'" class="avatar-preview" />
             <div class="file-input-container">
               <label for="file-upload" class="custom-file-upload">📸 Tukar Gambar</label>
               <input id="file-upload" type="file" accept="image/*" @change="handleFileUpload" />
@@ -26,7 +26,7 @@
 
       <div class="section">
         <h3>🏥 Info Kecemasan (Private)</h3>
-        <div class="info-text">Maklumat ini hanya untuk Emergency Card anda.</div>
+        <div class="info-text">Maklumat ini selamat dan hanya dilihat oleh anda (untuk Emergency Card).</div>
         
         <div class="form-group">
           <label>Jenis Darah</label>
@@ -49,6 +49,7 @@
           <input type="text" v-model="form.emergencyContact" placeholder="Cth: 012-3456789 (Isteri)" />
         </div>
       </div>
+
       <div class="section" v-if="form.role === 'organizer'">
         <h3 style="color: #e67e22;">Maklumat Penganjur</h3>
         <div class="form-group">
@@ -119,7 +120,7 @@
 import { reactive, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebaseConfig';
-import { doc, getDoc, setDoc, deleteDoc, } from 'firebase/firestore';
+import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged, deleteUser } from 'firebase/auth';
 
 const router = useRouter();
@@ -129,7 +130,6 @@ const wantToDelete = ref(false);
 const showDeleteModal = ref(false);
 const confirmEmail = ref('');
 
-// 🔥 UPDATE SINI: Tambah field baru (bloodType, allergies, emergencyContact)
 const form = reactive({
   name: '', bio: '', avatar: '', role: 'user',
   whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '',
@@ -143,18 +143,29 @@ const form = reactive({
 onMounted(() => {
   onAuthStateChanged(auth, async (currentUser) => {
     if (currentUser) {
+      // 1. Ambil Public Data
       const docSnap = await getDoc(doc(db, "users", currentUser.uid));
       if (docSnap.exists()) {
         const data = docSnap.data();
-        // Assign data database ke form
         Object.assign(form, data);
         
         // Pastikan object structure wujud kalau user lama
         if (!form.organizerDetails) form.organizerDetails = { orgName: '', ssm: '', license: '' };
-        if (!form.bloodType) form.bloodType = '';
-        if (!form.allergies) form.allergies = '';
-        if (!form.emergencyContact) form.emergencyContact = '';
       }
+
+      // 2. Ambil Private Data (Dari Subcollection)
+      try {
+        const privateSnap = await getDoc(doc(db, "users", currentUser.uid, "private_data", "info"));
+        if (privateSnap.exists()) {
+          const pData = privateSnap.data();
+          form.bloodType = pData.bloodType || '';
+          form.allergies = pData.allergies || '';
+          form.emergencyContact = pData.emergencyContact || '';
+        }
+      } catch (e) {
+        console.log("Tiada data peribadi atau akses disekat.");
+      }
+
     } else { router.push('/'); }
   });
 });
@@ -168,14 +179,14 @@ const handleFileUpload = (event: Event) => {
   }
 };
 
-// LOGIC UTAMA BUTTON SAVE
+// 🔥 UPDATE: Split Save Logic 🔥
 const handleSave = async () => {
   if (!auth.currentUser) return;
 
   // 1. Cek Delete Dulu
   if (wantToDelete.value) {
     showDeleteModal.value = true;
-    return; // Stop sini, tunggu modal
+    return;
   }
 
   loading.value = true;
@@ -183,17 +194,43 @@ const handleSave = async () => {
     // 2. Cek Downgrade
     if (wantToDowngrade.value) {
       form.role = 'user';
-      // Reset detail organizer jika perlu, atau biarkan sebagai sejarah
     }
 
-    // 3. Simpan Update Biasa (Termasuk field emergency baru sebab guna 'form' object)
-    await setDoc(doc(db, "users", auth.currentUser.uid), form, { merge: true });
+    // 3. Asingkan Data Public
+    const publicData = {
+      name: form.name,
+      bio: form.bio,
+      avatar: form.avatar,
+      // Jangan update role sewenang-wenangnya jika bukan downgrade (Security #1)
+      ...(wantToDowngrade.value ? { role: 'user' } : {}), 
+      whatsapp: form.whatsapp,
+      facebook: form.facebook,
+      instagram: form.instagram,
+      tiktok: form.tiktok,
+      youtube: form.youtube,
+      organizerDetails: form.organizerDetails
+    };
+
+    // 4. Asingkan Data Private
+    const privateData = {
+      bloodType: form.bloodType,
+      allergies: form.allergies,
+      emergencyContact: form.emergencyContact
+    };
+
+    // 5. Simpan ke DUA tempat berbeza
+    await setDoc(doc(db, "users", auth.currentUser.uid), publicData, { merge: true });
+    await setDoc(doc(db, "users", auth.currentUser.uid, "private_data", "info"), privateData, { merge: true });
     
     alert(wantToDowngrade.value ? "Akaun berjaya diturunkan ke User Biasa." : "Profil berjaya dikemaskini!");
     router.push('/profile');
 
-  } catch (e) { console.error(e); alert("Gagal menyimpan."); } 
-  finally { loading.value = false; }
+  } catch (e) { 
+    console.error(e); 
+    alert("Gagal menyimpan."); 
+  } finally { 
+    loading.value = false; 
+  }
 };
 
 // LOGIC DELETE AKAUN
@@ -207,8 +244,9 @@ const confirmDeleteAccount = async () => {
     const user = auth.currentUser;
     // 1. Padam Data Firestore
     await deleteDoc(doc(db, "users", user.uid));
+    await deleteDoc(doc(db, "users", user.uid, "private_data", "info")); // Delete private data juga
     
-    // 2. Padam Auth User (Mungkin gagal jika login dah lama, kena re-auth)
+    // 2. Padam Auth User
     await deleteUser(user);
     
     alert("Akaun anda telah dipadam sepenuhnya. Selamat tinggal!");
@@ -232,7 +270,7 @@ h2 { margin-bottom: 1.5rem; color: #2c3e50; text-align: center; }
 .section h3 { margin-bottom: 1rem; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
 
 /* CSS untuk text info kecil */
-.info-text { font-size: 0.8rem; color: #888; margin-bottom: 10px; font-style: italic; }
+.info-text { font-size: 0.8rem; color: #27ae60; margin-bottom: 10px; font-style: italic; background: #e8f5e9; padding: 5px; border-radius: 4px; }
 /* CSS untuk dropdown darah */
 .custom-select { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; background: white; }
 
