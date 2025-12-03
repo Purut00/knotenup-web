@@ -5,7 +5,6 @@
     <div v-else-if="spot" class="spot-container">
       
       <div class="hero-gallery-wrapper">
-        
         <div class="desktop-gallery">
           <div class="gallery-item main-item" 
                :style="{ backgroundImage: `url(${displayImages[0]})` }"
@@ -19,11 +18,9 @@
                  @click="openLightbox(index + 1)">
             </div>
           </div>
-          
           <button class="btn-show-all" @click="openLightbox(0)">
             🖼️ {{ t('spotDetail.viewPhotos') }}
           </button>
-          
           <div class="gallery-overlay">
             <span class="badge-cat">📍 {{ spot.state }}</span>
             <h1>{{ spot.name }}</h1>
@@ -58,7 +55,6 @@
       <div class="content-wrapper container">
         
         <div class="main-info">
-          
           <div class="info-box">
             <div class="header-row">
                <h3>{{ t('spotDetail.locationInfo') }}</h3>
@@ -109,10 +105,8 @@
                        <AuthorBadge :userId="spot.contributorId" :fallbackName="spot.contributorName" />
                     </div>
                  </div>
-                 
                  <button class="btn-history" @click="showHistory = true">📜 {{ t('spotDetail.viewHistory') }}</button>
               </div>
-
               <p v-if="spot.lastEditedBy" class="edited-text">
                   🔄 {{ t('spotDetail.lastUpdatedBy') }}: <strong>{{ spot.lastEditedBy }}</strong>
               </p>
@@ -153,7 +147,6 @@
         </div>
 
         <div class="sidebar-info">
-          
           <div class="pending-updates-box" v-if="suggestions.length > 0">
               <div class="update-header">🚧 {{ t('spotDetail.pendingUpdates') }}</div>
               <div v-for="sugg in suggestions" :key="sugg.id" class="suggestion-card">
@@ -217,63 +210,39 @@
                 <small>{{ t('spotDetail.editLockedMsg') }}</small>
              </p>
           </div>
-
         </div>
       </div>
     </div>
 
     <div v-else class="empty">{{ t('spotDetail.notFound') }}</div>
 
-    <VueEasyLightbox
-      :visible="visibleRef"
-      :imgs="displayImages"
-      :index="indexRef"
-      @hide="onHide"
-    />
+    <VueEasyLightbox :visible="visibleRef" :imgs="displayImages" :index="indexRef" @hide="onHide" />
 
     <div v-if="showDiffModal && selectedSugg" class="modal-overlay">
        <div class="diff-modal card-modal-wrapper">
          <h3>🔍 {{ t('spotDetail.diffTitle') }}</h3>
          <p>{{ t('spotDetail.diffInstructions') }}</p>
-         
          <div class="diff-table-wrapper">
             <table class="diff-table">
                <thead>
-                  <tr>
-                     <th>{{ t('spotDetail.infoLabel') }}</th>
-                     <th>{{ t('spotDetail.current') }}</th>
-                     <th>{{ t('spotDetail.newSuggestion') }}</th>
-                  </tr>
+                  <tr><th>{{ t('spotDetail.infoLabel') }}</th><th>{{ t('spotDetail.current') }}</th><th>{{ t('spotDetail.newSuggestion') }}</th></tr>
                </thead>
                <tbody>
                   <tr v-for="key in compareKeys" :key="key.field">
                      <td>{{ key.label }}</td>
-                     <td v-if="key.field === 'image'">
-                        <img v-if="spot.image" :src="spot.image" class="diff-thumb" />
-                        <span v-else>-</span>
-                     </td>
+                     <td v-if="key.field === 'image'"><img v-if="spot.image" :src="spot.image" class="diff-thumb" /><span v-else>-</span></td>
                      <td v-else class="old-val">{{ spot[key.field] || '-' }}</td>
-                     <td v-if="key.field === 'image'" :class="{'new-val-bg': spot.image != selectedSugg.image}">
-                        <img v-if="selectedSugg.image" :src="selectedSugg.image" class="diff-thumb" />
-                        <span v-else>-</span>
-                     </td>
-                     <td v-else :class="{'new-val': spot[key.field] != selectedSugg[key.field]}">
-                        {{ selectedSugg[key.field] || '-' }}
-                     </td>
+                     <td v-if="key.field === 'image'" :class="{'new-val-bg': spot.image != selectedSugg.image}"><img v-if="selectedSugg.image" :src="selectedSugg.image" class="diff-thumb" /><span v-else>-</span></td>
+                     <td v-else :class="{'new-val': spot[key.field] != selectedSugg[key.field]}">{{ selectedSugg[key.field] || '-' }}</td>
                   </tr>
                </tbody>
             </table>
          </div>
-
          <div class="modal-actions-spread">
             <button class="btn-cancel" @click="showDiffModal = false">{{ t('common.close') }}</button>
             <div class="vote-actions">
-               <button class="btn-reject" @click="confirmVote(selectedSugg, 'reject')">
-                 ❌ {{ t('common.reject') }}
-               </button>
-               <button class="btn-confirm" @click="confirmVote(selectedSugg, 'approve')">
-                 ✅ {{ t('common.approve') }}
-               </button>
+               <button class="btn-reject" @click="confirmVote(selectedSugg, 'reject')">❌ {{ t('common.reject') }}</button>
+               <button class="btn-confirm" @click="confirmVote(selectedSugg, 'approve')">✅ {{ t('common.approve') }}</button>
             </div>
          </div>
        </div>
@@ -285,17 +254,13 @@
          <button class="close-btn-hist" @click="showHistory = false">✖</button>
          <div class="history-list">
             <div v-for="log in historyLogs" :key="log.id" class="hist-item">
-               <div class="hist-header">
-                  <strong>{{ log.editorName }}</strong>
-                  <span class="hist-date">{{ formatDate(log.timestamp) }}</span>
-               </div>
+               <div class="hist-header"><strong>{{ log.editorName }}</strong><span class="hist-date">{{ formatDate(log.timestamp) }}</span></div>
                <p class="hist-desc">{{ t('spotDetail.updateLocationLog') }}</p>
             </div>
             <p v-if="historyLogs.length === 0" class="no-hist">{{ t('spotDetail.noHistory') }}</p>
          </div>
        </div>
     </div>
-
   </div>
 </template>
 
@@ -312,6 +277,8 @@ import 'leaflet-gpx';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { isSpam } from '../utils/spamFilter';
+import { checkRateLimit } from '../utils/rateLimiter';
 
 // @ts-ignore
 import VueEasyLightbox from 'vue-easy-lightbox';
@@ -343,19 +310,15 @@ const newReviewText = ref('');
 const newRating = ref(0);
 const suggestions = ref<any[]>([]);
 const historyLogs = ref<any[]>([]);
-
 const showDiffModal = ref(false);
 const showHistory = ref(false);
 const selectedSugg = ref<any>(null);
-
 const visibleRef = ref(false);
 const indexRef = ref(0);
-
 const translatedDesc = ref('');
 const showingTranslation = ref(false);
 const translating = ref(false);
 const translationError = ref('');
-
 const gpxData = reactive({ distance: '0.00', elevationGain: '0', elevationLoss: '0', maxElevation: '0', minElevation: '0', movingTime: '-' });
 const ADMIN_EMAILS = ["knotenup@gmail.com", "admin@knotenup.com"];
 
@@ -373,42 +336,25 @@ const compareKeys = computed(() => [
 const allImages = computed(() => {
   if (!spot.value) return [];
   let imgs = spot.value.images && Array.isArray(spot.value.images) ? [...spot.value.images] : [];
-  if (imgs.length === 0 && spot.value.image) {
-    imgs.push(spot.value.image);
-  }
+  if (imgs.length === 0 && spot.value.image) imgs.push(spot.value.image);
   return [...new Set(imgs)].filter(url => url && url.length > 5);
 });
 
 const displayImages = computed(() => {
   const imgs = [...allImages.value];
   if (imgs.length === 0) return new Array(5).fill('https://via.placeholder.com/800x600?text=No+Image');
-  while (imgs.length < 5) {
-     imgs.push(imgs[0]); 
-  }
+  while (imgs.length < 5) imgs.push(imgs[0]); 
   return imgs;
 });
 
-const openLightbox = (index: number) => {
-  indexRef.value = index;
-  visibleRef.value = true;
-};
-
-const onHide = () => {
-  visibleRef.value = false;
-};
+const openLightbox = (index: number) => { indexRef.value = index; visibleRef.value = true; };
+const onHide = () => { visibleRef.value = false; };
 
 const toggleTranslation = async () => {
-  if (showingTranslation.value) {
-    showingTranslation.value = false;
-    return;
-  }
-  if (translatedDesc.value) {
-    showingTranslation.value = true;
-    return;
-  }
+  if (showingTranslation.value) { showingTranslation.value = false; return; }
+  if (translatedDesc.value) { showingTranslation.value = true; return; }
   if (!spot.value.description) return;
-  translating.value = true;
-  translationError.value = '';
+  translating.value = true; translationError.value = '';
   try {
      const targetLang = locale.value === 'ms' ? 'ms' : 'en'; 
      const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(spot.value.description)}&langpair=Autodetect|${targetLang}`);
@@ -416,15 +362,9 @@ const toggleTranslation = async () => {
      if (data.responseData && data.responseData.translatedText) {
         translatedDesc.value = data.responseData.translatedText;
         showingTranslation.value = true;
-     } else {
-        throw new Error("Translation failed");
-     }
-  } catch (e) {
-     console.error(e);
-     translationError.value = t('spotDetail.translationError');
-  } finally {
-     translating.value = false;
-  }
+     } else { throw new Error("Translation failed"); }
+  } catch (e) { console.error(e); translationError.value = t('spotDetail.translationError'); } 
+  finally { translating.value = false; }
 };
 
 const getLevelLabel = (level: string) => { if (!level) return ''; const key = level.toLowerCase(); return t(`components.${key}`) !== `components.${key}` ? t(`components.${key}`) : level; };
@@ -439,183 +379,85 @@ const averageRating = computed(() => { if (reviews.value.length === 0) return 0;
 const sortedReviews = computed(() => { return [...reviews.value].sort((a, b) => (b.votes || 0) - (a.votes || 0)); });
 const goToProfile = (userId: string) => { if (userId) router.push(`/user/${userId}`); };
 
-const openCheckModal = (sugg: any) => {
-   selectedSugg.value = sugg;
-   showDiffModal.value = true;
-};
+const openCheckModal = (sugg: any) => { selectedSugg.value = sugg; showDiffModal.value = true; };
 
 const finalizeUpdate = async (sugg: any, forceAdmin = false) => {
    const cleanedData = { ...sugg };
-   delete cleanedData.id; delete cleanedData.votes; delete cleanedData.rejectVotes; 
-   delete cleanedData.verifiedUsers; delete cleanedData.votedUsers;
-   delete cleanedData.createdAt; delete cleanedData.suggestedBy; delete cleanedData.suggestedById;
-
+   delete cleanedData.id; delete cleanedData.votes; delete cleanedData.rejectVotes; delete cleanedData.verifiedUsers; delete cleanedData.votedUsers; delete cleanedData.createdAt; delete cleanedData.suggestedBy; delete cleanedData.suggestedById;
    const editorName = forceAdmin ? (sugg.suggestedBy + " (Admin Approved)") : sugg.suggestedBy;
-
-   await updateDoc(doc(db, "spots", spotId), { 
-      ...cleanedData, 
-      lastEditedBy: editorName, 
-      lastEditedAt: serverTimestamp() 
-   });
-   
-   await addDoc(collection(db, "spots", spotId, "history"), {
-      editorName: editorName,
-      editorId: sugg.suggestedById,
-      timestamp: serverTimestamp(),
-      type: 'update'
-   });
-
+   await updateDoc(doc(db, "spots", spotId), { ...cleanedData, lastEditedBy: editorName, lastEditedAt: serverTimestamp() });
+   await addDoc(collection(db, "spots", spotId, "history"), { editorName: editorName, editorId: sugg.suggestedById, timestamp: serverTimestamp(), type: 'update' });
    await deleteDoc(doc(db, "spots", spotId, "suggestions", sugg.id));
-   
-   alert(t('spotDetail.infoUpdatedAlert')); 
-   window.location.reload();
+   alert(t('spotDetail.infoUpdatedAlert')); window.location.reload();
 };
 
-const rejectSuggestion = async (suggId: string) => {
-    await deleteDoc(doc(db, "spots", spotId, "suggestions", suggId));
-    alert(t('spotDetail.suggestionCancelledAlert'));
-    showDiffModal.value = false;
-};
+const rejectSuggestion = async (suggId: string) => { await deleteDoc(doc(db, "spots", spotId, "suggestions", suggId)); alert(t('spotDetail.suggestionCancelledAlert')); showDiffModal.value = false; };
 
 const confirmVote = async (sugg: any, voteType: 'approve' | 'reject') => {
   if (!auth.currentUser) return alert(t('common.pleaseLogin'));
-  
-  const hasVoted = (sugg.votedUsers && sugg.votedUsers.includes(auth.currentUser.uid)) || 
-                   (sugg.verifiedUsers && sugg.verifiedUsers.includes(auth.currentUser.uid));
-
+  const hasVoted = (sugg.votedUsers && sugg.votedUsers.includes(auth.currentUser.uid)) || (sugg.verifiedUsers && sugg.verifiedUsers.includes(auth.currentUser.uid));
   if (hasVoted) return alert(t('spotDetail.alreadyVotedAlert'));
-  
   const suggRef = doc(db, "spots", spotId, "suggestions", sugg.id);
-  
   if (voteType === 'approve') {
       const newVotes = (sugg.votes || 0) + 1;
-      if (newVotes >= 5) {
-          await finalizeUpdate(sugg, false);
-      } else {
-          await updateDoc(suggRef, { 
-             votes: increment(1), 
-             votedUsers: arrayUnion(auth.currentUser.uid) 
-          });
-          alert(t('spotDetail.voteApprovedAlert'));
-          showDiffModal.value = false;
-      }
+      if (newVotes >= 5) { await finalizeUpdate(sugg, false); } 
+      else { await updateDoc(suggRef, { votes: increment(1), votedUsers: arrayUnion(auth.currentUser.uid) }); alert(t('spotDetail.voteApprovedAlert')); showDiffModal.value = false; }
   } else {
       const newRejectVotes = (sugg.rejectVotes || 0) + 1;
-      if (newRejectVotes >= 5) {
-          await rejectSuggestion(sugg.id);
-      } else {
-          await updateDoc(suggRef, { 
-             rejectVotes: increment(1), 
-             votedUsers: arrayUnion(auth.currentUser.uid) 
-          });
-          alert(t('spotDetail.voteRejectedAlert'));
-          showDiffModal.value = false;
-      }
+      if (newRejectVotes >= 5) { await rejectSuggestion(sugg.id); } 
+      else { await updateDoc(suggRef, { rejectVotes: increment(1), votedUsers: arrayUnion(auth.currentUser.uid) }); alert(t('spotDetail.voteRejectedAlert')); showDiffModal.value = false; }
   }
 };
 
-const adminReject = async (sugg: any) => {
-   if(!confirm(t('spotDetail.forceRejectConfirm'))) return;
-   await deleteDoc(doc(db, "spots", spotId, "suggestions", sugg.id));
-   alert(t('spotDetail.suggestionRejectedAlert'));
-};
+const adminReject = async (sugg: any) => { if(!confirm(t('spotDetail.forceRejectConfirm'))) return; await deleteDoc(doc(db, "spots", spotId, "suggestions", sugg.id)); alert(t('spotDetail.suggestionRejectedAlert')); };
+const reportSpot = async () => { if (!auth.currentUser) return alert(t('common.loginToReport')); const reason = prompt(t('spotDetail.reportReasonPrompt')); if (reason) { await addDoc(collection(db, "reports"), { targetId: spotId, targetType: 'spot', reason: reason, reportedBy: auth.currentUser.uid, createdAt: serverTimestamp() }); alert(t('spotDetail.reportSuccess')); } };
 
-const reportSpot = async () => { 
-    if (!auth.currentUser) return alert(t('common.loginToReport')); 
-    const reason = prompt(t('spotDetail.reportReasonPrompt')); 
-    if (reason) { 
-        await addDoc(collection(db, "reports"), { targetId: spotId, targetType: 'spot', reason: reason, reportedBy: auth.currentUser.uid, createdAt: serverTimestamp() }); 
-        alert(t('spotDetail.reportSuccess')); 
-    } 
-};
-
+// 🔥 SECURITY FIX: Spam & Rate Limit for Reviews 🔥
 const submitReview = async () => { 
     if (!auth.currentUser) return alert(t('common.pleaseLogin')); 
     if (newRating.value === 0) return alert(t('spotDetail.pleaseRate')); 
+    const limitCheck = checkRateLimit('submit_review');
+    if (!limitCheck.allowed) return alert(limitCheck.message);
+    if (isSpam(newReviewText.value)) return alert("Maaf, ulasan mengandungi perkataan dilarang.");
+
     try { 
-        // 🔥 UPDATE: Tambah votedUsers: [] semasa create review
         await addDoc(collection(db, "spots", spotId, "reviews"), { 
-            text: newReviewText.value, 
-            rating: newRating.value, 
-            userId: auth.currentUser.uid, 
-            userName: auth.currentUser.displayName || 'User', 
-            userAvatar: auth.currentUser.photoURL || '', 
-            createdAt: serverTimestamp(), 
-            votes: 0,
-            votedUsers: [] // Init empty array
+            text: newReviewText.value, rating: newRating.value, userId: auth.currentUser.uid, userName: auth.currentUser.displayName || 'User', 
+            userAvatar: auth.currentUser.photoURL || '', createdAt: serverTimestamp(), votes: 0, votedUsers: [] 
         }); 
-        newReviewText.value = ''; 
-        newRating.value = 0; 
-    } catch (e) { 
-        console.error(e); 
-    } 
+        newReviewText.value = ''; newRating.value = 0; 
+    } catch (e) { console.error(e); } 
 };
 
-// 🔥 UPDATE: Fungsi Vote Review dengan Anti-Spam 🔥
 const voteReview = async (review: any, val: number) => { 
     if (!auth.currentUser) return alert(t('common.pleaseLogin')); 
-    
-    // 1. Check Local State (Array votedUsers)
     const uid = auth.currentUser.uid;
-    const hasVoted = review.votedUsers && review.votedUsers.includes(uid);
-
-    if (hasVoted) {
-        return alert("Anda sudah mengundi ulasan ini.");
-    }
-
-    // 2. Execute Update
-    const reviewRef = doc(db, "spots", spotId, "reviews", review.id); 
-    try {
-        await updateDoc(reviewRef, { 
-            votes: increment(val),
-            votedUsers: arrayUnion(uid) // Kunci ID user dalam array
-        });
-    } catch (e) {
-        console.error("Gagal vote:", e);
-    }
+    if (review.votedUsers && review.votedUsers.includes(uid)) return alert("Sudah undi.");
+    try { await updateDoc(doc(db, "spots", spotId, "reviews", review.id), { votes: increment(val), votedUsers: arrayUnion(uid) }); } catch (e) { console.error(e); }
 };
 
-const deleteReview = async (reviewId: string) => { 
-    if (!confirm(t('common.confirmDelete'))) return; 
-    try { 
-        await deleteDoc(doc(db, "spots", spotId, "reviews", reviewId)); 
-    } catch (e) { 
-        alert(t('common.failed')); 
-    } 
-};
+const deleteReview = async (reviewId: string) => { if (!confirm(t('common.confirmDelete'))) return; try { await deleteDoc(doc(db, "spots", spotId, "reviews", reviewId)); } catch (e) { alert(t('common.failed')); } };
 
 const initMap = () => { if (!spot.value.gpxUrl) return; nextTick(() => { const mapElement = document.getElementById('gpx-map'); if (!mapElement) return; if (mapInstance) { mapInstance.remove(); mapInstance = null; } mapInstance = L.map('gpx-map', { scrollWheelZoom: false }).setView([4.2105, 101.9758], 6); L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM &copy; CARTO', maxZoom: 19 }).addTo(mapInstance); setTimeout(() => { if(mapInstance) mapInstance.invalidateSize(); }, 300); new (L as any).GPX(spot.value.gpxUrl, { async: true, marker_options: { startIconUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-icon-start.png', endIconUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-icon-end.png', shadowUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-shadow.png' }, polyline_options: { color: '#e67e22', opacity: 0.8, weight: 5, lineCap: 'round' } }).on('loaded', function(e: any) { if(mapInstance) { mapInstance.fitBounds(e.target.getBounds()); setTimeout(() => { mapInstance.invalidateSize(); }, 200); const gpx = e.target; gpxData.distance = (gpx.get_distance() / 1000).toFixed(2); gpxData.elevationGain = gpx.get_elevation_gain().toFixed(0); gpxData.elevationLoss = gpx.get_elevation_loss().toFixed(0); gpxData.maxElevation = gpx.get_elevation_max().toFixed(0); gpxData.minElevation = gpx.get_elevation_min().toFixed(0); gpxData.movingTime = formatTime(gpx.get_moving_time()); } }).addTo(mapInstance); }); };
 
 onMounted(async () => {
   try {
     const docSnap = await getDoc(doc(db, "spots", spotId));
-    if (docSnap.exists()) {
-      spot.value = docSnap.data();
-      if (spot.value.gpxUrl) setTimeout(() => initMap(), 100);
-    }
+    if (docSnap.exists()) { spot.value = docSnap.data(); if (spot.value.gpxUrl) setTimeout(() => initMap(), 100); }
     if (auth.currentUser && ADMIN_EMAILS.includes(auth.currentUser.email!)) isAdmin.value = true;
-
-    const qReview = query(collection(db, "spots", spotId, "reviews"), orderBy("createdAt", "desc"));
-    onSnapshot(qReview, (snap) => { reviews.value = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
-    const qSugg = query(collection(db, "spots", spotId, "suggestions"));
-    onSnapshot(qSugg, (snap) => { suggestions.value = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
-    
-    const qHist = query(collection(db, "spots", spotId, "history"), orderBy("timestamp", "desc"));
-    onSnapshot(qHist, (snap) => { historyLogs.value = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
-
-  } catch (e) { console.error(e); }
-  finally { loading.value = false; }
+    onSnapshot(query(collection(db, "spots", spotId, "reviews"), orderBy("createdAt", "desc")), (snap) => { reviews.value = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
+    onSnapshot(query(collection(db, "spots", spotId, "suggestions")), (snap) => { suggestions.value = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
+    onSnapshot(query(collection(db, "spots", spotId, "history"), orderBy("timestamp", "desc")), (snap) => { historyLogs.value = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
+  } catch (e) { console.error(e); } finally { loading.value = false; }
 });
 onUnmounted(() => { if (mapInstance) { mapInstance.remove(); mapInstance = null; } });
 </script>
 
 <style scoped>
-/* STYLE KEKAL SAMA - TIADA PERUBAHAN */
+/* CSS KEKAL SAMA */
 .spot-detail-page { background: #f5f5f5; min-height: 100vh; padding-bottom: 2rem; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
-
 .hero-gallery-wrapper { position: relative; margin-bottom: 2rem; max-width: 1200px; margin: 0 auto 2rem auto; padding: 1rem 1rem 0 1rem; }
-
 .desktop-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 400px; border-radius: 16px; overflow: hidden; position: relative; background: #000; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
 .main-item { width: 100%; height: 100%; background-size: cover; background-position: center; cursor: pointer; transition: filter 0.2s; }
 .main-item:hover { filter: brightness(0.9); }
@@ -624,14 +466,11 @@ onUnmounted(() => { if (mapInstance) { mapInstance.remove(); mapInstance = null;
 .gallery-item:hover { filter: brightness(0.9); }
 .btn-show-all { position: absolute; bottom: 20px; right: 20px; background: white; border: 1px solid #333; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 5; transition: transform 0.2s; }
 .btn-show-all:hover { transform: scale(1.05); }
-
 .gallery-overlay { position: absolute; bottom: 0; left: 0; width: 50%; padding: 2rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; pointer-events: none; }
 .badge-cat { background: #e67e22; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; color: white; display: inline-block; margin-bottom: 5px; }
 h1 { margin: 5px 0 10px 0; font-size: 2.2rem; font-weight: 800; text-shadow: 0 2px 5px rgba(0,0,0,0.5); color: white; line-height: 1.2; }
 .hero-meta { display: flex; gap: 15px; font-size: 1rem; opacity: 0.9; color: white; }
 .mobile-gallery { display: none; }
-
-/* CONTENT STYLES */
 .content-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 0; position: relative; z-index: 10; }
 .main-info { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 2rem; height: fit-content; }
 .info-box h3 { margin-top: 0; margin-bottom: 0; }

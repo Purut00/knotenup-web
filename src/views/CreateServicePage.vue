@@ -243,11 +243,22 @@ const handleMultiUpload = (event: Event) => {
     const filesToProcess = files.slice(0, remainingSlots);
 
     filesToProcess.forEach(file => {
+      
+      // 🔥 KESELAMATAN: Had Saiz Fail (5MB)
+      const MAX_SIZE = 5 * 1024 * 1024;
+      if (file.size > MAX_SIZE) {
+        alert(`Fail terlalu besar (${(file.size / 1024 / 1024).toFixed(2)}MB). Sila pilih fail bawah 5MB.`);
+        return; // Skip
+      }
+
       rawFiles.value.push(file);
       const reader = new FileReader();
       reader.onload = (e) => { if (e.target?.result) previewImages.value.push(e.target.result as string); };
       reader.readAsDataURL(file);
     });
+
+    // Reset value supaya boleh upload lagi
+    target.value = '';
   }
 };
 
@@ -335,7 +346,7 @@ const submitService = async () => {
 
 .left-panel {
   width: 40%;
-  background-image: url('https://images.unsplash.com/photo-1533240332313-0db49b459ad6?q=80&w=1000&auto=format&fit=crop');
+  background-image: url('[https://images.unsplash.com/photo-1533240332313-0db49b459ad6?q=80&w=1000&auto=format&fit=crop](https://images.unsplash.com/photo-1533240332313-0db49b459ad6?q=80&w=1000&auto=format&fit=crop)');
   background-size: cover; background-position: center; height: 100vh;
   display: flex; flex-direction: column; justify-content: flex-start; 
   padding: 4rem; padding-top: 20vh; color: white; position: relative;
@@ -387,7 +398,7 @@ const submitService = async () => {
 .action-bar { position: fixed; bottom: 0; right: 0; width: 60%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 1.5rem 3rem; border-top: 1px solid #eaeaea; display: flex; align-items: center; z-index: 10; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); }
 .spacer { flex: 1; }
 .btn-text { background: none; border: none; color: #7f8c8d; font-weight: bold; cursor: pointer; font-size: 1rem; }
-.btn-pill { background: #2c3e50; color: white; border: none; padding: 1rem 3rem; border-radius: 50px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: transform 0.2s; box-shadow: 0 5px 15px rgba(44, 62, 80, 0.2); }
+.btn-pill { background: #2c3e50; color: white; border: none; padding: 1rem 3rem; border-radius: 50px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 5px 15px rgba(44, 62, 80, 0.2); }
 .btn-pill:hover { transform: translateY(-2px); background: #34495e; }
 .btn-pill.finish { background: #e67e22; box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3); }
 .btn-pill.finish:hover { background: #d35400; }

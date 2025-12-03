@@ -7,7 +7,7 @@
         <h3>Info Peribadi</h3>
         <div class="form-group avatar-section">
           <div class="avatar-wrapper">
-            <img :src="form.avatar || 'https://i.pravatar.cc/150?img=3'" class="avatar-preview" />
+            <img :src="form.avatar || '[https://i.pravatar.cc/150?img=3](https://i.pravatar.cc/150?img=3)'" class="avatar-preview" />
             <div class="file-input-container">
               <label for="file-upload" class="custom-file-upload">📸 Tukar Gambar</label>
               <input id="file-upload" type="file" accept="image/*" @change="handleFileUpload" />
@@ -119,9 +119,10 @@
 <script setup lang="ts">
 import { reactive, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { auth, db } from '../firebaseConfig';
+import { auth, db,  } from '../firebaseConfig';
 import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged, deleteUser } from 'firebase/auth';
+//import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'; 
 
 const router = useRouter();
 const loading = ref(false);
@@ -134,26 +135,20 @@ const form = reactive({
   name: '', bio: '', avatar: '', role: 'user',
   whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '',
   organizerDetails: { orgName: '', ssm: '', license: '' },
-  // Field Baru untuk Emergency Card
-  bloodType: '',
-  allergies: '',
-  emergencyContact: ''
+  bloodType: '', allergies: '', emergencyContact: ''
 });
 
 onMounted(() => {
   onAuthStateChanged(auth, async (currentUser) => {
     if (currentUser) {
-      // 1. Ambil Public Data
       const docSnap = await getDoc(doc(db, "users", currentUser.uid));
       if (docSnap.exists()) {
         const data = docSnap.data();
         Object.assign(form, data);
         
-        // Pastikan object structure wujud kalau user lama
         if (!form.organizerDetails) form.organizerDetails = { orgName: '', ssm: '', license: '' };
       }
 
-      // 2. Ambil Private Data (Dari Subcollection)
       try {
         const privateSnap = await getDoc(doc(db, "users", currentUser.uid, "private_data", "info"));
         if (privateSnap.exists()) {
@@ -170,20 +165,27 @@ onMounted(() => {
   });
 });
 
-const handleFileUpload = (event: Event) => {
+const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files[0]) {
+    const file = target.files[0];
+
+    // 🔥 SECURITY UPDATE: Check file size (Max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert(`Fail terlalu besar (${(file.size / 1024 / 1024).toFixed(2)}MB). Sila pilih fail bawah 5MB.`);
+      target.value = ''; // Reset input
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => { if (e.target?.result) form.avatar = e.target.result as string; };
-    reader.readAsDataURL(target.files[0]);
+    reader.readAsDataURL(file);
   }
 };
 
-// 🔥 UPDATE: Split Save Logic 🔥
 const handleSave = async () => {
   if (!auth.currentUser) return;
 
-  // 1. Cek Delete Dulu
   if (wantToDelete.value) {
     showDeleteModal.value = true;
     return;
@@ -191,17 +193,14 @@ const handleSave = async () => {
 
   loading.value = true;
   try {
-    // 2. Cek Downgrade
     if (wantToDowngrade.value) {
       form.role = 'user';
     }
 
-    // 3. Asingkan Data Public
     const publicData = {
       name: form.name,
       bio: form.bio,
       avatar: form.avatar,
-      // Jangan update role sewenang-wenangnya jika bukan downgrade (Security #1)
       ...(wantToDowngrade.value ? { role: 'user' } : {}), 
       whatsapp: form.whatsapp,
       facebook: form.facebook,
@@ -211,14 +210,12 @@ const handleSave = async () => {
       organizerDetails: form.organizerDetails
     };
 
-    // 4. Asingkan Data Private
     const privateData = {
       bloodType: form.bloodType,
       allergies: form.allergies,
       emergencyContact: form.emergencyContact
     };
 
-    // 5. Simpan ke DUA tempat berbeza
     await setDoc(doc(db, "users", auth.currentUser.uid), publicData, { merge: true });
     await setDoc(doc(db, "users", auth.currentUser.uid, "private_data", "info"), privateData, { merge: true });
     
@@ -233,7 +230,6 @@ const handleSave = async () => {
   }
 };
 
-// LOGIC DELETE AKAUN
 const confirmDeleteAccount = async () => {
   if (confirmEmail.value !== auth.currentUser?.email) {
     alert("Emel tidak sepadan!");
@@ -242,11 +238,9 @@ const confirmDeleteAccount = async () => {
 
   try {
     const user = auth.currentUser;
-    // 1. Padam Data Firestore
     await deleteDoc(doc(db, "users", user.uid));
-    await deleteDoc(doc(db, "users", user.uid, "private_data", "info")); // Delete private data juga
+    await deleteDoc(doc(db, "users", user.uid, "private_data", "info")); 
     
-    // 2. Padam Auth User
     await deleteUser(user);
     
     alert("Akaun anda telah dipadam sepenuhnya. Selamat tinggal!");
@@ -268,13 +262,8 @@ const confirmDeleteAccount = async () => {
 h2 { margin-bottom: 1.5rem; color: #2c3e50; text-align: center; }
 .section { margin-bottom: 2rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
 .section h3 { margin-bottom: 1rem; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
-
-/* CSS untuk text info kecil */
 .info-text { font-size: 0.8rem; color: #27ae60; margin-bottom: 10px; font-style: italic; background: #e8f5e9; padding: 5px; border-radius: 4px; }
-/* CSS untuk dropdown darah */
 .custom-select { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; background: white; }
-
-/* Avatar & Inputs (Sama macam dulu) */
 .avatar-wrapper { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 1rem; }
 .avatar-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #eee; }
 input[type="file"] { display: none; }
@@ -283,18 +272,13 @@ input[type="file"] { display: none; }
 label { display: block; font-weight: bold; margin-bottom: 0.4rem; font-size: 0.9rem; }
 input, textarea { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; }
 .icon-input { display: flex; align-items: center; gap: 10px; }
-
-/* DANGER ZONE */
 .danger-zone { border: 1px solid #f8d7da; background: #fff5f5; padding: 1rem; border-radius: 8px; }
 .danger-zone h3 { color: #c0392b; }
 .danger-item { margin-bottom: 10px; }
 .checkbox-danger { display: flex; gap: 10px; cursor: pointer; color: #c0392b; font-weight: bold; font-size: 0.9rem; }
-
 .actions { display: flex; gap: 1rem; margin-top: 2rem; }
 .btn-save { flex: 2; background-color: #2c3e50; color: white; padding: 0.8rem; border: none; border-radius: 6px; cursor: pointer; }
 .btn-cancel { flex: 1; background-color: white; border: 1px solid #ccc; padding: 0.8rem; border-radius: 6px; cursor: pointer; }
-
-/* MODAL DELETE */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
 .delete-card { background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; border-top: 5px solid #e74c3c; }
 .delete-input { margin: 1rem 0; border: 2px solid #e74c3c; }

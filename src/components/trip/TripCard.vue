@@ -7,19 +7,21 @@
 
     <div class="card-image" :style="{ backgroundImage: `url(${trip.image})` }">
       <div class="overlay"></div>
-      <div class="level-badge">{{ trip.difficulty }}</div>
+      <div class="level-badge">{{ translateLevel(trip.difficulty) }}</div>
     </div>
 
     <div class="card-content">
       <div class="header-row">
-        <span class="category">{{ trip.category }}</span>
+        <!-- Translate kategori -->
+        <span class="category">{{ translateCategory(trip.category) }}</span>
         <div class="rating">⭐ {{ trip.rating || '5.0' }}</div>
       </div>
 
       <h3>{{ trip.title }}</h3>
 
       <div class="info-row">
-        <span>📅 {{ trip.date }}</span>
+        <!-- Format date secara reaktif -->
+        <span>📅 {{ formattedDate }}</span>
         <span>⏱️ {{ trip.duration }}</span>
       </div>
 
@@ -27,7 +29,7 @@
         <div class="progress-label">
           <span>Slot: {{ trip.currentSlots }}/{{ trip.maxSlots }}</span>
           <span class="spots-left" v-if="trip.maxSlots - trip.currentSlots <= 5">
-             🔥 {{ t('trip.slotsLeft', { count: trip.maxSlots - trip.currentSlots }) }}
+              🔥 {{ t('trip.slotsLeft', { count: trip.maxSlots - trip.currentSlots }) }}
           </span>
         </div>
         <div class="progress-bar">
@@ -50,14 +52,37 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ trip: any }>();
-const { t } = useI18n();
+const { t, locale } = useI18n(); // Ambil locale untuk format tarikh
 const router = useRouter();
 
-// Fungsi bawa ke page detail
+// 🔥 FORMAT DATE REAKTIF 🔥
+const formattedDate = computed(() => {
+  if (!props.trip.startDate) return '';
+  const date = new Date(props.trip.startDate);
+  // locale.value akan auto tukar format (cth: en-US -> ms-MY)
+  return date.toLocaleDateString(locale.value, { day: 'numeric', month: 'short' });
+});
+
+// Helper Translate Kategori (Hiking -> Mendaki)
+const translateCategory = (cat: string) => {
+  if (!cat) return '';
+  // Pastikan key lowercase dan tiada jarak (cth: 'white water rafting' -> 'whitewaterrafting' atau ikut key JSON anda)
+  // Untuk keselamatan, kita guna lowercase sahaja
+  return t(`activities.${cat.toLowerCase()}`); 
+};
+
+// Helper Translate Level
+const translateLevel = (level: string) => {
+  if (!level) return '';
+  // Level dalam DB: Easy, Moderate, Hard. Kita map ke translation keys.
+  return t(`levels.${level.toLowerCase()}`);
+};
+
 const goToDetail = () => {
   router.push(`/trips/${props.trip.id}`);
 };
@@ -66,7 +91,7 @@ const goToDetail = () => {
 <style scoped>
 .trip-card { 
   background: white; 
-  border-radius: 8px; /* Kurangkan radius sikit biar tajam */
+  border-radius: 8px; 
   overflow: hidden; 
   box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
   border: 1px solid #eee; 
@@ -74,13 +99,13 @@ const goToDetail = () => {
   transition: transform 0.2s, box-shadow 0.2s; 
   display: flex; 
   flex-direction: column;
-  cursor: pointer; /* PENTING: Tunjuk ni boleh klik */
+  cursor: pointer;
 }
 
 .trip-card:hover { 
   transform: translateY(-3px); 
   box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-  border-color: #27ae60; /* Highlight hijau sikit bila hover */
+  border-color: #27ae60; 
 }
 
 .status-badge { position: absolute; top: 10px; left: 10px; z-index: 10; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase; color: white; }

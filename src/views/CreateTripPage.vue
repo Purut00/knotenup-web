@@ -46,8 +46,10 @@
               <label>{{ t('createTrip.category') }}</label>
               <select v-model="form.category" class="clean-input">
                 <option disabled value="">{{ t('common.select') }}...</option>
-                <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
-                  <option v-for="item in group.items" :key="item" :value="item">{{ item }}</option>
+                <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="t('activities.' + group.group)">
+                  <option v-for="item in group.items" :key="item" :value="item">
+                    {{ t('activities.' + item) }}
+                  </option>
                 </optgroup>
               </select>
             </div>
@@ -81,7 +83,9 @@
             <div class="input-wrap">
               <select v-model="form.state" class="clean-input">
                 <option disabled value="">{{ t('common.selectState') }}</option>
-                <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
+                <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">
+                  {{ t('states.' + state) }}
+                </option>
               </select>
             </div>
             <div class="input-wrap">
@@ -183,7 +187,7 @@
                 :class="{ active: form.includes.includes(service) }"
                 @click="toggleService(service)"
               >
-                {{ service }}
+                {{ t('services.' + service) }}
               </div>
             </div>
           </div>
@@ -206,14 +210,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
+import { useI18n } from 'vue-i18n'; // Import i18n
 import { ACTIVITY_CATEGORIES, TRIP_SERVICES, MALAYSIA_STATES } from '../constants/data';
 import { auth, db, storage } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; 
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { isSpam } from '../utils/spamFilter';
 
-const { t } = useI18n();
+const { t } = useI18n(); // Init t function
 const router = useRouter();
 const currentStep = ref(1);
 const loading = ref(false);
@@ -231,7 +235,7 @@ const form = reactive({
   tips: '', mandatory: '', recommended: '', includes: [] as string[]
 });
 
-// Duration Logic
+// 🔥 DURATION LOGIC (DYNAMIC LANGUAGE) 🔥
 const computedDuration = computed(() => {
   if (!form.startDate || !form.endDate) return '-';
   const start = new Date(form.startDate);
@@ -239,9 +243,11 @@ const computedDuration = computed(() => {
   const diffTime = end.getTime() - start.getTime();
   const diffDays = diffTime / (1000 * 3600 * 24);
 
-  if (diffDays < 0) return t('createTrip.dateError'); // Kena tambah key ni kat json kalau nak, atau biar hardcode sikit
+  if (diffDays < 0) return t('createTrip.dateError'); 
   if (diffDays === 0) return t('createTrip.dayTrip');
-  return `${diffDays + 1}D ${diffDays}N`;
+  
+  // Guna t('createTrip.days') -> "D" atau "H" (Hari)
+  return `${diffDays + 1}${t('createTrip.days')} ${diffDays}${t('createTrip.nights')}`;
 });
 
 // Helpers
@@ -298,7 +304,8 @@ const submitForm = async () => {
       location: finalLocation,
       startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
       endDate: form.endDate ? new Date(form.endDate).toISOString() : null,
-      duration: computedDuration.value,
+      duration: computedDuration.value, // Note: Duration ini akan save string dalam bahasa semasa (cth: 3H 2M). 
+      // Jika nak strict, boleh simpan raw value juga, tapi untuk sekarang ini ok.
       images: uploadedUrls, 
       image: uploadedUrls[0] || '',
       price: Number(form.price),
@@ -350,7 +357,7 @@ const submitForm = async () => {
   flex-direction: column;
   justify-content: flex-start; /* Mula dari atas */
   padding: 4rem; /* Padding sekeliling */
-  padding-top: 20vh; /* Jarak dari bumbung skrin (adjust 20vh ikut sedap mata) */
+  padding-top: 20vh; /* Jarak dari bumbung skrin */
   
   color: white;
   position: relative;

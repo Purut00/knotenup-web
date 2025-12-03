@@ -23,10 +23,10 @@
         <div class="footer-col">
           <h3>{{ t('footer.support') }}</h3>
           <ul>
-            <li><a href="#">Syarat & Terma</a></li>
-            <li><a href="#">Polisi Privasi</a></li>
-            <li><a href="#">Pusat Bantuan</a></li>
-            <li><a href="#">Hubungi Admin</a></li>
+            <li><a href="#">{{ t('footer.terms') }}</a></li>
+            <li><a href="#">{{ t('footer.privacy') }}</a></li>
+            <li><a href="#">{{ t('footer.help') }}</a></li>
+            <li><a href="#">{{ t('footer.contactAdmin') }}</a></li>
           </ul>
         </div>
 

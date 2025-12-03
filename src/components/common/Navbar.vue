@@ -17,7 +17,7 @@
         <router-link to="/spots" class="navbar-item">{{ t('navbar.spots') }}</router-link>
         
         <router-link v-if="currentUser" to="/profile" class="navbar-item user-name-link">
-             {{ displayName }}
+             {{ displayName ? displayName : t('navbar.profile') }}
         </router-link>
       </div>  
 
@@ -75,14 +75,15 @@ const router = useRouter();
 const showLogin = ref(false);
 const currentUser = ref<User | null>(null);
 const userRole = ref('user');
-const displayName = ref('Profile');
+const displayName = ref(''); // Biarkan kosong string mula-mula
 
-// Variable khas untuk handle dropdown supaya lebih stabil
 const currentLang = ref(locale.value);
 
-const getFirstName = (name: string | null | undefined): string => {
-  if (!name) return 'Profile';
-  return name.split(' ')[0] || 'Profile'; 
+// Helper function: Return null jika tiada nama, supaya Template boleh guna t('navbar.profile')
+const getFirstName = (name: string | null | undefined): string | null => {
+  if (!name) return null;
+  const first = name.split(' ')[0];
+  return first || null;
 };
 
 // 🔥 FUNGSI TUKAR BAHASA 🔥
@@ -116,22 +117,18 @@ onMounted(() => {
           userRole.value = data.role || 'user'; 
           
           // --- LOGIK "FIRESTORE FIRST" ---
-          // 1. Cari nama dalam database dulu (name atau fullName)
           const firestoreName = data.name || data.fullName;
-          
-          // 2. Kalau database kosong, baru guna nama Google (user.displayName)
-          // 3. Kalau Google pun kosong, letak 'Profile'
-          const finalName = firestoreName ? firestoreName : (user.displayName || 'Profile');
+          const finalName = firestoreName ? firestoreName : (user.displayName || ''); // Jika tiada nama, string kosong
 
-          // Set nama di navbar
-          displayName.value = getFirstName(finalName);
+          // Set nama. Jika null, template akan guna fallback t('navbar.profile')
+          displayName.value = getFirstName(finalName) || '';
         }
       });
       
     } else {
       currentUser.value = null;
       userRole.value = 'user';
-      displayName.value = 'Profile';
+      displayName.value = '';
     }
   });
 });

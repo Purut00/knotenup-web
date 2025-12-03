@@ -43,7 +43,15 @@
     "popularActivities": "Popular Activities",
     "latestTrips": "Latest Trips",
     "viewAllTrips": "View All Trips",
-    "communityDiscuss": "Community Discussions"
+    "communityDiscuss": "Community Discussions",
+    "more": "More",
+    "viewAll": "View All",
+    "goToForum": "Go to Forum",
+    "noTrips": "No latest trips available.",
+    "noPosts": "No discussions yet.",
+    "bannerExplore": "Explore Nature",
+    "bannerCommunity": "Outdoor Community",
+    "bannerService": "Find Services"
   },
   "trip": {
     "headerTitle": "Explore Recreation Trips",
@@ -69,7 +77,67 @@
     "noLink": "Link Not Ready",
     "paymentNote": "Click the button above to join the WhatsApp group. Payment is handled directly with the organizer.",
     "notFound": "Trip not found",
-    "backList": "Back to List"
+    "backList": "Back to List",
+    "showingActiveTrips": "Showing {count} active trips"
+  },
+  "activities": {
+    "Land": "Land Activities",
+    "Water": "Water Activities",
+    "Air": "Air Activities",
+    "hiking": "Hiking",
+    "camping": "Camping",
+    "diving": "Diving",
+    "cycling": "Cycling",
+    "climbing": "Climbing",
+    "kayaking": "Kayaking",
+    "rafting": "Rafting",
+    "fishing": "Fishing",
+    "caving": "Caving",
+    "surfing": "Surfing",
+    "run": "Run",
+    "atv": "ATV",
+    "motocross": "Motocross",
+    "paragliding": "Paragliding",
+    "snorkeling": "Snorkeling",
+    "zipline": "Zipline"
+  },
+  "services": {
+    "Guide": "Guide",
+    "Permit": "Permit",
+    "Transport": "Transport",
+    "Food": "Food/Meals",
+    "Tent": "Tent",
+    "Equipment": "Equipment",
+    "First Aid": "First Aid",
+    "Insurance": "Insurance",
+    "Chef": "Chef",
+    "Porter": "Porter",
+    "Photographer": "Photographer"
+  },
+  "states": {
+    "Johor": "Johor",
+    "Kedah": "Kedah",
+    "Kelantan": "Kelantan",
+    "Melaka": "Melaka",
+    "Negeri Sembilan": "Negeri Sembilan",
+    "Pahang": "Pahang",
+    "Perak": "Perak",
+    "Perlis": "Perlis",
+    "Pulau Pinang": "Penang",
+    "Sabah": "Sabah",
+    "Sarawak": "Sarawak",
+    "Selangor": "Selangor",
+    "Terengganu": "Terengganu",
+    "Kuala Lumpur": "Kuala Lumpur",
+    "Labuan": "Labuan",
+    "Putrajaya": "Putrajaya"
+  },
+  "time": {
+    "justNow": "Just now",
+    "s": "s",
+    "m": "m",
+    "h": "h",
+    "d": "d"
   },
   "createTrip": {
     "title": "Create New Trip",
@@ -197,14 +265,20 @@
     "quickLinks": "Main Menu",
     "support": "Help & Info",
     "contact": "Follow Us",
-    "rights": "All Rights Reserved."
+    "rights": "All Rights Reserved.",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "help": "Help Center",
+    "contactAdmin": "Contact Admin"
   },
   "auth": {
     "modalTitle": "Start Adventure",
     "modalSub": "Log in for full access to Trips & Forum.",
     "continueWith": "Continue with {provider}",
     "disclaimer": "By signing up, you agree to our Terms & Privacy.",
-    "loginRequired": "Please login first!"
+    "loginRequired": "Please login first!",
+    "welcome": "Welcome",
+    "loginFailed": "Login failed. Please try again."
   },
   "components": {
     "postedBy": "Posted by",
@@ -228,7 +302,7 @@
     "advertiseBtn": "📢 Advertise Your Service",
     "allStates": "All States",
     "statePlaceholder": "Select State",
-    "catAll": "All",
+    "catAll": "All Categories",
     "catCampsite": "Campsite",
     "catChalet": "Chalet / Homestay",
     "catGuide": "Guide",

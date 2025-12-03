@@ -1,15 +1,19 @@
 <template>
   <div class="trip-page">
     
+    <!-- SEARCH STRIP -->
     <div class="search-strip-container">
       <div class="container">
         <div class="search-row">
           <div class="search-input-wrapper">
             
             <select v-model="currentFilter" class="search-select">
-              <option value="">Semua Kategori</option>
-              <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
-                <option v-for="item in group.items" :key="item" :value="item">{{ item }}</option>
+              <option value="">{{ t('directory.catAll') }}</option>
+              <!-- Translate nama group & items -->
+              <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="t('activities.' + group.group)">
+                <option v-for="item in group.items" :key="item" :value="item">
+                  {{ t('activities.' + item) }}
+                </option>
               </optgroup>
             </select>
             
@@ -28,6 +32,7 @@
       </div>
     </div>
 
+    <!-- SECONDARY FILTERS -->
     <div class="container secondary-filter-container">
       <div class="filter-row">
         <div class="filter-group">
@@ -43,9 +48,9 @@
           <span class="filter-label">{{ t('trip.filterLevel') }}:</span>
           <select v-model="filterLevel" class="mini-select">
             <option value="">{{ t('components.allLevels') }}</option>
-            <option>🟢 Santai (Easy)</option>
-            <option>🟡 Sederhana (Moderate)</option>
-            <option>🔴 Hardcore (Hard)</option>
+            <option value="Easy">🟢 {{ t('levels.easy') }}</option>
+            <option value="Moderate">🟡 {{ t('levels.moderate') }}</option>
+            <option value="Hard">🔴 {{ t('levels.hard') }}</option>
           </select>
         </div>
 
@@ -53,9 +58,11 @@
       </div>
     </div>
 
+    <!-- CONTENT GRID -->
     <div class="content-container container">
       <div class="results-meta">
-        <span>Menunjukkan <strong>{{ filteredTrips.length }}</strong> trip aktif</span>
+        <!-- Guna t() dengan parameter count -->
+        <span>{{ t('trip.showingActiveTrips', { count: filteredTrips.length }) }}</span>
       </div>
       
       <div v-if="loading" class="loading-box">⏳ {{ t('common.loading') }}</div>
@@ -65,8 +72,8 @@
       </div>
       
       <div v-if="!loading && filteredTrips.length === 0" class="empty-box">
-        <p>Tiada trip ditemui.</p>
-        <button class="btn-outline" @click="resetFilters">Lihat Semua</button>
+        <p>{{ t('trip.notFound') }}</p>
+        <button class="btn-outline" @click="resetFilters">{{ t('home.viewAllTrips') }}</button>
       </div>
     </div>
 
@@ -91,7 +98,7 @@ const loading = ref(true);
 
 // Filter States
 const searchQuery = ref('');
-const currentFilter = ref(''); // Category
+const currentFilter = ref(''); 
 const filterLevel = ref('');
 const filterDate = ref('');
 
@@ -103,13 +110,17 @@ const resetFilters = () => {
   router.replace({ query: {} });
 };
 
-// Logic Filter Gabungan
+// Logic Filter
 const filteredTrips = computed(() => {
   return trips.value.filter(trip => {
     // 1. Search Text
-    const matchSearch = !searchQuery.value || trip.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || trip.location.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchSearch = !searchQuery.value || 
+      trip.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+      (trip.location && trip.location.toLowerCase().includes(searchQuery.value.toLowerCase()));
+    
     // 2. Category
     const matchCat = !currentFilter.value || (trip.category && trip.category.toLowerCase() === currentFilter.value.toLowerCase());
+    
     // 3. Level
     const matchLevel = !filterLevel.value || trip.difficulty === filterLevel.value;
     
@@ -125,6 +136,7 @@ onMounted(async () => {
   try {
     const q = query(collection(db, "trips"), orderBy("createdAt", "desc"));
     const querySnapshot = await getDocs(q);
+    // Simpan data raw. Formatting tarikh & translate kategori dibuat di TripCard supaya reaktif
     trips.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) { console.error(error); } 
   finally { loading.value = false; }
@@ -135,10 +147,10 @@ onMounted(async () => {
 .trip-page { background-color: #f5f5f5; min-height: 100vh; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
 
-/* --- 1. SEARCH STRIP (DESIGN SERAGAM HOME & DIREKTORI) --- */
+/* SEARCH STRIP */
 .search-strip-container { 
   background: white; 
-  padding: 1.5rem 0 0.8rem 0; /* Padding atas ditambah sedikit untuk spacing */
+  padding: 1.5rem 0 0.8rem 0; 
   border-bottom: 1px solid #eaeaea; 
   margin-bottom: 1rem; 
   position: sticky; 
@@ -147,11 +159,7 @@ onMounted(async () => {
   box-shadow: 0 2px 5px rgba(0,0,0,0.02);
 }
 
-.search-row { 
-  display: flex; 
-  justify-content: center; 
-  padding: 0 1rem;
-}
+.search-row { display: flex; justify-content: center; padding: 0 1rem; }
 
 .search-input-wrapper { 
   display: flex; 
@@ -163,7 +171,6 @@ onMounted(async () => {
   background: white;
 }
 
-/* Dropdown Kategori */
 .search-select {
   border: none;
   border-right: 1px solid #eee;
@@ -178,7 +185,6 @@ onMounted(async () => {
   appearance: auto; 
 }
 
-/* Input Teks */
 .search-input-wrapper input { 
   flex: 1; 
   border: none; 
@@ -187,7 +193,6 @@ onMounted(async () => {
   font-size: 0.9rem; 
 }
 
-/* Button Search */
 .btn-search-strip { 
   background: #27ae60; 
   color: white; 
@@ -200,8 +205,7 @@ onMounted(async () => {
 }
 .btn-search-strip:hover { background: #219150; }
 
-
-/* 2. SECONDARY FILTERS (LEVEL & DATE) */
+/* SECONDARY FILTERS */
 .secondary-filter-container { margin-bottom: 1rem; }
 .filter-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; padding: 0.5rem 0; border-bottom: 1px dashed #ddd;}
 

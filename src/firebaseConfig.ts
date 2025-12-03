@@ -33,14 +33,14 @@ const storage = getStorage(app);
 
 // Connect to Emulators if in development mode
 
-if (location.hostname === "localhost") {
-  console.log("🔥 Sedang guna Emulator!");
+//if (location.hostname === "localhost") {
+ // console.log("🔥 Sedang guna Emulator!");
   
   // Port ni MESTI sama dengan screenshot anda tadi
   //connectAuthEmulator(auth, "http://127.0.0.1:9099");     
   //connectFirestoreEmulator(db, "127.0.0.1", 8080);
   //onnectStorageEmulator(storage, "127.0.0.1", 9199);
-}
+//}
 
 
 // Setup Providers (Google, FB, Apple)

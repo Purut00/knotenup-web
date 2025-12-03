@@ -1,29 +1,24 @@
 <template>
   <div class="create-layout">
     
-    <!-- LEFT PANEL: STEPS INDICATOR -->
     <div class="left-panel">
       <div class="overlay-content">
         <h1>{{ isEditMode ? t('createSpot.editTitle') : t('createSpot.title') }}</h1>
         <p>{{ isEditMode ? t('createSpot.editSub') : t('createSpot.sub') }}</p>
         
-        <!-- Vertical Steps -->
         <div class="steps-vertical">
           <div class="step-item" :class="{ active: currentStep === 1, done: currentStep > 1 }">
             <div class="dot">1</div>
-            <!-- FIX: Guna t() untuk langkah -->
             <span>{{ t('createSpot.steps.step1') }}</span>
           </div>
           <div class="step-line"></div>
           <div class="step-item" :class="{ active: currentStep === 2, done: currentStep > 2 }">
             <div class="dot">2</div>
-            <!-- FIX: Guna t() untuk langkah -->
             <span>{{ t('createSpot.steps.step2') }}</span>
           </div>
         </div>
 
         <div class="info-box mt-8">
-          <!-- FIX: Guna t() untuk info box -->
           <p>{{ t('createSpot.infoBox.name') }}</p>
           <p>{{ t('createSpot.infoBox.photo') }}</p>
           <p>{{ t('createSpot.infoBox.gpx') }}</p>
@@ -31,12 +26,10 @@
       </div>
     </div>
 
-    <!-- RIGHT PANEL: FORM -->
     <div class="right-panel">
       <div class="form-wrapper">
         
         <div class="mobile-header">
-          <!-- FIX: Mobile header dynamic translation -->
           <h2>
             {{ t('createSpot.steps.mobileStep', { 
               current: currentStep, 
@@ -46,9 +39,7 @@
           </h2>
         </div>
 
-        <!-- STEP 1: INFO ASAS -->
         <div v-if="currentStep === 1" class="form-section fade-up">
-          <!-- FIX: Tajuk & Subtajuk Step 1 -->
           <h2 class="section-title">{{ t('createSpot.section1.title') }}</h2>
           <p class="section-subtitle">{{ t('createSpot.section1.subtitle') }}</p>
 
@@ -135,31 +126,25 @@
                <span class="icon">🗺️</span>
                <div class="file-info">
                  <span v-if="gpxFile">{{ gpxFile.name }}</span>
-                 <!-- FIX: Teks GPX sedia ada -->
                  <span v-else-if="form.gpxUrl" class="existing-file">{{ t('createSpot.gpx.existing') }}</span>
                  <span v-else>{{ t('createSpot.gpx.prompt') }}</span>
                </div>
                <input type="file" accept=".gpx" @change="handleGpxSelect" class="file-input-hidden" />
-               <!-- FIX: Butang Pilih Fail -->
                <button class="btn-browse">{{ t('createSpot.gpx.choose') }}</button>
             </div>
           </div>
         </div>
 
-        <!-- STEP 2: DETAIL & FOTO -->
         <div v-if="currentStep === 2" class="form-section fade-up">
-          <!-- FIX: Tajuk & Subtajuk Step 2 -->
           <h2 class="section-title">{{ t('createSpot.section2.title') }}</h2>
           <p class="section-subtitle">{{ t('createSpot.section2.subtitle') }}</p>
 
-          <!-- IMAGE UPLOAD SECTION -->
           <div class="form-group mb-8">
             <label class="section-title-small">📸 {{ t('createSpot.imagesLabel') }} (Max 10)</label>
             
             <div class="multi-upload-grid mt-2">
               <div class="add-img-box" @click="triggerMultiUpload" v-if="previewImages.length < 10">
                 <span class="plus">+</span>
-                <!-- FIX: Teks 'Tambah' -->
                 <span>{{ t('createSpot.addPhoto') }}</span>
               </div>
               <input type="file" ref="multiFileInput" multiple accept="image/*" @change="handleImageSelect" hidden />
@@ -173,12 +158,9 @@
 
           <hr class="separator my-6 border-gray-100" />
 
-          <!-- INFO SECTIONS -->
           <div class="details-stack space-y-6">
             
-            <!-- 1. Tips -->
             <div class="input-wrap">
-              <!-- FIX: Label Tips -->
               <label>💡 {{ t('createSpot.labels.tips') }}</label>
               <textarea 
                 v-model="form.tips" 
@@ -188,9 +170,7 @@
               ></textarea>
             </div>
 
-            <!-- 2. Parking -->
             <div class="input-wrap">
-              <!-- FIX: Label Parking -->
               <label>🚗 {{ t('createSpot.labels.parking') }}</label>
               <input 
                 type="text" 
@@ -200,9 +180,7 @@
               />
             </div>
 
-            <!-- 3. Checkpoint Detail -->
             <div class="input-wrap">
-              <!-- FIX: Label Checkpoint -->
               <label>📍 {{ t('createSpot.labels.checkpoint') }}</label>
               <textarea 
                 v-model="form.checkpointDetail" 
@@ -212,9 +190,7 @@
               ></textarea>
             </div>
 
-            <!-- 4. Additional Info -->
             <div class="input-wrap">
-              <!-- FIX: Label Lain-lain -->
               <label>📝 {{ t('createSpot.labels.other') }}</label>
               <textarea 
                 v-model="form.description" 
@@ -227,7 +203,6 @@
           </div>
         </div>
 
-        <!-- ACTION BAR -->
         <div class="action-bar">
           <button v-if="currentStep === 1" class="btn-text" @click="$router.back()">{{ t('common.cancel') }}</button>
           <button v-if="currentStep === 2" class="btn-text" @click="prevStep">{{ t('common.back') }}</button>
@@ -336,12 +311,20 @@ const handleImageSelect = (event: Event) => {
     const files = Array.from(target.files);
     if (previewImages.value.length + files.length > 10) return alert(t('createSpot.maxImgError'));
 
-    files.forEach(file => {
+    for (const file of files) {
+      // 🔥 KESELAMATAN: Had Saiz Fail (5MB)
+      const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+      if (file.size > MAX_SIZE) {
+        alert(`Fail terlalu besar (${(file.size / 1024 / 1024).toFixed(2)}MB). Sila pilih fail bawah 5MB.`);
+        continue;
+      }
+      
       newImageFiles.value.push(file);
       const reader = new FileReader();
       reader.onload = (e) => { if(e.target?.result) previewImages.value.push(e.target.result as string); };
       reader.readAsDataURL(file);
-    });
+    }
+    target.value = ''; // Reset input
   }
 };
 

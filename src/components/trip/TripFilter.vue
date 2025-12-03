@@ -18,18 +18,18 @@
       <span class="label">{{ t('trip.filterLevel') }}</span>
       <select>
         <option>{{ t('components.allLevels') }}</option>
-        <option>{{ t('components.easy') }}</option>
-        <option>{{ t('components.moderate') }}</option>
-        <option>{{ t('components.hard') }}</option>
+        <option>{{ t('levels.easy') }}</option>
+        <option>{{ t('levels.moderate') }}</option>
+        <option>{{ t('levels.hard') }}</option>
       </select>
     </div>
 
     <div class="filter-item">
       <span class="label">{{ t('createTrip.category') }}</span>
       <select>
-        <option value="">All</option>
-        <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
-          <option v-for="item in group.items" :key="item">{{ item }}</option>
+        <option value="">{{ t('directory.catAll') }}</option>
+        <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="t('activities.' + group.group)">
+          <option v-for="item in group.items" :key="item">{{ t('activities.' + item) }}</option>
         </optgroup>
       </select>
     </div>

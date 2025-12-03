@@ -39,7 +39,7 @@
                 @click="goToLink(slide.linkUrl)"
               >
                 <div class="slide-caption" v-if="slide.title">
-                  <h3>{{ slide.title }}</h3>
+                  <h3>{{ t(slide.title) }}</h3>
                 </div>
               </div>
             </swiper-slide>
@@ -65,13 +65,14 @@
 
       <section class="category-section">
         <div class="category-list">
-          <div class="cat-item" v-for="item in popularActivities" :key="item.name" @click="filterBy(item.name)">
+          <div class="cat-item" v-for="item in popularActivities" :key="item.key" @click="filterBy(item.key)">
             <div class="cat-circle">{{ item.emoji }}</div>
-            <span class="cat-label">{{ item.name }}</span>
+            <span class="cat-label">{{ t('activities.' + item.key) }}</span>
           </div>
+          
           <div class="cat-item" @click="$router.push('/trips')">
             <div class="cat-circle">...</div>
-            <span class="cat-label">Lagi</span>
+            <span class="cat-label">{{ t('home.more') }}</span>
           </div>
         </div>
       </section>
@@ -79,7 +80,9 @@
       <section class="section-container">
         <div class="section-header">
           <h3>{{ t('home.latestTrips') }}</h3>
-          <a href="#" @click.prevent="$router.push('/trips')" class="see-more">Lihat Semua ></a>
+          <a href="#" @click.prevent="$router.push('/trips')" class="see-more">
+            {{ t('home.viewAll') }} >
+          </a>
         </div>
         
         <div v-if="loadingTrips" class="loading-text">⏳ {{ t('common.loading') }}</div>
@@ -88,20 +91,22 @@
           <TripCard v-for="trip in latestTrips" :key="trip.id" :trip="trip" />
         </div>
         
-        <div v-else class="empty-text">Belum ada trip terkini.</div>
+        <div v-else class="empty-text">{{ t('home.noTrips') }}</div>
       </section>
 
       <section class="section-container">
         <div class="section-header">
           <h3>{{ t('home.communityDiscuss') }}</h3>
-          <a href="#" @click.prevent="$router.push('/forum')" class="see-more">Ke Forum ></a>
+          <a href="#" @click.prevent="$router.push('/forum')" class="see-more">
+            {{ t('home.goToForum') }} >
+          </a>
         </div>
 
         <div v-if="loadingPosts" class="loading-text">⏳ {{ t('common.loading') }}</div>
         <div v-else-if="latestPosts.length > 0" class="forum-grid">
           <ForumPostCard v-for="post in latestPosts" :key="post.id" :post="post" />
         </div>
-        <div v-else class="empty-text">Belum ada perbincangan.</div>
+        <div v-else class="empty-text">{{ t('home.noPosts') }}</div>
       </section>
 
     </div>
@@ -118,7 +123,6 @@ import { db } from '../firebaseConfig';
 import { collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 
 // 🔥 IMPORT SWIPER 🔥
-// IMPORT SWIPER
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay, Pagination } from 'swiper/modules';
 
@@ -127,7 +131,7 @@ import 'swiper/css';
 // @ts-ignore
 import 'swiper/css/pagination';
 
-const { t } = useI18n();
+const { t, locale } = useI18n(); // Ambil locale juga untuk format tarikh
 const router = useRouter();
 const latestTrips = ref<any[]>([]);
 const latestPosts = ref<any[]>([]);
@@ -135,36 +139,64 @@ const loadingTrips = ref(true);
 const loadingPosts = ref(true);
 const searchQuery = ref('');
 
-// 🔥 STRUKTUR BANNER BARU 🔥
-// Saya letak default images supaya slider tak kosong mula-mula
+// 🔥 STRUKTUR BANNER (Default Keys) 🔥
 const banners = reactive({
   largeSlides: [
-    { imageUrl: 'https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=800', linkUrl: '/trips', title: 'Jelajah Alam' },
-    { imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800', linkUrl: '/forum', title: 'Komuniti Outdoor' },
-    { imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32119?w=800', linkUrl: '/directory', title: 'Cari Servis' }
+    // Guna keys (home.bannerExplore) untuk title default supaya boleh translate
+    { imageUrl: 'https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=800', linkUrl: '/trips', title: 'home.bannerExplore' },
+    { imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800', linkUrl: '/forum', title: 'home.bannerCommunity' },
+    { imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32119?w=800', linkUrl: '/directory', title: 'home.bannerService' }
   ],
   small1: { imageUrl: '', linkUrl: '' },
   small2: { imageUrl: '', linkUrl: '' }
 });
 
+// 🔥 POPULAR ACTIVITIES (Guna keys, bukan nama static) 🔥
 const popularActivities = [
-  { name: 'Hiking', emoji: '⛰️' },
-  { name: 'Camping', emoji: '⛺' },
-  { name: 'Diving', emoji: '🤿' },
-  { name: 'Cycling', emoji: '🚴' },
-  { name: 'Climbing', emoji: '🧗' },
-  { name: 'Kayaking', emoji: '🛶' },
-  { name: 'Rafting', emoji: '🌊' },
-  { name: 'Fishing', emoji: '🎣' },
-  { name: 'Caving', emoji: '🦇' },
-  { name: 'Surfing', emoji: '🏄' },
-  { name: 'Run', emoji: '🏃' },
+  { key: 'hiking', emoji: '⛰️' },
+  { key: 'camping', emoji: '⛺' },
+  { key: 'diving', emoji: '🤿' },
+  { key: 'cycling', emoji: '🚴' },
+  { key: 'climbing', emoji: '🧗' },
+  { key: 'kayaking', emoji: '🛶' },
+  { key: 'rafting', emoji: '🌊' },
+  { key: 'fishing', emoji: '🎣' },
+  { key: 'caving', emoji: '🦇' },
+  { key: 'surfing', emoji: '🏄' },
+  { key: 'run', emoji: '🏃' },
 ];
 
-const formatDate = (dateString: string) => { if(!dateString) return ''; return new Date(dateString).toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }); };
-const getTimeAgo = (timestamp: any) => { if (!timestamp) return 'Baru saja'; const date = timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(); const now = new Date(); const seconds = Math.floor((now.getTime() - date.getTime()) / 1000); if (seconds < 60) return `${seconds}s`; const minutes = Math.floor(seconds / 60); if (minutes < 60) return `${minutes}m`; const hours = Math.floor(minutes / 60); if (hours < 24) return `${hours}h`; return `${Math.floor(hours / 24)}d`; };
+// 🔥 FUNGSI FORMAT DATE (Auto detect locale) 🔥
+const formatDate = (dateString: string) => { 
+  if(!dateString) return ''; 
+  // locale.value akan auto tukar format (cth: 'en-US' atau 'ms-MY')
+  return new Date(dateString).toLocaleDateString(locale.value, { day: 'numeric', month: 'short' }); 
+};
+
+// 🔥 FUNGSI TIME AGO (Guna t() untuk unit masa) 🔥
+const getTimeAgo = (timestamp: any) => { 
+  if (!timestamp) return t('time.justNow'); 
+  
+  const date = timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(); 
+  const now = new Date(); 
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000); 
+  
+  if (seconds < 60) return `${seconds}${t('time.s')}`; 
+  
+  const minutes = Math.floor(seconds / 60); 
+  if (minutes < 60) return `${minutes}${t('time.m')}`; 
+  
+  const hours = Math.floor(minutes / 60); 
+  if (hours < 24) return `${hours}${t('time.h')}`; 
+  
+  return `${Math.floor(hours / 24)}${t('time.d')}`; 
+};
+
 const executeSearch = () => { if (searchQuery.value.trim()) router.push({ name: 'search', query: { q: searchQuery.value } }); };
-const filterBy = (activity: string) => { router.push({ path: '/trips', query: { category: activity } }); };
+const filterBy = (activityKey: string) => { 
+  // Kita pass 'key' (cth: hiking) ke URL, bukan nama translate
+  router.push({ path: '/trips', query: { category: activityKey } }); 
+};
 const goToLink = (url: string) => { if (!url) return; if (url.startsWith('http')) window.open(url, '_blank'); else router.push(url); };
 
 onMounted(async () => {
@@ -173,11 +205,9 @@ onMounted(async () => {
     const docSnap = await getDoc(doc(db, "site_settings", "banners"));
     if (docSnap.exists()) { 
       const data = docSnap.data(); 
-      // Kalau ada array slides dalam DB, guna itu
       if(data.largeSlides && Array.isArray(data.largeSlides) && data.largeSlides.length > 0) {
          banners.largeSlides = data.largeSlides; 
       }
-      // Kalau cuma ada 'large' (structure lama), kita masukkan dia dalam array supaya slider tetap jalan
       else if (data.large) {
          banners.largeSlides = [data.large];
       }
@@ -191,14 +221,23 @@ onMounted(async () => {
   try {
     const qTrips = query(collection(db, "trips"), orderBy("createdAt", "desc"), limit(12));
     const snapTrips = await getDocs(qTrips);
-    latestTrips.value = snapTrips.docs.map(doc => ({ id: doc.id, ...doc.data(), date: formatDate(doc.data().startDate) }));
+    latestTrips.value = snapTrips.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data(), 
+      date: formatDate(doc.data().startDate) // Guna format date baru
+    }));
   } catch (e) {} finally { loadingTrips.value = false; }
 
   // 3. Fetch Posts
   try {
     const qPosts = query(collection(db, "forum_posts"), orderBy("createdAt", "desc"), limit(4));
     const snapPosts = await getDocs(qPosts);
-    latestPosts.value = snapPosts.docs.map(doc => ({ id: doc.id, ...doc.data(), excerpt: doc.data().content, timeAgo: getTimeAgo(doc.data().createdAt) }));
+    latestPosts.value = snapPosts.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data(), 
+      excerpt: doc.data().content, 
+      timeAgo: getTimeAgo(doc.data().createdAt) // Guna time ago baru
+    }));
   } catch (e) {} finally { loadingPosts.value = false; }
 });
 </script>
@@ -215,12 +254,12 @@ onMounted(async () => {
 .btn-search-strip { background: #27ae60; color: white; border: none; padding: 0 2rem; cursor: pointer; font-size: 0.95rem; font-weight: bold; white-space: nowrap; }
 .btn-search-strip:hover { background: #219150; }
 
-/* 🔥 HERO GRID BARU (420px Tinggi) 🔥 */
+/* HERO GRID SECTION */
 .hero-grid-section { 
   display: grid; 
   grid-template-columns: 2fr 1fr; 
   gap: 10px; 
-  height: 420px; /* TINGGI DITAMBAH */
+  height: 420px; 
   margin-bottom: 1.5rem; 
 }
 
@@ -244,7 +283,6 @@ onMounted(async () => {
   position: relative;
 }
 
-/* Caption atas banner (optional) */
 .slide-caption {
   position: absolute;
   bottom: 20px;
@@ -270,7 +308,7 @@ onMounted(async () => {
 }
 .banner-small:hover { transform: translateY(-3px); }
 
-/* Pagination Dots Customization */
+/* Pagination Dots */
 :deep(.swiper-pagination-bullet) { background: white; opacity: 0.6; }
 :deep(.swiper-pagination-bullet-active) { background: #27ae60; opacity: 1; }
 
@@ -281,7 +319,7 @@ onMounted(async () => {
 .cat-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 60px; transition: transform 0.1s; }
 .cat-item:hover { transform: translateY(-2px); }
 .cat-circle { width: 40px; height: 40px; border: 1px solid #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 5px; background: #fff; }
-.cat-label { font-size: 0.7rem; color: #555; text-align: center; line-height: 1.2; font-weight: 500; }
+.cat-label { font-size: 0.7rem; color: #555; text-align: center; line-height: 1.2; font-weight: 500; text-transform: capitalize; }
 
 /* SECTIONS */
 .section-container { margin-bottom: 1.5rem; }
@@ -304,7 +342,7 @@ onMounted(async () => {
     gap: 10px;
   }
   .banner-large-slider { 
-    height: 250px; /* Tinggi slider di mobile */
+    height: 250px; 
   }
   .banner-stack { 
     flex-direction: row; 
