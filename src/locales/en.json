@@ -51,7 +51,12 @@
     "noPosts": "No discussions yet.",
     "bannerExplore": "Explore Nature",
     "bannerCommunity": "Outdoor Community",
-    "bannerService": "Find Services"
+    "bannerService": "Find Services",
+    "heroPrefix": "Explore the Beauty",
+    "heroHighlight": "of Nature",
+    "heroSubtitle": "Discover exciting outdoor activities, from hiking to diving.",
+    "tripSectionTitle": "Popular",
+    "popularHighlight": "Trips"
   },
   "trip": {
     "headerTitle": "Explore Recreation Trips",

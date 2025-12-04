@@ -1,26 +1,44 @@
-/* 1. DEFINISI WARNA (DEFAULT: LIGHT MODE) */
+/* 0. IMPORT FONT POPPINS (Supaya nampak modern) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* 1. DEFINISI WARNA (THEME: SUNSET MINIMALIST) */
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif; /* Tukar ke Poppins */
   line-height: 1.5;
   font-weight: 400;
 
-  /* Variables */
-  --bg-body: #f4f6f8;       /* Latar belakang website */
-  --bg-card: #ffffff;       /* Latar belakang kad/navbar */
-  --text-primary: #2c3e50;  /* Tulisan utama (Hitam/Biru Gelap) */
-  --text-secondary: #666666;/* Tulisan pudar */
-  --border-color: #eeeeee;  /* Garis sempadan */
-  --input-bg: #ffffff;      /* Latar input */
+  /* --- SUNSET PALETTE VARIABLES --- */
+  --c-sunset-orange: #FF7E5F;
+  --c-sunset-pink: #FEB47B;
+  --c-sunset-purple: #6C63FF;
+  --c-bg-light: #F8FAFC;  /* Off-white lembut */
+  
+  /* Gradient Presets */
+  --gradient-sunset: linear-gradient(135deg, #FF7E5F 0%, #FEB47B 100%);
+  --gradient-text: linear-gradient(to right, #FF7E5F, #FEB47B, #6C63FF, #FF7E5F);
+  
+  /* Base Variables */
+  --bg-body: var(--c-bg-light);
+  --bg-card: #ffffff;
+  --text-primary: #2D3748;
+  --text-secondary: #718096;
+  --border-color: #E2E8F0;
+  --input-bg: #ffffff;
+  
+  /* Shadows (Soft & Float) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-float: 0 10px 25px -5px rgba(255, 126, 95, 0.15), 0 8px 10px -6px rgba(255, 126, 95, 0.1);
 }
 
-/* 2. DEFINISI WARNA (DARK MODE) */
+/* 2. DEFINISI WARNA (DARK MODE - Optional Adjustment) */
 body.dark-mode {
-  --bg-body: #1a202c;       /* Gelap (Latar) */
-  --bg-card: #2d3748;       /* Kelabu Gelap (Kad) */
-  --text-primary: #f7fafc;  /* Tulisan Putih */
-  --text-secondary: #a0aec0;/* Tulisan Kelabu Cerah */
-  --border-color: #4a5568;  /* Garis Gelap */
+  --bg-body: #1a202c;
+  --bg-card: #2d3748;
+  --text-primary: #f7fafc;
+  --text-secondary: #a0aec0;
+  --border-color: #4a5568;
   --input-bg: #2d3748;
+  /* Dark mode still keeps the sunset accents active */
 }
 
 /* 3. GLOBAL STYLES */
@@ -28,33 +46,51 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  
-  /* Guna variable di sini! */
   background-color: var(--bg-body);
   color: var(--text-primary);
-  
-  /* Animasi tukar warna smooth */
   transition: background-color 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--c-sunset-orange);
   text-decoration: inherit;
+  transition: color 0.2s;
 }
-a:hover { color: #535bf2; }
+a:hover { color: var(--c-sunset-purple); }
 
 h1, h2, h3, h4, h5 {
-  color: var(--text-primary); /* Tajuk ikut warna tema */
+  color: var(--text-primary);
+  letter-spacing: -0.02em; /* Tight tracking for modern look */
 }
 
-button {
-  cursor: pointer;
-}
+button { cursor: pointer; }
 
-/* Paksa input ikut tema */
 input, select, textarea {
   background-color: var(--input-bg) !important;
   color: var(--text-primary) !important;
   border-color: var(--border-color) !important;
+  font-family: inherit;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes shine {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Helper Class for Gradient Text */
+.text-gradient-animate {
+  background: var(--gradient-text);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shine 5s linear infinite;
 }

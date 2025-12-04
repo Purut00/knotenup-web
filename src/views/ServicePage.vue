@@ -1,55 +1,68 @@
 <template>
-  <div class="directory-page">
+  <div class="service-page">
     
-    <div class="top-header-strip">
-      <div class="container header-flex">
-        <div class="title-area">
-          <h1>{{ t('directory.title') }}</h1>
-          <p>{{ t('directory.sub') }}</p>
-        </div>
+    <!-- 1. HERO SECTION (TEMA SUNSET) -->
+    <div class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="hero-content container">
+        <h1>{{ t('directory.title') }}</h1>
+        <p>{{ t('directory.sub') }}</p>
         
-        <button 
-          v-if="userRole === 'organizer'" 
-          class="btn-create-service" 
-          @click="$router.push('/create-service')"
-        >
-          {{ t('directory.advertiseBtn') }}
+        <!-- Advertise Button (White/Glassy to contrast with sunset) -->
+        <button v-if="userRole === 'organizer'" class="btn-create-hero" @click="$router.push('/create-service')">
+          📢 {{ t('directory.advertiseBtn') }}
         </button>
       </div>
     </div>
 
-    <div class="sticky-search-navbar">
+    <!-- 2. FLOATING SEARCH BAR (Tema Sunset) -->
+    <div class="search-floating-wrapper">
       <div class="container">
-        <div class="search-row">
-          <div class="search-input-wrapper">
-            
-            <div class="dropdown-wrapper">
-               <select v-model="selectedState" class="search-select">
-                  <option value="">{{ t('directory.allStates') }}</option>
-                  <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
-               </select>
-               <span class="down-arrow">▼</span>
-            </div>
-            
-            <input 
-              type="text" 
-              v-model="searchQuery"
-              :placeholder="t('common.search') + '...'" 
-            />
+        <div class="search-card-pill">
+           
+           <!-- State Dropdown Segment -->
+           <div class="search-segment location-segment">
+              <span class="segment-icon">📍</span>
+              <div class="segment-content">
+                <label>Lokasi</label>
+                <select v-model="selectedState" class="search-select">
+                   <option value="">{{ t('directory.allStates') }}</option>
+                   <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
+                </select>
+              </div>
+              <span class="chevron-icon">▼</span>
+           </div>
 
-            <button class="btn-search-nav">
-              🔍 <span class="btn-text">{{ t('common.search') }}</span>
-            </button>
-          </div>
+           <div class="vertical-divider"></div>
+
+           <!-- Search Input Segment -->
+           <div class="search-segment input-segment">
+              <span class="segment-icon">🔍</span>
+              <div class="segment-content">
+                 <label>Carian</label>
+                 <input 
+                   type="text" 
+                   v-model="searchQuery"
+                   :placeholder="t('common.search') + '...'" 
+                 />
+              </div>
+           </div>
+           
+           <!-- Search Button (Gradient Sunset) -->
+           <button class="btn-search-circle">
+             {{ t('common.search') }}
+           </button>
         </div>
       </div>
     </div>
 
     <div class="container">
+      
+      <!-- 3. CATEGORY ICONS -->
       <section class="category-section">
         <div class="category-list">
-          <div class="cat-item" @click="selectedCat = 'Semua'">
-            <div class="cat-circle" :class="{ active: selectedCat === 'Semua' }">🌐</div>
+          <div class="cat-item" @click="selectedCat = 'Semua'" :class="{ active: selectedCat === 'Semua' }">
+            <span class="cat-emoji">🌐</span>
             <span class="cat-label">{{ t('directory.catAll') }}</span>
           </div>
           <div 
@@ -57,18 +70,22 @@
             v-for="cat in categoryIcons" 
             :key="cat.name" 
             @click="selectedCat = cat.name"
+            :class="{ active: selectedCat === cat.name }"
           >
-            <div class="cat-circle" :class="{ active: selectedCat === cat.name }">{{ cat.emoji }}</div>
+            <span class="cat-emoji">{{ cat.emoji }}</span>
             <span class="cat-label">{{ cat.name }}</span>
           </div>
         </div>
       </section>
 
+      <!-- 4. CONTENT AREA -->
       <div class="content-area">
-        <div v-if="loading" class="loading-box">⏳ {{ t('common.loading') }}</div>
+        <div v-if="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>{{ t('common.loading') }}</p>
+        </div>
         
         <div v-else class="service-grid">
-          
           <div 
             v-for="service in filteredServices" 
             :key="service.id" 
@@ -76,7 +93,6 @@
             :class="{ 'expired-card': isExpired(service) }"
             @click="$router.push(`/service/${service.id}`)"
           >
-            
             <div v-if="isExpired(service)" class="expired-overlay">⚠️ {{ t('directory.expired') }}</div>
 
             <div class="card-img" :style="{ backgroundImage: `url(${service.image || 'https://via.placeholder.com/300'})` }">
@@ -87,40 +103,35 @@
             <div class="card-body">
               <div class="title-row">
                 <h3>{{ service.name }}</h3>
-                
                 <div v-if="auth.currentUser && auth.currentUser.uid === service.ownerId" class="owner-actions">
-                  <button @click.stop="renewService(service)" class="btn-renew" :title="t('directory.renewTooltip')">🔄</button>
-                  <button @click.stop="deleteService(service.id)" class="btn-delete" :title="t('directory.deleteTooltip')">🗑️</button>
+                  <button @click.stop="renewService(service)" class="btn-action">🔄</button>
+                  <button @click.stop="deleteService(service.id)" class="btn-action btn-delete">🗑️</button>
                 </div>
               </div>
 
               <p class="loc">📍 {{ service.location }}</p>
               
-              <p class="price" v-if="service.details && service.details.priceDisplay">
-                {{ service.details.priceDisplay }}
-              </p>
-              <p class="price" v-else-if="service.details && service.details.price">
-                RM {{ service.details.price }} {{ service.details.priceType ? '/' + service.details.priceType : '' }}
-              </p>
+              <div class="price-tag">
+                <span v-if="service.details?.priceDisplay">{{ service.details.priceDisplay }}</span>
+                <span v-else>RM {{ service.details?.price }} <small>{{ service.details?.priceType ? '/' + service.details.priceType : '' }}</small></span>
+              </div>
 
-              <p class="desc">{{ service.description }}</p>
-              
               <div class="owner-row" @click.stop="goToProfile(service.ownerId)">
                 <img :src="service.ownerAvatar || 'https://i.pravatar.cc/150'" />
                 <span class="owner-name">{{ service.ownerName }}</span>
               </div>
 
               <a :href="`https://wa.me/60${service.whatsapp}`" target="_blank" class="btn-contact" v-if="!isExpired(service)" @click.stop>
-                📞 {{ t('directory.contactBtn') }}
+                Hubungi
               </a>
-              <button v-else class="btn-contact disabled" disabled>{{ t('directory.inactive') }}</button>
             </div>
           </div>
-
         </div>
         
-        <div v-if="!loading && filteredServices.length === 0" class="empty-box">
-          {{ t('directory.empty') }}
+        <div v-if="!loading && filteredServices.length === 0" class="empty-state">
+           <div class="empty-icon">📂</div>
+           <h3>{{ t('directory.empty') }}</h3>
+           <p>Tiada hasil dijumpai.</p>
         </div>
       </div>
     </div>
@@ -156,22 +167,16 @@ const categoryIcons = [
 
 const isExpired = (service: any) => {
   if (!service.expiryDate) return false;
-  const now = new Date();
-  return now > service.expiryDate.toDate();
+  return new Date() > service.expiryDate.toDate();
 };
 
 const filteredServices = computed(() => {
   return services.value.filter(s => {
-    // Kategori Logic: Check 'Semua' atau match tepat ATAU support nama lama
-    const matchCat = selectedCat.value === 'Semua' || s.category === selectedCat.value || s.category.includes(selectedCat.value);
-    
+    const matchCat = selectedCat.value === 'Semua' || s.category === selectedCat.value || (s.category && s.category.includes(selectedCat.value));
     const matchState = selectedState.value === '' || s.state === selectedState.value;
     const matchSearch = !searchQuery.value || s.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || s.location.toLowerCase().includes(searchQuery.value.toLowerCase());
-
     const isMyService = auth.currentUser && auth.currentUser.uid === s.ownerId;
-    const active = !isExpired(s);
-    
-    return matchCat && matchState && matchSearch && (active || isMyService);
+    return matchCat && matchState && matchSearch && (!isExpired(s) || isMyService);
   });
 });
 
@@ -198,116 +203,163 @@ onMounted(async () => {
     if (user) {
       const snap = await getDoc(doc(db, 'users', user.uid));
       if (snap.exists()) userRole.value = snap.data().role || 'user';
-    } else {
-      userRole.value = 'user';
-    }
+    } else { userRole.value = 'user'; }
   });
-
   try {
     const q = query(collection(db, 'services'), orderBy('createdAt', 'desc'));
     const snap = await getDocs(q);
     services.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch (e) {}
-  finally { loading.value = false; }
+  } catch (e) {} finally { loading.value = false; }
 });
 </script>
 
 <style scoped>
-.directory-page { background-color: #f5f5f5; min-height: 100vh; padding-bottom: 2rem; }
+.directory-page { background-color: #fcfcfc; min-height: 100vh; font-family: 'Inter', sans-serif; padding-bottom: 3rem; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
 
-/* 1. TOP HEADER */
-.top-header-strip { background: #f5f5f5; padding: 2rem 0 1rem 0; }
-.header-flex { display: flex; justify-content: space-between; align-items: flex-end; }
-.title-area h1 { margin: 0; font-size: 2rem; color: #2c3e50; font-weight: 900; letter-spacing: -1px; }
-.title-area p { margin: 5px 0 0; color: #666; font-size: 1rem; }
-.btn-create-service { background-color: #e67e22; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 50px; font-weight: bold; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3); }
-.btn-create-service:hover { transform: translateY(-2px); background-color: #d35400; }
+/* --- HERO SECTION (SUNSET THEME) --- */
+.hero-section {
+  position: relative;
+  height: 320px;
+  /* Gambar Sunset */
+  background-image: url('https://images.unsplash.com/photo-1495570689269-d883668a6810?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+  background-size: cover;
+  background-position: center;
+  display: flex; align-items: center; justify-content: center; text-align: center; color: white;
+}
+.hero-overlay { 
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+  /* Overlay Gradient Oren-Ungu Gelap */
+  background: linear-gradient(to bottom, rgba(230, 126, 34, 0.3), rgba(44, 62, 80, 0.8)); 
+}
+.hero-content { position: relative; z-index: 1; }
+.hero-content h1 { font-size: 2.8rem; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); margin-bottom: 0.5rem; }
+.hero-content p { font-size: 1.2rem; opacity: 0.95; margin-bottom: 1.5rem; }
 
-/* --- 2. STICKY SEARCH NAVBAR --- */
-.sticky-search-navbar { 
-  background: rgba(255, 255, 255, 0.95); 
-  backdrop-filter: blur(10px);
-  padding: 1rem 0; 
-  border-bottom: 1px solid #eaeaea; 
-  margin-bottom: 1.5rem; 
-  position: sticky; 
-  top: 0; 
-  z-index: 99; 
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+/* Button Hero: Glassy White/Orange text */
+.btn-create-hero { 
+  background: rgba(255, 255, 255, 0.9); 
+  color: #d35400; /* Dark Orange text */
+  border: none; padding: 0.8rem 1.8rem; border-radius: 50px; font-weight: bold; cursor: pointer; transition: transform 0.2s; 
+}
+.btn-create-hero:hover { transform: translateY(-3px); background: white; color: #e67e22; }
+
+/* --- FLOATING SEARCH BAR --- */
+.search-floating-wrapper {
+  margin-top: -40px;
+  position: sticky; top: 10px; z-index: 999;
+  padding-bottom: 1.5rem; pointer-events: none;
+}
+.search-card-pill {
+  pointer-events: auto;
+  background: white;
+  border-radius: 50px;
+  padding: 8px;
+  box-shadow: 0 12px 30px rgba(211, 84, 0, 0.15); /* Orange tinted shadow */
+  display: flex; align-items: center;
+  max-width: 800px; margin: 0 auto;
+  border: 1px solid rgba(230, 126, 34, 0.1);
 }
 
-.search-row { display: flex; justify-content: center; padding: 0 1rem; }
+/* Segments */
+.search-segment { display: flex; align-items: center; padding: 0 15px; position: relative; flex: 1; }
+.segment-icon { font-size: 1.2rem; color: #e67e22; margin-right: 12px; } /* Orange Icon */
+.segment-content { display: flex; flex-direction: column; width: 100%; }
+.segment-content label { font-size: 0.7rem; font-weight: 800; color: #d35400; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-.search-input-wrapper { 
-  display: flex; width: 100%; max-width: 800px; border: 2px solid #27ae60; 
-  border-radius: 50px; overflow: hidden; background: white; height: 50px; align-items: center;
+/* Inputs Reset */
+.search-select, .input-segment input { 
+  border: none; background: transparent; outline: none; 
+  font-size: 0.95rem; color: #333; width: 100%; font-weight: 500; padding: 0;
+}
+.chevron-icon { font-size: 0.7rem; color: #999; margin-left: 5px; }
+.vertical-divider { width: 1px; height: 35px; background: #ffe0b2; margin: 0 5px; } /* Light orange divider */
+
+/* Button Search: Gradient Orange */
+.btn-search-circle {
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  color: white; border: none;
+  border-radius: 50px; padding: 14px 32px;
+  font-weight: 700; cursor: pointer; font-size: 1rem;
+  margin-left: 10px; transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+}
+.btn-search-circle:hover { 
+  background: linear-gradient(135deg, #d35400 0%, #c0392b 100%);
+  transform: translateY(-1px);
 }
 
-.dropdown-wrapper { position: relative; border-right: 1px solid #eee; height: 100%; display: flex; align-items: center; background: #fdfdfd; }
-.search-select { border: none; background: transparent; padding: 0 2rem 0 1.5rem; font-weight: bold; font-size: 0.9rem; color: #555; cursor: pointer; outline: none; appearance: none; height: 100%; z-index: 2; }
-.down-arrow { position: absolute; right: 10px; font-size: 0.7rem; color: #888; pointer-events: none; z-index: 1; }
-
-.search-input-wrapper input { flex: 1; border: none; padding: 0 1.5rem; outline: none; font-size: 1rem; height: 100%; }
-
-.btn-search-nav { 
-  background: #27ae60; color: white; border: none; padding: 0 2rem; height: 100%; 
-  cursor: pointer; font-size: 1rem; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: background 0.2s;
-}
-.btn-search-nav:hover { background: #219150; }
-
-/* 3. KATEGORI */
+/* --- ICONS --- */
 .category-section { margin-bottom: 2rem; }
-.category-list { display: flex; justify-content: flex-start; gap: 1.5rem; overflow-x: auto; padding: 10px 5px; scrollbar-width: none; }
-.category-list::-webkit-scrollbar { display: none; }
-.cat-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 80px; transition: transform 0.1s; }
-.cat-item:hover { transform: translateY(-3px); }
-.cat-circle { width: 50px; height: 50px; border: 1px solid #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 8px; background: #fff; transition: all 0.2s; }
-.cat-circle.active { border-color: #27ae60; background: #e8f5e9; }
-.cat-label { font-size: 0.75rem; color: #555; text-align: center; }
-
-/* 4. GRID & CARDS */
-.service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; }
-
-/* 🔥 CARD STYLE UPDATED: Cursor Pointer 🔥 */
-.service-card { 
-  background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-  border: 1px solid #f0f0f0; display: flex; flex-direction: column; position: relative; 
-  transition: transform 0.2s; cursor: pointer; /* Menunjukkan boleh klik */
+.category-list { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+.cat-item { 
+  display: flex; flex-direction: column; align-items: center; cursor: pointer; 
+  padding: 10px 15px; border-radius: 12px; transition: all 0.2s; 
+  background: white; border: 1px solid transparent;
 }
-.service-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-.service-card.expired-card { opacity: 0.7; filter: grayscale(100%); }
+.cat-item:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.cat-item.active { 
+  background: #fff3e0; /* Light Orange BG */
+  border-color: #e67e22; 
+  box-shadow: 0 4px 10px rgba(230, 126, 34, 0.15); 
+}
+.cat-emoji { font-size: 1.8rem; margin-bottom: 5px; }
+.cat-label { font-size: 0.85rem; color: #555; font-weight: 600; }
+.cat-item.active .cat-label { color: #d35400; }
 
-.expired-overlay { position: absolute; top: 0; left: 0; width: 100%; background: #e74c3c; color: white; text-align: center; font-size: 0.7rem; padding: 3px; z-index: 10; font-weight: bold; }
-.card-img { height: 180px; background-size: cover; background-position: center; position: relative; }
-.cat-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; }
-.state-badge { position: absolute; bottom: 10px; right: 10px; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+/* --- CARDS --- */
+.service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
+.service-card { 
+  background: white; border-radius: 16px; overflow: hidden; 
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #fcfcfc; 
+  cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; 
+}
+.service-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
 
-.card-body { padding: 1.2rem; flex-grow: 1; display: flex; flex-direction: column; }
+.card-img { height: 200px; background-size: cover; position: relative; }
+.cat-badge { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; backdrop-filter: blur(4px); }
+.state-badge { 
+  position: absolute; bottom: 12px; right: 12px; 
+  background: #e67e22; /* Orange Badge */
+  color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; 
+}
+
+.card-body { padding: 1.2rem; flex: 1; display: flex; flex-direction: column; }
 .title-row { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; }
-.title-row h3 { margin: 0; font-size: 1.1rem; color: #2c3e50; font-weight: 700; line-height: 1.3; flex: 1; }
-.owner-actions { display: flex; gap: 5px; z-index: 2; /* Supaya button delete boleh tekan */ }
-.btn-delete, .btn-renew { border: 1px solid #ddd; cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 0.9rem; background: #fff; z-index: 5; }
+.title-row h3 { margin: 0; font-size: 1.1rem; color: #2c3e50; font-weight: 800; flex: 1; }
+.btn-action { background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; margin-left: 5px; padding: 4px; }
+.btn-action:hover { background: #eee; }
 
-.loc { font-size: 0.9rem; color: #777; margin-bottom: 5px; }
-.price { font-size: 1.1rem; color: #e67e22; font-weight: 800; margin-bottom: 10px; }
-.desc { font-size: 0.9rem; color: #666; line-height: 1.5; flex-grow: 1; margin-bottom: 1.2rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.loc { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 8px; }
+.price-tag { color: #d35400; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; } /* Darker Orange Price */
+.price-tag small { color: #95a5a6; font-weight: normal; font-size: 0.85rem; }
 
-.owner-row { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 12px; border-top: 1px solid #f5f5f5; cursor: pointer; z-index: 2; }
-.owner-row img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
-.owner-name { font-size: 0.85rem; color: #333; font-weight: 600; }
+.owner-row { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 12px; border-top: 1px solid #f9f9f9; }
+.owner-row img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.owner-name { font-size: 0.9rem; font-weight: 600; color: #34495e; }
 
-.btn-contact { margin-top: 15px; display: block; text-align: center; background: #25D366; color: white; padding: 10px; border-radius: 8px; text-decoration: none; font-size: 0.95rem; font-weight: bold; transition: background 0.2s; position: relative; z-index: 5; }
-.btn-contact:hover { background: #1ebc57; }
-.btn-contact.disabled { background: #ccc; cursor: not-allowed; }
+.btn-contact { 
+  margin-top: 15px; 
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); /* Orange Gradient */
+  color: white; text-align: center; padding: 10px; border-radius: 8px; 
+  font-weight: 700; text-decoration: none; transition: opacity 0.2s; display: block; 
+}
+.btn-contact:hover { opacity: 0.9; }
 
-.loading-box, .empty-box { text-align: center; padding: 3rem; color: #999; font-style: italic; }
+/* LOADING/EMPTY */
+.loading-state, .empty-state { grid-column: 1/-1; text-align: center; padding: 4rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+.spinner { border: 4px solid #f3f3f3; border-top: 4px solid #e67e22; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
 
-@media (max-width: 768px) { 
-  .header-flex { flex-direction: column; text-align: center; gap: 1rem; } 
-  .dropdown-wrapper { display: none; } 
-  .btn-text { display: none; } 
-  .btn-search-nav { padding: 0 1.5rem; }
-  .service-grid { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); }
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .hero-section { height: 260px; }
+  .hero-content h1 { font-size: 2rem; }
+  .search-card-pill { flex-direction: column; padding: 15px; border-radius: 20px; gap: 10px; margin: 0 1rem; }
+  .vertical-divider { display: none; }
+  .search-segment { width: 100%; border-bottom: 1px solid #ffe0b2; padding-bottom: 10px; margin-bottom: 5px; }
+  .btn-search-circle { width: 100%; margin: 0; padding: 12px; }
+  .service-grid { grid-template-columns: 1fr; }
 }
 </style>
