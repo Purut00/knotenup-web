@@ -1,138 +1,187 @@
 <template>
   <div class="service-page">
     
-    <!-- 1. HERO SECTION (TEMA SUNSET) -->
-    <div class="hero-section">
-      <div class="hero-overlay"></div>
-      <div class="hero-content container">
-        <h1>{{ t('directory.title') }}</h1>
-        <p>{{ t('directory.sub') }}</p>
+    <!-- BACKGROUND LAYERS -->
+    <div class="contour-lines"></div> <!-- Corak Kontur Topo Map Realistik -->
+    <div class="page-glow-purple"></div>
+    <div class="page-glow-orange"></div>
+
+    <div class="container pt-8 pb-12">
+      
+      <!-- HEADER SIMPLE -->
+      <div class="mb-8 relative z-10 text-center md:text-left">
+        <h1 class="text-3xl font-bold text-white mb-2">{{ t('directory.title') || 'Direktori Servis' }}</h1>
+        <p class="text-gray-400">Cari penginapan, guide, sewaan khemah & transport untuk trip anda.</p>
         
-        <!-- Advertise Button (White/Glassy to contrast with sunset) -->
-        <button v-if="userRole === 'organizer'" class="btn-create-hero" @click="$router.push('/create-service')">
-          📢 {{ t('directory.advertiseBtn') }}
+        <!-- Advertise Button (Mobile view maybe?) -->
+        <button v-if="userRole === 'organizer'" class="btn-advertise-header" @click="$router.push('/create-service')">
+          <i class="fas fa-bullhorn mr-2"></i> {{ t('directory.advertiseBtn') || 'Iklankan Servis' }}
         </button>
       </div>
-    </div>
 
-    <!-- 2. FLOATING SEARCH BAR (Tema Sunset) -->
-    <div class="search-floating-wrapper">
-      <div class="container">
-        <div class="search-card-pill">
-           
-           <!-- State Dropdown Segment -->
-           <div class="search-segment location-segment">
-              <span class="segment-icon">📍</span>
-              <div class="segment-content">
-                <label>Lokasi</label>
-                <select v-model="selectedState" class="search-select">
-                   <option value="">{{ t('directory.allStates') }}</option>
-                   <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
+      <!-- FILTER SECTION (Updated Compact Layout) -->
+      <div class="filter-section mb-8 relative z-10">
+        <div class="filter-container">
+          
+          <!-- Row 1: Search Bar Memanjang + Button -->
+          <div class="search-row">
+            <div class="search-wrapper-full">
+               <i class="fas fa-search search-icon"></i>
+               <input 
+                 type="text" 
+                 v-model="searchQuery"
+                 class="search-input-full"
+                 :placeholder="t('common.searchPlaceholder') || 'Cari servis, lokasi, atau nama...'" 
+                 @keyup.enter="() => {}"
+               />
+               <button class="btn-search-main">
+                 Cari
+               </button>
+            </div>
+          </div>
+
+          <!-- Row 2: Filters (Kurangkan margin top jadi mt-3) -->
+          <div class="filters-row mt-3">
+             
+             <!-- Filter: State (Lokasi) -->
+             <div class="select-wrapper">
+                <i class="fas fa-map-marker-alt select-icon text-red-400"></i>
+                <select v-model="selectedState" class="custom-select">
+                  <option value="">{{ t('directory.allStates') || 'Semua Negeri' }}</option>
+                  <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
                 </select>
-              </div>
-              <span class="chevron-icon">▼</span>
-           </div>
+             </div>
 
-           <div class="vertical-divider"></div>
+             <!-- Filter: Category -->
+             <div class="select-wrapper">
+                <i class="fas fa-layer-group select-icon text-orange-400"></i>
+                <select v-model="selectedCat" class="custom-select">
+                  <option value="Semua">Semua Kategori</option>
+                  <option v-for="cat in categoryIcons" :key="cat.name" :value="cat.name">
+                    {{ cat.name }}
+                  </option>
+                </select>
+             </div>
 
-           <!-- Search Input Segment -->
-           <div class="search-segment input-segment">
-              <span class="segment-icon">🔍</span>
-              <div class="segment-content">
-                 <label>Carian</label>
-                 <input 
-                   type="text" 
-                   v-model="searchQuery"
-                   :placeholder="t('common.search') + '...'" 
-                 />
-              </div>
-           </div>
-           
-           <!-- Search Button (Gradient Sunset) -->
-           <button class="btn-search-circle">
-             {{ t('common.search') }}
-           </button>
+             <!-- Reset -->
+             <button 
+                v-if="searchQuery || selectedState || selectedCat !== 'Semua'" 
+                class="btn-reset" 
+                @click="resetFilters"
+                title="Reset Filter"
+             >
+               <i class="fas fa-undo"></i>
+             </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="container">
-      
-      <!-- 3. CATEGORY ICONS -->
-      <section class="category-section">
-        <div class="category-list">
-          <div class="cat-item" @click="selectedCat = 'Semua'" :class="{ active: selectedCat === 'Semua' }">
-            <span class="cat-emoji">🌐</span>
-            <span class="cat-label">{{ t('directory.catAll') }}</span>
-          </div>
-          <div 
-            class="cat-item" 
-            v-for="cat in categoryIcons" 
-            :key="cat.name" 
-            @click="selectedCat = cat.name"
-            :class="{ active: selectedCat === cat.name }"
+      <!-- CATEGORY ICONS (Horizontal Scroll - Optional but good for quick access) -->
+      <div class="category-scroll-container mb-8 relative z-10">
+          <button 
+            class="cat-pill" 
+            :class="{ 'active': selectedCat === 'Semua' }"
+            @click="selectedCat = 'Semua'"
           >
-            <span class="cat-emoji">{{ cat.emoji }}</span>
-            <span class="cat-label">{{ cat.name }}</span>
-          </div>
-        </div>
-      </section>
+            <i class="fas fa-globe mr-2"></i> Semua
+          </button>
+          <button 
+            v-for="cat in categoryIcons" 
+            :key="cat.name"
+            class="cat-pill"
+            :class="{ 'active': selectedCat === cat.name }"
+            @click="selectedCat = cat.name"
+          >
+            <i :class="cat.icon" class="mr-2"></i>
+            {{ cat.name }}
+          </button>
+      </div>
 
-      <!-- 4. CONTENT AREA -->
-      <div class="content-area">
-        <div v-if="loading" class="loading-state">
-          <div class="spinner"></div>
+      <!-- CONTENT AREA -->
+      <div class="content-area relative z-10">
+        
+        <!-- Loading State -->
+        <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-gray-400">
+          <div class="spinner mb-4"></div>
           <p>{{ t('common.loading') }}</p>
         </div>
         
+        <!-- Empty State -->
+        <div v-else-if="filteredServices.length === 0" class="empty-state glass-panel">
+          <i class="fas fa-folder-open text-4xl mb-4 opacity-30 text-gray-400"></i>
+          <h3 class="text-lg font-bold text-gray-300">{{ t('directory.empty') || 'Tiada Servis Dijumpai' }}</h3>
+          <p class="text-gray-500 text-sm">Cuba ubah filter lokasi atau kategori anda.</p>
+          <button @click="resetFilters" class="text-orange-400 underline mt-2 text-sm">Reset Filter</button>
+        </div>
+
+        <!-- Grid Content -->
         <div v-else class="service-grid">
           <div 
             v-for="service in filteredServices" 
             :key="service.id" 
-            class="service-card" 
+            class="service-card glass-card" 
             :class="{ 'expired-card': isExpired(service) }"
             @click="$router.push(`/service/${service.id}`)"
           >
-            <div v-if="isExpired(service)" class="expired-overlay">⚠️ {{ t('directory.expired') }}</div>
+            <!-- Expired Overlay -->
+            <div v-if="isExpired(service)" class="expired-overlay">
+              <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold">TAMAT TEMPOH</span>
+            </div>
 
+            <!-- Image -->
             <div class="card-img" :style="{ backgroundImage: `url(${service.image || 'https://via.placeholder.com/300'})` }">
-              <span class="cat-badge">{{ service.category }}</span>
+              <div class="overlay-gradient"></div>
+              <span class="cat-badge">
+                 <i :class="getCategoryIcon(service.category)" class="mr-1"></i> {{ service.category }}
+              </span>
               <span class="state-badge" v-if="service.state">{{ service.state }}</span>
             </div>
             
+            <!-- Body -->
             <div class="card-body">
               <div class="title-row">
                 <h3>{{ service.name }}</h3>
+                
+                <!-- Owner Actions -->
                 <div v-if="auth.currentUser && auth.currentUser.uid === service.ownerId" class="owner-actions">
-                  <button @click.stop="renewService(service)" class="btn-action">🔄</button>
-                  <button @click.stop="deleteService(service.id)" class="btn-action btn-delete">🗑️</button>
+                  <button @click.stop="renewService(service)" class="btn-action renew" title="Renew">
+                    <i class="fas fa-sync-alt"></i>
+                  </button>
+                  <button @click.stop="deleteService(service.id)" class="btn-action delete" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
                 </div>
               </div>
 
-              <p class="loc">📍 {{ service.location }}</p>
+              <p class="loc">
+                <i class="fas fa-map-pin text-red-400 mr-1"></i> {{ service.location }}
+              </p>
               
               <div class="price-tag">
                 <span v-if="service.details?.priceDisplay">{{ service.details.priceDisplay }}</span>
-                <span v-else>RM {{ service.details?.price }} <small>{{ service.details?.priceType ? '/' + service.details.priceType : '' }}</small></span>
+                <span v-else>RM {{ service.details?.price }} <small class="text-xs font-normal text-gray-400">{{ service.details?.priceType ? '/' + service.details.priceType : '' }}</small></span>
               </div>
 
-              <div class="owner-row" @click.stop="goToProfile(service.ownerId)">
-                <img :src="service.ownerAvatar || 'https://i.pravatar.cc/150'" />
-                <span class="owner-name">{{ service.ownerName }}</span>
+              <div class="card-footer">
+                 <div class="owner-info" @click.stop="goToProfile(service.ownerId)">
+                   <img :src="service.ownerAvatar || 'https://i.pravatar.cc/150'" class="owner-avatar"/>
+                   <span class="owner-name">{{ service.ownerName }}</span>
+                 </div>
+                 
+                 <a 
+                   :href="`https://wa.me/60${service.whatsapp}`" 
+                   target="_blank" 
+                   class="btn-contact" 
+                   v-if="!isExpired(service)" 
+                   @click.stop
+                 >
+                   <i class="fab fa-whatsapp"></i> Wasap
+                 </a>
               </div>
-
-              <a :href="`https://wa.me/60${service.whatsapp}`" target="_blank" class="btn-contact" v-if="!isExpired(service)" @click.stop>
-                Hubungi
-              </a>
             </div>
           </div>
         </div>
-        
-        <div v-if="!loading && filteredServices.length === 0" class="empty-state">
-           <div class="empty-icon">📂</div>
-           <h3>{{ t('directory.empty') }}</h3>
-           <p>Tiada hasil dijumpai.</p>
-        </div>
+
       </div>
     </div>
   </div>
@@ -156,14 +205,20 @@ const selectedState = ref('');
 const searchQuery = ref('');
 const userRole = ref('user'); 
 
+// Ganti Emoji dengan FontAwesome Icons
 const categoryIcons = [
-  { name: 'Campsite', emoji: '⛺' },
-  { name: 'Guide', emoji: '🧗' },
-  { name: 'Transport', emoji: '🚙' },
-  { name: 'Rental', emoji: '🎒' },
-  { name: 'Chalet', emoji: '🏡' },
-  { name: 'Event', emoji: '🚩' }
+  { name: 'Campsite', icon: 'fas fa-campground' },
+  { name: 'Guide', icon: 'fas fa-map-signs' },
+  { name: 'Transport', icon: 'fas fa-shuttle-van' },
+  { name: 'Rental', icon: 'fas fa-tools' }, // Atau fa-hiking
+  { name: 'Chalet', icon: 'fas fa-home' },
+  { name: 'Event', icon: 'fas fa-calendar-alt' }
 ];
+
+const getCategoryIcon = (catName: string) => {
+    const found = categoryIcons.find(c => c.name === catName);
+    return found ? found.icon : 'fas fa-tag';
+};
 
 const isExpired = (service: any) => {
   if (!service.expiryDate) return false;
@@ -179,6 +234,12 @@ const filteredServices = computed(() => {
     return matchCat && matchState && matchSearch && (!isExpired(s) || isMyService);
   });
 });
+
+const resetFilters = () => {
+    selectedCat.value = 'Semua';
+    selectedState.value = '';
+    searchQuery.value = '';
+};
 
 const goToProfile = (id: string) => { if (id) router.push(`/user/${id}`); };
 
@@ -214,152 +275,204 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.directory-page { background-color: #fcfcfc; min-height: 100vh; font-family: 'Inter', sans-serif; padding-bottom: 3rem; }
-.container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
-
-/* --- HERO SECTION (SUNSET THEME) --- */
-.hero-section {
+/* --- THEME BACKGROUND (DARK SUNSET + CONTOUR) --- */
+.service-page { 
+  background-color: #0f172a; /* Dark Blue/Black base */
+  min-height: 100vh;
   position: relative;
-  height: 320px;
-  /* Gambar Sunset */
-  background-image: url('https://images.unsplash.com/photo-1495570689269-d883668a6810?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+  overflow-x: hidden;
+  color: white;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
+
+/* GLOW EFFECTS */
+.page-glow-purple {
+  position: absolute; top: 0; left: 0; width: 60vw; height: 60vw;
+  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none;
+  border-radius: 50%; z-index: 0;
+}
+.page-glow-orange {
+  position: absolute; bottom: 0; right: 0; width: 50vw; height: 50vw;
+  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none;
+  border-radius: 50%; z-index: 0;
+}
+
+/* REALISTIC CONTOUR LINES PATTERN (Topo Map) */
+.contour-lines {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
+  /* Complex SVG Pattern mimicking Topo Maps */
+  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400 M0,700 Q250,500 500,700 T1000,700 M0,300 Q250,100 500,300 T1000,300' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3Cpath d='M500,0 Q600,250 500,500 T500,1000 M600,0 Q700,250 600,500 T600,1000 M400,0 Q500,250 400,500 T400,1000' stroke='white' fill='none' stroke-width='1.5' opacity='0.5'/%3E%3C/svg%3E");
   background-size: cover;
-  background-position: center;
-  display: flex; align-items: center; justify-content: center; text-align: center; color: white;
+  pointer-events: none;
 }
-.hero-overlay { 
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
-  /* Overlay Gradient Oren-Ungu Gelap */
-  background: linear-gradient(to bottom, rgba(230, 126, 34, 0.3), rgba(44, 62, 80, 0.8)); 
-}
-.hero-content { position: relative; z-index: 1; }
-.hero-content h1 { font-size: 2.8rem; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); margin-bottom: 0.5rem; }
-.hero-content p { font-size: 1.2rem; opacity: 0.95; margin-bottom: 1.5rem; }
 
-/* Button Hero: Glassy White/Orange text */
-.btn-create-hero { 
-  background: rgba(255, 255, 255, 0.9); 
-  color: #d35400; /* Dark Orange text */
-  border: none; padding: 0.8rem 1.8rem; border-radius: 50px; font-weight: bold; cursor: pointer; transition: transform 0.2s; 
+/* HEADER BUTTON */
+.btn-advertise-header {
+    display: inline-flex; align-items: center;
+    margin-top: 1rem;
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    color: white; border: none; padding: 8px 20px;
+    border-radius: 50px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+    transition: 0.3s;
 }
-.btn-create-hero:hover { transform: translateY(-3px); background: white; color: #e67e22; }
+.btn-advertise-header:hover { transform: translateY(-2px); }
 
-/* --- FLOATING SEARCH BAR --- */
-.search-floating-wrapper {
-  margin-top: -40px;
-  position: sticky; top: 10px; z-index: 999;
-  padding-bottom: 1.5rem; pointer-events: none;
+/* --- FILTER SECTION (COMPACT GLASS DARK) --- */
+.filter-section {
+  background: rgba(255, 255, 255, 0.05); /* Glass Dark */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  /* Reduced Padding for compactness */
+  padding: 1rem; 
+  backdrop-filter: blur(10px);
 }
-.search-card-pill {
-  pointer-events: auto;
-  background: white;
-  border-radius: 50px;
-  padding: 8px;
-  box-shadow: 0 12px 30px rgba(211, 84, 0, 0.15); /* Orange tinted shadow */
+
+.filter-container { display: flex; flex-direction: column; gap: 8px; }
+
+/* SEARCH ROW */
+.search-row { width: 100%; }
+.search-wrapper-full {
+  position: relative; display: flex; width: 100%; align-items: center;
+}
+.search-input-full {
+  width: 100%; 
+  /* Reduced vertical padding slightly (from 14px to 10px) */
+  padding: 10px 100px 10px 44px; 
+  border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.2); color: white;
+  outline: none; transition: 0.3s; font-size: 1rem;
+}
+.search-input-full:focus { border-color: #6c63ff; background: rgba(0,0,0,0.4); }
+.search-icon { position: absolute; left: 16px; color: #94a3b8; font-size: 1.1rem; }
+
+.btn-search-main {
+  position: absolute; right: 4px; top: 4px; bottom: 4px;
+  background: #6c63ff; color: white; border: none;
+  padding: 0 20px; border-radius: 8px; font-weight: 600; cursor: pointer;
+  transition: 0.3s;
+}
+.btn-search-main:hover { background: #5b54e0; }
+
+/* FILTERS ROW */
+.filters-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+.select-wrapper { position: relative; flex: 1; min-width: 160px; }
+.custom-select {
+  width: 100%; appearance: none;
+  /* Reduced vertical padding (from 12px to 10px) */
+  padding: 10px 36px 10px 38px;
+  border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.2); color: #e2e8f0;
+  outline: none; cursor: pointer; transition: 0.3s;
+}
+.custom-select:hover { background: rgba(0,0,0,0.3); }
+.custom-select:focus { border-color: #6c63ff; }
+.select-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.select-wrapper::after {
+  content: '▼'; font-size: 0.7rem; color: #94a3b8;
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none;
+}
+
+.btn-reset {
+  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+  border-radius: 10px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; cursor: pointer;
+}
+.btn-reset:hover { background: rgba(239, 68, 68, 0.3); }
+
+/* CATEGORY SCROLL */
+.category-scroll-container {
+  display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;
+  scrollbar-width: none;
+}
+.category-scroll-container::-webkit-scrollbar { display: none; }
+.cat-pill {
   display: flex; align-items: center;
-  max-width: 800px; margin: 0 auto;
-  border: 1px solid rgba(230, 126, 34, 0.1);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 16px; border-radius: 50px;
+  color: #94a3b8; cursor: pointer; white-space: nowrap; transition: 0.3s;
+}
+.cat-pill:hover { background: rgba(255,255,255,0.1); color: white; }
+.cat-pill.active {
+  background: #e67e22; color: white; border-color: #e67e22; /* Orange for Services */
+  box-shadow: 0 0 15px rgba(230, 126, 34, 0.4);
 }
 
-/* Segments */
-.search-segment { display: flex; align-items: center; padding: 0 15px; position: relative; flex: 1; }
-.segment-icon { font-size: 1.2rem; color: #e67e22; margin-right: 12px; } /* Orange Icon */
-.segment-content { display: flex; flex-direction: column; width: 100%; }
-.segment-content label { font-size: 0.7rem; font-weight: 800; color: #d35400; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-/* Inputs Reset */
-.search-select, .input-segment input { 
-  border: none; background: transparent; outline: none; 
-  font-size: 0.95rem; color: #333; width: 100%; font-weight: 500; padding: 0;
-}
-.chevron-icon { font-size: 0.7rem; color: #999; margin-left: 5px; }
-.vertical-divider { width: 1px; height: 35px; background: #ffe0b2; margin: 0 5px; } /* Light orange divider */
-
-/* Button Search: Gradient Orange */
-.btn-search-circle {
-  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
-  color: white; border: none;
-  border-radius: 50px; padding: 14px 32px;
-  font-weight: 700; cursor: pointer; font-size: 1rem;
-  margin-left: 10px; transition: all 0.2s;
-  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
-}
-.btn-search-circle:hover { 
-  background: linear-gradient(135deg, #d35400 0%, #c0392b 100%);
-  transform: translateY(-1px);
+/* --- SERVICE CARDS (GLASS DARK) --- */
+.service-grid {
+  display: grid;
+  /* Consistent Grid Size with Trip Page */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
 }
 
-/* --- ICONS --- */
-.category-section { margin-bottom: 2rem; }
-.category-list { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-.cat-item { 
-  display: flex; flex-direction: column; align-items: center; cursor: pointer; 
-  padding: 10px 15px; border-radius: 12px; transition: all 0.2s; 
-  background: white; border: 1px solid transparent;
+.glass-card {
+  background: rgba(255, 255, 255, 0.03); /* Very transparent */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px; overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: 0.3s; cursor: pointer;
+  display: flex; flex-direction: column;
 }
-.cat-item:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-.cat-item.active { 
-  background: #fff3e0; /* Light Orange BG */
-  border-color: #e67e22; 
-  box-shadow: 0 4px 10px rgba(230, 126, 34, 0.15); 
-}
-.cat-emoji { font-size: 1.8rem; margin-bottom: 5px; }
-.cat-label { font-size: 0.85rem; color: #555; font-weight: 600; }
-.cat-item.active .cat-label { color: #d35400; }
-
-/* --- CARDS --- */
-.service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
-.service-card { 
-  background: white; border-radius: 16px; overflow: hidden; 
-  box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #fcfcfc; 
-  cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; 
-}
-.service-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
-
-.card-img { height: 200px; background-size: cover; position: relative; }
-.cat-badge { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; backdrop-filter: blur(4px); }
-.state-badge { 
-  position: absolute; bottom: 12px; right: 12px; 
-  background: #e67e22; /* Orange Badge */
-  color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; 
+.glass-card:hover { 
+    transform: translateY(-5px); 
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #6c63ff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
-.card-body { padding: 1.2rem; flex: 1; display: flex; flex-direction: column; }
-.title-row { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; }
-.title-row h3 { margin: 0; font-size: 1.1rem; color: #2c3e50; font-weight: 800; flex: 1; }
-.btn-action { background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; margin-left: 5px; padding: 4px; }
-.btn-action:hover { background: #eee; }
-
-.loc { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 8px; }
-.price-tag { color: #d35400; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; } /* Darker Orange Price */
-.price-tag small { color: #95a5a6; font-weight: normal; font-size: 0.85rem; }
-
-.owner-row { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 12px; border-top: 1px solid #f9f9f9; }
-.owner-row img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.owner-name { font-size: 0.9rem; font-weight: 600; color: #34495e; }
-
-.btn-contact { 
-  margin-top: 15px; 
-  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); /* Orange Gradient */
-  color: white; text-align: center; padding: 10px; border-radius: 8px; 
-  font-weight: 700; text-decoration: none; transition: opacity 0.2s; display: block; 
+.card-img { height: 180px; background-size: cover; position: relative; }
+.overlay-gradient {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(15, 23, 42, 0.8));
 }
-.btn-contact:hover { opacity: 0.9; }
+
+.cat-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(108, 99, 255, 0.9); color: white;
+    padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+}
+.state-badge {
+    position: absolute; bottom: 10px; right: 10px;
+    background: rgba(230, 126, 34, 0.9); color: white;
+    padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+}
+
+.card-body { padding: 1.2rem; display: flex; flex-direction: column; flex: 1; }
+.title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.title-row h3 { color: white; font-size: 1.1rem; font-weight: 700; line-height: 1.4; margin: 0; flex: 1; }
+
+.loc { color: #94a3b8; font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; }
+
+.price-tag { color: #facc15; font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; }
+
+.card-footer { 
+    margin-top: auto; padding-top: 12px; 
+    border-top: 1px solid rgba(255,255,255,0.1); 
+    display: flex; justify-content: space-between; align-items: center; 
+}
+.owner-info { display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.85rem; }
+.owner-avatar { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); }
+
+.btn-contact {
+    background: rgba(255,255,255,0.1); color: #2ecc71;
+    padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+    text-decoration: none; transition: 0.2s; border: 1px solid rgba(46, 204, 113, 0.3);
+}
+.btn-contact:hover { background: #2ecc71; color: white; }
 
 /* LOADING/EMPTY */
-.loading-state, .empty-state { grid-column: 1/-1; text-align: center; padding: 4rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-.spinner { border: 4px solid #f3f3f3; border-top: 4px solid #e67e22; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-.empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+.spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #6c63ff; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 3rem; display: flex; flex-direction: column; align-items: center; }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .hero-section { height: 260px; }
-  .hero-content h1 { font-size: 2rem; }
-  .search-card-pill { flex-direction: column; padding: 15px; border-radius: 20px; gap: 10px; margin: 0 1rem; }
-  .vertical-divider { display: none; }
-  .search-segment { width: 100%; border-bottom: 1px solid #ffe0b2; padding-bottom: 10px; margin-bottom: 5px; }
-  .btn-search-circle { width: 100%; margin: 0; padding: 12px; }
-  .service-grid { grid-template-columns: 1fr; }
+  .search-wrapper-full { flex-direction: column; gap: 10px; }
+  .search-input-full { padding-right: 12px; } /* Reset padding if button moves */
+  .btn-search-main { position: static; width: 100%; padding: 12px; }
+  .filters-row { flex-direction: column; }
+  .select-wrapper { width: 100%; }
 }
 </style>

@@ -1,164 +1,195 @@
 <template>
-  <div class="detail-page">
+  <div class="trip-detail-page">
     
-    <div v-if="loading" class="loading-container">
-      <div class="spinner"></div>
-      <p>⏳ {{ t('common.loading') }}</p>
-    </div>
+    <!-- BACKGROUND LAYERS -->
+    <div class="contour-lines"></div>
+    <div class="page-glow-purple"></div>
+    <div class="page-glow-orange"></div>
 
-    <div v-else-if="trip" class="trip-container">
-      
-      <div class="hero-gallery-wrapper">
-        
-        <div class="desktop-gallery">
-          <div class="gallery-item main-item" 
-               :style="{ backgroundImage: `url(${displayImages[0]})` }"
-               @click="openLightbox(0)">
-          </div>
-          <div class="sub-gallery">
-            <div class="gallery-item" 
-                 v-for="(img, index) in displayImages.slice(1, 5)" 
-                 :key="index"
-                 :style="{ backgroundImage: `url(${img})` }"
-                 @click="openLightbox(index + 1)">
-            </div>
-          </div>
-          <button class="btn-show-all" @click="openLightbox(0)">
-            🖼️ {{ t('trip.viewPhotos') }}
-          </button>
-          <div class="gallery-overlay">
-            <span class="badge-cat">{{ trip.category }}</span>
-            <h1>{{ trip.title }}</h1>
-            <div class="hero-meta">
-              <span>📍 {{ trip.location }}</span>
-              <span v-if="trip.duration">⏱️ {{ trip.duration }}</span>
-              <span>💪 {{ trip.difficulty }}</span>
-            </div>
-          </div>
-        </div>
+    <!-- MAIN CONTAINER (Padding 120px) -->
+    <div class="content-container" style="padding-top: 120px; padding-bottom: 4rem;">
 
-        <div class="mobile-gallery">
-          <swiper
-            :modules="[Pagination, Navigation]"
-            :slides-per-view="1"
-            :pagination="{ clickable: true }"
-            class="detail-swiper"
-          >
-            <swiper-slide v-for="(img, index) in displayImages" :key="index">
-              <div class="slide-bg" :style="{ backgroundImage: `url(${img})` }" @click="openLightbox(index)"></div>
-            </swiper-slide>
-          </swiper>
-          <div class="mobile-overlay">
-            <span class="badge-cat">{{ trip.category }}</span>
-            <h1>{{ trip.title }}</h1>
-            <div class="hero-meta-mobile"><span>📍 {{ trip.location }}</span></div>
-          </div>
-        </div>
+      <div v-if="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Sedang memuatkan...</p>
       </div>
 
-      <div class="content-wrapper">
+      <div v-else-if="trip" class="fade-up">
         
-        <div class="main-info">
+        <!-- 🔥 HERO GALLERY (BENTO GRID) 🔥 -->
+        <div class="hero-gallery-wrapper mb-8">
           
-          <div class="section-box">
-            <h3>📖 {{ t('trip.about') }}</h3>
-            <p class="desc-text">{{ trip.description }}</p>
-          </div>
-
-          <div class="section-box date-box">
-            <h3>📅 {{ t('trip.schedule') }}</h3>
-            <div class="date-row">
-              <div class="date-item">
-                <small>{{ t('createTrip.startDate') }}</small>
-                <strong>{{ formatDate(trip.startDate) }}</strong>
+          <!-- Desktop Grid -->
+          <div class="desktop-gallery">
+            <div class="gallery-item main-item" 
+                 :style="{ backgroundImage: `url(${displayImages[0]})` }"
+                 @click="openLightbox(0)">
+                 <div class="overlay-gradient-heavy"></div>
+            </div>
+            <div class="sub-gallery">
+              <div class="gallery-item" 
+                   v-for="(img, index) in displayImages.slice(1, 5)" 
+                   :key="index" 
+                   :style="{ backgroundImage: `url(${img})` }"
+                   @click="openLightbox(index + 1)">
+                   <div class="overlay-hover"></div>
               </div>
-              <div class="arrow">➝</div>
-              <div class="date-item">
-                <small>{{ t('createTrip.endDate') }}</small>
-                <strong>{{ formatDate(trip.endDate) }}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="info-grid">
-            <div class="info-card warning" v-if="trip.mandatory">
-              <h4>⚠️ {{ t('createTrip.mandatory') }}</h4>
-              <p>{{ trip.mandatory }}</p>
-            </div>
-            <div class="info-card tip" v-if="trip.tips">
-              <h4>💡 {{ t('createTrip.tips') }}</h4>
-              <p>{{ trip.tips }}</p>
-            </div>
-            <div class="info-card recommend" v-if="trip.recommended">
-              <h4>🎒 {{ t('createTrip.recommended') }}</h4>
-              <p>{{ trip.recommended }}</p>
-            </div>
-          </div>
-
-          <div class="section-box" v-if="trip.includes && trip.includes.length">
-            <h3>✅ {{ t('createTrip.includes') }}</h3>
-            <ul class="includes-list">
-              <li v-for="item in trip.includes" :key="item">
-                <span class="check-icon">✔</span> {{ item }}
-              </li>
-            </ul>
-          </div>
-
-          <div class="organizer-card" @click="$router.push(`/user/${trip.organizerId}`)">
-            <img :src="trip.organizerImage || 'https://i.pravatar.cc/150?img=3'" class="org-avatar" />
-            <div class="org-info">
-              <small>{{ t('trip.organizedBy') }}:</small>
-              <h4>{{ trip.organizerName }}</h4>
-            </div>
-            <button class="btn-view-profile">{{ t('trip.viewProfile') }}</button>
-          </div>
-
-        </div>
-
-        <div class="booking-sidebar">
-          <div class="price-card">
-            <div class="price-tag">
-              <span class="currency">RM</span>
-              <span class="amount">{{ trip.price }}</span>
-              <span class="unit">{{ t('trip.perPax') }}</span>
             </div>
             
-            <div class="slots-info">
-              <div class="progress-bar">
-                <div class="fill" :style="{ width: (trip.currentSlots / trip.maxSlots) * 100 + '%' }"></div>
-              </div>
-              <div class="slot-text">
-                <span>{{ trip.currentSlots }} {{ t('trip.taken') }}</span>
-                <span class="slot-left">{{ trip.maxSlots - trip.currentSlots }} {{ t('trip.empty') }}</span>
+            <!-- Button View Photos -->
+            <button class="btn-show-all" @click="openLightbox(0)">
+              <i class="fas fa-images mr-2"></i> {{ t('trip.viewPhotos') || 'Lihat Gambar' }}
+            </button>
+            
+            <!-- Title Overlay -->
+            <div class="gallery-title-overlay">
+              <span class="badge-cat">{{ trip.category }}</span>
+              <h1>{{ trip.title }}</h1>
+              <div class="hero-meta">
+                <span><i class="fas fa-map-marker-alt text-red-400"></i> {{ trip.location }}</span>
+                <span v-if="trip.duration"><i class="fas fa-clock text-blue-400 ml-3"></i> {{ trip.duration }}</span>
+                <span class="ml-3"><i class="fas fa-tachometer-alt text-yellow-400"></i> {{ trip.difficulty }}</span>
               </div>
             </div>
+          </div>
 
-            <div class="action-buttons">
-              <a v-if="trip.groupLink" :href="trip.groupLink" target="_blank" class="btn-join">
-                🚀 {{ t('trip.joinChat') }}
-              </a>
-              <button v-else class="btn-join disabled" disabled>{{ t('trip.noLink') }}</button>
+          <!-- Mobile Swiper -->
+          <div class="mobile-gallery">
+            <swiper
+              :modules="[Pagination, Navigation]"
+              :slides-per-view="1"
+              :pagination="{ clickable: true }"
+              class="detail-swiper"
+            >
+              <swiper-slide v-for="(img, index) in displayImages" :key="index">
+                <div class="slide-bg" :style="{ backgroundImage: `url(${img})` }" @click="openLightbox(index)">
+                   <div class="overlay-gradient-mobile"></div>
+                </div>
+              </swiper-slide>
+            </swiper>
+            <div class="mobile-title-overlay">
+              <span class="badge-cat">{{ trip.category }}</span>
+              <h1>{{ trip.title }}</h1>
+              <div class="hero-meta-mobile"><span>📍 {{ trip.location }}</span></div>
             </div>
-
-            <p class="note">* {{ t('trip.paymentNote') }}</p>
           </div>
         </div>
 
+        <!-- MAIN LAYOUT -->
+        <div class="main-layout">
+          
+          <!-- LEFT CONTENT -->
+          <div class="left-content">
+            
+            <!-- About -->
+            <div class="glass-panel mb-6">
+              <h3><i class="fas fa-book-open text-purple-400 mr-2"></i> {{ t('trip.about') || 'Tentang Trip' }}</h3>
+              <p class="desc-text">{{ trip.description }}</p>
+            </div>
+
+            <!-- Schedule -->
+            <div class="glass-panel mb-6">
+              <h3><i class="far fa-calendar-alt text-orange-400 mr-2"></i> {{ t('trip.schedule') || 'Jadual' }}</h3>
+              <div class="date-row">
+                <div class="date-item">
+                  <small>{{ t('createTrip.startDate') }}</small>
+                  <strong>{{ formatDate(trip.startDate) }}</strong>
+                </div>
+                <div class="arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="date-item">
+                  <small>{{ t('createTrip.endDate') }}</small>
+                  <strong>{{ formatDate(trip.endDate) }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Info Cards Grid -->
+            <div class="info-grid mb-6">
+              <div class="info-card warning" v-if="trip.mandatory">
+                <h4><i class="fas fa-exclamation-triangle mr-1"></i> {{ t('createTrip.mandatory') }}</h4>
+                <p>{{ trip.mandatory }}</p>
+              </div>
+              <div class="info-card tip" v-if="trip.tips">
+                <h4><i class="fas fa-lightbulb mr-1"></i> {{ t('createTrip.tips') }}</h4>
+                <p>{{ trip.tips }}</p>
+              </div>
+              <div class="info-card recommend" v-if="trip.recommended">
+                <h4><i class="fas fa-hiking mr-1"></i> {{ t('createTrip.recommended') }}</h4>
+                <p>{{ trip.recommended }}</p>
+              </div>
+            </div>
+
+            <!-- Includes -->
+            <div class="glass-panel mb-6" v-if="trip.includes && trip.includes.length">
+              <h3><i class="fas fa-check-circle text-green-400 mr-2"></i> {{ t('createTrip.includes') }}</h3>
+              <ul class="includes-list">
+                <li v-for="item in trip.includes" :key="item">
+                  <i class="fas fa-check text-green-400 mr-2"></i> {{ item }}
+                </li>
+              </ul>
+            </div>
+
+            <!-- Organizer Card -->
+            <div class="glass-panel organizer-card" @click="$router.push(`/user/${trip.organizerId}`)">
+              <div class="flex items-center gap-4">
+                <img :src="trip.organizerImage || 'https://i.pravatar.cc/150?img=3'" class="org-avatar" />
+                <div class="org-info">
+                  <small class="text-gray-400 text-xs uppercase tracking-wider">{{ t('trip.organizedBy') }}</small>
+                  <h4>{{ trip.organizerName }}</h4>
+                </div>
+              </div>
+              <button class="btn-view-profile">{{ t('trip.viewProfile') }}</button>
+            </div>
+
+          </div>
+
+          <!-- RIGHT SIDEBAR (Sticky) -->
+          <div class="right-sidebar">
+            <div class="glass-panel price-card">
+              <div class="price-tag">
+                <span class="currency">RM</span>
+                <span class="amount">{{ trip.price }}</span>
+                <span class="unit">/ {{ t('trip.perPax') }}</span>
+              </div>
+              
+              <div class="slots-info mt-6">
+                <div class="progress-bar">
+                  <div class="fill" :style="{ width: (trip.currentSlots / trip.maxSlots) * 100 + '%' }"></div>
+                </div>
+                <div class="slot-text mt-2">
+                  <span>{{ trip.currentSlots }} {{ t('trip.taken') }}</span>
+                  <span class="slot-left text-orange-400">{{ trip.maxSlots - trip.currentSlots }} {{ t('trip.empty') }}</span>
+                </div>
+              </div>
+
+              <div class="action-buttons mt-6">
+                <a v-if="trip.groupLink" :href="trip.groupLink" target="_blank" class="btn-join">
+                  <i class="fab fa-whatsapp text-xl mr-2"></i> {{ t('trip.joinChat') }}
+                </a>
+                <button v-else class="btn-join disabled" disabled>{{ t('trip.noLink') }}</button>
+              </div>
+
+              <p class="note mt-4">* {{ t('trip.paymentNote') }}</p>
+            </div>
+          </div>
+
+        </div>
       </div>
+
+      <div v-else class="error-container glass-panel">
+        <h2 class="text-white">{{ t('trip.notFound') }} 😔</h2>
+        <button @click="$router.push('/trips')" class="btn-back">{{ t('trip.backList') }}</button>
+      </div>
+
+      <!-- Lightbox -->
+      <VueEasyLightbox
+        :visible="visibleRef"
+        :imgs="displayImages"
+        :index="indexRef"
+        @hide="onHide"
+      />
+
     </div>
-
-    <div v-else class="error-container">
-      <h2>{{ t('trip.notFound') }} 😔</h2>
-      <button @click="$router.push('/trips')" class="btn-back">{{ t('trip.backList') }}</button>
-    </div>
-
-    <VueEasyLightbox
-      :visible="visibleRef"
-      :imgs="displayImages"
-      :index="indexRef"
-      @hide="onHide"
-    />
-
   </div>
 </template>
 
@@ -194,7 +225,6 @@ const indexRef = ref(0);
 // Helper Date
 const formatDate = (dateString: string) => {
   if(!dateString) return '-';
-  // Menggunakan 'default' supaya ikut bahasa browser/sistem user, atau boleh hardcode 'en-MY' jika mahu English sentiasa
   const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric', weekday: 'short' };
   return new Date(dateString).toLocaleDateString('default', options);
 };
@@ -237,101 +267,159 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* CSS SAMA MACAM SEBELUM NI (BENTO GRID) */
-.detail-page { background-color: #f8f9fa; min-height: 100vh; padding-bottom: 4rem; }
-.loading-container, .error-container { text-align: center; padding: 5rem; font-size: 1.2rem; color: #666; display: flex; flex-direction: column; align-items: center; }
-.spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+/* --- BASE THEME (DARK GLASS) --- */
+.trip-detail-page { 
+  background-color: #0f172a; /* Dark Blue Base */
+  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
+}
+.content-container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
 
-/* HERO GALLERY WRAPPER */
-.hero-gallery-wrapper { position: relative; margin-bottom: 2rem; max-width: 1200px; margin: 0 auto 2rem auto; padding: 1rem 1rem 0 1rem; }
+/* GLOWS */
+.page-glow-purple {
+  position: absolute; top: -10%; right: -10%; width: 60vw; height: 60vw;
+  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
+}
+.page-glow-orange {
+  position: absolute; bottom: -10%; left: -10%; width: 60vw; height: 60vw;
+  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
+}
+.contour-lines {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: cover; pointer-events: none;
+}
 
-/* DESKTOP GRID */
-.desktop-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 400px; border-radius: 16px; overflow: hidden; position: relative; background: #000; }
-.main-item { width: 100%; height: 100%; background-size: cover; background-position: center; cursor: pointer; transition: filter 0.2s; }
+/* --- HERO GALLERY --- */
+.hero-gallery-wrapper { position: relative; margin-bottom: 2rem; }
+
+.desktop-gallery { 
+  display: grid; grid-template-columns: 2fr 1fr; gap: 10px; 
+  height: 450px; border-radius: 20px; overflow: hidden; position: relative; 
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.main-item { width: 100%; height: 100%; background-size: cover; background-position: center; cursor: pointer; transition: filter 0.2s; position: relative; }
 .main-item:hover { filter: brightness(0.9); }
-.sub-gallery { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; }
+.sub-gallery { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; }
 .gallery-item { background-size: cover; background-position: center; cursor: pointer; transition: filter 0.2s; position: relative; }
 .gallery-item:hover { filter: brightness(0.9); }
-.btn-show-all { position: absolute; bottom: 20px; right: 20px; background: white; border: 1px solid #333; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 5; transition: transform 0.2s; }
-.btn-show-all:hover { transform: scale(1.05); }
-.gallery-overlay { position: absolute; bottom: 0; left: 0; width: 50%; padding: 2rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; pointer-events: none; }
 
-/* MOBILE STYLE */
-.mobile-gallery { display: none; } 
+/* Overlays */
+.overlay-gradient-heavy { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent 60%); }
+.gallery-title-overlay { 
+  position: absolute; bottom: 30px; left: 30px; z-index: 5; max-width: 70%; 
+}
+.gallery-title-overlay h1 { font-size: 3rem; font-weight: 800; line-height: 1.1; margin: 10px 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+.badge-cat { 
+  background: #e67e22; color: white; padding: 5px 12px; 
+  border-radius: 30px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; 
+  letter-spacing: 1px;
+}
+.hero-meta { font-size: 1.1rem; color: #cbd5e1; }
 
-/* CONTENT */
-.content-wrapper { max-width: 1200px; margin: 0 auto; padding: 0 1rem; display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; position: relative; z-index: 20; margin-top: 2rem;}
-.section-box { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 2rem; }
-.section-box h3 { margin-top: 0; color: #2c3e50; font-size: 1.3rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 1rem; }
-.desc-text { line-height: 1.8; color: #444; white-space: pre-wrap; font-size: 1rem; }
+.btn-show-all { 
+  position: absolute; bottom: 20px; right: 20px; 
+  background: rgba(255, 255, 255, 0.9); color: #0f172a; 
+  padding: 10px 20px; border-radius: 50px; font-weight: bold; 
+  cursor: pointer; transition: transform 0.2s; z-index: 5; 
+}
+.btn-show-all:hover { transform: scale(1.05); background: white; }
 
-.date-row { display: flex; align-items: center; justify-content: space-around; background: #f9f9f9; padding: 1rem; border-radius: 8px; border: 1px dashed #ccc; }
+/* Mobile Gallery */
+.mobile-gallery { display: none; }
+
+/* --- MAIN LAYOUT --- */
+.main-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+
+/* --- GLASS PANELS (Dark) --- */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px; padding: 2rem;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+
+.glass-panel h3 { margin-top: 0; color: white; font-size: 1.3rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 1.5rem; font-weight: 700; display: flex; align-items: center; }
+.desc-text { line-height: 1.8; color: #cbd5e1; white-space: pre-wrap; font-size: 1rem; }
+
+/* Date Box */
+.date-row { display: flex; align-items: center; justify-content: space-around; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.2); }
 .date-item { text-align: center; }
-.date-item small { display: block; color: #7f8c8d; font-size: 0.8rem; text-transform: uppercase; }
-.date-item strong { display: block; color: #2c3e50; font-size: 1.2rem; margin-top: 5px; }
-.arrow { font-size: 1.5rem; color: #bdc3c7; }
+.date-item small { display: block; color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.date-item strong { display: block; color: white; font-size: 1.2rem; margin-top: 5px; }
+.arrow { font-size: 1.5rem; color: #6c63ff; }
 
+/* Info Cards */
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-.info-card { padding: 1.5rem; border-radius: 10px; border-left: 5px solid #ccc; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-.info-card h4 { margin: 0 0 10px 0; font-size: 1rem; }
-.info-card p { margin: 0; font-size: 0.9rem; color: #555; white-space: pre-wrap; }
-.info-card.warning { border-color: #e74c3c; background: #fff5f5; }
-.info-card.warning h4 { color: #c0392b; }
-.info-card.tip { border-color: #f1c40f; background: #fef9e7; }
-.info-card.tip h4 { color: #d35400; }
-.info-card.recommend { border-color: #3498db; background: #f0f8ff; grid-column: 1 / -1; }
-.info-card.recommend h4 { color: #2980b9; }
+.info-card { padding: 1.5rem; border-radius: 12px; border-left: 4px solid #ccc; background: rgba(255,255,255,0.05); }
+.info-card h4 { margin: 0 0 10px 0; font-size: 1rem; color: white; }
+.info-card p { margin: 0; font-size: 0.9rem; color: #cbd5e1; white-space: pre-wrap; }
 
+.info-card.warning { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+.info-card.warning h4 { color: #fca5a5; }
+.info-card.tip { border-color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+.info-card.tip h4 { color: #fcd34d; }
+.info-card.recommend { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); grid-column: 1 / -1; }
+.info-card.recommend h4 { color: #93c5fd; }
+
+/* Includes List */
 .includes-list { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.includes-list li { display: flex; align-items: center; gap: 10px; color: #555; font-size: 0.95rem; }
-.check-icon { color: #27ae60; font-weight: bold; }
+.includes-list li { display: flex; align-items: center; gap: 10px; color: #cbd5e1; font-size: 0.95rem; }
 
-.organizer-card { background: white; padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem; border: 1px solid #eee; cursor: pointer; transition: transform 0.2s; }
-.organizer-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-.org-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
+/* Organizer Card */
+.organizer-card { display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
+.organizer-card:hover { background: rgba(255,255,255,0.08); }
+.org-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); }
 .org-info { flex-grow: 1; }
-.org-info small { color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
-.org-info h4 { margin: 0; color: #2c3e50; font-size: 1.1rem; }
-.btn-view-profile { background: none; border: 1px solid #3498db; color: #3498db; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; cursor: pointer; font-weight: bold; }
-.btn-view-profile:hover { background: #3498db; color: white; }
+.org-info small { color: #94a3b8; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+.org-info h4 { margin: 0; color: white; font-size: 1.1rem; }
+.btn-view-profile { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: 0.2s; }
+.btn-view-profile:hover { background: white; color: #0f172a; }
 
-/* SIDEBAR */
-.booking-sidebar { position: sticky; top: 100px; }
-.price-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; border-top: 6px solid #27ae60; }
+/* --- RIGHT SIDEBAR --- */
+.right-sidebar { position: sticky; top: 120px; height: fit-content; }
+.price-card { text-align: center; border-top: 4px solid #e67e22; }
 .price-tag { margin-bottom: 1.5rem; }
-.currency { font-size: 1.2rem; color: #888; vertical-align: top; position: relative; top: 5px; }
-.amount { font-size: 3rem; font-weight: 800; color: #2c3e50; }
-.unit { color: #999; font-size: 1rem; }
+.currency { font-size: 1.2rem; color: #94a3b8; vertical-align: top; position: relative; top: 5px; }
+.amount { font-size: 3rem; font-weight: 800; color: #fbbf24; } /* Gold */
+.unit { color: #94a3b8; font-size: 1rem; }
 
-.slots-info { margin-bottom: 2rem; text-align: left; }
-.progress-bar { height: 10px; background: #f0f0f0; border-radius: 5px; overflow: hidden; margin-bottom: 8px; }
+.slots-info { text-align: left; }
+.progress-bar { height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-bottom: 8px; }
 .fill { height: 100%; background: #27ae60; border-radius: 5px; transition: width 0.5s; }
-.slot-text { display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; font-weight: 600; }
-.slot-left { color: #e67e22; }
+.slot-text { display: flex; justify-content: space-between; font-size: 0.85rem; color: #cbd5e1; font-weight: 600; }
+.slot-left { color: #fbbf24; }
 
-.btn-join { display: flex; align-items: center; justify-content: center; width: 100%; padding: 1.2rem; background-color: #25D366; color: white; text-decoration: none; font-weight: bold; border-radius: 8px; margin-bottom: 10px; transition: transform 0.2s; border: none; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); }
-.btn-join:hover { transform: translateY(-2px); background-color: #1ebc57; }
-.btn-join.disabled { background-color: #bdc3c7; cursor: not-allowed; box-shadow: none; transform: none; }
+.btn-join { 
+  display: flex; align-items: center; justify-content: center; width: 100%; padding: 1rem; 
+  background: linear-gradient(135deg, #10b981, #059669); color: white; text-decoration: none; font-weight: bold; 
+  border-radius: 12px; margin-bottom: 10px; transition: transform 0.2s; border: none; cursor: pointer; font-size: 1rem; 
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); 
+}
+.btn-join:hover { transform: translateY(-2px); }
+.btn-join.disabled { background: rgba(255,255,255,0.1); color: #666; cursor: not-allowed; box-shadow: none; transform: none; background-image: none; }
 
-.note { font-size: 0.8rem; color: #95a5a6; line-height: 1.4; margin-top: 1rem; font-style: italic; }
-.btn-back { padding: 10px 20px; background: #34495e; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+.note { font-size: 0.8rem; color: #64748b; line-height: 1.4; margin-top: 1rem; font-style: italic; }
 
-/* OVERLAY & MOBILE */
-.badge-cat { background: #e67e22; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; color: white; display: inline-block; margin-bottom: 5px; }
-h1 { margin: 5px 0 10px 0; font-size: 2.2rem; font-weight: 800; text-shadow: 0 2px 5px rgba(0,0,0,0.5); color: white;}
-.hero-meta { display: flex; gap: 15px; font-size: 1rem; opacity: 0.9; color: white; }
+/* Loading/Error */
+.loading-container, .error-container { text-align: center; padding: 5rem; font-size: 1.2rem; color: #94a3b8; }
+.spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #6c63ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-back { margin-top: 20px; padding: 10px 20px; background: #6c63ff; color: white; border: none; border-radius: 50px; cursor: pointer; }
+
+.fade-up { animation: fadeUp 0.6s ease-out; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 768px) {
-  .hero-gallery-wrapper { padding: 0; margin-bottom: 1rem; }
-  .desktop-gallery { display: none; } 
-  .mobile-gallery { display: block; position: relative; height: 300px; } 
-  .detail-swiper { height: 100%; }
-  .slide-bg { height: 100%; background-size: cover; background-position: center; }
-  .mobile-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 1.5rem; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color: white; z-index: 10; }
-  .hero-meta-mobile { font-size: 0.9rem; opacity: 0.9; }
-  .content-wrapper { grid-template-columns: 1fr; margin-top: 0; }
-  .booking-sidebar { position: static; margin-top: 2rem; }
+  .hero-gallery-wrapper { margin-bottom: 1rem; }
+  .desktop-gallery { display: none; }
+  .mobile-gallery { display: block; height: 350px; position: relative; border-radius: 0; margin-left: -1.5rem; margin-right: -1.5rem; width: calc(100% + 3rem); }
+  .slide-bg { height: 100%; background-size: cover; background-position: center; position: relative; }
+  .overlay-gradient-mobile { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(15,23,42,0.95)); }
+  .mobile-title-overlay { position: absolute; bottom: 40px; left: 1.5rem; z-index: 10; color: white; }
+  .mobile-title-overlay h1 { font-size: 2rem; margin: 5px 0; line-height: 1.2; }
+  .main-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+  .right-sidebar { order: -1; position: static; }
   .info-grid { grid-template-columns: 1fr; }
 }
 </style>

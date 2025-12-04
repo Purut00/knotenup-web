@@ -1,195 +1,222 @@
 <template>
-  <div class="detail-page">
+  <div class="service-detail-page">
     
-    <div v-if="loading" class="loading-container">
-      <div class="spinner"></div>
-      <p>⏳ {{ t('common.loading') }}</p>
-    </div>
+    <!-- BACKGROUND LAYERS (Sama Macam Page Lain) -->
+    <div class="contour-lines"></div>
+    <div class="page-glow-purple"></div>
+    <div class="page-glow-orange"></div>
 
-    <div v-else-if="service" class="content-container">
+    <!-- MAIN CONTAINER (Padding Besar Untuk Elak Navbar) -->
+    <div class="content-container" style="padding-top: 100px; padding-bottom: 4rem;">
       
-      <!-- 🔥 HERO GALLERY (SAMA MACAM TRIP & SPOT) 🔥 -->
-      <div class="hero-gallery-wrapper">
-        
-        <!-- Desktop Bento Grid -->
-        <div class="desktop-gallery">
-          <div class="gallery-item main-item" 
-               :style="{ backgroundImage: `url(${displayImages[0]})` }"
-               @click="openLightbox(0)">
-          </div>
-          <div class="sub-gallery">
-            <div class="gallery-item" 
-                 v-for="(img, index) in displayImages.slice(1, 5)" 
-                 :key="index" 
-                 :style="{ backgroundImage: `url(${img})` }"
-                 @click="openLightbox(index + 1)">
-            </div>
-          </div>
-          
-          <!-- Butang View Photos -->
-          <button class="btn-show-all" @click="openLightbox(0)">
-            🖼️ {{ t('service.viewPhotos') || 'Lihat Gambar' }}
-          </button>
-
-          <!-- Overlay Info -->
-          <div class="gallery-overlay">
-            <span class="badge-cat">{{ service.category }}</span>
-            <h1>{{ service.name }}</h1>
-            <div class="hero-meta">📍 {{ service.location }}, {{ service.state }}</div>
-          </div>
-        </div>
-
-        <!-- Mobile Swiper -->
-        <div class="mobile-gallery">
-          <swiper 
-            :modules="[Pagination, Navigation]" 
-            :pagination="{ clickable: true }" 
-            class="detail-swiper"
-          >
-            <swiper-slide v-for="(img, index) in displayImages" :key="index">
-              <div class="slide-bg" :style="{ backgroundImage: `url(${img})` }" @click="openLightbox(index)"></div>
-            </swiper-slide>
-          </swiper>
-          <div class="mobile-overlay">
-            <span class="badge-cat">{{ service.category }}</span>
-            <h1>{{ service.name }}</h1>
-          </div>
-        </div>
+      <div v-if="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Sedang memuatkan...</p>
       </div>
 
-      <div class="main-layout">
+      <div v-else-if="service" class="fade-up">
         
-        <div class="left-content">
+        <!-- 🔥 HERO GALLERY (BENTO GRID) 🔥 -->
+        <div class="hero-gallery-wrapper mb-8">
           
-          <div class="section-box">
-            <h3>📖 {{ t('service.info') }}</h3>
-            <p class="desc-text">{{ service.description }}</p>
-          </div>
-
-          <div v-if="['Campsite', 'Chalet', 'Event'].includes(service.category)" class="section-box">
-            <h3>⛺ {{ t('service.accommodationInfo') }}</h3>
-            <div class="info-row">
-              <div class="info-item">
-                <span class="label">{{ t('service.checkIn') }}</span>
-                <strong>{{ service.details.checkIn || '2:00 PM' }}</strong>
-              </div>
-              <div class="info-item">
-                <span class="label">{{ t('service.checkOut') }}</span>
-                <strong>{{ service.details.checkOut || '12:00 PM' }}</strong>
+          <!-- Desktop Grid -->
+          <div class="desktop-gallery">
+            <div class="gallery-item main-item" 
+                 :style="{ backgroundImage: `url(${displayImages[0]})` }"
+                 @click="openLightbox(0)">
+                 <div class="overlay-gradient-heavy"></div>
+            </div>
+            <div class="sub-gallery">
+              <div class="gallery-item" 
+                   v-for="(img, index) in displayImages.slice(1, 5)" 
+                   :key="index" 
+                   :style="{ backgroundImage: `url(${img})` }"
+                   @click="openLightbox(index + 1)">
+                   <div class="overlay-hover"></div>
               </div>
             </div>
             
-            <div class="divider"></div>
-            
-            <h4>{{ t('service.facilities') }}:</h4>
-            <div class="facilities-grid">
-              <div v-for="fac in service.details.facilities" :key="fac" class="fac-item">
-                ✅ {{ fac }}
-              </div>
-            </div>
-          </div>
-
-          <div v-if="service.category === 'Guide'" class="section-box">
-            <h3>🧗 {{ t('service.guideInfo') }}</h3>
-            <div class="info-grid-2">
-              <div class="info-card">
-                <span class="label">{{ t('service.ratio') }}</span>
-                <strong>{{ service.details.guideRatio || '-' }}</strong>
-              </div>
-              <div class="info-card">
-                <span class="label">{{ t('service.cert') }}</span>
-                <strong>{{ service.details.certification || '-' }}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="service.category === 'Transport'" class="section-box">
-            <h3>🚙 {{ t('service.transportInfo') }}</h3>
-            <div class="info-grid-2">
-              <div class="info-card">
-                <span class="label">{{ t('service.vehicleType') }}</span>
-                <strong>{{ service.details.vehicleType }}</strong>
-              </div>
-              <div class="info-card">
-                <span class="label">{{ t('service.maxPax') }}</span>
-                <strong>{{ service.details.maxPax }} {{ t('service.pax') }}</strong>
-              </div>
-            </div>
-            <div class="mt-4">
-              <strong>{{ t('service.coverage') }}:</strong>
-              <p>{{ service.details.coverageArea }}</p>
-            </div>
-          </div>
-
-          <div v-if="service.category === 'Rental'" class="section-box">
-            <h3>🎒 {{ t('service.rentalList') }}</h3>
-            <div class="rental-list">
-              <p class="pre-line">{{ service.details.equipmentList }}</p>
-            </div>
-            <div class="mt-4 alert-box">
-              📍 <strong>{{ t('service.pickup') }}:</strong> {{ service.details.pickupLocation }}
-            </div>
-          </div>
-
-          <div class="organizer-card">
-            <img :src="service.ownerAvatar || 'https://i.pravatar.cc/150'" class="org-avatar" />
-            <div class="org-info">
-              <small>{{ t('service.hostedBy') }}:</small>
-              <h4>{{ service.ownerName }}</h4>
-            </div>
-            <button class="btn-view-profile" @click="$router.push(`/user/${service.ownerId}`)">
-              {{ t('trip.viewProfile') }}
+            <!-- Button View Photos -->
+            <button class="btn-show-all" @click="openLightbox(0)">
+              <i class="fas fa-images mr-2"></i> {{ t('service.viewPhotos') || 'Lihat Semua Gambar' }}
             </button>
+
+            <!-- Title Overlay (Absolute on Image) -->
+            <div class="gallery-title-overlay">
+              <span class="badge-cat">{{ service.category }}</span>
+              <h1>{{ service.name }}</h1>
+              <div class="hero-meta">
+                <i class="fas fa-map-marker-alt text-red-400"></i> {{ service.location }}, {{ service.state }}
+              </div>
+            </div>
           </div>
 
+          <!-- Mobile Swiper -->
+          <div class="mobile-gallery">
+            <swiper 
+              :modules="[Pagination, Navigation]" 
+              :pagination="{ clickable: true }" 
+              class="detail-swiper"
+            >
+              <swiper-slide v-for="(img, index) in displayImages" :key="index">
+                <div class="slide-bg" :style="{ backgroundImage: `url(${img})` }" @click="openLightbox(index)">
+                   <div class="overlay-gradient-mobile"></div>
+                </div>
+              </swiper-slide>
+            </swiper>
+            <div class="mobile-title-overlay">
+              <span class="badge-cat">{{ service.category }}</span>
+              <h1>{{ service.name }}</h1>
+              <p><i class="fas fa-map-pin"></i> {{ service.location }}</p>
+            </div>
+          </div>
         </div>
 
-        <div class="right-sidebar">
-          <div class="price-card">
-            <div class="price-header">
-              <span class="label">{{ t('service.startingPrice') }}</span>
+        <!-- MAIN LAYOUT (Columns) -->
+        <div class="main-layout">
+          
+          <!-- LEFT CONTENT -->
+          <div class="left-content">
+            
+            <!-- Description -->
+            <div class="glass-panel mb-6">
+              <h3><i class="fas fa-book-open text-purple-400 mr-2"></i> {{ t('service.info') || 'Tentang Servis' }}</h3>
+              <p class="desc-text">{{ service.description }}</p>
+            </div>
+
+            <!-- Accommodation Info -->
+            <div v-if="['Campsite', 'Chalet', 'Event'].includes(service.category)" class="glass-panel mb-6">
+              <h3><i class="fas fa-campground text-orange-400 mr-2"></i> Info Penginapan</h3>
+              <div class="info-row">
+                <div class="info-box">
+                  <span class="label">Check-In</span>
+                  <strong>{{ service.details.checkIn || '2:00 PM' }}</strong>
+                </div>
+                <div class="info-box">
+                  <span class="label">Check-Out</span>
+                  <strong>{{ service.details.checkOut || '12:00 PM' }}</strong>
+                </div>
+              </div>
               
-              <div v-if="service.category === 'Guide'">
-                <span class="amount">RM {{ service.details.price }}</span>
-                <span class="unit">/ {{ service.details.priceType }}</span>
-              </div>
-              <div v-else-if="service.details.priceDisplay">
-                <span class="amount-text">{{ service.details.priceDisplay }}</span>
-              </div>
-              <div v-else>
-                <span class="amount-text">{{ t('service.contactForPrice') }}</span>
+              <div class="divider"></div>
+              
+              <h4>Fasiliti Disediakan:</h4>
+              <div class="facilities-grid">
+                <div v-for="fac in service.details.facilities" :key="fac" class="fac-pill">
+                  <i class="fas fa-check-circle text-green-400"></i> {{ fac }}
+                </div>
               </div>
             </div>
 
-            <a :href="whatsappUrl" target="_blank" class="btn-whatsapp">
-              📞 {{ t('service.whatsappAction') }}
-            </a>
-            <p class="note">{{ t('service.whatsappNote') }}</p>
-            
-            <div v-if="isOwner" class="owner-actions">
-              <button class="btn-edit" @click="$router.push(`/service/edit/${serviceId}`)">
-                ✏️ {{ t('service.editAd') }}
+            <!-- Guide Info -->
+            <div v-if="service.category === 'Guide'" class="glass-panel mb-6">
+              <h3><i class="fas fa-hiking text-green-400 mr-2"></i> Info Guide</h3>
+              <div class="info-grid-2">
+                <div class="info-box">
+                  <span class="label">Nisbah Guide</span>
+                  <strong>{{ service.details.guideRatio || '-' }}</strong>
+                </div>
+                <div class="info-box">
+                  <span class="label">Sijil / Lesen</span>
+                  <strong>{{ service.details.certification || '-' }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Transport Info -->
+            <div v-if="service.category === 'Transport'" class="glass-panel mb-6">
+              <h3><i class="fas fa-shuttle-van text-blue-400 mr-2"></i> Info Transport</h3>
+              <div class="info-grid-2">
+                <div class="info-box">
+                  <span class="label">Jenis Kenderaan</span>
+                  <strong>{{ service.details.vehicleType }}</strong>
+                </div>
+                <div class="info-box">
+                  <span class="label">Max Penumpang</span>
+                  <strong>{{ service.details.maxPax }} Pax</strong>
+                </div>
+              </div>
+              <div class="mt-4 info-box-wide">
+                <span class="label">Kawasan Liputan:</span>
+                <p>{{ service.details.coverageArea }}</p>
+              </div>
+            </div>
+
+            <!-- Rental Info -->
+            <div v-if="service.category === 'Rental'" class="glass-panel mb-6">
+              <h3><i class="fas fa-tools text-yellow-400 mr-2"></i> Senarai Barang</h3>
+              <div class="rental-list">
+                <p class="pre-line">{{ service.details.equipmentList }}</p>
+              </div>
+              <div class="mt-4 info-box-highlight">
+                📍 <strong>Lokasi Pickup:</strong> {{ service.details.pickupLocation }}
+              </div>
+            </div>
+
+            <!-- Organizer Info -->
+            <div class="glass-panel organizer-card">
+              <div class="flex items-center gap-4">
+                 <img :src="service.ownerAvatar || 'https://i.pravatar.cc/150'" class="org-avatar" />
+                 <div class="org-info">
+                   <small class="text-gray-400 text-xs uppercase tracking-wider">Disediakan Oleh</small>
+                   <h4>{{ service.ownerName }}</h4>
+                 </div>
+              </div>
+              <button class="btn-view-profile" @click="$router.push(`/user/${service.ownerId}`)">
+                Lihat Profil
               </button>
             </div>
+
           </div>
+
+          <!-- RIGHT SIDEBAR (Sticky) -->
+          <div class="right-sidebar">
+            <div class="glass-panel price-card">
+              <div class="price-header">
+                <span class="label text-gray-400">Harga Bermula</span>
+                
+                <div v-if="service.category === 'Guide'">
+                  <span class="amount">RM {{ service.details.price }}</span>
+                  <span class="unit">/ {{ service.details.priceType }}</span>
+                </div>
+                <div v-else-if="service.details.priceDisplay">
+                  <span class="amount-text">{{ service.details.priceDisplay }}</span>
+                </div>
+                <div v-else>
+                  <span class="amount-text text-sm">Hubungi untuk harga</span>
+                </div>
+              </div>
+
+              <a :href="whatsappUrl" target="_blank" class="btn-whatsapp">
+                <i class="fab fa-whatsapp text-xl"></i> WhatsApp
+              </a>
+              <p class="note">Tekan butang di atas untuk deal terus dengan owner.</p>
+              
+              <div v-if="isOwner" class="owner-actions">
+                <button class="btn-edit" @click="$router.push(`/service/edit/${serviceId}`)">
+                  <i class="fas fa-edit"></i> Edit Iklan
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
-
       </div>
+
+      <div v-else class="error-container glass-panel">
+        <h2 class="text-white">Servis Tidak Dijumpai 😔</h2>
+        <button @click="$router.push('/directory')" class="btn-back">Kembali ke Direktori</button>
+      </div>
+
+      <!-- 🔥 LIGHTBOX COMPONENT 🔥 -->
+      <VueEasyLightbox
+        :visible="visibleRef"
+        :imgs="displayImages"
+        :index="indexRef"
+        @hide="onHide"
+      />
+
     </div>
-
-    <div v-else class="error-container">
-      <h2>{{ t('service.notFound') }} 😔</h2>
-      <button @click="$router.push('/directory')" class="btn-back">{{ t('service.backToDirectory') }}</button>
-    </div>
-
-    <!-- 🔥 LIGHTBOX COMPONENT 🔥 -->
-    <VueEasyLightbox
-      :visible="visibleRef"
-      :imgs="displayImages"
-      :index="indexRef"
-      @hide="onHide"
-    />
-
   </div>
 </template>
 
@@ -201,11 +228,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useI18n } from 'vue-i18n'; 
 
-// 🔥 Import VueEasyLightbox 🔥
 // @ts-ignore
 import VueEasyLightbox from 'vue-easy-lightbox';
-
-// Swiper
 // @ts-ignore
 import { Swiper, SwiperSlide } from 'swiper/vue';
 // @ts-ignore
@@ -224,22 +248,19 @@ const service = ref<any>(null);
 const loading = ref(true);
 const currentUser = ref<any>(null);
 
-// 🔥 LIGHTBOX STATE 🔥
+// LIGHTBOX STATE
 const visibleRef = ref(false);
 const indexRef = ref(0);
 
-// Gambar Logic
 const displayImages = computed(() => {
   if (service.value?.images && service.value.images.length > 0) {
     let imgs = [...service.value.images];
-    // Pastikan grid sentiasa penuh (5 petak) walaupun gambar kurang
     while (imgs.length < 5) imgs.push(imgs[0]); 
     return imgs;
   }
   return new Array(5).fill('https://via.placeholder.com/800x600?text=No+Image');
 });
 
-// WhatsApp Link Logic
 const whatsappUrl = computed(() => {
   if (!service.value?.whatsapp) return '#';
   const message = `Hi ${service.value.ownerName}, saya berminat dengan servis ${service.value.name} yang saya lihat di KnotenUp.`;
@@ -250,7 +271,6 @@ const isOwner = computed(() => {
   return currentUser.value && service.value && currentUser.value.uid === service.value.ownerId;
 });
 
-// 🔥 LIGHTBOX FUNCTIONS 🔥
 const openLightbox = (index: number) => {
   indexRef.value = index;
   visibleRef.value = true;
@@ -274,91 +294,145 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.detail-page { background-color: #f8f9fa; min-height: 100vh; padding-bottom: 3rem; }
-.content-container { max-width: 1200px; margin: 0 auto; }
-.loading-container, .error-container { text-align: center; padding: 5rem; color: #666; display: flex; flex-direction: column; align-items: center; }
-.spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+/* --- BASE THEME --- */
+.service-detail-page { 
+  background-color: #0f172a; /* Dark Blue Base */
+  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
+}
+.content-container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
 
-/* 🔥 HERO GALLERY (Bento Style - Updated CSS) 🔥 */
-.hero-gallery-wrapper { position: relative; margin-bottom: 2rem; padding: 1rem; }
+/* GLOWS */
+.page-glow-purple {
+  position: absolute; top: -10%; right: -10%; width: 60vw; height: 60vw;
+  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
+}
+.page-glow-orange {
+  position: absolute; bottom: -10%; left: -10%; width: 60vw; height: 60vw;
+  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
+}
+.contour-lines {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: cover; pointer-events: none;
+}
 
-.desktop-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 400px; border-radius: 16px; overflow: hidden; position: relative; background: #000; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-.main-item { width: 100%; height: 100%; background-size: cover; background-position: center; cursor: pointer; transition: filter 0.2s; }
-.main-item:hover { filter: brightness(0.9); }
-.sub-gallery { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; }
-.gallery-item { background-size: cover; background-position: center; cursor: pointer; transition: filter 0.2s; position: relative; }
-.gallery-item:hover { filter: brightness(0.9); }
+/* --- HERO GALLERY --- */
+.hero-gallery-wrapper { position: relative; }
 
-/* Butang View Photos */
-.btn-show-all { position: absolute; bottom: 20px; right: 20px; background: white; border: 1px solid #333; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 5; transition: transform 0.2s; }
-.btn-show-all:hover { transform: scale(1.05); }
+.desktop-gallery { 
+  display: grid; grid-template-columns: 2fr 1fr; gap: 10px; 
+  height: 450px; border-radius: 20px; overflow: hidden; position: relative; 
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.main-item { width: 100%; height: 100%; background-size: cover; background-position: center; cursor: pointer; position: relative; }
+.sub-gallery { display: grid; grid-template-rows: 1fr 1fr; gap: 10px; }
+.gallery-item { background-size: cover; background-position: center; cursor: pointer; position: relative; transition: filter 0.3s; }
+.gallery-item:hover { filter: brightness(1.1); }
 
-/* Overlay */
-.gallery-overlay { position: absolute; bottom: 0; left: 0; width: 50%; padding: 2rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; pointer-events: none; }
-.badge-cat { background: #e67e22; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; display: inline-block; margin-bottom: 5px; }
-h1 { margin: 5px 0; font-size: 2.5rem; font-weight: 800; text-shadow: 0 2px 5px rgba(0,0,0,0.5); line-height: 1.2; }
-.hero-meta { font-size: 1rem; opacity: 0.9; }
+/* Overlays */
+.overlay-gradient-heavy { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent 60%); }
+.gallery-title-overlay { 
+  position: absolute; bottom: 30px; left: 30px; z-index: 5; max-width: 70%; 
+}
+.gallery-title-overlay h1 { font-size: 3rem; font-weight: 800; line-height: 1.1; margin: 10px 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+.badge-cat { 
+  background: #e67e22; color: white; padding: 5px 12px; 
+  border-radius: 30px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; 
+  letter-spacing: 1px;
+}
+.hero-meta { font-size: 1.1rem; color: #cbd5e1; }
+
+.btn-show-all { 
+  position: absolute; bottom: 20px; right: 20px; 
+  background: rgba(255, 255, 255, 0.9); color: #0f172a; 
+  padding: 10px 20px; border-radius: 50px; font-weight: bold; 
+  cursor: pointer; transition: transform 0.2s; z-index: 5; 
+}
+.btn-show-all:hover { transform: scale(1.05); background: white; }
 
 /* Mobile Gallery */
 .mobile-gallery { display: none; }
 
-/* MAIN LAYOUT */
-.main-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; padding: 0 1rem; }
+/* --- MAIN LAYOUT --- */
+.main-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
 
-/* SECTION BOXES */
-.section-box { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); margin-bottom: 2rem; }
-.section-box h3 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 1rem; }
-.desc-text { line-height: 1.7; color: #555; white-space: pre-line; }
+/* --- GLASS PANELS (Dark) --- */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px; padding: 2rem;
+  backdrop-filter: blur(10px);
+  color: white;
+}
 
-/* Dynamic Info Styles */
+.glass-panel h3 { margin-top: 0; color: white; font-size: 1.3rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 1.5rem; font-weight: 700; display: flex; align-items: center; }
+.desc-text { line-height: 1.8; color: #cbd5e1; white-space: pre-line; font-size: 1rem; }
+
+/* Info Boxes */
 .info-row { display: flex; gap: 2rem; }
-.info-item { display: flex; flex-direction: column; }
-.label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-.info-item strong { font-size: 1.1rem; color: #2c3e50; }
-
-.divider { height: 1px; background: #eee; margin: 1.5rem 0; }
-
-.facilities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-.fac-item { background: #f9f9f9; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; color: #555; }
-
 .info-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.info-card { background: #f8f9fa; padding: 1rem; border-radius: 8px; border: 1px solid #eee; }
-.rental-list { background: #fff8e1; padding: 1rem; border-radius: 8px; font-family: monospace; line-height: 1.6; }
-.pre-line { white-space: pre-line; }
-.alert-box { background: #e3f2fd; padding: 1rem; border-radius: 8px; color: #0d47a1; }
+.info-box { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; flex: 1; }
+.label { display: block; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; font-weight: 600; }
+.info-box strong { font-size: 1.1rem; color: white; }
 
-/* Organizer */
-.organizer-card { background: white; padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem; border: 1px solid #eee; cursor: pointer; transition: 0.2s; }
-.organizer-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-.org-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
-.org-info h4 { margin: 0; font-size: 1.1rem; }
-.btn-view-profile { margin-left: auto; border: 1px solid #ccc; background: white; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
+.divider { height: 1px; background: rgba(255,255,255,0.1); margin: 1.5rem 0; }
 
-/* SIDEBAR */
-.right-sidebar { position: sticky; top: 100px; height: fit-content; }
-.price-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid #e67e22; }
-.price-header { margin-bottom: 1.5rem; }
-.amount { font-size: 2rem; font-weight: 800; color: #e67e22; }
-.amount-text { font-size: 1.5rem; font-weight: 800; color: #2c3e50; }
-.unit { color: #999; }
+.facilities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
+.fac-pill { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; font-size: 0.9rem; color: #cbd5e1; display: flex; align-items: center; gap: 8px; }
 
-.btn-whatsapp { display: block; width: 100%; padding: 1rem; background: #25D366; color: white; text-decoration: none; font-weight: bold; border-radius: 8px; transition: 0.2s; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
-.btn-whatsapp:hover { background: #1ebe57; transform: translateY(-2px); }
-.note { font-size: 0.8rem; color: #999; margin-top: 10px; }
+.info-box-highlight { background: rgba(108, 99, 255, 0.1); padding: 1rem; border-radius: 10px; border: 1px solid rgba(108, 99, 255, 0.3); color: #a78bfa; }
+.rental-list { background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 10px; font-family: monospace; color: #e2e8f0; }
 
-.owner-actions { margin-top: 1rem; border-top: 1px dashed #ccc; padding-top: 1rem; }
-.btn-edit { width: 100%; padding: 0.8rem; background: #34495e; color: white; border: none; border-radius: 6px; cursor: pointer; }
-.btn-back { padding: 10px 20px; background: #34495e; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+/* Organizer Card */
+.organizer-card { display: flex; align-items: center; justify-content: space-between; }
+.org-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); object-fit: cover; }
+.org-info h4 { margin: 0; font-size: 1.2rem; color: white; }
+.btn-view-profile { 
+  background: transparent; border: 1px solid rgba(255,255,255,0.3); 
+  color: white; padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: 0.2s; 
+}
+.btn-view-profile:hover { background: white; color: #0f172a; }
 
-/* MOBILE */
+/* --- RIGHT SIDEBAR --- */
+.right-sidebar { position: sticky; top: 120px; height: fit-content; }
+.price-card { text-align: center; border-top: 4px solid #e67e22; }
+.amount { font-size: 2.2rem; font-weight: 800; color: #fbbf24; } /* Gold/Yellow */
+.amount-text { font-size: 1.5rem; font-weight: 800; color: white; }
+.unit { color: #94a3b8; }
+
+.btn-whatsapp { 
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 1rem; margin-top: 1.5rem;
+  background: linear-gradient(135deg, #10b981, #059669); /* Green Gradient */
+  color: white; text-decoration: none; font-weight: bold; border-radius: 12px; 
+  transition: transform 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+.btn-whatsapp:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.note { font-size: 0.8rem; color: #64748b; margin-top: 10px; }
+
+.btn-edit { width: 100%; margin-top: 10px; padding: 10px; background: #334155; color: white; border: none; border-radius: 8px; cursor: pointer; }
+
+/* Loading/Error */
+.loading-container, .error-container { text-align: center; color: #94a3b8; }
+.spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #6c63ff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-back { margin-top: 20px; padding: 10px 20px; background: #6c63ff; color: white; border: none; border-radius: 50px; cursor: pointer; }
+
+.fade-up { animation: fadeUp 0.6s ease-out; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
-  .hero-gallery-wrapper { padding: 0; margin-bottom: 1rem; }
+  .hero-gallery-wrapper { margin-bottom: 1rem; }
   .desktop-gallery { display: none; }
-  .mobile-gallery { display: block; height: 300px; position: relative; }
-  .detail-swiper, .slide-bg { height: 100%; background-size: cover; background-position: center; }
-  .mobile-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 1.5rem 1rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; z-index: 10; pointer-events: none; }
-  .main-layout { grid-template-columns: 1fr; }
-  .right-sidebar { position: static; margin-top: 2rem; }
+  .mobile-gallery { display: block; height: 350px; position: relative; border-radius: 0; margin-left: -1.5rem; margin-right: -1.5rem; width: calc(100% + 3rem); }
+  .slide-bg { height: 100%; background-size: cover; background-position: center; position: relative; }
+  .overlay-gradient-mobile { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(15,23,42,0.95)); }
+  
+  .mobile-title-overlay { position: absolute; bottom: 40px; left: 1.5rem; z-index: 10; color: white; }
+  .mobile-title-overlay h1 { font-size: 2rem; margin: 5px 0; line-height: 1.2; }
+  
+  .main-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+  .right-sidebar { order: -1; position: static; } /* Price card on top for mobile */
 }
 </style>

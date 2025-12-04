@@ -1,45 +1,80 @@
 <template>
   <div class="reg-page">
-    <div class="form-card">
-      <h2>🏆 Daftar Sebagai Organizer</h2>
-      <p class="sub-text">Tingkatkan akaun anda untuk mula menganjurkan trip.</p>
+    
+    <!-- BACKGROUND LAYERS -->
+    <div class="contour-lines"></div>
+    <div class="page-glow-purple"></div>
+    <div class="page-glow-orange"></div>
 
-      <div class="form-body">
+    <!-- MAIN CONTAINER (Hardcoded Padding Fix) -->
+    <div class="container relative z-10" style="padding-top: 100px; padding-bottom: 80px;">
+      
+      <div class="glass-form-container fade-up">
         
-        <div class="form-group">
-          <label>Nama Organisasi / Jenama</label>
+        <!-- HEADER -->
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-white mb-2">🏆 Daftar Sebagai Organizer</h2>
+            <p class="text-gray-400">Tingkatkan akaun anda untuk mula menganjurkan trip dan aktiviti menarik.</p>
+        </div>
+
+        <div class="form-body">
           
-          <div class="checkbox-wrapper">
-            <input type="checkbox" v-model="useProfileName" @change="syncName" id="useProfile">
-            <label for="useProfile" class="sm-label">Guna nama profil saya ({{ currentUserName }})</label>
+          <!-- NAMA ORGANISASI -->
+          <div class="form-group">
+            <label class="text-gray-300 font-semibold mb-2 block">Nama Organisasi / Jenama</label>
+            
+            <div class="checkbox-wrapper mb-3">
+              <input type="checkbox" v-model="useProfileName" @change="syncName" id="useProfile" class="accent-purple-500 w-4 h-4">
+              <label for="useProfile" class="text-sm text-gray-400 cursor-pointer select-none ml-2">
+                Guna nama profil saya <span class="text-white font-bold">({{ currentUserName }})</span>
+              </label>
+            </div>
+
+            <input 
+                type="text" 
+                v-model="form.orgName" 
+                :disabled="useProfileName" 
+                class="glass-input"
+                :class="{ 'opacity-50 cursor-not-allowed': useProfileName }"
+                placeholder="Cth: Abang Mat Guide Services" 
+            />
           </div>
 
-          <input type="text" v-model="form.orgName" :disabled="useProfileName" placeholder="Cth: Abang Mat Guide Services" />
+          <!-- SSM -->
+          <div class="form-group">
+            <label class="text-gray-300 font-semibold mb-2 block">
+                No. Pendaftaran Perniagaan (SSM) 
+                <span class="text-xs text-gray-500 font-normal ml-1">- Jika ada</span>
+            </label>
+            <input type="text" v-model="form.ssm" class="glass-input" placeholder="Cth: 20230100XXXX" />
+          </div>
+
+          <!-- LESEN -->
+          <div class="form-group">
+            <label class="text-gray-300 font-semibold mb-2 block">
+                No. Pemandu Pelancong (Green Badge) / Malim Gunung Perhutanan 
+                <span class="text-xs text-gray-500 font-normal ml-1">- Jika ada</span>
+            </label>
+            <input type="text" v-model="form.license" class="glass-input" placeholder="Cth: MGP-A9753" />
+          </div>
+
+          <!-- T&C BOX -->
+          <div class="tnc-box">
+            <label class="checkbox-container flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" v-model="form.agreed" class="accent-orange-500 mt-1 w-5 h-5 flex-shrink-0">
+              <span class="text-sm text-gray-300 leading-relaxed">
+                Saya mengesahkan maklumat ini adalah benar. Saya faham bahawa <span class="text-white font-bold">KnotenUp</span> hanyalah medium promosi dan saya bertanggungjawab sepenuhnya ke atas trip yang dianjurkan.
+              </span>
+            </label>
+          </div>
+
+          <!-- BUTTON -->
+          <button class="btn-submit w-full" :disabled="!form.agreed || loading" @click="submitUpgrade">
+            <span v-if="loading"><i class="fas fa-spinner fa-spin mr-2"></i> Sedang Proses...</span>
+            <span v-else>Hantar Permohonan</span>
+          </button>
+
         </div>
-
-        <div class="form-group">
-          <label>No. Pendaftaran Perniagaan (SSM) - <small>Jika ada</small></label>
-          <input type="text" v-model="form.ssm" placeholder="Cth: 20230100XXXX" />
-        </div>
-
-        <div class="form-group">
-          <label>No. Lesen Malim / Permit Guide - <small>Jika ada</small></label>
-          <input type="text" v-model="form.license" placeholder="Cth: MG-12345" />
-        </div>
-
-        <div class="tnc-box">
-          <label class="checkbox-container">
-            <input type="checkbox" v-model="form.agreed">
-            <span class="text">
-              Saya mengesahkan maklumat ini benar. Saya faham bahawa KnotenUp hanyalah medium promosi.
-            </span>
-          </label>
-        </div>
-
-        <button class="btn-submit" :disabled="!form.agreed || loading" @click="submitUpgrade">
-          {{ loading ? 'Sedang Proses...' : 'Hantar Permohonan' }}
-        </button>
-
       </div>
     </div>
   </div>
@@ -65,7 +100,7 @@ const form = reactive({
 
 onMounted(() => {
   if(auth.currentUser) {
-    currentUserName.value = auth.currentUser.displayName || '';
+    currentUserName.value = auth.currentUser.displayName || 'User';
   }
 });
 
@@ -86,8 +121,7 @@ const submitUpgrade = async () => {
   try {
     const userRef = doc(db, "users", auth.currentUser.uid);
     
-    // 🔥 SECURITY FIX: Kita TIDAK set 'role: organizer' di sini.
-    // Kita hanya hantar permohonan 'pending'. Admin akan approve nanti.
+    // Status 'pending' untuk admin approval
     await updateDoc(userRef, {
       organizerStatus: 'pending',
       organizerDetails: {
@@ -101,7 +135,7 @@ const submitUpgrade = async () => {
     alert("Permohonan dihantar! Sila tunggu pengesahan daripada Admin.");
     
     router.push('/profile');
-    // Reload sedikit untuk update state jika perlu
+    // Reload sedikit untuk update state user di navbar
     setTimeout(() => {
        window.location.reload();
     }, 100);
@@ -116,22 +150,84 @@ const submitUpgrade = async () => {
 </script>
 
 <style scoped>
-.reg-page { background: #f4f6f8; min-height: 100vh; padding: 2rem; display: flex; justify-content: center; align-items: center; }
-.form-card { background: white; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-h2 { color: #2c3e50; text-align: center; margin-bottom: 0.5rem; }
-.sub-text { text-align: center; color: #777; margin-bottom: 2rem; font-size: 0.9rem; }
-.form-group { margin-bottom: 1.5rem; }
-.form-group label { display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333; font-size: 0.9rem; }
-.form-group input { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px; }
-.form-group input:focus { border-color: #e67e22; outline: none; }
-.form-group input:disabled { background-color: #eee; color: #888; }
-.checkbox-wrapper { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.sm-label { font-weight: normal !important; font-size: 0.8rem !important; margin: 0 !important; cursor: pointer; }
-.tnc-box { background: #fff8e1; padding: 1rem; border-radius: 6px; border: 1px solid #ffe0b2; margin-bottom: 1.5rem; }
-.checkbox-container { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
-.checkbox-container input { width: auto; margin-top: 4px; }
-.checkbox-container .text { font-size: 0.8rem; color: #5d4037; line-height: 1.4; }
-.btn-submit { width: 100%; padding: 1rem; background: #e67e22; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; }
-.btn-submit:hover { background: #d35400; }
-.btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+/* --- BASE THEME (DARK) --- */
+.reg-page { 
+  background-color: #0f172a; 
+  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
+}
+.container { max-width: 600px; margin: 0 auto; padding-left: 1.5rem; padding-right: 1.5rem; }
+
+/* GLOWS */
+.page-glow-purple {
+  position: absolute; top: 0; left: 0; width: 60vw; height: 60vw;
+  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
+}
+.page-glow-orange {
+  position: absolute; bottom: 0; right: 0; width: 60vw; height: 60vw;
+  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
+}
+.contour-lines {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: cover; pointer-events: none;
+}
+
+/* --- GLASS FORM --- */
+.glass-form-container {
+  background: rgba(30, 41, 59, 0.7); 
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px; padding: 2.5rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+.form-group { margin-bottom: 1.5rem; position: relative; }
+
+/* GLASS INPUT */
+.glass-input {
+  width: 100%; padding: 12px 16px; border-radius: 10px; 
+  border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.6);
+  color: white; outline: none; transition: 0.3s; font-size: 1rem;
+}
+.glass-input:focus { 
+    border-color: #6c63ff; 
+    background: rgba(15, 23, 42, 0.8); 
+    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
+}
+.glass-input::placeholder { color: #64748b; }
+
+/* CHECKBOX WRAPPER */
+.checkbox-wrapper { display: flex; align-items: center; }
+
+/* TNC BOX */
+.tnc-box {
+  background: rgba(234, 179, 8, 0.1); /* Yellow tint */
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  padding: 1rem; border-radius: 10px; margin-bottom: 2rem;
+}
+
+/* BUTTONS */
+.btn-submit { 
+  background: linear-gradient(135deg, #e67e22, #d35400); 
+  color: white; padding: 14px; border: none; border-radius: 12px; 
+  font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 1rem;
+  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+}
+.btn-submit:hover:not(:disabled) { 
+  transform: translateY(-2px); 
+  box-shadow: 0 8px 25px rgba(230, 126, 34, 0.5);
+}
+.btn-submit:disabled { 
+  background: #475569; color: #94a3b8; 
+  cursor: not-allowed; box-shadow: none; transform: none;
+}
+
+/* ANIMATION */
+.fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+    .glass-form-container { padding: 1.5rem; }
+}
 </style>

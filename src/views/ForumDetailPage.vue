@@ -1,140 +1,200 @@
 <template>
   <div class="forum-detail-page">
-    <div class="container">
+    
+    <!-- BACKGROUND LAYERS -->
+    <div class="contour-lines"></div>
+    <div class="page-glow-purple"></div>
+    <div class="page-glow-orange"></div>
+
+    <!-- MAIN CONTAINER (Hardcoded Padding Fix Kekal) -->
+    <div class="container relative z-10" style="padding-top: 150px; padding-bottom: 80px;">
       
-      <div v-if="loading" class="loading-box">⏳ {{ t('common.loading') }}</div>
+      <!-- LOADING STATE -->
+      <div v-if="loading" class="text-center py-20 fade-up">
+        <div class="glass-card inline-block px-8 py-6">
+            <i class="fas fa-spinner fa-spin text-3xl text-purple-400 mb-3"></i>
+            <p class="text-gray-300">⏳ {{ t('common.loading') }}</p>
+        </div>
+      </div>
 
-      <div v-else-if="!post" class="error-box">{{ t('forum.postNotFound') }}</div>
+      <!-- ERROR STATE -->
+      <div v-else-if="!post" class="text-center py-20 fade-up">
+        <div class="glass-card inline-block px-8 py-6 border-red-500/30 border">
+            <i class="fas fa-exclamation-triangle text-3xl text-red-400 mb-3"></i>
+            <p class="text-red-300">{{ t('forum.postNotFound') }}</p>
+            <button @click="$router.push('/forum')" class="mt-4 btn-cancel-small">Kembali ke Forum</button>
+        </div>
+      </div>
 
-      <div v-else>
-        <div class="main-post">
+      <!-- CONTENT -->
+      <div v-else class="fade-up">
+        
+        <!-- MAIN POST CARD -->
+        <div class="glass-card mb-6 flex overflow-hidden relative"> <!-- mb-8 -> mb-6 (padat) -->
+          
+          <!-- VOTE SIDEBAR -->
           <div class="vote-section">
             <button class="vote-btn" @click="votePost(1)">▲</button>
-            <span class="score">{{ post.votes || 0 }}</span>
+            <span class="score" :class="post.votes > 0 ? 'text-orange-400' : (post.votes < 0 ? 'text-blue-400' : 'text-gray-400')">
+                {{ post.votes || 0 }}
+            </span>
             <button class="vote-btn" @click="votePost(-1)">▼</button>
           </div>
 
-          <div class="post-content">
-            <div class="meta">
-              <span class="tag">{{ post.category }}</span> • 
+          <!-- POST BODY -->
+          <div class="post-content p-5 md:p-6 w-full"> <!-- Padding dikurangkan sikit -->
+            
+            <!-- META HEADER -->
+            <div class="meta-header mb-3">
+              <span class="category-badge">{{ post.category }}</span>
+              <span class="divider">•</span>
               
-              <span class="author-wrapper">
-                 <span style="margin-right: 5px; color: #787c7e;">{{ t('components.postedBy') }}</span>
-                 
+              <div class="flex items-center gap-2">
+                 <span class="text-gray-500 hidden sm:inline">{{ t('components.postedBy') }}</span>
                  <AuthorBadge 
-                   :userId="post.userId || post.authorId" 
-                   :fallbackName="post.author || post.userName"
-                   :fallbackAvatar="post.authorAvatar || post.userAvatar"
+                    :userId="post.userId || post.authorId" 
+                    :fallbackName="post.author || post.userName"
+                    :fallbackAvatar="post.authorAvatar || post.userAvatar"
                  />
-              </span>
+              </div>
               
-              • <span class="time">{{ formatDate(post.createdAt) }}</span>
+              <span class="divider">•</span>
+              <span class="text-gray-500 text-xs">{{ formatDate(post.createdAt) }}</span>
             </div>
             
-            <h1>{{ post.title }}</h1>
-            <div class="body-text">{{ post.content }}</div>
-
-            <div class="action-bar">
-              <span>💬 {{ comments.length }} {{ t('forum.comments') }}</span>
-              <span class="action-link" @click="copyLink">🔗 {{ t('forum.share') }}</span>
+            <!-- TITLE (Saiz dikurangkan sedikit supaya seimbang) -->
+            <h1 class="text-xl md:text-2xl font-bold text-white mb-3 mt-1 leading-tight">{{ post.title }}</h1>
+            
+            <!-- BODY TEXT (UPDATED: text-sm, leading-snug for compactness) -->
+            <div class="body-text text-gray-200 leading-snug mb-6 whitespace-pre-line text-sm">
+                {{ post.content }}
             </div>
-          </div>
-        </div>
 
-        <div class="comment-section">
-          
-          <div class="comment-input-box">
-            <h3>{{ t('forum.joinDiscussion') }}</h3>
-            <textarea 
-              v-model="mainCommentText" 
-              rows="3" 
-              :placeholder="auth.currentUser ? t('forum.writeComment') : t('forum.loginToComment')"
-              :disabled="!auth.currentUser"
-            ></textarea>
-            <div class="input-actions">
-              <button @click="submitComment(null)" class="btn-submit" :disabled="!auth.currentUser || !mainCommentText">
-                {{ t('common.submit') }}
+            <!-- ACTION BAR -->
+            <div class="action-bar pt-3 border-t border-white/10 flex gap-6 text-xs md:text-sm font-semibold text-gray-400">
+              <span class="flex items-center gap-2"><i class="fas fa-comment-alt"></i> {{ comments.length }} {{ t('forum.comments') }}</span>
+              <button class="action-link flex items-center gap-2 hover:text-white transition" @click="copyLink">
+                <i class="fas fa-share"></i> {{ t('forum.share') }}
               </button>
             </div>
           </div>
+        </div>
 
-          <div class="comments-list">
-            <h3>{{ t('forum.discussionTitle') }} ({{ comments.length }})</h3>
+        <!-- COMMENTS SECTION -->
+        <div class="glass-card p-5 md:p-6">
+          
+          <!-- COMMENT INPUT -->
+          <div class="mb-8 relative z-20">
+            <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                💬 {{ t('forum.joinDiscussion') }}
+            </h3>
+            <div class="relative">
+                <textarea 
+                  v-model="mainCommentText" 
+                  rows="2" 
+                  class="glass-input w-full text-sm" 
+                  :placeholder="auth.currentUser ? t('forum.writeComment') : t('forum.loginToComment')"
+                  :disabled="!auth.currentUser"
+                ></textarea>
+                <div class="mt-2 flex justify-end">
+                  <button 
+                    @click="submitComment(null)" 
+                    class="btn-submit py-1.5 px-4 text-sm" 
+                    :disabled="!auth.currentUser || !mainCommentText"
+                  >
+                    {{ t('common.submit') }} <i class="fas fa-paper-plane ml-1"></i>
+                  </button>
+                </div>
+            </div>
+          </div>
+
+          <!-- COMMENTS LIST -->
+          <div>
+            <h3 class="text-base font-semibold text-gray-300 mb-4 border-b border-white/10 pb-2 flex justify-between items-center">
+                <span>{{ t('forum.discussionTitle') }}</span>
+                <span class="text-xs bg-white/10 px-2 py-1 rounded text-gray-400">{{ comments.length }}</span>
+            </h3>
             
-            <div v-for="comment in rootComments" :key="comment.id" class="comment-thread">
-              
-              <div class="comment-item">
-                <div class="comment-vote">
-                  <button @click="voteComment(comment, 1)">▲</button>
-                  <span>{{ comment.votes || 0 }}</span>
-                  <button @click="voteComment(comment, -1)">▼</button>
-                </div>
-
-                <div class="comment-body-wrapper">
-                  
-                  <div class="comment-meta">
-                    <AuthorBadge 
-                      :userId="comment.userId"
-                      :fallbackName="comment.userName"
-                      :fallbackAvatar="comment.userAvatar"
-                    >
-                       <template #subtext>
-                          <span class="time">{{ formatDate(comment.createdAt) }}</span>
-                       </template>
-                    </AuthorBadge>
-                  </div>
-                  
-                  <p class="comment-text">{{ comment.text }}</p>
-                  
-                  <div class="comment-actions">
-                    <button @click="toggleReplyBox(comment.id)">↩️ {{ t('forum.replyBtn') }}</button>
-                  </div>
-
-                  <div v-if="activeReplyId === comment.id" class="reply-input">
-                    <textarea v-model="replyText" rows="2" :placeholder="t('forum.replyPlaceholder')"></textarea>
-                    <div class="reply-btns">
-                      <button class="btn-cancel-small" @click="activeReplyId = null">{{ t('common.cancel') }}</button>
-                      <button class="btn-submit-small" @click="submitComment(comment.id)">{{ t('common.submit') }}</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="replies-wrapper" v-if="getReplies(comment.id).length > 0">
-                <div v-for="reply in getReplies(comment.id)" :key="reply.id" class="comment-item reply-item">
-                   <div class="comment-vote">
-                    <button @click="voteComment(reply, 1)">▲</button>
-                    <span>{{ reply.votes || 0 }}</span>
-                    <button @click="voteComment(reply, -1)">▼</button>
-                  </div>
-
-                  <div class="comment-body-wrapper">
-                    
-                    <div class="comment-meta">
-                      <AuthorBadge 
-                        :userId="reply.userId"
-                        :fallbackName="reply.userName"
-                        :fallbackAvatar="reply.userAvatar"
-                      >
-                         <template #subtext>
-                            <span class="time">{{ formatDate(reply.createdAt) }}</span>
-                         </template>
-                      </AuthorBadge>
-                    </div>
-
-                    <p class="comment-text">{{ reply.text }}</p>
-                  </div>
-                </div>
-              </div>
-
+            <div v-if="rootComments.length === 0" class="text-center py-6">
+               <div class="text-4xl mb-2">🦗</div>
+               <p class="text-gray-500 italic text-sm">{{ t('forum.noComments') }}</p>
             </div>
 
-            <p v-if="rootComments.length === 0" class="no-comments">
-              {{ t('forum.noComments') }}
-            </p>
+            <div v-else class="space-y-4"> <!-- space-y-6 -> space-y-4 (lebih rapat) -->
+                <!-- COMMENT LOOP -->
+                <div v-for="comment in rootComments" :key="comment.id" class="comment-thread">
+                    <!-- COMMENT ITEM -->
+                    <div class="flex gap-3">
+                        <!-- VOTE (Compact) -->
+                        <div class="flex flex-col items-center gap-0.5 pt-1 min-w-[20px]">
+                            <button @click="voteComment(comment, 1)" class="vote-arrow hover:text-orange-400 text-xs">▲</button>
+                            <span class="text-[11px] font-bold text-gray-500">{{ comment.votes || 0 }}</span>
+                            <button @click="voteComment(comment, -1)" class="vote-arrow hover:text-blue-400 text-xs">▼</button>
+                        </div>
+                        
+                        <!-- BODY -->
+                        <div class="flex-1">
+                            <div class="flex items-center flex-wrap gap-2 mb-1">
+                                <AuthorBadge 
+                                    :userId="comment.userId"
+                                    :fallbackName="comment.userName"
+                                    :fallbackAvatar="comment.userAvatar"
+                                />
+                                <span class="text-[11px] text-gray-600">• {{ formatDate(comment.createdAt) }}</span>
+                            </div>
+                            
+                            <!-- Comment Text Compact -->
+                            <p class="text-gray-300 text-sm leading-snug mb-1">{{ comment.text }}</p>
+                            
+                            <div class="flex items-center gap-3">
+                                <button @click="toggleReplyBox(comment.id)" class="text-[11px] font-bold text-gray-500 hover:text-white transition flex items-center gap-1">
+                                    <i class="fas fa-reply"></i> {{ t('forum.replyBtn') }}
+                                </button>
+                            </div>
+
+                            <!-- REPLY INPUT -->
+                            <div v-if="activeReplyId === comment.id" class="mt-2 pl-3 border-l-2 border-purple-500/50 fade-in">
+                                <textarea v-model="replyText" rows="2" class="glass-input w-full text-xs" :placeholder="t('forum.replyPlaceholder')"></textarea>
+                                <div class="flex gap-2 mt-2 justify-end">
+                                    <button class="btn-cancel-small text-xs" @click="activeReplyId = null">{{ t('common.cancel') }}</button>
+                                    <button class="btn-submit-small text-xs" @click="submitComment(comment.id)">{{ t('common.submit') }}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- REPLIES LOOP -->
+                    <div v-if="getReplies(comment.id).length > 0" class="mt-2 pl-8 md:pl-10 space-y-3 ml-1 border-l border-white/5 relative">
+                        <div v-for="reply in getReplies(comment.id)" :key="reply.id" class="flex gap-3 relative mt-3">
+                            <!-- Connector Line -->
+                            <div class="absolute -left-[30px] top-3 w-5 h-[1px] bg-white/10"></div>
+
+                            <!-- VOTE -->
+                             <div class="flex flex-col items-center gap-0.5 pt-1 min-w-[16px]">
+                                <button @click="voteComment(reply, 1)" class="vote-arrow hover:text-orange-400 text-[10px]">▲</button>
+                                <span class="text-[10px] font-bold text-gray-500">{{ reply.votes || 0 }}</span>
+                                <button @click="voteComment(reply, -1)" class="vote-arrow hover:text-blue-400 text-[10px]">▼</button>
+                            </div>
+
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-0.5">
+                                    <AuthorBadge 
+                                        :userId="reply.userId"
+                                        :fallbackName="reply.userName"
+                                        :fallbackAvatar="reply.userAvatar"
+                                    />
+                                    <span class="text-[10px] text-gray-600">• {{ formatDate(reply.createdAt) }}</span>
+                                </div>
+                                <p class="text-gray-400 text-sm leading-snug">{{ reply.text }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
           </div>
 
         </div>
+
       </div>
 
     </div>
@@ -149,7 +209,7 @@ import { auth, db } from '../firebaseConfig';
 import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
 import { isSpam } from '../utils/spamFilter';
 import { checkRateLimit } from '../utils/rateLimiter';
-import AuthorBadge from '../components/common/AuthorBadge.vue'; // ✅ Import component
+import AuthorBadge from '../components/common/AuthorBadge.vue'; 
 
 const { t } = useI18n();
 const route = useRoute();
@@ -174,12 +234,17 @@ const formatDate = (timestamp: any) => {
 };
 
 onMounted(async () => {
-  const docRef = doc(db, "forum_posts", postId);
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    post.value = { id: docSnap.id, ...docSnap.data() };
+  try {
+    const docRef = doc(db, "forum_posts", postId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      post.value = { id: docSnap.id, ...docSnap.data() };
+    }
+  } catch (e) {
+    console.error("Error fetching post", e);
+  } finally {
+    loading.value = false;
   }
-  loading.value = false;
 
   const commentsRef = collection(db, "forum_posts", postId, "comments");
   const q = query(commentsRef, orderBy("createdAt", "asc"));
@@ -213,7 +278,6 @@ const submitComment = async (parentId: string | null) => {
     await addDoc(collection(db, "forum_posts", postId, "comments"), {
       text: text,
       userId: auth.currentUser.uid,
-      // Simpan nama asal sebagai backup jika Firestore user tak jumpa
       userName: auth.currentUser.displayName || 'User',
       userAvatar: auth.currentUser.photoURL || '',
       createdAt: serverTimestamp(),
@@ -231,7 +295,6 @@ const submitComment = async (parentId: string | null) => {
 
   } catch (e) {
     console.error("Error comment:", e);
-    // Guna key translation yang betul
     alert(t('forum.commentFailed') || "Gagal hantar komen.");
   }
 };
@@ -261,46 +324,80 @@ const copyLink = () => {
 </script>
 
 <style scoped>
-.forum-detail-page { background-color: #dae0e6; min-height: 100vh; padding: 2rem 0; }
-.container { max-width: 800px; margin: 0 auto; padding: 0 1rem; }
-.main-post { background: white; border-radius: 4px; display: flex; overflow: hidden; border: 1px solid #ccc; margin-bottom: 1rem; }
-.vote-section { width: 40px; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; padding-top: 10px; border-right: 1px solid #eee; }
-.vote-btn { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #878a8c; font-weight: bold; }
-.vote-btn:hover { color: #e67e22; background: #eee; border-radius: 4px; }
-.score { font-weight: bold; margin: 5px 0; font-size: 0.9rem; }
-.post-content { padding: 1rem; flex: 1; }
-.meta { font-size: 0.75rem; color: #787c7e; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-.author-wrapper { display: inline-flex; align-items: center; } /* Wrapper untuk AuthorBadge */
-.tag { background: #e1f5fe; color: #0288d1; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
-h1 { margin: 0 0 1rem 0; font-size: 1.4rem; color: #222; }
-.body-text { font-size: 1rem; line-height: 1.6; color: #1c1c1c; margin-bottom: 2rem; white-space: pre-line; }
-.action-bar { border-top: 1px solid #eee; padding-top: 0.5rem; display: flex; gap: 1rem; color: #878a8c; font-weight: bold; font-size: 0.8rem; }
-.action-link { cursor: pointer; } .action-link:hover { text-decoration: underline; }
-.comment-section { background: white; border-radius: 4px; border: 1px solid #ccc; padding: 1.5rem; }
-.comment-input-box { margin-bottom: 2rem; }
-.comment-input-box h3 { margin-top: 0; font-size: 1rem; color: #555; }
-textarea { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; resize: vertical; min-height: 80px; }
-.input-actions { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
-.btn-submit { background: #2c3e50; color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 20px; font-weight: bold; cursor: pointer; }
-.btn-submit:disabled { background: #ccc; cursor: not-allowed; }
-.comment-thread { margin-bottom: 1.5rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 1rem; }
-.comment-item { display: flex; gap: 10px; }
-.comment-vote { display: flex; flex-direction: column; align-items: center; margin-top: 5px; }
-.comment-vote button { border: none; background: none; cursor: pointer; color: #888; font-size: 0.8rem; }
-.comment-vote button:hover { color: #e67e22; }
-.comment-vote span { font-size: 0.8rem; font-weight: bold; }
-.comment-body-wrapper { flex: 1; }
-.comment-meta { margin-bottom: 8px; }
-.time { color: #999; font-size: 0.7rem; font-weight: normal; margin-top: 2px;}
-.comment-text { font-size: 0.95rem; line-height: 1.4; margin-bottom: 0.5rem; color: #333; }
-.comment-actions button { border: none; background: none; color: #888; font-weight: bold; font-size: 0.8rem; cursor: pointer; padding: 0; }
-.comment-actions button:hover { text-decoration: underline; color: #333; }
-.reply-input { margin-top: 10px; margin-left: 10px; border-left: 2px solid #eee; padding-left: 10px; }
-.reply-btns { display: flex; gap: 10px; margin-top: 5px; }
-.btn-submit-small { background: #2c3e50; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-.btn-cancel-small { background: transparent; border: 1px solid #ccc; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-.replies-wrapper { margin-left: 35px; margin-top: 10px; border-left: 2px solid #f0f0f0; padding-left: 10px; }
-.reply-item { margin-bottom: 10px; }
-.no-comments { text-align: center; color: #888; font-style: italic; margin-top: 2rem; }
-.loading-box, .error-box { text-align: center; padding: 3rem; font-size: 1.2rem; }
+/* --- BASE THEME (DARK) --- */
+.forum-detail-page { 
+  background-color: #0f172a; 
+  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
+}
+.container { max-width: 900px; margin: 0 auto; padding-left: 1.5rem; padding-right: 1.5rem; }
+
+/* GLOWS */
+.page-glow-purple {
+  position: absolute; top: 0; left: 0; width: 60vw; height: 60vw;
+  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
+}
+.page-glow-orange {
+  position: absolute; bottom: 0; right: 0; width: 60vw; height: 60vw;
+  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
+}
+.contour-lines {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: cover; pointer-events: none;
+}
+
+/* --- GLASS COMPONENTS --- */
+.glass-card {
+  background: rgba(30, 41, 59, 0.7); 
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px; 
+  backdrop-filter: blur(20px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.glass-input {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white; padding: 12px; border-radius: 10px;
+  outline: none; transition: 0.3s;
+}
+.glass-input:focus {
+  border-color: #6c63ff; background: rgba(15, 23, 42, 0.8);
+}
+
+/* VOTE SECTION */
+.vote-section { 
+  width: 50px; background: rgba(0,0,0,0.2); 
+  display: flex; flex-direction: column; align-items: center; padding-top: 1.5rem; 
+  border-right: 1px solid rgba(255,255,255,0.05);
+}
+.vote-btn { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #64748b; transition: 0.2s; }
+.vote-btn:hover { color: #fff; transform: scale(1.1); }
+.score { font-weight: bold; margin: 8px 0; font-size: 1rem; }
+.vote-arrow { background: none; border: none; cursor: pointer; color: #64748b; font-size: 0.9rem; transition: 0.2s; }
+
+/* POST CONTENT */
+.meta-header { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 0.85rem; color: #94a3b8; }
+.category-badge { background: rgba(108, 99, 255, 0.2); color: #a5b4fc; padding: 2px 10px; border-radius: 20px; font-weight: 600; border: 1px solid rgba(108, 99, 255, 0.3); }
+.divider { color: #475569; }
+
+/* BUTTONS */
+.btn-submit { 
+  background: linear-gradient(135deg, #6c63ff, #5b54e0); 
+  color: white; padding: 8px 20px; border: none; border-radius: 8px; 
+  font-weight: 600; cursor: pointer; transition: 0.3s;
+}
+.btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-submit-small { background: #6c63ff; color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; border: none; }
+.btn-cancel-small { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #94a3b8; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
+.btn-cancel-small:hover { color: white; border-color: white; }
+
+/* ANIMATION */
+.fade-up { animation: fadeUp 0.6s ease-out; }
+.fade-in { animation: fadeIn 0.3s ease-out; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 </style>

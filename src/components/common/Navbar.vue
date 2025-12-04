@@ -140,12 +140,28 @@ const handleLogout = async () => {
 </script>
 
 <style scoped lang="css">
+/* --- 1. NAVBAR STYLES (STICKY & GLASS) --- */
 .navbar {
+  /* Positioning Logic untuk Sticky */
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  background-color: var(--bg-card);
-  border-bottom: 1px solid var(--border-color);
+  z-index: 1000; /* Pastikan ia sentiasa di atas content lain */
+  
+  /* 🔥 GLASS EFFECT (Kaca) 🔥 */
+  background: rgba(255, 255, 255, 0.85); /* Putih transparent */
+  backdrop-filter: blur(12px);           /* Effect kabur belakang */
+  -webkit-backdrop-filter: blur(12px);   /* Support untuk Safari */
+  
+  /* Border & Shadow lembut */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  
+  /* Spacing */
   padding: 0 2rem;
   box-sizing: border-box; 
+  transition: all 0.3s ease;
 }
 
 .navbar-container {
@@ -169,14 +185,16 @@ const handleLogout = async () => {
 
 .navbar-item {
   text-decoration: none;
-  color: var(--text-primary);
+  color: #333; /* Warna gelap sikit untuk kontras atas glass */
   font-weight: 500;
   padding: 0.5rem;
+  transition: color 0.2s ease;
 }
 
+/* Hover effect ikut tema sunset (purple/orange) sikit kalau nak, atau biru standard */
 .navbar-item:hover, .navbar-item.router-link-active {
-  color: #007bff; 
-  border-bottom: 2px solid #007bff;
+  color: #6c63ff; /* Guna purple theme sikit */
+  /* border-bottom: 2px solid #6c63ff; (Optional: kalau nak garis bawah) */
 }
 
 .navbar-right {
@@ -186,30 +204,33 @@ const handleLogout = async () => {
 }
 
 .button-login {
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
+  padding: 0.5rem 1.2rem;
+  background: linear-gradient(135deg, #6c63ff, #ff8c42); /* Ikut theme sunset sikit */
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 50px; /* Lebih bulat (modern style) */
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+  transition: transform 0.2s;
 }
 
 .button-login:hover {
-  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
 }
 
 .logo-text {
   font-size: 1.3rem;       
-  font-weight: 600;        
-  color:#155724;           
-  letter-spacing: -1px;    
+  font-weight: 700;        
+  color: #155724;           
+  letter-spacing: -0.5px;    
   text-decoration: none;   
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
 }
 
 .navbar-brand a:hover .logo-text {
-  opacity: 0.9;
+  opacity: 0.8;
 }
 
 .button-logout {
@@ -237,10 +258,10 @@ const handleLogout = async () => {
 }
 
 .lang-select {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  background-color: #f8f9fa;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background-color: rgba(255,255,255,0.5); /* Semi-transparent */
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
@@ -250,13 +271,13 @@ const handleLogout = async () => {
 }
 
 .lang-select:hover {
-  border-color: #007bff;
   background-color: #fff;
+  border-color: #6c63ff;
 }
 
 .lang-select:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0,123,255,0.1);
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
 }
 
 /* --- RESPONSIVE NAVBAR --- */
@@ -275,12 +296,20 @@ const handleLogout = async () => {
     padding-bottom: 5px;
     justify-content: flex-start; 
     padding-left: 1rem; 
+    /* Hide scrollbar */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .navbar-menu::-webkit-scrollbar {
+    display: none;
   }
 
   .navbar-right {
     width: 100%;
     justify-content: center; 
     flex-wrap: wrap; 
+    padding-bottom: 0.5rem;
   }
 }
 </style>

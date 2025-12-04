@@ -1,8 +1,16 @@
 <template>
   <div class="profile-page">
-    <div class="container profile-layout">
+    
+    <!-- BACKGROUND LAYERS (Ikut Tema) -->
+    <div class="contour-lines"></div>
+    <div class="page-glow-purple"></div>
+    <div class="page-glow-orange"></div>
+
+    <!-- UPDATE: Guna style manual padding-top: 180px supaya betul-betul tak kena potong -->
+    <div class="container profile-layout" style="padding-top: 100px; padding-bottom: 3rem;">
       
-      <aside class="profile-sidebar">
+      <!-- LEFT SIDEBAR -->
+      <aside class="profile-sidebar glass-panel">
         <div class="user-card">
           <div class="avatar-wrapper">
             <img :src="user.avatar" alt="Avatar" class="avatar" />
@@ -21,7 +29,7 @@
              <a v-if="user.whatsapp" :href="'https://wa.me/' + user.whatsapp" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25D366" /></a>
              <a v-if="user.facebook" :href="'https://facebook.com/' + user.facebook" target="_blank"><img src="https://cdn.simpleicons.org/facebook/1877F2" /></a>
              <a v-if="user.instagram" :href="'https://instagram.com/' + user.instagram" target="_blank"><img src="https://cdn.simpleicons.org/instagram/E4405F" /></a>
-             <a v-if="user.tiktok" :href="'https://tiktok.com/@' + user.tiktok" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/000000" /></a>
+             <a v-if="user.tiktok" :href="'https://tiktok.com/@' + user.tiktok" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/white" /></a>
              <a v-if="user.youtube" :href="'https://youtube.com/' + user.youtube" target="_blank"><img src="https://cdn.simpleicons.org/youtube/FF0000" /></a>
           </div>
 
@@ -42,7 +50,7 @@
             </button>
 
             <button class="btn-action edit" @click="$router.push('/profile/edit')">
-              ⚙️ {{ t('profile.editProfile') }}
+              ⚙️ {{ t('profile.editProfile') || 'Edit Profil' }}
             </button>
           </div>
 
@@ -52,37 +60,34 @@
              </a>
           </div>
 
-          <div class="settings-box">
-            <h3>Tetapan Aplikasi</h3>
-            <div class="setting-row">
-              <span>Bahasa:</span>
-              <LanguageSwitcher />
-            </div>
-          </div>
-
         </div>
       </aside>
 
+      <!-- RIGHT MAIN CONTENT -->
       <main class="profile-main">
-        <div class="tabs-strip">
+        
+        <!-- TABS -->
+        <div class="tabs-strip glass-panel-top">
           <button :class="{ active: activeTab === 'upcoming' }" @click="activeTab = 'upcoming'">
-            📅 {{ t('profile.tabUpcoming') }}
+            📅 {{ t('profile.tabUpcoming') || 'Akan Datang' }}
           </button>
           <button :class="{ active: activeTab === 'history' }" @click="activeTab = 'history'">
-            📜 {{ t('profile.tabHistory') }}
+            📜 {{ t('profile.tabHistory') || 'Sejarah' }}
           </button>
           <button :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">
-            💬 {{ t('profile.tabPosts') }}
+            💬 {{ t('profile.tabPosts') || 'Post Saya' }}
           </button>
         </div>
 
-        <div class="content-box">
-          <div v-if="loadingData" class="loading-text">⏳ {{ t('common.loading') }}</div>
+        <!-- CONTENT BOX -->
+        <div class="content-box glass-panel-bottom">
+          <div v-if="loadingData" class="loading-text">⏳ {{ t('common.loading') }}...</div>
           
           <div v-else>
+            <!-- UPCOMING TAB -->
             <div v-if="activeTab === 'upcoming'">
               <div v-if="upcomingTrips.length > 0" class="grid-layout">
-                <div v-for="trip in upcomingTrips" :key="trip.id" class="compact-card">
+                <div v-for="trip in upcomingTrips" :key="trip.id" class="compact-card glass-card-small">
                   <div class="cc-date">
                     <span class="d">{{ getDay(trip.startDate) }}</span>
                     <span class="m">{{ getMonth(trip.startDate) }}</span>
@@ -94,19 +99,20 @@
                     <span v-if="trip.organizerId === user.id" class="status-pill organizer">Organizer</span>
                     <span v-else class="status-pill participant">Peserta</span>
                     
-                    <span class="status-pill open">{{ t('trip.open') }}</span>
+                    <span class="status-pill open">{{ t('trip.open') || 'Open' }}</span>
                   </div>
                   <button class="btn-mini" @click="$router.push('/trips/' + trip.id)">
-                    {{ t('common.view') }}
+                    {{ t('common.view') || 'Lihat' }}
                   </button>
                 </div>
               </div>
               <div v-else class="empty-text">Tiada trip akan datang.</div>
             </div>
 
+            <!-- HISTORY TAB -->
             <div v-if="activeTab === 'history'">
               <div v-if="historyTrips.length > 0" class="grid-layout">
-                <div v-for="trip in historyTrips" :key="trip.id" class="compact-card faded">
+                <div v-for="trip in historyTrips" :key="trip.id" class="compact-card glass-card-small faded">
                   <div class="cc-date">
                     <span class="d">{{ getDay(trip.startDate) }}</span>
                     <span class="m">{{ getMonth(trip.startDate) }}</span>
@@ -117,16 +123,17 @@
                     <span class="status-pill closed">Tamat</span>
                   </div>
                   <button class="btn-mini outline" @click="$router.push('/trips/' + trip.id)">
-                    {{ t('common.view') }}
+                    {{ t('common.view') || 'Lihat' }}
                   </button>
                 </div>
               </div>
               <div v-else class="empty-text">Tiada sejarah trip.</div>
             </div>
 
+            <!-- FORUM TAB -->
             <div v-if="activeTab === 'forum'">
               <div v-if="myPosts.length > 0" class="forum-layout">
-                <div v-for="post in myPosts" :key="post.id" class="forum-row" @click="$router.push('/forum/' + post.id)">
+                <div v-for="post in myPosts" :key="post.id" class="forum-row glass-row" @click="$router.push('/forum/' + post.id)">
                    <div class="fr-content">
                      <h4>{{ post.title }}</h4>
                      <span>💬 {{ post.commentCount || 0 }} • ❤️ {{ post.votes || 0 }}</span>
@@ -144,6 +151,7 @@
       </main>
     </div>
 
+    <!-- MODALS (Business Card & Emergency) - KEKAL SAMA FUNGSI -->
     <div v-if="showCard" class="modal-overlay" @click.self="showCard = false">
       <div class="card-modal-wrapper">
         <button class="close-btn" @click="showCard = false">✖</button>
@@ -250,7 +258,6 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, deleteDoc } from 'firebase/firestore';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -265,7 +272,6 @@ const loadingData = ref(true);
 const isOwnProfile = ref(false);
 const isAdmin = ref(false);
 const isDownloading = ref(false);
-const isDark = ref(false);
 
 const ADMIN_EMAIL = "knotenup@gmail.com"; 
 
@@ -289,7 +295,6 @@ const fetchUserData = async (targetUserId: string) => {
   upcomingTrips.value = []; historyTrips.value = []; myPosts.value = [];
   
   try {
-    // 1. Fetch PUBLIC User Data (Sesiapa boleh baca)
     const docSnap = await getDoc(doc(db, "users", targetUserId));
     if (docSnap.exists()) { 
         const data = docSnap.data();
@@ -300,12 +305,9 @@ const fetchUserData = async (targetUserId: string) => {
     } 
     else { user.name = 'User Tidak Dijumpai'; }
 
-    // 🔥 2. Fetch PRIVATE Data (Hanya jika Owner atau Admin)
-    // Reset data sensitif dulu supaya tak paparkan data user sebelum ni
     user.bloodType = ''; user.allergies = ''; user.emergencyContact = '';
 
     const currentUser = auth.currentUser;
-    // Cek: Adakah yang login ni Owner atau Admin?
     if (currentUser && (currentUser.uid === targetUserId || isAdmin.value)) {
        try {
          const privateRef = doc(db, "users", targetUserId, "private_data", "info");
@@ -316,20 +318,14 @@ const fetchUserData = async (targetUserId: string) => {
             user.allergies = pData.allergies;
             user.emergencyContact = pData.emergencyContact;
          }
-       } catch (err) {
-         // Kalau permission denied (Rules block), dia akan masuk sini. Selamat.
-         console.log("Akses data peribadi disekat (Bukan Owner).");
-       }
+       } catch (err) { console.log("Akses data peribadi disekat."); }
     }
 
-    // 3. FETCH TRIPS (GABUNGAN ORGANIZER + PARTICIPANT)
     const tripMap = new Map();
-    // A. Cari Trip di mana user adalah Organizer
     const qOrganizer = query(collection(db, "trips"), where("organizerId", "==", targetUserId));
     const snapOrganizer = await getDocs(qOrganizer);
     snapOrganizer.forEach(doc => tripMap.set(doc.id, { id: doc.id, ...doc.data() }));
 
-    // B. Cari Trip di mana user adalah Peserta
     const qParticipant = query(collection(db, "trips"), where("participants", "array-contains", targetUserId));
     const snapParticipant = await getDocs(qParticipant);
     snapParticipant.forEach(doc => tripMap.set(doc.id, { id: doc.id, ...doc.data() }));
@@ -345,7 +341,6 @@ const fetchUserData = async (targetUserId: string) => {
     upcomingTrips.value.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
     historyTrips.value.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
-    // 4. Fetch Forum Posts
     const qPost = query(collection(db, "forum_posts"), where("authorId", "==", targetUserId), orderBy("createdAt", "desc"));
     const snapPost = await getDocs(qPost);
     myPosts.value = snapPost.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -355,13 +350,9 @@ const fetchUserData = async (targetUserId: string) => {
 };
 
 onMounted(() => {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') { isDark.value = true; document.body.classList.add('dark-mode'); }
-
   onAuthStateChanged(auth, (currentUser) => {
     const routeId = route.params.id as string;
     if (routeId) {
-      // Periksa admin status
       if (currentUser && currentUser.email === ADMIN_EMAIL) isAdmin.value = true;
       fetchUserData(routeId);
       isOwnProfile.value = currentUser ? (currentUser.uid === routeId) : false;
@@ -379,15 +370,11 @@ watch(() => route.params.id, (newId) => { if (newId) fetchUserData(newId as stri
 const editPost = (id: string) => { router.push(`/forum/edit/${id}`); };
 const deletePost = async (id: string) => { if (confirm("Padam?")) { try { await deleteDoc(doc(db, "forum_posts", id)); myPosts.value = myPosts.value.filter(p => p.id !== id); } catch(e) {} } };
 
-const openEmergency = () => {
-    showEmergency.value = true;
-};
+const openEmergency = () => { showEmergency.value = true; };
 
-// DOWNLOAD PDF
 const downloadCard = async (elementId: string, fileName: string) => {
   const element = document.getElementById(elementId);
   if (!element) return;
-  
   isDownloading.value = true;
   try {
     const canvas = await html2canvas(element, { scale: 3, useCORS: true, backgroundColor: null });
@@ -395,97 +382,155 @@ const downloadCard = async (elementId: string, fileName: string) => {
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
     pdf.save(`${fileName}.pdf`);
-  } catch (error) { 
-    console.error("Error download:", error);
-    alert("Gagal download. Sila pastikan 'html2canvas' & 'jspdf' diinstall."); 
-  } finally { 
-    isDownloading.value = false; 
-  }
+  } catch (error) { alert("Gagal download."); } finally { isDownloading.value = false; }
 };
 
 const shareCard = () => { navigator.clipboard.writeText(`https://knotenup.com/user/${user.name}`); alert("Link disalin!"); };
 </script>
 
 <style scoped>
-/* --- VARS & LAYOUT --- */
-.profile-page { background-color: var(--bg-color, #f4f6f8); min-height: 100vh; padding: 2rem 0; color: var(--text-color, #333); }
-.container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
-.profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; }
-.profile-sidebar { background: var(--card-bg, white); border-radius: 8px; border: 1px solid var(--border-color, #eee); padding: 2rem; text-align: center; height: fit-content; }
+/* --- THEME BACKGROUND (DARK SUNSET + CONTOUR) --- */
+.profile-page { 
+  background-color: #0f172a; /* Dark Blue Base */
+  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
 
-/* --- SIDEBAR ELEMENTS --- */
-.avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #eee; object-fit: cover; margin-bottom: 10px; }
-.role-badge { background: #e67e22; color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
-.user-name { font-size: 1.3rem; color: var(--heading-color, #2c3e50); margin: 0; }
-.user-bio { color: #777; font-size: 0.9rem; margin-top: 5px; line-height: 1.4; }
-.stats-grid { display: flex; justify-content: center; gap: 20px; margin: 1.5rem 0; border-top: 1px dashed #eee; border-bottom: 1px dashed #eee; padding: 10px 0; }
+/* GLOWS */
+.page-glow-purple {
+  position: absolute; top: 0; left: 0; width: 50vw; height: 50vw;
+  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%; z-index: 0;
+}
+.page-glow-orange {
+  position: absolute; bottom: 0; right: 0; width: 50vw; height: 50vw;
+  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%; z-index: 0;
+}
+.contour-lines {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: cover; pointer-events: none;
+}
+
+/* LAYOUT */
+.profile-layout { display: grid; grid-template-columns: 320px 1fr; gap: 2rem; position: relative; z-index: 2; }
+
+/* --- SIDEBAR (GLASS DARK) --- */
+.profile-sidebar { 
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px; padding: 2rem; text-align: center; height: fit-content;
+  backdrop-filter: blur(10px);
+}
+
+.avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); object-fit: cover; margin-bottom: 15px; }
+.role-badge { background: #e67e22; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 12px; text-transform: uppercase; }
+.user-name { font-size: 1.5rem; color: white; margin: 0; font-weight: 700; }
+.user-bio { color: #cbd5e1; font-size: 0.95rem; margin-top: 8px; line-height: 1.5; }
+
+.stats-grid { display: flex; justify-content: center; gap: 25px; margin: 1.5rem 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
 .stat-item { display: flex; flex-direction: column; }
-.stat-item strong { font-size: 1.2rem; color: #27ae60; }
-.stat-item span { font-size: 0.8rem; color: #999; }
-.social-links { display: flex; justify-content: center; gap: 10px; margin-bottom: 1.5rem; }
-.social-links img { width: 20px; transition: transform 0.2s; }
+.stat-item strong { font-size: 1.3rem; color: #6c63ff; } /* Purple Stat */
+.stat-item span { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
+
+.social-links { display: flex; justify-content: center; gap: 12px; margin-bottom: 1.5rem; }
+.social-links img { width: 24px; transition: transform 0.2s; }
 .social-links a:hover img { transform: scale(1.2); }
-.action-stack { display: flex; flex-direction: column; gap: 8px; }
-.btn-action { width: 100%; padding: 0.6rem; border: 1px solid #ddd; background: white; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
-.btn-action:hover { background: #f9f9f9; border-color: #ccc; }
-.btn-action.upgrade { background: #27ae60; color: white; border: none; }
-.btn-action.admin { background: #e74c3c; color: white; border: none; }
-.btn-action.contact { background: #25D366; color: white; border: none; }
-.btn-action.emergency { background: #fff; border: 1px solid #c0392b; color: #c0392b; }
+
+.action-stack { display: flex; flex-direction: column; gap: 10px; }
+.btn-action { 
+  width: 100%; padding: 0.8rem; border: 1px solid rgba(255,255,255,0.1); 
+  background: rgba(255,255,255,0.05); color: white;
+  border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; 
+}
+.btn-action:hover { background: rgba(255,255,255,0.1); border-color: #6c63ff; }
+.btn-action.upgrade { background: linear-gradient(135deg, #10b981, #059669); border: none; }
+.btn-action.emergency { border-color: #c0392b; color: #f87171; }
 .btn-action.emergency:hover { background: #c0392b; color: white; }
 
-/* --- SETTINGS BOX --- */
-.settings-box { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee; text-align: left; }
-.settings-box h3 { font-size: 1rem; color: var(--heading-color, #333); margin-bottom: 1rem; }
-.setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-color, #555); }
+/* --- MAIN CONTENT (GLASS DARK) --- */
+.profile-main { display: flex; flex-direction: column; }
 
-/* --- MAIN CONTENT --- */
-.profile-main { display: flex; flex-direction: column; gap: 1rem; }
-.tabs-strip { background: var(--card-bg, white); padding: 0 1rem; border-radius: 8px 8px 0 0; border-bottom: 1px solid #eee; display: flex; gap: 20px; }
-.tabs-strip button { background: none; border: none; padding: 1rem 0; font-size: 0.95rem; color: #777; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; }
-.tabs-strip button.active { color: #e67e22; border-bottom-color: #e67e22; }
-.content-box { background: var(--card-bg, white); padding: 1.5rem; border-radius: 0 0 8px 8px; min-height: 300px; border: 1px solid var(--border-color, #eee); border-top: none; }
-.grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
-.compact-card { border: 1px solid #eee; border-radius: 6px; padding: 10px; display: flex; align-items: center; gap: 10px; background: #fff; }
-.compact-card.faded { opacity: 0.7; }
-.cc-date { background: #f0f8ff; padding: 5px 10px; border-radius: 4px; text-align: center; min-width: 50px; }
-.d { display: block; font-weight: bold; font-size: 1.1rem; color: #2c3e50; }
-.m { font-size: 0.7rem; color: #7f8c8d; }
+.tabs-strip { 
+  background: rgba(255, 255, 255, 0.05); 
+  padding: 0 1.5rem; border-radius: 16px 16px 0 0; 
+  border: 1px solid rgba(255, 255, 255, 0.1); border-bottom: none;
+  display: flex; gap: 25px; backdrop-filter: blur(10px);
+}
+.tabs-strip button { 
+  background: none; border: none; padding: 1.2rem 0; font-size: 1rem; 
+  color: #94a3b8; font-weight: 600; cursor: pointer; 
+  border-bottom: 3px solid transparent; transition: color 0.3s;
+}
+.tabs-strip button.active { color: #6c63ff; border-bottom-color: #6c63ff; } /* Purple Active */
+
+.content-box { 
+  background: rgba(255, 255, 255, 0.03); 
+  padding: 2rem; border-radius: 0 0 16px 16px; min-height: 400px; 
+  border: 1px solid rgba(255, 255, 255, 0.1); 
+  backdrop-filter: blur(10px);
+}
+
+.grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+
+/* Compact Card (Glass Small) */
+.compact-card { 
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; 
+  transition: transform 0.2s;
+}
+.compact-card:hover { transform: translateY(-3px); border-color: #6c63ff; }
+.compact-card.faded { opacity: 0.6; }
+
+.cc-date { 
+  background: rgba(108, 99, 255, 0.2); color: #a78bfa; /* Purple tint */
+  padding: 8px 12px; border-radius: 8px; text-align: center; min-width: 60px; 
+}
+.d { display: block; font-weight: 800; font-size: 1.2rem; line-height: 1; }
+.m { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+
 .cc-info { flex: 1; }
-.cc-info h4 { margin: 0 0 3px 0; font-size: 0.95rem; color: #333; }
-.cc-info p { margin: 0; font-size: 0.8rem; color: #777; }
-/* 🔥 NEW STATUS PILL STYLE 🔥 */
-.status-pill { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-top: 3px; display: inline-block; margin-right: 5px; }
-.status-pill.open { background: #d4edda; color: #155724; }
-.status-pill.closed { background: #e2e3e5; color: #383d41; }
-.status-pill.organizer { background: #cce5ff; color: #004085; }
-.status-pill.participant { background: #fff3cd; color: #856404; }
+.cc-info h4 { margin: 0 0 5px 0; font-size: 1rem; color: white; font-weight: 600; }
+.cc-info p { margin: 0; font-size: 0.85rem; color: #94a3b8; }
 
-.btn-mini { padding: 5px 10px; font-size: 0.8rem; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; }
-.btn-mini.outline { background: transparent; border: 1px solid #ccc; color: #555; }
-.forum-layout { display: flex; flex-direction: column; gap: 0; }
-.forum-row { padding: 1rem 0; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-.forum-row:last-child { border: none; }
-.forum-row:hover h4 { color: #e67e22; }
-.fr-content h4 { margin: 0 0 5px 0; font-size: 1rem; }
-.fr-content span { font-size: 0.8rem; color: #888; }
-.fr-actions button { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 5px; }
-.fr-actions button.del:hover { background: #ffebee; border-radius: 4px; }
-.empty-text, .loading-text { text-align: center; color: #999; padding: 2rem; font-style: italic; }
+/* Status Pills */
+.status-pill { font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; margin-top: 5px; display: inline-block; margin-right: 5px; }
+.status-pill.open { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.status-pill.closed { background: rgba(255,255,255,0.1); color: #94a3b8; }
+.status-pill.organizer { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+.status-pill.participant { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
 
-/* --- MODAL & CARD --- */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(5px); }
+.btn-mini { padding: 6px 12px; font-size: 0.8rem; background: #6c63ff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.btn-mini:hover { background: #5b54e0; }
+.btn-mini.outline { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #ccc; }
+
+/* Forum Row (Glass) */
+.forum-layout { display: flex; flex-direction: column; gap: 10px; }
+.forum-row { 
+  padding: 1.2rem; background: rgba(255,255,255,0.05); 
+  border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);
+  display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s;
+}
+.forum-row:hover { background: rgba(255,255,255,0.08); border-color: #6c63ff; }
+.fr-content h4 { margin: 0 0 5px 0; font-size: 1.05rem; color: white; }
+.fr-content span { font-size: 0.85rem; color: #94a3b8; }
+.fr-actions button { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 5px; color: #ccc; }
+.fr-actions button:hover { color: #6c63ff; }
+.fr-actions button.del:hover { color: #ef4444; }
+
+.empty-text, .loading-text { text-align: center; color: #64748b; padding: 3rem; font-style: italic; }
+
+/* --- MODAL (No Dark Theme Changes Needed for Card Logic) --- */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(8px); }
 .card-modal-wrapper { background: transparent; padding: 1rem; }
-.close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #fff; z-index: 10; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+.close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #fff; z-index: 10; }
 .modal-actions { padding: 1.5rem; display: flex; justify-content: center; gap: 10px; }
-.share-btn { padding: 0.6rem 1.5rem; border: 1px solid #ccc; background: white; border-radius: 50px; cursor: pointer; font-weight: bold; color: #555; transition: background 0.2s; }
+.share-btn { padding: 0.6rem 1.5rem; border: none; background: white; border-radius: 50px; cursor: pointer; font-weight: bold; color: #333; transition: background 0.2s; }
 .share-btn:hover { background: #eee; }
-.share-btn.download { background-color: #e67e22; color: white; border: none; }
+.share-btn.download { background-color: #e67e22; color: white; }
 
-/* 🔥 STANDARD CARD CSS (Fixed Size 600x340) 🔥 */
-.standard-card { width: 600px; height: 340px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; position: relative; display: flex; font-family: 'Helvetica Neue', sans-serif; }
-
-/* 1. BUSINESS CARD STYLE */
+/* CARD CSS KEKAL SAMA (PUTIH) UTK PRINTING */
+.standard-card { width: 600px; height: 340px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; position: relative; display: flex; font-family: 'Helvetica Neue', sans-serif; color: #333; }
 .business-card { background: #2c3e50; color: white; }
 .bc-left-panel { flex: 2; padding: 30px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
 .bc-profile-header { display: flex; align-items: center; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
@@ -504,7 +549,6 @@ const shareCard = () => { navigator.clipboard.writeText(`https://knotenup.com/us
 .bc-qr { width: 110px; height: 110px; }
 .bc-brand { font-weight: 900; font-size: 1.1rem; color: #2c3e50; margin-top: 5px; }
 
-/* 2. EMERGENCY CARD STYLE */
 .emergency-card { background: #ecf0f1; border: 4px solid #c0392b; flex-direction: column; }
 .ec-header { background: #c0392b; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 50px; }
 .ec-header h2 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
@@ -523,20 +567,9 @@ const shareCard = () => { navigator.clipboard.writeText(`https://knotenup.com/us
 .ec-avatar { width: 80px; height: 80px; border-radius: 4px; border: 1px solid #bdc3c7; object-fit: cover; margin-bottom: 10px; }
 .ec-qr-box img { width: 80px; height: 80px; opacity: 0.8; }
 
-/* RESPONSIVE FOR MOBILE */
+/* RESPONSIVE */
 @media (max-width: 768px) { 
   .profile-layout { grid-template-columns: 1fr; } 
-}
-@media (max-width: 650px) {
-  .standard-card { width: 340px; height: auto; flex-direction: column; }
-  .business-card { height: auto; }
-  .bc-left-panel { padding: 20px; }
-  .bc-right-panel { clip-path: none; margin-left: 0; padding: 20px; border-top: 5px solid #e67e22; }
-  .qr-container { margin-left: 0; }
-  .bc-socials-list { grid-template-columns: 1fr; }
-  .emergency-card { height: auto; }
-  .ec-body { flex-direction: column-reverse; gap: 15px; }
-  .ec-side { border-left: none; border-bottom: 1px dashed #bdc3c7; padding-bottom: 15px; margin-bottom: 10px; flex-direction: row; justify-content: space-around; }
-  .close-btn { color: #888; top: 5px; right: 10px; } 
+  .tabs-strip { overflow-x: auto; }
 }
 </style>

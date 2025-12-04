@@ -1,23 +1,24 @@
 <template>
   <div class="modal-overlay" @click.self="$emit('close')">
-    <div class="login-card">
+    <div class="login-card glass-modal">
       <button class="close-btn" @click="$emit('close')">✖</button>
       
       <div class="header">
-        <h2>{{ t('auth.modalTitle') }}</h2>
-        <p>{{ t('auth.modalSub') }}</p>
+        <h2>{{ t('auth.modalTitle') || 'Selamat Datang' }}</h2>
+        <p>{{ t('auth.modalSub') || 'Log masuk untuk teruskan' }}</p>
       </div>
 
       <div class="button-stack">
         <button class="social-btn google" @click="loginWith('google')">
           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G" />
-          {{ t('auth.continueWith', { provider: 'Google' }) }}
+          {{ t('auth.continueWith', { provider: 'Google' }) || 'Teruskan dengan Google' }}
         </button>
         
-        </div>
+        <!-- Tambahan button lain jika perlu nanti -->
+      </div>
 
       <p class="disclaimer">
-        {{ t('auth.disclaimer') }}
+        {{ t('auth.disclaimer') || 'Dengan log masuk, anda bersetuju dengan Terma & Syarat kami.' }}
       </p>
     </div>
   </div>
@@ -48,7 +49,7 @@ const loginWith = async (providerName: string) => {
     // Simpan User ke Firestore
     await saveUserToDB(user);
 
-    alert(`Welcome, ${user.displayName}!`);
+    // alert(`Welcome, ${user.displayName}!`); // Optional: Boleh buang kalau tak nak kacau
     emit('close'); 
     router.push('/profile'); 
 
@@ -85,14 +86,84 @@ const saveUserToDB = async (user: any) => {
 </script>
 
 <style scoped>
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(3px); }
-.login-card { background: white; width: 100%; max-width: 400px; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; position: relative; }
-.close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #999; }
-.header h2 { margin: 0 0 0.5rem 0; color: #2c3e50; }
+/* OVERLAY: Gelapkan belakang */
+.modal-overlay { 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  background: rgba(0,0,0,0.6); /* Gelap sikit */
+  z-index: 2000; 
+  
+  display: flex; 
+  justify-content: center; 
+  /* TUKAR: align-items center -> flex-start supaya boleh tolak ke bawah */
+  align-items: flex-start; 
+  
+  /* PENTING: Tolak modal ke bawah (jarak dari atas) */
+  padding-top: 100px; 
+  padding-left: 1rem;
+  padding-right: 1rem;
+  backdrop-filter: blur(5px); /* Blur background belakang modal */
+}
+
+/* KAD LOGIN (GLASS EFFECT) */
+.login-card { 
+  width: 100%; 
+  max-width: 400px; 
+  padding: 2.5rem; 
+  border-radius: 20px; 
+  text-align: center; 
+  position: relative; 
+  
+  /* 🔥 GLASS EFFECT SETTING 🔥 */
+  background: rgba(255, 255, 255, 0.9); /* Putih lutsinar */
+  backdrop-filter: blur(15px);           /* Blur content belakang kad */
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.5); /* Border halus */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); /* Shadow lembut */
+}
+
+.close-btn { 
+  position: absolute; 
+  top: 15px; 
+  right: 15px; 
+  background: rgba(0,0,0,0.05); /* Bulatan pudar */
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none; 
+  font-size: 1rem; 
+  cursor: pointer; 
+  color: #666; 
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.close-btn:hover { background: rgba(0,0,0,0.1); color: #333; }
+
+.header h2 { margin: 0 0 0.5rem 0; color: #2c3e50; font-weight: 700; }
 .header p { color: #666; margin-bottom: 2rem; font-size: 0.95rem; }
+
 .button-stack { display: flex; flex-direction: column; gap: 1rem; }
-.social-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 0.8rem; border-radius: 50px; font-weight: 600; font-size: 1rem; cursor: pointer; border: 1px solid #ddd; background: white; color: #333; transition: transform 0.1s, background 0.2s; }
-.social-btn:hover { background-color: #f7f7f7; transform: scale(1.02); }
+
+.social-btn { 
+  display: flex; align-items: center; justify-content: center; gap: 12px; 
+  width: 100%; padding: 0.8rem; border-radius: 50px; 
+  font-weight: 600; font-size: 1rem; cursor: pointer; 
+  border: 1px solid rgba(0,0,0,0.1); 
+  background: white; 
+  color: #333; 
+  transition: transform 0.1s, box-shadow 0.2s; 
+}
+.social-btn:hover { 
+  background-color: #fff; 
+  transform: translateY(-2px); 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 .social-btn img { width: 20px; height: 20px; }
+
 .disclaimer { margin-top: 2rem; font-size: 0.75rem; color: #999; }
 </style>

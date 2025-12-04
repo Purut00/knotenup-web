@@ -1,17 +1,23 @@
 <template>
   <div class="home">
     
+    <!-- HERO SECTION -->
     <div class="hero-header-section">
       <div class="container text-center">
-        <h1 class="hero-title">
+        <!-- Glow Effect Background untuk Hero -->
+        <div class="hero-glow-purple"></div>
+        <div class="hero-glow-orange"></div>
+
+        <h1 class="hero-title animate-fade-in-up">
           Terokai Keindahan <br>
           <span class="text-gradient-animate">{{ t('home.heroHighlight') || 'Alam Semulajadi' }}</span>
         </h1>
-        <p class="hero-subtitle">
+        <p class="hero-subtitle animate-fade-in-up" style="animation-delay: 0.1s;">
           {{ t('home.heroSubtitle') || 'Temui aktiviti luar yang menarik, daripada hiking hingga menyelam.' }}
         </p>
 
-        <div class="search-wrapper-floating">
+        <!-- SEARCH BAR (Floating) -->
+        <div class="search-wrapper-floating animate-float" style="animation-delay: 0.2s;">
           <div class="search-glow"></div>
           <div class="search-box">
              <i class="fas fa-location-dot search-icon-left"></i>
@@ -31,7 +37,9 @@
 
     <div class="main-content-wrapper container">
       
-      <section class="banner-grid-section">
+      <!-- BANNER GRID SECTION -->
+      <section class="banner-grid-section animate-fade-in-up" style="animation-delay: 0.3s;">
+        <!-- Large Slider -->
         <div class="banner-large-slider">
           <swiper
             :modules="[Autoplay, Pagination]"
@@ -56,20 +64,26 @@
           </swiper>
         </div>
         
+        <!-- Stacked Small Banners -->
         <div class="banner-stack">
            <div 
             class="banner-small" 
             :style="{ backgroundImage: `url(${banners.small1.imageUrl})` }"
             @click="goToLink(banners.small1.linkUrl)"
-          ></div>
+          >
+            <div class="overlay-hover"></div>
+          </div>
            <div 
             class="banner-small" 
             :style="{ backgroundImage: `url(${banners.small2.imageUrl})` }"
             @click="goToLink(banners.small2.linkUrl)"
-          ></div>
+          >
+            <div class="overlay-hover"></div>
+          </div>
         </div>
       </section>
 
+      <!-- CATEGORY ICONS SECTION -->
       <section class="category-section">
         <div class="category-list">
           <div 
@@ -93,6 +107,7 @@
         </div>
       </section>
 
+      <!-- TRIP POPULAR SECTION -->
       <section class="section-container">
         <div class="section-header">
           <h3 class="section-title">Trip <span class="text-gradient-animate">Popular</span></h3>
@@ -113,6 +128,7 @@
         <div v-else class="empty-text">{{ t('home.noTrips') }}</div>
       </section>
 
+      <!-- FORUM SECTION -->
       <section class="section-container">
         <div class="section-header">
           <h3 class="section-title">{{ t('home.communityDiscuss') }}</h3>
@@ -157,18 +173,18 @@ const loadingTrips = ref(true);
 const loadingPosts = ref(true);
 const searchQuery = ref('');
 
-// --- DATA: ACTIVITIES (UPDATED LIST) ---
+// --- DATA: ACTIVITIES ---
 const popularActivities = [
-  { key: 'hiking',       icon: 'fas fa-hiking',          color: '#48bb78' }, // Hiking (Green)
-  { key: 'camping',      icon: 'fas fa-campground',      color: '#ed8936' }, // Camping (Orange)
-  { key: 'climbing',     icon: 'fas fa-mountain',        color: '#718096' }, // Climbing (Gray) - NEW
-  { key: 'caving',       icon: 'fas fa-dungeon',         color: '#4a5568' }, // Caving (Dark Gray)
-  { key: 'diving',       icon: 'fas fa-mask-snorkel',    color: '#4299e1' }, // Scuba Diving (Blue)
-  { key: 'kayaking',     icon: 'fas fa-sailboat',        color: '#38b2ac' }, // Kayaking (Teal)
-  { key: 'rafting',      icon: 'fas fa-water',           color: '#3182ce' }, // Rafting (Indigo) - NEW
-  { key: 'surfing',      icon: 'fas fa-person-surfing',  color: '#0bc5ea' }, // Surfing (Cyan) - NEW
-  { key: 'fishing',      icon: 'fas fa-fish',            color: '#2b6cb0' }, // Fishing (Navy)
-  { key: 'paragliding',  icon: 'fas fa-paper-plane',     color: '#9f7aea' }, // Paragliding (Purple) - NEW (Air Category)
+  { key: 'hiking',       icon: 'fas fa-hiking',          color: '#48bb78' },
+  { key: 'camping',      icon: 'fas fa-campground',      color: '#ed8936' },
+  { key: 'climbing',     icon: 'fas fa-mountain',        color: '#718096' },
+  { key: 'caving',       icon: 'fas fa-dungeon',         color: '#a0aec0' },
+  { key: 'diving',       icon: 'fas fa-mask-snorkel',    color: '#4299e1' },
+  { key: 'kayaking',     icon: 'fas fa-sailboat',        color: '#38b2ac' },
+  { key: 'rafting',      icon: 'fas fa-water',           color: '#3182ce' },
+  { key: 'surfing',      icon: 'fas fa-person-surfing',  color: '#0bc5ea' },
+  { key: 'fishing',      icon: 'fas fa-fish',            color: '#2b6cb0' },
+  { key: 'paragliding',  icon: 'fas fa-paper-plane',     color: '#9f7aea' },
 ];
 
 // DATA BANNER
@@ -211,7 +227,6 @@ const filterBy = (activityKey: string) => { router.push({ path: '/trips', query:
 const goToLink = (url: string) => { if (!url) return; if (url.startsWith('http')) window.open(url, '_blank'); else router.push(url); };
 
 onMounted(async () => {
-  // Fetch Banners
   try {
     const docSnap = await getDoc(doc(db, "site_settings", "banners"));
     if (docSnap.exists()) { 
@@ -244,26 +259,47 @@ onMounted(async () => {
 
 /* --- HERO SECTION --- */
 .hero-header-section {
-  padding: 4rem 1rem 2rem;
+  padding: 6rem 1rem 3rem; /* Padding lebih besar sikit utk header fixed */
   text-align: center;
-  background: transparent; /* Background body dah handle warna */
+  position: relative;
+}
+
+/* Glow Decoration (Sesuai dengan tema dark purple) */
+.hero-glow-purple, .hero-glow-orange {
+  position: absolute;
+  filter: blur(80px);
+  z-index: -1;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.hero-glow-purple {
+  width: 300px; height: 300px;
+  background: var(--c-sunset-purple);
+  top: -50px; left: 20%;
+}
+.hero-glow-orange {
+  width: 250px; height: 250px;
+  background: var(--c-sunset-orange);
+  top: 50px; right: 20%;
 }
 
 .hero-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 1rem;
+  font-size: 3rem; /* Lebih besar */
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.2rem;
+  color: #fff; /* Pastikan putih */
 }
 
 .hero-subtitle {
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   max-width: 600px;
-  margin: 0 auto 2.5rem;
+  margin: 0 auto 3rem;
+  font-weight: 300;
 }
 
-/* --- FLOATING SEARCH BAR --- */
+/* --- FLOATING SEARCH BAR (DARK THEME) --- */
 .search-wrapper-floating {
   max-width: 600px;
   margin: 0 auto;
@@ -273,53 +309,60 @@ onMounted(async () => {
 
 .search-glow {
   position: absolute;
-  inset: -5px;
+  inset: -3px;
   background: var(--gradient-sunset);
   border-radius: 50px;
-  opacity: 0.2;
-  filter: blur(10px);
+  opacity: 0.3;
+  filter: blur(15px);
   transition: opacity 0.3s;
 }
-.search-wrapper-floating:hover .search-glow { opacity: 0.4; }
+.search-wrapper-floating:hover .search-glow { opacity: 0.6; }
 
 .search-box {
   position: relative;
-  background: #ffffff;
+  /* Glassmorphism Dark Background */
+  background: rgba(19, 6, 33, 0.8); 
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 50px;
-  padding: 8px 8px 8px 20px;
+  padding: 8px 8px 8px 25px;
   display: flex;
   align-items: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-  border: 1px solid rgba(0,0,0,0.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
 }
 
-.search-icon-left { color: #cbd5e0; margin-right: 12px; font-size: 1.1rem; }
+.search-icon-left { color: var(--c-sunset-purple); margin-right: 15px; font-size: 1.2rem; }
+
 .search-box input {
   flex: 1; border: none; outline: none; background: transparent;
-  font-size: 1rem; color: var(--text-primary);
+  font-size: 1rem; color: #fff;
 }
+/* Override global input style specifically for this search bar */
+.search-box input:focus { border: none !important; box-shadow: none !important; }
 
 .btn-search-sunset {
   background: var(--gradient-sunset);
   color: white; border: none;
-  padding: 12px 32px; border-radius: 50px;
-  font-weight: 500; font-size: 0.95rem;
+  padding: 12px 36px; border-radius: 50px;
+  font-weight: 600; font-size: 0.95rem;
   transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
 }
 .btn-search-sunset:hover {
   transform: translateY(-1px);
-  box-shadow: 0 5px 15px rgba(255, 126, 95, 0.3);
+  box-shadow: 0 5px 20px rgba(255, 126, 95, 0.4);
 }
 
 /* --- BANNER GRID --- */
 .banner-grid-section {
-  display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px;
-  height: 400px; margin-bottom: 3rem; margin-top: 1rem;
+  display: grid; grid-template-columns: 2.5fr 1fr; gap: 24px;
+  height: 420px; margin-bottom: 4rem; margin-top: 2rem;
 }
 
 .banner-large-slider {
   border-radius: 24px; overflow: hidden; height: 100%;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
 .mySwiper, .banner-slide-item { width: 100%; height: 100%; }
@@ -330,28 +373,38 @@ onMounted(async () => {
 
 .overlay-gradient-bottom {
   position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 40%);
+  /* Darker gradient for text readability */
+  background: linear-gradient(to top, rgba(5,1,10,0.9) 0%, transparent 50%);
 }
 
 .slide-caption {
-  position: absolute; bottom: 25px; left: 25px; z-index: 2;
+  position: absolute; bottom: 30px; left: 30px; z-index: 2;
 }
 .slide-caption h3 {
-  color: white; font-size: 1.8rem; margin: 0; text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  color: white; font-size: 2rem; margin: 0; font-weight: 700;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-.banner-stack { display: flex; flex-direction: column; gap: 20px; height: 100%; }
+.banner-stack { display: flex; flex-direction: column; gap: 24px; height: 100%; }
 .banner-small {
-  flex: 1; border-radius: 20px; background-size: cover; background-position: center;
+  flex: 1; border-radius: 24px; background-size: cover; background-position: center;
   cursor: pointer; transition: transform 0.3s;
+  position: relative; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
 }
 .banner-small:hover { transform: translateY(-5px); }
 
+.overlay-hover {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.2);
+  transition: background 0.3s;
+}
+.banner-small:hover .overlay-hover { background: rgba(0,0,0,0); }
 
-/* --- CATEGORY ICONS (STYLE BARU) --- */
-.category-section { margin-bottom: 3rem; padding: 10px 0; }
+
+/* --- CATEGORY ICONS (GLASSMOPRHIC DARK) --- */
+.category-section { margin-bottom: 4rem; padding: 10px 0; }
 .category-list {
-  display: flex; gap: 25px; justify-content: center; flex-wrap: wrap;
+  display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
 }
 
 .cat-item {
@@ -359,75 +412,103 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-/* Bulatan Putih */
+/* Bulatan Glassmorphic */
 .cat-circle {
-  width: 65px; height: 65px;
-  background: #ffffff;
-  border-radius: 20px; /* Squircles (sedikit petak rounded) */
+  width: 70px; height: 70px;
+  /* Dark Glassy Background */
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   margin-bottom: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-  border: 1px solid #f1f5f9;
-  
-  /* Gunakan CSS variable utk warna icon */
-  color: #a0aec0; /* Default Grey */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Icon color default */
+  color: #94a3b8; 
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Icon dalam bulatan */
 .cat-circle i { transition: transform 0.3s; }
 
-/* HOVER EFFECTS - MAGIC HAPPENS HERE */
+/* HOVER EFFECTS */
 .cat-item:hover .cat-circle {
   transform: translateY(-8px);
-  box-shadow: var(--shadow-float);
-  color: var(--icon-color); /* Bertukar warna ikut jenis aktiviti */
-  background: white;
+  box-shadow: 0 10px 25px -5px var(--icon-color), 0 0 10px rgba(255,255,255,0.1) inset;
+  color: white;
+  background: var(--icon-color); /* Bertukar penuh atau semi-transparent jika mahu */
   border-color: transparent;
 }
 
-.cat-item:hover .cat-circle i { transform: scale(1.1); }
-.cat-item:hover .cat-label { color: var(--c-sunset-purple); }
+.cat-item:hover .cat-circle i { transform: scale(1.2); }
+.cat-item:hover .cat-label { color: white; }
 
-.more-circle { color: var(--c-sunset-purple); background: #fdfaff; }
-.cat-label { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); transition: color 0.3s; }
-
-/* --- SECTION HEADERS --- */
-.section-container { margin-bottom: 4rem; }
-.section-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 1.5rem;
+.more-circle { 
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--c-sunset-pink);
+}
+.cat-item:hover .more-circle {
+  background: var(--c-sunset-purple);
+  box-shadow: 0 10px 20px rgba(108, 99, 255, 0.4);
 }
 
-.section-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
+.cat-label { 
+  font-size: 0.9rem; font-weight: 500; 
+  color: var(--text-secondary); transition: color 0.3s; 
+}
+
+/* --- SECTION HEADERS --- */
+.section-container { margin-bottom: 5rem; }
+.section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.section-title { font-size: 1.8rem; font-weight: 700; margin: 0; color: white; }
 .see-more-link {
-  color: var(--c-sunset-orange); font-size: 0.9rem;
-  display: flex; align-items: center; gap: 5px;
+  color: var(--c-sunset-pink); font-size: 0.95rem;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.03);
+  transition: all 0.3s;
+}
+.see-more-link:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--c-sunset-orange);
+  transform: translateX(5px);
 }
 
 /* GRIDS */
-.trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; }
-.forum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; }
-.loading-area { text-align: center; padding: 3rem; color: #cbd5e0; }
+.trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; }
+.forum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
+.loading-area { text-align: center; padding: 3rem; color: var(--text-secondary); }
 
 .spinner {
-  width: 30px; height: 30px; margin: 0 auto 10px;
-  border: 3px solid #edf2f7; border-top-color: var(--c-sunset-orange);
+  width: 40px; height: 40px; margin: 0 auto 15px;
+  border: 3px solid rgba(255,255,255,0.1); 
+  border-top-color: var(--c-sunset-purple);
   border-radius: 50%; animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.empty-text { text-align: center; color: #a0aec0; padding: 3rem; }
+.empty-text { text-align: center; color: var(--text-secondary); padding: 3rem; font-style: italic; }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .hero-title { font-size: 2rem; }
-  .banner-grid-section { grid-template-columns: 1fr; height: auto; gap: 15px; }
-  .banner-large-slider { height: 250px; border-radius: 16px; }
-  .banner-stack { display: none; /* Hide stack banner on mobile for clean look */ }
-  .category-list { gap: 15px; justify-content: flex-start; overflow-x: auto; padding-bottom: 20px; padding-left: 10px; }
-  .cat-item { min-width: 70px; }
-  .trip-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .hero-title { font-size: 2.2rem; }
+  .search-wrapper-floating { margin: 0 10px; }
+  .search-box { padding-left: 15px; }
+  .btn-search-sunset { padding: 10px 20px; font-size: 0.9rem; }
+  
+  .banner-grid-section { grid-template-columns: 1fr; height: auto; gap: 20px; }
+  .banner-large-slider { height: 280px; }
+  .banner-stack { display: none; }
+  
+  .category-list { gap: 15px; justify-content: flex-start; overflow-x: auto; padding-bottom: 20px; padding-left: 5px; scrollbar-width: none; }
+  .category-list::-webkit-scrollbar { display: none; }
+  .cat-item { min-width: 80px; }
+  
+  .trip-grid { grid-template-columns: repeat(1, 1fr); gap: 20px; }
   .forum-grid { grid-template-columns: 1fr; }
 }
 </style>

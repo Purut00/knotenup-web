@@ -1,9 +1,14 @@
 /* 0. IMPORT FONT POPPINS (Supaya nampak modern) */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-/* 1. DEFINISI WARNA (THEME: SUNSET MINIMALIST) */
+/* TAILWIND DIRECTIVES (Wajib ada untuk mix @apply nanti) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 1. DEFINISI WARNA (THEME: SUNSET & DARK PURPLE MIX) */
 :root {
-  font-family: 'Poppins', 'Inter', system-ui, sans-serif; /* Tukar ke Poppins */
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -11,79 +16,107 @@
   --c-sunset-orange: #FF7E5F;
   --c-sunset-pink: #FEB47B;
   --c-sunset-purple: #6C63FF;
-  --c-bg-light: #F8FAFC;  /* Off-white lembut */
   
+  /* --- DARK THEME PALETTE (Untuk Background Website) --- */
+  --c-dark-bg-start: #05010a;
+  --c-dark-bg-mid: #110524;
+  --c-dark-bg-end: #240b3b;
+
   /* Gradient Presets */
   --gradient-sunset: linear-gradient(135deg, #FF7E5F 0%, #FEB47B 100%);
   --gradient-text: linear-gradient(to right, #FF7E5F, #FEB47B, #6C63FF, #FF7E5F);
+  /* Background Gradient Gelap Keungguan */
+  --gradient-body-dark: linear-gradient(135deg, var(--c-dark-bg-start) 0%, var(--c-dark-bg-mid) 40%, var(--c-dark-bg-end) 100%);
   
-  /* Base Variables */
-  --bg-body: var(--c-bg-light);
-  --bg-card: #ffffff;
-  --text-primary: #2D3748;
-  --text-secondary: #718096;
-  --border-color: #E2E8F0;
-  --input-bg: #ffffff;
+  /* Base Variables (Default ke Dark Mode untuk theme ini) */
+  --bg-body: var(--gradient-body-dark);
+  --text-primary: #f8fafc;     /* Putih/Kelabu cerah untuk background gelap */
+  --text-secondary: #94a3b8;   /* Slate-400 */
+  --border-color: rgba(255, 255, 255, 0.1); /* Border telus */
+  --input-bg: rgba(255, 255, 255, 0.05);
   
   /* Shadows (Soft & Float) */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-float: 0 10px 25px -5px rgba(255, 126, 95, 0.15), 0 8px 10px -6px rgba(255, 126, 95, 0.1);
+  --shadow-glow: 0 0 15px rgba(108, 99, 255, 0.2);
 }
 
-/* 2. DEFINISI WARNA (DARK MODE - Optional Adjustment) */
-body.dark-mode {
-  --bg-body: #1a202c;
-  --bg-card: #2d3748;
-  --text-primary: #f7fafc;
-  --text-secondary: #a0aec0;
-  --border-color: #4a5568;
-  --input-bg: #2d3748;
-  /* Dark mode still keeps the sunset accents active */
-}
-
-/* 3. GLOBAL STYLES */
+/* 2. GLOBAL STYLES */
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--bg-body);
+  background: var(--bg-body); /* Guna gradient gelap */
+  background-attachment: fixed; /* Parallax effect */
   color: var(--text-primary);
   transition: background-color 0.3s, color 0.3s;
   -webkit-font-smoothing: antialiased;
+  
+  /* Scrollbar Customization */
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-sunset-purple) var(--c-dark-bg-start);
 }
+
+/* Scrollbar Webkit */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--c-dark-bg-start); }
+::-webkit-scrollbar-thumb { background: var(--c-sunset-purple); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-sunset-orange); }
 
 a {
   font-weight: 500;
-  color: var(--c-sunset-orange);
+  color: var(--c-sunset-pink);
   text-decoration: inherit;
-  transition: color 0.2s;
+  transition: all 0.2s;
 }
-a:hover { color: var(--c-sunset-purple); }
+a:hover { color: var(--c-sunset-orange); }
 
 h1, h2, h3, h4, h5 {
-  color: var(--text-primary);
-  letter-spacing: -0.02em; /* Tight tracking for modern look */
+  color: #ffffff; /* Tajuk sentiasa putih terang */
+  letter-spacing: -0.02em;
 }
 
 button { cursor: pointer; }
 
 input, select, textarea {
   background-color: var(--input-bg) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--border-color) !important;
   font-family: inherit;
 }
 
-/* --- ANIMATIONS --- */
-@keyframes shine {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
+input::placeholder {
+  color: var(--text-secondary);
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+/* 3. CUSTOM COMPONENTS (Glassmorphism & Buttons) */
+
+/* Kad Glassmorphism (Gabungan stail Tailwind & CSS biasa) */
+.card-theme {
+  @apply backdrop-blur-md rounded-2xl shadow-xl overflow-hidden transition-all duration-300;
+  background-color: rgba(30, 11, 54, 0.4); /* Base ungu gelap telus */
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+.card-theme:hover {
+  background-color: rgba(45, 27, 78, 0.5);
+  border-color: rgba(108, 99, 255, 0.5); /* Purple border on hover */
+  transform: translateY(-5px);
+}
+
+/* Butang Gradient Utama */
+.btn-primary {
+  background: linear-gradient(135deg, var(--c-sunset-purple) 0%, var(--c-sunset-orange) 100%);
+  @apply text-white font-semibold py-2 px-6 rounded-full inline-block no-underline border-none transition-all duration-300;
+  box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 126, 95, 0.4);
+}
+
+/* 4. ANIMATIONS */
 
 /* Helper Class for Gradient Text */
 .text-gradient-animate {
@@ -93,4 +126,29 @@ input, select, textarea {
   -webkit-background-clip: text;
   background-clip: text;
   animation: shine 5s linear infinite;
+  font-weight: 800; /* Extra bold untuk effect gradient lebih jelas */
+}
+
+@keyframes shine {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); } /* Ubah -5px ke -10px supaya lebih nampak */
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animation Classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

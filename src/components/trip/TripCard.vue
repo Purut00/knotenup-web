@@ -1,35 +1,48 @@
 <template>
-  <div class="trip-card" @click="goToDetail">
+  <div class="trip-card glass-card" @click="goToDetail">
     
+    <!-- Status Badge -->
     <div class="status-badge" :class="trip.status">
-      {{ trip.status === 'open' ? t('trip.open') : t('trip.full') }}
+      {{ trip.status === 'open' ? t('trip.open') || 'OPEN' : t('trip.full') || 'FULL' }}
     </div>
 
+    <!-- Image Section -->
     <div class="card-image" :style="{ backgroundImage: `url(${trip.image})` }">
-      <div class="overlay"></div>
-      <div class="level-badge">{{ translateLevel(trip.difficulty) }}</div>
+      <div class="overlay-gradient"></div>
+      <div class="level-badge">
+        <i class="fas fa-mountain"></i> {{ translateLevel(trip.difficulty) }}
+      </div>
+      <button class="wishlist-btn"><i class="far fa-heart"></i></button>
     </div>
 
+    <!-- Content Section -->
     <div class="card-content">
       <div class="header-row">
-        <!-- Translate kategori -->
+        <!-- Category dengan warna theme -->
         <span class="category">{{ translateCategory(trip.category) }}</span>
-        <div class="rating">⭐ {{ trip.rating || '5.0' }}</div>
+        <div class="rating">
+          <i class="fas fa-star text-yellow-400"></i> {{ trip.rating || '5.0' }}
+        </div>
       </div>
 
       <h3>{{ trip.title }}</h3>
 
       <div class="info-row">
-        <!-- Format date secara reaktif -->
-        <span>📅 {{ formattedDate }}</span>
-        <span>⏱️ {{ trip.duration }}</span>
+        <div class="info-item">
+            <i class="far fa-calendar-alt icon-theme"></i>
+            <span>{{ formattedDate }}</span>
+        </div>
+        <div class="info-item">
+            <i class="far fa-clock icon-theme"></i>
+            <span>{{ trip.duration }}</span>
+        </div>
       </div>
 
       <div class="progress-section">
         <div class="progress-label">
           <span>Slot: {{ trip.currentSlots }}/{{ trip.maxSlots }}</span>
           <span class="spots-left" v-if="trip.maxSlots - trip.currentSlots <= 5">
-              🔥 {{ t('trip.slotsLeft', { count: trip.maxSlots - trip.currentSlots }) }}
+              🔥 {{ t('trip.slotsLeft', { count: trip.maxSlots - trip.currentSlots }) || (trip.maxSlots - trip.currentSlots) + ' left!' }}
           </span>
         </div>
         <div class="progress-bar">
@@ -40,14 +53,15 @@
       <div class="card-footer">
         <div class="organizer">
           <img :src="trip.organizerImage || 'https://i.pravatar.cc/150?img=3'" alt="Org" />
-          <span>{{ trip.organizerName }}</span>
+          <span class="org-name">{{ trip.organizerName }}</span>
         </div>
         <div class="price-action">
-          <span class="price">RM {{ trip.price }}</span>
+          <span class="price-currency">RM</span>
+          <span class="price-value">{{ trip.price }}</span>
         </div>
       </div>
       
-      </div>
+    </div>
   </div>
 </template>
 
@@ -57,30 +71,25 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ trip: any }>();
-const { t, locale } = useI18n(); // Ambil locale untuk format tarikh
+const { t, locale } = useI18n(); 
 const router = useRouter();
 
 // 🔥 FORMAT DATE REAKTIF 🔥
 const formattedDate = computed(() => {
   if (!props.trip.startDate) return '';
   const date = new Date(props.trip.startDate);
-  // locale.value akan auto tukar format (cth: en-US -> ms-MY)
   return date.toLocaleDateString(locale.value, { day: 'numeric', month: 'short' });
 });
 
-// Helper Translate Kategori (Hiking -> Mendaki)
+// Helper Translate
 const translateCategory = (cat: string) => {
   if (!cat) return '';
-  // Pastikan key lowercase dan tiada jarak (cth: 'white water rafting' -> 'whitewaterrafting' atau ikut key JSON anda)
-  // Untuk keselamatan, kita guna lowercase sahaja
-  return t(`activities.${cat.toLowerCase()}`); 
+  return t(`activities.${cat.toLowerCase()}`) || cat; 
 };
 
-// Helper Translate Level
 const translateLevel = (level: string) => {
   if (!level) return '';
-  // Level dalam DB: Easy, Moderate, Hard. Kita map ke translation keys.
-  return t(`levels.${level.toLowerCase()}`);
+  return t(`levels.${level.toLowerCase()}`) || level;
 };
 
 const goToDetail = () => {
@@ -89,50 +98,130 @@ const goToDetail = () => {
 </script>
 
 <style scoped>
+/* --- GLASS CARD CONTAINER (WHITE GLASS) --- */
 .trip-card { 
-  background: white; 
-  border-radius: 8px; 
+  /* White Glass Effect */
+  background: rgba(255, 255, 255, 0.85); /* Putih lutsinar */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6); /* Border putih halus */
+  
+  border-radius: 16px; 
   overflow: hidden; 
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
-  border: 1px solid #eee; 
   position: relative; 
-  transition: transform 0.2s, box-shadow 0.2s; 
+  transition: all 0.3s ease; 
   display: flex; 
   flex-direction: column;
   cursor: pointer;
+  color: #334155; /* Teks gelap (Slate) supaya boleh baca atas putih */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Shadow lembut */
 }
 
 .trip-card:hover { 
-  transform: translateY(-3px); 
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-  border-color: #27ae60; 
+  transform: translateY(-5px); 
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15);
+  border-color: #6c63ff; /* Purple border bila hover */
 }
 
-.status-badge { position: absolute; top: 10px; left: 10px; z-index: 10; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase; color: white; }
-.status-badge.open { background-color: #2ecc71; }
-.status-badge.full { background-color: #e74c3c; }
+/* IMAGE SECTION */
+.card-image { 
+  height: 180px; 
+  background-size: cover; 
+  background-position: center; 
+  position: relative; 
+}
+.overlay-gradient {
+  position: absolute; inset: 0;
+  /* Gradient hitam sikit di bawah gambar supaya tulisan badge nampak */
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0, 0, 0, 0.6) 100%);
+}
 
-.card-image { height: 160px; background-size: cover; background-position: center; position: relative; }
-.level-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+/* BADGES - Font weight dikurangkan */
+.status-badge { 
+  position: absolute; top: 12px; left: 12px; z-index: 10; 
+  padding: 4px 10px; border-radius: 20px; 
+  font-size: 0.7rem; 
+  font-weight: 500; /* Buang Bold (Normal/Medium) */
+  text-transform: uppercase; letter-spacing: 0.5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.status-badge.open { background: #6c63ff; color: white; }
+.status-badge.full { background: #ef4444; color: white; }
 
-.card-content { padding: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; }
+.level-badge { 
+  position: absolute; bottom: 10px; left: 12px; 
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  color: #fff; padding: 4px 8px; border-radius: 6px; 
+  font-size: 0.75rem; 
+  font-weight: 400; /* Buang Bold */
+  display: flex; align-items: center; gap: 4px;
+}
 
-.header-row { display: flex; justify-content: space-between; font-size: 0.75rem; }
-.category { color: #27ae60; font-weight: bold; text-transform: uppercase; font-size: 0.7rem; }
-.rating { color: #f1c40f; font-weight: bold; }
+.wishlist-btn {
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.9); /* Butang putih */
+  border: none; color: #ff6584; /* Icon pink */
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: 0.2s; cursor: pointer;
+}
+.wishlist-btn:hover { transform: scale(1.1); background: white; }
 
-h3 { margin: 0; font-size: 1rem; color: #2c3e50; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* CONTENT */
+.card-content { padding: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; flex-grow: 1; }
 
-.info-row { display: flex; gap: 1rem; font-size: 0.8rem; color: #7f8c8d; }
+.header-row { display: flex; justify-content: space-between; align-items: center; }
+.category { 
+  color: #f97316; /* Orange terang sikit */
+  font-weight: 500; /* Buang Bold */
+  text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;
+}
+.rating { color: #eab308; font-weight: 500; font-size: 0.85rem; }
 
-.progress-section { margin-top: auto; }
-.progress-label { display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 3px; color: #999; }
-.spots-left { color: #e67e22; font-weight: bold; }
-.progress-bar { height: 4px; background-color: #ecf0f1; border-radius: 2px; overflow: hidden; }
-.progress-fill { height: 100%; background-color: #27ae60; border-radius: 2px; }
+h3 { 
+  margin: 0; font-size: 1.1rem; 
+  font-weight: 500; /* Buang Bold sepenuhnya */
+  color: #1e293b; /* Teks Hitam/Gelap */
+  line-height: 1.4; 
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; 
+}
 
-.card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #f5f5f5; }
-.organizer { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: #555; }
-.organizer img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
-.price { font-weight: 800; font-size: 1rem; color: #2c3e50; }
+/* INFO ROW */
+.info-row { display: flex; gap: 1rem; font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+.info-item { display: flex; align-items: center; gap: 6px; }
+.icon-theme { color: #6c63ff; } 
+
+/* PROGRESS BAR */
+.progress-section { margin-top: auto; padding-top: 10px; }
+.progress-label { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 6px; color: #64748b; }
+.spots-left { color: #ef4444; font-weight: 500; animation: pulse 2s infinite; }
+.progress-bar { 
+  height: 6px; background-color: #e2e8f0; /* Kelabu cair */
+  border-radius: 10px; overflow: hidden; 
+}
+.progress-fill { 
+  height: 100%; 
+  background: linear-gradient(90deg, #6c63ff, #ff8c42); 
+  border-radius: 10px; 
+}
+
+/* FOOTER */
+.card-footer { 
+  display: flex; justify-content: space-between; align-items: center; 
+  margin-top: 0.8rem; padding-top: 0.8rem; 
+  border-top: 1px solid #f1f5f9; /* Garis halus cair */
+}
+.organizer { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #475569; }
+.organizer img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0; }
+
+.price-action { display: flex; align-items: baseline; gap: 2px; }
+.price-currency { font-size: 0.7rem; color: #64748b; font-weight: 400; }
+.price-value { 
+  font-weight: 500; /* Buang Bold */
+  font-size: 1.2rem; 
+  color: #1e293b; /* Harga gelap */
+}
+
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 </style>
