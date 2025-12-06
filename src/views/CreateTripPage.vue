@@ -69,9 +69,9 @@
               <label>{{ t('createTrip.level') || 'Tahap Kesukaran' }}</label>
               <div class="select-wrapper">
                   <select v-model="form.difficulty" class="glass-input">
-                    <option value="Easy">🟢 Mudah (Easy)</option>
-                    <option value="Moderate">🟡 Sederhana (Moderate)</option>
-                    <option value="Hard">🔴 Sukar (Hard)</option>
+                    <option value="Easy">Mudah</option>
+                    <option value="Moderate">Sederhana</option>
+                    <option value="Hard">Sukar</option>
                   </select>
                   <i class="fas fa-chevron-down select-arrow"></i>
               </div>
@@ -83,11 +83,11 @@
             <div class="radio-group">
                <label class="radio-card" :class="{ active: locationType === 'malaysia' }">
                  <input type="radio" v-model="locationType" value="malaysia" hidden>
-                 <span>🇲🇾 Dalam Malaysia</span>
+                 <span>Dalam Malaysia</span>
                </label>
                <label class="radio-card" :class="{ active: locationType === 'overseas' }">
                  <input type="radio" v-model="locationType" value="overseas" hidden>
-                 <span>✈️ Luar Negara</span>
+                 <span>Luar Negara</span>
                </label>
             </div>
           </div>

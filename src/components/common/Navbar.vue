@@ -143,7 +143,7 @@ const handleLogout = async () => {
 /* --- 1. NAVBAR STYLES (STICKY & GLASS) --- */
 .navbar {
   /* Positioning Logic untuk Sticky */
-  position: fixed;
+  position: relative;
   top: 0;
   left: 0;
   width: 100%;

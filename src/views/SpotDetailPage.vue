@@ -105,18 +105,58 @@
                 </div>
                 <p v-if="translationError" class="text-red-400 text-xs mb-4">⚠️ {{ t('spotDetail.translationError') }}</p>
 
-                <!-- EXTRA INFO GRID -->
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="p-3 bg-black/20 rounded-lg border border-white/5">
-                        <span class="text-gray-400 text-xs uppercase block mb-1">🛤️ {{ t('spotDetail.via') }}</span>
-                        <span class="text-white font-semibold">{{ spot.via || '-' }}</span>
+                <!-- EXTRA INFO GRID (Dikemaskini: Kos dibuang, Fasiliti ditambah nanti) -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                    
+                    <!-- Box 1: Via -->
+                    <div class="info-box">
+                        <span class="info-label">🛤️ {{ t('spotDetail.via') }}</span>
+                        <span class="info-value">{{ spot.via || '-' }}</span>
                     </div>
-                    <div class="p-3 bg-black/20 rounded-lg border border-white/5">
-                        <span class="text-gray-400 text-xs uppercase block mb-1">👮 {{ t('spotDetail.guideStatus') }}</span>
-                        <span class="font-bold" :class="spot.guideRequired === 'Yes' ? 'text-red-400' : 'text-green-400'">
+
+                    <!-- Box 2: Guide -->
+                    <div class="info-box">
+                        <span class="info-label">👮 Guide</span>
+                        <span class="info-value font-bold" :class="spot.guideRequired === 'Yes' ? 'text-red-400' : 'text-green-400'">
                             {{ getGuideLabel(spot.guideRequired) }}
                         </span>
                     </div>
+
+                    <!-- Box 3: Duration (Masa) -->
+                    <div class="info-box">
+                        <span class="info-label">⏱️ Masa</span>
+                        <span class="info-value">{{ spot.duration || '-' }}</span>
+                    </div>
+
+                    <!-- Box 4: Distance (Jarak) -->
+                    <div class="info-box">
+                        <span class="info-label">📏 Jarak</span>
+                        <span class="info-value">{{ spot.distance ? spot.distance + ' km' : '-' }}</span>
+                    </div>
+
+                    <!-- Box 5: Difficulty (Tahap) -->
+                    <div class="info-box">
+                        <span class="info-label">💪 Tahap</span>
+                        <span class="info-value">{{ getLevelLabel(spot.difficulty) }}</span>
+                    </div>
+                    
+                    <!-- Kos Dibuang seperti diminta -->
+                </div>
+
+                <!-- FACILITIES LIST (Paparan Fasiliti - Checkbox style) -->
+                <div v-if="spot.facilities && spot.facilities.length > 0" class="mb-6">
+                    <h4 class="text-sm font-bold text-gray-400 mb-3 uppercase flex items-center gap-2">
+                        <i class="fas fa-concierge-bell"></i> Fasiliti Disediakan
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span v-for="fac in spot.facilities" :key="fac" class="px-3 py-1.5 bg-green-900/30 text-green-300 text-xs font-bold rounded-lg border border-green-500/20 flex items-center gap-2">
+                            <i class="fas fa-check"></i> {{ fac }}
+                        </span>
+                    </div>
+                </div>
+                <!-- Fallback jika tiada fasiliti tapi user nak tahu -->
+                <div v-else class="mb-6 p-3 bg-white/5 rounded-lg border border-dashed border-white/10 text-center">
+                    <p class="text-xs text-gray-500 italic">Tiada maklumat fasiliti disenaraikan.</p>
                 </div>
 
                 <!-- PERMIT ALERT -->
@@ -153,7 +193,6 @@
             <div class="glass-card p-6 md:p-8">
                 <h3 class="text-xl font-bold text-white mb-6">💬 {{ t('spotDetail.reviewsTitle') }}</h3>
                 
-                <!-- Review Form -->
                 <div v-if="auth.currentUser" class="mb-8 p-4 bg-black/20 rounded-xl border border-white/5">
                     <div class="flex gap-2 mb-3">
                         <i v-for="n in 5" :key="n" @click="newRating = n" 
@@ -169,7 +208,6 @@
                     🔒 {{ t('spotDetail.loginToReview') }}
                 </div>
 
-                <!-- Review List -->
                 <div class="space-y-6">
                     <div v-for="review in sortedReviews" :key="review.id" class="border-b border-white/10 pb-6 last:border-0">
                         <div class="flex justify-between items-start mb-2 cursor-pointer" @click="goToProfile(review.userId)">
@@ -203,8 +241,6 @@
             
             <!-- ACTIONS CARD -->
             <div class="glass-card p-4">
-                 <!-- 1. CADANG PERUBAHAN (Everyone) -->
-                 <!-- LOGIC: Jika suggestions > 0, butang ini akan Disable & bertukar jadi kelabu -->
                  <button 
                     class="w-full py-3 rounded-lg font-bold transition text-sm flex items-center justify-center gap-2 mb-2 shadow-lg"
                     :class="suggestions.length > 0 ? 'bg-gray-700 text-gray-400 cursor-not-allowed border border-white/5' : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90'"
@@ -215,12 +251,10 @@
                     <span v-else>✏️ Cadang Perubahan Info</span>
                  </button>
                  
-                 <!-- Mesej Amaran jika dibekukan -->
                  <div v-if="suggestions.length > 0" class="text-[11px] text-orange-300 text-center mb-3 bg-orange-500/10 p-2 rounded border border-orange-500/20">
                     <i class="fas fa-info-circle mr-1"></i> Sedang dalam proses undian. Sila tunggu keputusan sebelum menghantar cadangan baru.
                  </div>
                  
-                 <!-- 2. EDIT PENUH (Admin/Owner Only) -->
                  <div v-if="isAdmin || isOwner">
                      <button 
                         class="w-full py-2 rounded-lg text-sm flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-gray-300 transition"
@@ -243,11 +277,9 @@
                     <p class="text-xs text-gray-400 mb-2">{{ t('spotDetail.suggestedBy') }}: <strong class="text-gray-300">{{ sugg.suggestedBy || 'Pengguna' }}</strong></p>
                     <p class="text-xs text-blue-300 mb-2">Ubah: {{ translateField(sugg.field) }}</p>
                     
-                    <!-- Progress Bar (Target: 5 Votes) -->
                     <div class="h-2 bg-gray-700 rounded-full overflow-hidden flex mb-2 relative">
                         <div class="bg-green-500 h-full transition-all duration-500" :style="{ width: Math.min((sugg.votes / 5) * 100, 100) + '%' }"></div>
                         <div class="bg-red-500 h-full transition-all duration-500" :style="{ width: Math.min(((sugg.rejectVotes || 0) / 5) * 100, 100) + '%' }"></div>
-                        <!-- Marker line for 5 votes -->
                         <div class="absolute top-0 right-0 h-full w-px bg-white/30" title="Target 5 Undi"></div>
                     </div>
                     <div class="flex justify-between items-center text-[10px] text-gray-400 mb-3">
@@ -259,7 +291,6 @@
                         🔍 Semak & Undi
                     </button>
 
-                    <!-- Admin Bypass Buttons -->
                     <div v-if="isAdmin" class="flex gap-2 mt-2 pt-2 border-t border-white/5">
                         <button class="flex-1 py-1 bg-green-900/50 hover:bg-green-800 text-[10px] text-green-300 border border-green-500/30 rounded" @click="finalizeUpdate(sugg, true)">⚡ Force Accept</button>
                         <button class="flex-1 py-1 bg-red-900/50 hover:bg-red-800 text-[10px] text-red-300 border border-red-500/30 rounded" @click="adminReject(sugg)">✖ Force Reject</button>
@@ -305,8 +336,9 @@
              <option value="description">Deskripsi</option>
              <option value="difficulty">Kesukaran</option>
              <option value="duration">Masa / Durasi</option>
-             <option value="cost">Kos / Bayaran</option>
+             <option value="distance">Jarak</option>
              <option value="permit">Permit</option>
+             <option value="via">Laluan / Via</option>
          </select>
 
          <label class="block text-gray-300 text-sm mb-2 font-bold">Maklumat Baru:</label>
@@ -481,8 +513,9 @@ const translateField = (field: string) => {
         description: 'Deskripsi', 
         difficulty: 'Kesukaran', 
         duration: 'Masa', 
-        cost: 'Kos',
-        permit: 'Permit'
+        distance: 'Jarak',
+        permit: 'Permit',
+        via: 'Laluan / Via'
     };
     return map[field] || field;
 };
@@ -505,11 +538,17 @@ const toggleTranslation = async () => {
 };
 
 const getLevelLabel = (level: string) => { if (!level) return ''; const key = level.toLowerCase(); return t(`components.${key}`) !== `components.${key}` ? t(`components.${key}`) : level; };
+
+// IMPROVED: Guide Label with Fallback
 const getGuideLabel = (val: string) => { 
-   if(val === 'Yes') return t('createSpot.guideYes') || 'Wajib';
-   if(val === 'Optional') return t('createSpot.guideOptional') || 'Pilihan';
-   return t('createSpot.guideNo') || 'Tidak Perlu';
+   const labels: any = {
+       'Yes': t('createSpot.guideYes') !== 'createSpot.guideYes' ? t('createSpot.guideYes') : 'Wajib',
+       'Optional': t('createSpot.guideOptional') !== 'createSpot.guideOptional' ? t('createSpot.guideOptional') : 'Pilihan',
+       'No': t('createSpot.guideNo') !== 'createSpot.guideNo' ? t('createSpot.guideNo') : 'Tidak Perlu'
+   };
+   return labels[val] || val || 'Tidak Perlu';
 };
+
 const formatTime = (ms: number) => { if (!ms || ms === 0) return '-'; const totalSeconds = ms / 1000; const hours = Math.floor(totalSeconds / 3600); const minutes = Math.floor((totalSeconds % 3600) / 60); if (hours > 0) return `${hours}j ${minutes}m`; return `${minutes} min`; };
 const formatDate = (timestamp: any) => { if (!timestamp) return ''; return new Date(timestamp.seconds * 1000).toLocaleDateString("en-MY", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' }); };
 const averageRating = computed(() => { if (reviews.value.length === 0) return 0; const total = reviews.value.reduce((acc, curr) => acc + (curr.rating || 0), 0); return (total / reviews.value.length).toFixed(1); });
@@ -709,6 +748,17 @@ onUnmounted(() => { if (mapInstance) { mapInstance.remove(); mapInstance = null;
   color: white; outline: none; transition: 0.3s;
 }
 .glass-input:focus { border-color: #6c63ff; background: rgba(0, 0, 0, 0.6); }
+
+/* INFO BOX (NEW) */
+.info-box {
+    padding: 12px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);
+}
+.info-label {
+    display: block; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+}
+.info-value {
+    font-size: 1rem; color: white; font-weight: 600;
+}
 
 /* --- HERO GALLERY --- */
 .hero-gallery-wrapper { position: relative; }

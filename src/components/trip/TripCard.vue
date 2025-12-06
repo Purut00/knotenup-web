@@ -1,44 +1,52 @@
 <template>
-  <div class="trip-card glass-card" @click="goToDetail">
+  <!-- UPDATE: Tambah class 'compact' jika isCompact = true -->
+  <div class="trip-card glass-card" :class="{ 'compact': isCompact }" @click="goToDetail">
     
-    <!-- Status Badge -->
-    <div class="status-badge" :class="trip.status">
+    <!-- Status Badge (Sembunyi bila compact supaya tak serabut atas gambar kecil) -->
+    <div v-if="!isCompact" class="status-badge" :class="trip.status">
       {{ trip.status === 'open' ? t('trip.open') || 'OPEN' : t('trip.full') || 'FULL' }}
     </div>
 
-    <!-- Image Section -->
+    <!-- Image Section: KIRI bila compact -->
     <div class="card-image" :style="{ backgroundImage: `url(${trip.image})` }">
       <div class="overlay-gradient"></div>
-      <div class="level-badge">
+      
+      <!-- Sembunyi badge level & wishlist button bila compact -->
+      <div v-if="!isCompact" class="level-badge">
         <i class="fas fa-mountain"></i> {{ translateLevel(trip.difficulty) }}
       </div>
-      <button class="wishlist-btn"><i class="far fa-heart"></i></button>
+      <button v-if="!isCompact" class="wishlist-btn"><i class="far fa-heart"></i></button>
     </div>
 
-    <!-- Content Section -->
+    <!-- Content Section: KANAN bila compact -->
     <div class="card-content">
       <div class="header-row">
-        <!-- Category dengan warna theme -->
+        <!-- Category -->
         <span class="category">{{ translateCategory(trip.category) }}</span>
-        <div class="rating">
+        <!-- Rating: Sembunyi dalam compact jika nak jimat ruang tajuk, tapi saya kekalkan dulu -->
+        <div class="rating" v-if="!isCompact">
           <i class="fas fa-star text-yellow-400"></i> {{ trip.rating || '5.0' }}
         </div>
       </div>
 
+      <!-- TAJUK: Diberi lebih ruang dalam CSS compact -->
       <h3>{{ trip.title }}</h3>
 
       <div class="info-row">
+        <!-- Date -->
         <div class="info-item">
             <i class="far fa-calendar-alt icon-theme"></i>
             <span>{{ formattedDate }}</span>
         </div>
+        <!-- Duration: KEKAL ADA (Updated) -->
         <div class="info-item">
             <i class="far fa-clock icon-theme"></i>
             <span>{{ trip.duration }}</span>
         </div>
       </div>
 
-      <div class="progress-section">
+      <!-- Progress Section (Bar): Sembunyi bila compact -->
+      <div v-if="!isCompact" class="progress-section">
         <div class="progress-label">
           <span>Slot: {{ trip.currentSlots }}/{{ trip.maxSlots }}</span>
           <span class="spots-left" v-if="trip.maxSlots - trip.currentSlots <= 5">
@@ -51,11 +59,14 @@
       </div>
 
       <div class="card-footer">
-        <div class="organizer">
+        <!-- Organizer: Sembunyi bila compact -->
+        <div v-if="!isCompact" class="organizer">
           <img :src="trip.organizerImage || 'https://i.pravatar.cc/150?img=3'" alt="Org" />
           <span class="org-name">{{ trip.organizerName }}</span>
         </div>
-        <div class="price-action">
+        
+        <!-- Price: Sentiasa tunjuk -->
+        <div class="price-action" :class="{ 'compact-price': isCompact }">
           <span class="price-currency">RM</span>
           <span class="price-value">{{ trip.price }}</span>
         </div>
@@ -70,7 +81,12 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps<{ trip: any }>();
+// UPDATE: Terima prop 'isCompact'
+const props = defineProps<{ 
+  trip: any;
+  isCompact?: boolean;
+}>();
+
 const { t, locale } = useI18n(); 
 const router = useRouter();
 
@@ -224,4 +240,76 @@ h3 {
 }
 
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+/* --- UPDATE: STYLE COMPACT MODE --- */
+.trip-card.compact {
+  flex-direction: row; /* Susun Kiri Kanan */
+  height: 130px; /* Tinggi sederhana supaya info tak berhimpit */
+  align-items: stretch;
+}
+
+/* Gambar belah KIRI */
+.trip-card.compact .card-image {
+  width: 35%; /* Lebar gambar */
+  min-width: 120px;
+  max-width: 160px;
+  height: 100%;
+  border-radius: 0;
+}
+
+/* Content belah KANAN */
+.trip-card.compact .card-content {
+  width: 65%;
+  padding: 0.8rem;
+  justify-content: space-between; /* Agihkan ruang atas bawah dengan seimbang */
+  gap: 0;
+}
+
+.trip-card.compact .header-row {
+  margin-bottom: 2px;
+}
+
+/* TAJUK COMPACT: Lebih ruang, tak terpotong teruk */
+.trip-card.compact h3 {
+  font-size: 1rem;
+  line-height: 1.2;
+  -webkit-line-clamp: 2; /* Benarkan 2 baris tajuk */
+  line-clamp: 2;
+  margin-bottom: 4px;
+}
+
+/* Info Row Compact (Date & Duration) */
+.trip-card.compact .info-row {
+  font-size: 0.75rem;
+  margin-top: 0;
+  gap: 0.8rem;
+}
+
+/* Footer Compact: Harga di hujung kanan */
+.trip-card.compact .card-footer {
+  border-top: none;
+  margin-top: auto;
+  padding-top: 0;
+  justify-content: flex-end;
+}
+
+.trip-card.compact .price-action.compact-price {
+  margin-left: auto;
+}
+
+/* Responsif Mobile untuk Compact */
+@media (max-width: 480px) {
+  .trip-card.compact .card-image { width: 30%; min-width: 100px; }
+  .trip-card.compact .card-content { width: 70%; padding: 0.6rem; }
+  .trip-card.compact h3 { font-size: 0.9rem; }
+}
 </style>
+```
+
+**Ringkasan Perubahan:**
+1.  **HomePage.vue**: 
+    * Bila klik toggle, layout grid jadi `grid-cols-1 md:grid-cols-2`. Ini akan letak **2 kad dalam 1 baris** (untuk skrin sederhana/besar), bukannya 1 kad panjang yang banyak ruang kosong.
+2.  **TripCard.vue**:
+    * Mengembalikan `Duration` dalam mode compact.
+    * Mengubah CSS `.trip-card.compact` supaya tinggi sikit (`130px`) dan memberi ruang kepada tajuk untuk menjadi 2 baris (`line-clamp: 2`) agar tidak terpotong.
+    * Susun atur info lebih kemas dengan Date dan Duration duduk sebelah menyebelah di bawah tajuk.

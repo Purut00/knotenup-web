@@ -160,10 +160,8 @@ const categoriesData = [
   { key: 'camping',     label: 'Camping',     icon: 'fas fa-campground' },
   { key: 'climbing',    label: 'Climbing',    icon: 'fas fa-mountain' },
   { key: 'caving',      label: 'Caving',      icon: 'fas fa-dungeon' },
-  { key: 'diving',      label: 'Diving',      icon: 'fas fa-mask-snorkel' },
   { key: 'kayaking',    label: 'Kayaking',    icon: 'fas fa-sailboat' },
   { key: 'rafting',     label: 'Rafting',     icon: 'fas fa-water' },
-  { key: 'surfing',     label: 'Surfing',     icon: 'fas fa-person-surfing' },
   { key: 'paragliding', label: 'Paragliding', icon: 'fas fa-paper-plane' },
   { key: 'fishing',     label: 'Fishing',     icon: 'fas fa-fish' },
 ];

@@ -1,10 +1,9 @@
 <template>
-  <div class="home">
+  <div class="home" :style="{ backgroundImage: `url(${bgImage})` }">
     
     <!-- HERO SECTION -->
     <div class="hero-header-section">
       <div class="container text-center">
-        <!-- Glow Effect Background untuk Hero -->
         <div class="hero-glow-purple"></div>
         <div class="hero-glow-orange"></div>
 
@@ -16,7 +15,7 @@
           {{ t('home.heroSubtitle') || 'Temui aktiviti luar yang menarik, daripada hiking hingga menyelam.' }}
         </p>
 
-        <!-- SEARCH BAR (Floating) -->
+        <!-- SEARCH BAR -->
         <div class="search-wrapper-floating animate-float" style="animation-delay: 0.2s;">
           <div class="search-glow"></div>
           <div class="search-box">
@@ -110,7 +109,20 @@
       <!-- TRIP POPULAR SECTION -->
       <section class="section-container">
         <div class="section-header">
-          <h3 class="section-title">Trip <span class="text-gradient-animate">Popular</span></h3>
+          <div class="flex items-center gap-4">
+            <h3 class="section-title"><span class="text-gradient-animate">Trip Popular</span></h3>
+            
+            <!-- BUTTON TOGGLE VIEW (Ditambah) -->
+            <button 
+              @click="isCompact = !isCompact"
+              class="toggle-view-btn"
+              :title="isCompact ? 'Tukar ke Grid Penuh' : 'Tukar ke Grid Ringkas'"
+            >
+              <i :class="isCompact ? 'fas fa-border-all' : 'fas fa-list-ul'"></i>
+              <span class="ml-2 text-xs font-medium hidden sm:inline">{{ isCompact ? 'Compact Grid' : 'Full Grid' }}</span>
+            </button>
+          </div>
+
           <a href="#" @click.prevent="$router.push('/trips')" class="see-more-link">
             {{ t('home.viewAll') }} <i class="fas fa-chevron-right text-xs"></i>
           </a>
@@ -121,8 +133,15 @@
             <span>{{ t('common.loading') }}</span>
         </div>
         
-        <div v-else-if="latestTrips.length > 0" class="trip-grid">
-          <TripCard v-for="trip in latestTrips" :key="trip.id" :trip="trip" />
+        <!-- TRIP GRID (Diubah suai) -->
+        <!-- Jika isCompact: guna trip-grid-compact (2 cols). Jika tidak: trip-grid (auto-fill) -->
+        <div v-else-if="latestTrips.length > 0" :class="isCompact ? 'trip-grid-compact' : 'trip-grid'">
+          <TripCard 
+            v-for="trip in latestTrips" 
+            :key="trip.id" 
+            :trip="trip" 
+            :is-compact="isCompact"
+          />
         </div>
         
         <div v-else class="empty-text">{{ t('home.noTrips') }}</div>
@@ -131,7 +150,7 @@
       <!-- FORUM SECTION -->
       <section class="section-container">
         <div class="section-header">
-          <h3 class="section-title">{{ t('home.communityDiscuss') }}</h3>
+          <h3 class="section-title"><span class="text-gradient-animate">{{ t('home.communityDiscuss') }}</span></h3>
           <a href="#" @click.prevent="$router.push('/forum')" class="see-more-link">
             {{ t('home.goToForum') }} <i class="fas fa-chevron-right text-xs"></i>
           </a>
@@ -163,6 +182,9 @@ import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
+// Import gambar
+import bgImage from '../assets/bg-kp2.png';
+
 const { t, locale } = useI18n();
 const router = useRouter();
 
@@ -173,16 +195,17 @@ const loadingTrips = ref(true);
 const loadingPosts = ref(true);
 const searchQuery = ref('');
 
+// TOGGLE STATE (Ditambah)
+const isCompact = ref(false);
+
 // --- DATA: ACTIVITIES ---
 const popularActivities = [
   { key: 'hiking',       icon: 'fas fa-hiking',          color: '#48bb78' },
   { key: 'camping',      icon: 'fas fa-campground',      color: '#ed8936' },
   { key: 'climbing',     icon: 'fas fa-mountain',        color: '#718096' },
   { key: 'caving',       icon: 'fas fa-dungeon',         color: '#a0aec0' },
-  { key: 'diving',       icon: 'fas fa-mask-snorkel',    color: '#4299e1' },
   { key: 'kayaking',     icon: 'fas fa-sailboat',        color: '#38b2ac' },
   { key: 'rafting',      icon: 'fas fa-water',           color: '#3182ce' },
-  { key: 'surfing',      icon: 'fas fa-person-surfing',  color: '#0bc5ea' },
   { key: 'fishing',      icon: 'fas fa-fish',            color: '#2b6cb0' },
   { key: 'paragliding',  icon: 'fas fa-paper-plane',     color: '#9f7aea' },
 ];
@@ -254,17 +277,24 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Scoped styles khusus untuk Homepage Layout */
 .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
 
-/* --- HERO SECTION --- */
-.hero-header-section {
-  padding: 6rem 1rem 3rem; /* Padding lebih besar sikit utk header fixed */
-  text-align: center;
-  position: relative;
+.home {
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
 }
 
-/* Glow Decoration (Sesuai dengan tema dark purple) */
+/* HERO SECTION */
+.hero-header-section {
+  padding: 6rem 1rem 3rem;
+  text-align: center;
+  position: relative;
+  background: transparent; 
+}
+
+/* Glow Decoration */
 .hero-glow-purple, .hero-glow-orange {
   position: absolute;
   filter: blur(80px);
@@ -284,11 +314,11 @@ onMounted(async () => {
 }
 
 .hero-title {
-  font-size: 3rem; /* Lebih besar */
+  font-size: 3rem;
   font-weight: 800;
   line-height: 1.1;
   margin-bottom: 1.2rem;
-  color: #fff; /* Pastikan putih */
+  color: #fff;
 }
 
 .hero-subtitle {
@@ -320,7 +350,6 @@ onMounted(async () => {
 
 .search-box {
   position: relative;
-  /* Glassmorphism Dark Background */
   background: rgba(19, 6, 33, 0.8); 
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -337,7 +366,6 @@ onMounted(async () => {
   flex: 1; border: none; outline: none; background: transparent;
   font-size: 1rem; color: #fff;
 }
-/* Override global input style specifically for this search bar */
 .search-box input:focus { border: none !important; box-shadow: none !important; }
 
 .btn-search-sunset {
@@ -373,7 +401,6 @@ onMounted(async () => {
 
 .overlay-gradient-bottom {
   position: absolute; inset: 0;
-  /* Darker gradient for text readability */
   background: linear-gradient(to top, rgba(5,1,10,0.9) 0%, transparent 50%);
 }
 
@@ -401,7 +428,7 @@ onMounted(async () => {
 .banner-small:hover .overlay-hover { background: rgba(0,0,0,0); }
 
 
-/* --- CATEGORY ICONS (GLASSMOPRHIC DARK) --- */
+/* --- CATEGORY ICONS --- */
 .category-section { margin-bottom: 4rem; padding: 10px 0; }
 .category-list {
   display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
@@ -412,29 +439,25 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-/* Bulatan Glassmorphic */
 .cat-circle {
   width: 70px; height: 70px;
-  /* Dark Glassy Background */
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 24px;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.5rem;
   margin-bottom: 12px;
-  /* Icon color default */
   color: #94a3b8; 
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .cat-circle i { transition: transform 0.3s; }
 
-/* HOVER EFFECTS */
 .cat-item:hover .cat-circle {
   transform: translateY(-8px);
   box-shadow: 0 10px 25px -5px var(--icon-color), 0 0 10px rgba(255,255,255,0.1) inset;
   color: white;
-  background: var(--icon-color); /* Bertukar penuh atau semi-transparent jika mahu */
+  background: var(--icon-color);
   border-color: transparent;
 }
 
@@ -479,8 +502,34 @@ onMounted(async () => {
   transform: translateX(5px);
 }
 
+/* --- TOGGLE BUTTON STYLE (Ditambah) --- */
+.toggle-view-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #aaa;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+.toggle-view-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
 /* GRIDS */
 .trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; }
+
+/* UPDATE: COMPACT GRID (2 Card Sebaris) */
+.trip-grid-compact {
+  display: grid; 
+  /* 2 Column untuk skrin sederhana ke atas */
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
+  gap: 20px;
+}
+
 .forum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
 .loading-area { text-align: center; padding: 3rem; color: var(--text-secondary); }
 
@@ -509,6 +558,7 @@ onMounted(async () => {
   .cat-item { min-width: 80px; }
   
   .trip-grid { grid-template-columns: repeat(1, 1fr); gap: 20px; }
+  .trip-grid-compact { grid-template-columns: 1fr; } /* Mobile jadi 1 column */
   .forum-grid { grid-template-columns: 1fr; }
 }
 </style>

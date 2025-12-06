@@ -8,7 +8,7 @@
 
     <!-- MAIN CONTAINER -->
     <!-- Guna style margin-top manual untuk paksa turun ke bawah -->
-    <div class="container main-content" style="padding-top: 0px; padding-bottom: 3rem;">
+    <div class="container main-content" style="padding-top: 10px; padding-bottom: 3rem;">
       
       <!-- HEADER SECTION -->
       <div class="header-section mb-8 relative z-10 flex flex-col md:flex-row justify-between items-end gap-4">

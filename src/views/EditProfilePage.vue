@@ -8,7 +8,6 @@
 
     <!-- MAIN CONTAINER -->
     <div class="container pt-48 pb-20 relative z-10">
-      
       <div class="glass-form-container fade-up">
         <h2 class="text-3xl font-bold text-white text-center mb-6">⚙️ Tetapan Profil</h2>
 
