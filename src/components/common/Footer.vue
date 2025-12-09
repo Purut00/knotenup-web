@@ -14,7 +14,7 @@
           <ul>
             <li><router-link to="/">{{ t('navbar.home') }}</router-link></li>
             <li><router-link to="/trips">{{ t('navbar.trips') }}</router-link></li>
-            <li><router-link to="/directory">{{ t('directory.title') }}</router-link></li>
+            <li><router-link to="/service">{{ t('directory.title') }}</router-link></li>
             <li><router-link to="/forum">{{ t('navbar.forum') }}</router-link></li>
             <li><router-link to="/requests">{{ t('navbar.requests') }}</router-link></li>
           </ul>
@@ -23,8 +23,12 @@
         <div class="footer-col">
           <h3>{{ t('footer.support') }}</h3>
           <ul>
-            <li><a href="#">{{ t('footer.terms') }}</a></li>
-            <li><a href="#">{{ t('footer.privacy') }}</a></li>
+            <li>
+              <router-link to="/terms">{{ t('footer.terms') || 'Terma & Syarat' }}</router-link>
+            </li>
+            <li>
+              <router-link to="/privacy">{{ t('footer.privacy') || 'Dasar Privasi' }}</router-link>
+            </li>
             <li><a href="#">{{ t('footer.help') }}</a></li>
             <li><a href="#">{{ t('footer.contactAdmin') }}</a></li>
           </ul>

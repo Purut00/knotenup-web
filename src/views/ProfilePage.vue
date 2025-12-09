@@ -6,7 +6,7 @@
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <!-- UPDATE: Guna style manual padding-top: 180px supaya betul-betul tak kena potong -->
+    <!-- MAIN CONTENT -->
     <div class="container profile-layout" style="padding-top: 100px; padding-bottom: 3rem;">
       
       <!-- LEFT SIDEBAR -->
@@ -15,9 +15,10 @@
           <div class="avatar-wrapper">
             <img :src="user.avatar" alt="Avatar" class="avatar" />
             <span v-if="user.role === 'organizer'" class="role-badge">Organizer</span>
+            <span v-if="user.role === 'admin'" class="role-badge" style="background: #e74c3c;">Admin</span>
           </div>
           
-          <h2 class="user-name">{{ user.name }} <span class="verified-icon">✅</span></h2>
+          <h2 class="user-name">{{ user.name }} <span v-if="user.organizerStatus === 'approved'" class="verified-icon">✅</span></h2>
           <p class="user-bio">{{ user.bio || 'Tiada bio.' }}</p>
 
           <div class="stats-grid">
@@ -34,9 +35,11 @@
           </div>
 
           <div class="action-stack" v-if="isOwnProfile">
-            <button v-if="user.role !== 'organizer'" class="btn-action upgrade" @click="$router.push('/be-organizer')">
+            <button v-if="user.role !== 'organizer' && user.role !== 'admin'" class="btn-action upgrade" @click="$router.push('/be-organizer')">
               🏆 Aktifkan Akaun Organizer
             </button>
+            
+            <!-- BUTTON ADMIN: Hanya muncul jika role dari DB adalah 'admin' -->
             <button v-if="isAdmin" class="btn-action admin" @click="$router.push('/admin')">
               ⚡ Admin Panel
             </button>
@@ -151,11 +154,10 @@
       </main>
     </div>
 
-    <!-- MODALS (Business Card & Emergency) - KEKAL SAMA FUNGSI -->
+    <!-- MODALS KEKAL SAMA -->
     <div v-if="showCard" class="modal-overlay" @click.self="showCard = false">
       <div class="card-modal-wrapper">
         <button class="close-btn" @click="showCard = false">✖</button>
-        
         <div class="standard-card business-card" id="capture-business">
           <div class="bc-left-panel">
              <div class="bc-profile-header">
@@ -187,7 +189,6 @@
              </div>
           </div>
         </div>
-
         <div class="modal-actions">
           <button class="share-btn" @click="shareCard">🔗 Copy Link</button>
           <button class="share-btn download" @click="downloadCard('capture-business', `BusinessCard-${user.name}`)">
@@ -200,13 +201,11 @@
     <div v-if="showEmergency" class="modal-overlay" @click.self="showEmergency = false">
       <div class="card-modal-wrapper">
         <button class="close-btn" @click="showEmergency = false">✖</button>
-        
         <div class="standard-card emergency-card" id="capture-emergency">
            <div class="ec-header">
              <h2>EMERGENCY INFO</h2>
              <span>ID: {{ user.name }}</span>
            </div>
-           
            <div class="ec-body">
              <div class="ec-main">
                  <div class="ec-row">
@@ -236,7 +235,6 @@
              </div>
            </div>
         </div>
-
         <div class="modal-actions">
           <button class="share-btn download" style="background:#c0392b;" @click="downloadCard('capture-emergency', `EmergencyCard-${user.name}`)">
             {{ isDownloading ? 'Prosessing...' : '⬇️ Download PDF' }}
@@ -263,17 +261,14 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-// STATE MODALS
+// STATE
 const activeTab = ref('upcoming');
 const showCard = ref(false);
 const showEmergency = ref(false); 
-
 const loadingData = ref(true);
 const isOwnProfile = ref(false);
 const isAdmin = ref(false);
 const isDownloading = ref(false);
-
-const ADMIN_EMAIL = "knotenup@gmail.com"; 
 
 const upcomingTrips = ref<any[]>([]);
 const historyTrips = ref<any[]>([]);
@@ -281,7 +276,7 @@ const myPosts = ref<any[]>([]);
 
 const user = reactive({
   id: '', name: 'Loading...', bio: '', avatar: 'https://i.pravatar.cc/300?img=3',
-  whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '', role: 'user',
+  whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '', role: 'user', organizerStatus: '',
   organizerDetails: { orgName: '', ssm: '', license: '' },
   bloodType: '', allergies: '', emergencyContact: ''
 });
@@ -289,6 +284,18 @@ const user = reactive({
 const organizedCount = computed(() => upcomingTrips.value.length + historyTrips.value.length);
 const getDay = (dateString: string) => { if(!dateString) return '01'; return new Date(dateString).getDate(); };
 const getMonth = (dateString: string) => { if(!dateString) return 'JAN'; return new Date(dateString).toLocaleDateString('en-MY', { month: 'short' }).toUpperCase(); };
+
+// --- 1. FUNCTION SEMAK ROLE (Tiada Hardcode) ---
+const checkAdminRole = async (uid: string) => {
+  try {
+    const userDoc = await getDoc(doc(db, "users", uid));
+    if (userDoc.exists() && userDoc.data().role === 'admin') {
+      isAdmin.value = true;
+    }
+  } catch (e) {
+    console.error("Error checking role:", e);
+  }
+};
 
 const fetchUserData = async (targetUserId: string) => {
   loadingData.value = true;
@@ -305,9 +312,10 @@ const fetchUserData = async (targetUserId: string) => {
     } 
     else { user.name = 'User Tidak Dijumpai'; }
 
+    // Fetch Private Data (Hanya jika admin atau owner)
     user.bloodType = ''; user.allergies = ''; user.emergencyContact = '';
-
     const currentUser = auth.currentUser;
+    
     if (currentUser && (currentUser.uid === targetUserId || isAdmin.value)) {
        try {
          const privateRef = doc(db, "users", targetUserId, "private_data", "info");
@@ -318,9 +326,10 @@ const fetchUserData = async (targetUserId: string) => {
             user.allergies = pData.allergies;
             user.emergencyContact = pData.emergencyContact;
          }
-       } catch (err) { console.log("Akses data peribadi disekat."); }
+       } catch (err) { console.log("Akses data peribadi disekat (privacy)."); }
     }
 
+    // Fetch Trips
     const tripMap = new Map();
     const qOrganizer = query(collection(db, "trips"), where("organizerId", "==", targetUserId));
     const snapOrganizer = await getDocs(qOrganizer);
@@ -341,6 +350,7 @@ const fetchUserData = async (targetUserId: string) => {
     upcomingTrips.value.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
     historyTrips.value.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
+    // Fetch Posts
     const qPost = query(collection(db, "forum_posts"), where("authorId", "==", targetUserId), orderBy("createdAt", "desc"));
     const snapPost = await getDocs(qPost);
     myPosts.value = snapPost.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -350,23 +360,33 @@ const fetchUserData = async (targetUserId: string) => {
 };
 
 onMounted(() => {
-  onAuthStateChanged(auth, (currentUser) => {
+  onAuthStateChanged(auth, async (currentUser) => {
+    // Cek dulu kalau user yang login ini Admin (untuk paparkan button)
+    if (currentUser) {
+      await checkAdminRole(currentUser.uid);
+    }
+
+    // Tentukan nak tunjuk profile siapa
     const routeId = route.params.id as string;
+    
     if (routeId) {
-      if (currentUser && currentUser.email === ADMIN_EMAIL) isAdmin.value = true;
+      // Tengok profil orang lain (atau diri sendiri melalui link /user/:id)
       fetchUserData(routeId);
       isOwnProfile.value = currentUser ? (currentUser.uid === routeId) : false;
     } else {
+      // Tengok profil sendiri (/profile)
       if (currentUser) {
-        if (currentUser.email === ADMIN_EMAIL) isAdmin.value = true;
         fetchUserData(currentUser.uid);
         isOwnProfile.value = true;
-      } else { router.push('/'); }
+      } else { 
+        router.push('/'); 
+      }
     }
   });
 });
 
 watch(() => route.params.id, (newId) => { if (newId) fetchUserData(newId as string); });
+
 const editPost = (id: string) => { router.push(`/forum/edit/${id}`); };
 const deletePost = async (id: string) => { if (confirm("Padam?")) { try { await deleteDoc(doc(db, "forum_posts", id)); myPosts.value = myPosts.value.filter(p => p.id !== id); } catch(e) {} } };
 
@@ -423,7 +443,7 @@ const shareCard = () => { navigator.clipboard.writeText(`https://knotenup.com/us
 }
 
 .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); object-fit: cover; margin-bottom: 15px; }
-.role-badge { background: #e67e22; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 12px; text-transform: uppercase; }
+.role-badge { background: #e67e22; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 12px; text-transform: uppercase; margin-right: 5px; }
 .user-name { font-size: 1.5rem; color: white; margin: 0; font-weight: 700; }
 .user-bio { color: #cbd5e1; font-size: 0.95rem; margin-top: 8px; line-height: 1.5; }
 
@@ -444,6 +464,7 @@ const shareCard = () => { navigator.clipboard.writeText(`https://knotenup.com/us
 }
 .btn-action:hover { background: rgba(255,255,255,0.1); border-color: #6c63ff; }
 .btn-action.upgrade { background: linear-gradient(135deg, #10b981, #059669); border: none; }
+.btn-action.admin { background: linear-gradient(135deg, #e74c3c, #c0392b); border: none; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3); }
 .btn-action.emergency { border-color: #c0392b; color: #f87171; }
 .btn-action.emergency:hover { background: #c0392b; color: white; }
 
