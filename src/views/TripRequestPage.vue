@@ -1,15 +1,12 @@
 <template>
   <div class="request-page">
     
-    <!-- BACKGROUND LAYERS -->
     <div class="contour-lines"></div>
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <!-- CONTAINER UTAMA -->
     <div class="container main-content" style="padding-top: 100px; padding-bottom: 3rem;">
       
-      <!-- HEADER SECTION -->
       <div class="header-section mb-8 relative z-10 flex flex-col md:flex-row justify-between items-end gap-4">
         <div class="text-center md:text-left">
           <h1 class="text-3xl font-bold text-white mb-2">{{ t('request.title') || 'Permintaan Trip' }}</h1>
@@ -18,7 +15,6 @@
           </p>
         </div>
         
-        <!-- BUTTON -->
         <button class="btn-create-request" @click="showCreateModal = true">
           <span class="btn-content">
             <i class="fas fa-plus-circle text-xl"></i>
@@ -28,11 +24,9 @@
         </button>
       </div>
 
-      <!-- FILTER SECTION -->
       <div class="filter-section mb-8 relative z-10">
         <div class="filter-container">
           
-          <!-- Row 1: Search Bar -->
           <div class="search-row">
             <div class="search-wrapper-full">
                <i class="fas fa-search search-icon"></i>
@@ -46,10 +40,8 @@
             </div>
           </div>
 
-          <!-- Row 2: Filters -->
           <div class="filters-row mt-4">
              
-             <!-- Filter: Category -->
              <div class="select-wrapper">
                 <i class="fas fa-layer-group select-icon text-purple-400"></i>
                 <select v-model="filterCategory" class="custom-select">
@@ -62,7 +54,6 @@
                 </select>
              </div>
 
-             <!-- Filter: State -->
              <div class="select-wrapper">
                 <i class="fas fa-map-marker-alt select-icon text-red-400"></i>
                 <select v-model="filterState" class="custom-select">
@@ -71,7 +62,6 @@
                 </select>
              </div>
 
-             <!-- Reset & Fix Buttons -->
              <div class="flex gap-2 shrink-0">
                 <button 
                     v-if="searchQuery || filterCategory || filterState" 
@@ -90,7 +80,6 @@
         </div>
       </div>
 
-      <!-- CONTENT GRID -->
       <div class="content-area relative z-10">
         
         <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-gray-400">
@@ -98,7 +87,6 @@
           <p>{{ t('common.loading') }}...</p>
         </div>
         
-        <!-- Empty State -->
         <div v-else-if="filteredRequests.length === 0" class="empty-state glass-panel">
           <i class="fas fa-paper-plane text-4xl mb-4 opacity-30 text-gray-400"></i>
           <h3 class="text-lg font-bold text-gray-300">Tiada Permintaan Aktif</h3>
@@ -106,27 +94,22 @@
           <button @click="resetFilters" class="text-purple-400 underline mt-2">Reset Filter</button>
         </div>
 
-        <!-- Request Grid -->
         <div v-else class="request-grid">
           <div 
             v-for="req in filteredRequests" 
             :key="req.id" 
             class="request-card glass-card"
           >
-            <!-- PEMBAIKAN: Category Badge Pindah ke KIRI -->
             <div class="category-badge">
                {{ req.category || 'Umum' }}
             </div>
 
-            <!-- PEMBAIKAN: Delete Button Kekal di KANAN -->
             <button v-if="isOwner(req.userId)" class="btn-delete-card" @click="deleteRequest(req.id)">
                <i class="fas fa-trash"></i>
             </button>
 
-            <!-- Card Body -->
             <div class="card-body">
               
-              <!-- User & Meta -->
               <div class="user-row mb-3">
                  <img :src="req.userAvatar || 'https://i.pravatar.cc/150?img=3'" class="avatar-sm" />
                  <div class="user-meta">
@@ -135,10 +118,8 @@
                  </div>
               </div>
 
-              <!-- Title -->
               <h3 class="req-title mb-2">Ke: {{ req.destination }}</h3>
               
-              <!-- Info Icons -->
               <div class="info-grid mb-3">
                  <div class="info-item">
                     <i class="fas fa-map-marker-alt text-red-400 w-5"></i> 
@@ -161,7 +142,6 @@
               <p class="req-desc line-clamp-2">"{{ req.note }}"</p>
             </div>
 
-            <!-- Footer Action -->
             <div class="card-footer">
                <button v-if="isOwner(req.userId)" 
                   class="btn-action btn-owner" 
@@ -170,10 +150,10 @@
                   @click="viewOffers(req)"
                >
                   <span v-if="req.offeredBy && req.offeredBy.length > 0">
-                     📨 Lihat {{ req.offeredBy.length }} Tawaran
+                      📨 Lihat {{ req.offeredBy.length }} Tawaran
                   </span>
                   <span v-else>
-                     👤 Menunggu Tawaran...
+                      👤 Menunggu Tawaran...
                   </span>
                </button>
 
@@ -199,7 +179,6 @@
       </div>
     </div>
 
-    <!-- MODAL 1: CREATE REQUEST -->
     <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
       <div class="glass-modal fade-up">
         <div class="modal-header">
@@ -270,7 +249,6 @@
       </div>
     </div>
 
-    <!-- MODAL 2: OFFER MODAL -->
     <div v-if="showOfferModal" class="modal-overlay" @click.self="showOfferModal = false">
       <div class="glass-modal fade-up">
         <div class="modal-header header-offer">
@@ -309,7 +287,6 @@
       </div>
     </div>
 
-    <!-- MODAL 3: VIEW OFFERS -->
     <div v-if="showViewOffersModal" class="modal-overlay" @click.self="showViewOffersModal = false">
       <div class="glass-modal fade-up modal-wide">
         <div class="modal-header header-view">
@@ -327,8 +304,8 @@
                    <div class="offer-user" @click="goToProfile(offer.organizerId)">
                       <img :src="offer.organizerAvatar || 'https://i.pravatar.cc/150'" class="avatar-sm">
                       <div>
-                         <div class="font-bold text-white">{{ offer.organizerName }}</div>
-                         <div class="text-xs text-gray-400">{{ formatDate(offer.createdAt) }}</div>
+                          <div class="font-bold text-white">{{ offer.organizerName }}</div>
+                          <div class="text-xs text-gray-400">{{ formatDate(offer.createdAt) }}</div>
                       </div>
                    </div>
                    <div class="offer-price-tag">RM {{ offer.offeredPrice }}</div>
@@ -352,7 +329,10 @@ import { ref, reactive, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebaseConfig';
-import { collection, addDoc, getDocs, deleteDoc, updateDoc, doc, getDoc, query, orderBy, where, serverTimestamp, arrayUnion } from 'firebase/firestore';
+import { 
+  collection, addDoc, getDocs, deleteDoc, updateDoc, doc, getDoc, 
+  query, orderBy, where, serverTimestamp, collectionGroup 
+} from 'firebase/firestore'; // Added collectionGroup
 import { onAuthStateChanged } from 'firebase/auth';
 import { ACTIVITY_CATEGORIES, MALAYSIA_STATES } from '../constants/data'; 
 
@@ -373,6 +353,9 @@ const requests = ref<any[]>([]);
 const currentOffers = ref<any[]>([]);
 const selectedRequest = ref<any>(null);
 
+// State baru untuk track offer pengguna semasa
+const myOfferedRequestIds = ref<Set<string>>(new Set());
+
 const offerForm = reactive({ price: null, message: '', contact: '' });
 const searchQuery = ref('');
 const filterCategory = ref('');
@@ -392,10 +375,18 @@ const isOwner = (reqUserId: string): boolean => {
   return auth.currentUser ? auth.currentUser.uid === reqUserId : false;
 };
 
+// LOGIC DIKEMASKINI: Cek local state juga
 const hasOffered = (req: any): boolean => {
   const currentUser = auth.currentUser;
-  if (!currentUser || !req.offeredBy) return false;
-  return req.offeredBy.includes(currentUser.uid);
+  if (!currentUser) return false;
+  
+  // 1. Cek local state (untuk immediate update) & fetch hasil collectionGroup
+  if (myOfferedRequestIds.value.has(req.id)) return true;
+
+  // 2. Fallback ke legacy array (jika ada data lama)
+  if (req.offeredBy && req.offeredBy.includes(currentUser.uid)) return true;
+
+  return false;
 };
 
 const goToProfile = (userId: string) => {
@@ -420,6 +411,25 @@ const fetchRequests = async () => {
   } catch (e) { 
     console.error("Error fetching requests:", e); 
   } finally { loading.value = false; }
+};
+
+// FUNGSI BARU: Fetch Offers sendiri menggunakan Collection Group
+// Ini perlu untuk tahu status 'Tawaran Dihantar' tanpa bergantung pada array parent yang tidak selamat
+const fetchMyOffers = async (userId: string) => {
+  try {
+    const q = query(collectionGroup(db, 'offers'), where('organizerId', '==', userId));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((docSnap) => {
+      // Dapatkan ID parent (request ID) dari ref path
+      const reqId = docSnap.ref.parent.parent?.id;
+      if (reqId) {
+        myOfferedRequestIds.value.add(reqId);
+      }
+    });
+  } catch (e) {
+    // Note: Jika console error "Requires Index", abaikan sementara atau buat index di Firebase Console
+    console.log("CollectionGroup query perlu index. Jika error, status tawaran mungkin tak persist selepas refresh.");
+  }
 };
 
 const fixOldData = async () => {
@@ -448,7 +458,13 @@ const checkOrganizerStatus = async (user: any) => {
     const userDoc = await getDoc(userDocRef);
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      isCurrentUserOrganizer.value = (userData.role === 'organizer' || userData.accountType === 'organizer');
+      const isOrg = (userData.role === 'organizer' || userData.accountType === 'organizer');
+      isCurrentUserOrganizer.value = isOrg;
+      
+      // Jika organizer, fetch offer history mereka
+      if (isOrg) {
+        fetchMyOffers(user.uid);
+      }
     }
   } catch (e) { console.error(e); }
 };
@@ -533,6 +549,7 @@ const submitOffer = async () => {
 
   submittingOffer.value = true;
   try {
+    // 1. Tambah offer ke SUBCOLLECTION (Selamat)
     const offersRef = collection(db, "trip_requests", selectedRequest.value.id, "offers");
     await addDoc(offersRef, {
       organizerId: user.uid,
@@ -544,12 +561,20 @@ const submitOffer = async () => {
       createdAt: serverTimestamp(),
       status: 'pending' 
     });
-    const requestRef = doc(db, "trip_requests", selectedRequest.value.id);
-    await updateDoc(requestRef, { offeredBy: arrayUnion(user.uid) });
+
+    // SAFETY UPDATE: 
+    // Kita BUANG 'updateDoc' ke parent (requestRef) di sini untuk elak 'Competitor Sabotage'.
+    // Organizer tidak sepatutnya boleh tulis ke dokumen request milik user lain.
+    // Jika perlu update count, sebaiknya guna Cloud Functions.
+    
+    // Update local state supaya butang bertukar jadi hijau serta-merta
+    myOfferedRequestIds.value.add(selectedRequest.value.id);
 
     alert("Proposal berjaya dihantar!");
     showOfferModal.value = false;
-    fetchRequests();
+    
+    // Refresh bukan mandatori sebab kita dah update local state, tapi bagus untuk data sync
+    // fetchRequests(); 
   } catch (e) { console.error(e); alert("Gagal menghantar tawaran."); } finally { submittingOffer.value = false; }
 };
 

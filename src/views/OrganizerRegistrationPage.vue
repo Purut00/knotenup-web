@@ -84,7 +84,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router'; 
 import { auth, db } from '../firebaseConfig';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc } from 'firebase/firestore';
 
 const router = useRouter(); 
 const loading = ref(false);
@@ -122,15 +122,19 @@ const submitUpgrade = async () => {
     const userRef = doc(db, "users", auth.currentUser.uid);
     
     // Status 'pending' untuk admin approval
-    await updateDoc(userRef, {
+  await updateDoc(userRef, {
       organizerStatus: 'pending',
-      organizerDetails: {
-        orgName: form.orgName,
-        ssm: form.ssm,
-        license: form.license,
-        submittedAt: new Date()
-      }
-    });
+        'organizerDetails.orgName': form.orgName,
+        'organizerDetails.submittedAt': new Date()
+});
+
+// 2. Simpan SSM & Lesen ke Private Data (Secure)
+  const privateDataRef = doc(db, "users", auth.currentUser.uid, "private_data", "organizer_info");
+  await setDoc(privateDataRef, {
+    ssm: form.ssm,
+    license: form.license,
+    updatedAt: new Date()
+});
 
     alert("Permohonan dihantar! Sila tunggu pengesahan daripada Admin.");
     
