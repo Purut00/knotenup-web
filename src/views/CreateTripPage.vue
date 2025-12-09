@@ -1,21 +1,17 @@
 <template>
   <div class="create-trip-page">
     
-    <!-- BACKGROUND LAYERS -->
     <div class="contour-lines"></div>
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <!-- MAIN CONTAINER (Padding Besar) -->
     <div class="container pt-44 pb-20">
       
-      <!-- HEADER -->
       <div class="text-center mb-10 relative z-10">
         <h1 class="text-4xl font-bold text-white mb-2">{{ t('createTrip.heroTitle') || 'Cipta Trip Baru' }}</h1>
         <p class="text-gray-400">"{{ t('createTrip.heroSub') || 'Bawa orang lain meneroka keindahan alam bersama anda.' }}"</p>
       </div>
 
-      <!-- STEPPER (Horizontal) -->
       <div class="stepper-wrapper relative z-10">
         <div class="step-item" :class="{ active: currentStep >= 1, done: currentStep > 1 }">
           <div class="step-circle">1</div>
@@ -33,10 +29,8 @@
         </div>
       </div>
 
-      <!-- FORM GLASS CARD -->
       <div class="glass-form-card relative z-10 fade-up">
         
-        <!-- STEP 1: INFO ASAS -->
         <div v-if="currentStep === 1">
           <h2 class="section-title">{{ t('createTrip.section1Title') || 'Maklumat Trip' }}</h2>
           
@@ -115,7 +109,6 @@
           </div>
         </div>
 
-        <!-- STEP 2: LOGISTIK -->
         <div v-if="currentStep === 2">
           <h2 class="section-title">{{ t('createTrip.section2Title') || 'Tarikh & Harga' }}</h2>
 
@@ -154,14 +147,12 @@
           </div>
         </div>
 
-        <!-- STEP 3: MEDIA & DETAIL -->
         <div v-if="currentStep === 3">
           <h2 class="section-title">{{ t('createTrip.section3Title') || 'Galeri & Info Lanjut' }}</h2>
 
           <div class="form-group">
             <label>📸 Gambar Trip (Max 5)</label>
             <div class="upload-grid-trip mt-2">
-               <!-- Main Image -->
                <div class="main-upload" @click="triggerUpload(0)" :style="{ backgroundImage: `url(${previewImages[0]})` }">
                  <div v-if="!previewImages[0]" class="placeholder-center">
                    <i class="fas fa-camera text-2xl mb-2 text-purple-400"></i>
@@ -170,7 +161,6 @@
                  <input type="file" ref="fileInput0" @change="(e) => handleImageSelect(e, 0)" accept="image/*" hidden />
                </div>
                
-               <!-- Sub Images -->
                <div class="sub-uploads">
                  <div v-for="i in 4" :key="i" class="sub-box" @click="triggerUpload(i)" :style="{ backgroundImage: `url(${previewImages[i]})` }">
                    <span v-if="!previewImages[i]">+</span>
@@ -216,14 +206,11 @@
           </div>
         </div>
 
-        <!-- ACTION BUTTONS -->
         <div class="form-actions mt-8 flex justify-between items-center">
            <button v-if="currentStep > 1" @click="prevStep" class="btn-back">
              <i class="fas fa-arrow-left mr-2"></i> Kembali
            </button>
-           <div v-else></div> <!-- Spacer -->
-
-           <button v-if="currentStep < 3" @click="nextStep" class="btn-next">
+           <div v-else></div> <button v-if="currentStep < 3" @click="nextStep" class="btn-next">
              Seterusnya <i class="fas fa-arrow-right ml-2"></i>
            </button>
            <button v-if="currentStep === 3" @click="submitForm" class="btn-submit" :disabled="loading">
@@ -245,6 +232,7 @@ import { auth, db, storage } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; 
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { isSpam } from '../utils/spamFilter';
+import { validateImageFile } from '../utils/security'; // Import helper tadi
 
 const { t } = useI18n(); 
 const router = useRouter();
@@ -288,18 +276,32 @@ const toggleService = (service: string) => {
 };
 
 const triggerUpload = (index: number) => {
-  // Hacky way to trigger specific refs in v-for
-  // In Vue 3 script setup, dynamic refs are handled differently, but DOM query works for simple cases
   const input = document.querySelectorAll('input[type=file]')[index] as HTMLInputElement;
   if(input) input.click();
 };
 
-const handleImageSelect = (event: Event, index: number) => {
+// [UPDATED] File Handler dengan Security Check
+const handleImageSelect = async (event: Event, index: number) => {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files[0]) {
     const file = target.files[0];
-    if (file.size > 5 * 1024 * 1024) return alert("Fail terlalu besar (Max 5MB).");
     
+    // 1. Validasi Saiz (Max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Fail terlalu besar (Max 5MB).");
+      target.value = ''; // Reset input
+      return;
+    }
+
+    // 2. Validasi Security (Magic Bytes)
+    const isValid = await validateImageFile(file);
+    if (!isValid) {
+      alert("Amaran Keselamatan: Fail ini dikesan bukan gambar sebenar atau rosak.");
+      target.value = ''; // Reset input
+      return;
+    }
+    
+    // 3. Proses Fail
     rawFiles.value[index] = file;
     const reader = new FileReader();
     reader.onload = (e) => { if (e.target?.result) previewImages.value[index] = e.target.result as string; };

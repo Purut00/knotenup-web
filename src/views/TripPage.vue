@@ -1,25 +1,20 @@
 <template>
   <div class="trip-page">
     
-    <!-- GLOW BACKGROUND (Ikut Homepage) -->
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
     <div class="container pt-8 pb-12">
       
-      <!-- HEADER SIMPLE -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-white mb-2">Semua Trip</h1>
         <p class="text-gray-400">Cari pengembaraan seterusnya di sini.</p>
       </div>
 
-      <!-- FILTER SECTION (Clean Row) -->
       <div class="filter-section mb-8">
         
-        <!-- Row 1: Inputs -->
         <div class="filter-row">
           
-          <!-- Search -->
           <div class="search-wrapper">
              <i class="fas fa-search search-icon"></i>
              <input 
@@ -30,10 +25,8 @@
              />
           </div>
 
-          <!-- Filters -->
           <div class="filters-wrapper">
              
-             <!-- Location -->
              <div class="select-wrapper">
                 <i class="fas fa-map-marker-alt select-icon text-red-400"></i>
                 <select v-model="filterLocation" class="custom-select">
@@ -47,7 +40,6 @@
                 </select>
              </div>
 
-             <!-- Date -->
              <div class="select-wrapper">
                 <i class="far fa-calendar-alt select-icon text-orange-400"></i>
                 <select v-model="filterDate" class="custom-select">
@@ -57,7 +49,6 @@
                 </select>
              </div>
 
-             <!-- Level -->
              <div class="select-wrapper">
                 <i class="fas fa-tachometer-alt select-icon text-purple-400"></i>
                 <select v-model="filterLevel" class="custom-select">
@@ -68,7 +59,6 @@
                 </select>
              </div>
 
-             <!-- Reset -->
              <button 
                 v-if="searchQuery || currentFilter || filterLevel || filterDate || filterLocation" 
                 class="btn-reset" 
@@ -79,7 +69,6 @@
           </div>
         </div>
 
-        <!-- Row 2: Categories -->
         <div class="category-scroll-container mt-4">
             <button 
               class="cat-pill" 
@@ -102,27 +91,23 @@
 
       </div>
 
-      <!-- RESULTS INFO -->
       <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-2">
          <h2 class="text-xl font-bold text-white">
            {{ filteredTrips.length }} Trip Ditemui
          </h2>
       </div>
 
-      <!-- LOADING -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-gray-400">
         <div class="spinner mb-4"></div>
         <p>Sedang memuatkan...</p>
       </div>
 
-      <!-- EMPTY STATE -->
       <div v-else-if="filteredTrips.length === 0" class="text-center py-20 text-gray-500">
         <i class="fas fa-search text-4xl mb-4 opacity-30"></i>
         <p>Tiada trip ditemui untuk carian ini.</p>
         <button @click="resetFilters" class="text-purple-400 underline mt-2">Reset Filter</button>
       </div>
 
-      <!-- GRID LAYOUT (Sama macam Homepage) -->
       <div v-else class="trip-grid">
          <TripCard v-for="trip in filteredTrips" :key="trip.id" :trip="trip" />
       </div>
@@ -137,7 +122,8 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import TripCard from '../components/trip/TripCard.vue';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+// [UPDATE 1] Tambah 'where' dalam import
+import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -180,6 +166,28 @@ const selectCategory = (catKey: string) => {
   router.replace({ query: { ...route.query, category: catKey || undefined } });
 };
 
+// [UPDATE 2] Fungsi bantuan untuk filter tarikh
+const checkDateFilter = (dateStr: string, filterType: string) => {
+  if (!dateStr) return true;
+  const tripDate = new Date(dateStr);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  if (filterType === 'week') {
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    return tripDate >= today && tripDate <= nextWeek;
+  }
+  
+  if (filterType === 'month') {
+    const nextMonth = new Date(today);
+    nextMonth.setDate(today.getDate() + 30);
+    return tripDate >= today && tripDate <= nextMonth;
+  }
+  
+  return true;
+};
+
 const filteredTrips = computed(() => {
   return trips.value.filter(trip => {
     const matchSearch = !searchQuery.value || 
@@ -193,7 +201,10 @@ const filteredTrips = computed(() => {
     
     const matchLevel = !filterLevel.value || trip.difficulty === filterLevel.value;
     
-    return matchSearch && matchLoc && matchCat && matchLevel;
+    // [UPDATE 3] Masukkan filter tarikh ke dalam logic computed
+    const matchDate = !filterDate.value || checkDateFilter(trip.startDate, filterDate.value);
+    
+    return matchSearch && matchLoc && matchCat && matchLevel && matchDate;
   });
 });
 
@@ -202,17 +213,18 @@ onMounted(async () => {
   if (route.query.q) searchQuery.value = route.query.q as string;
 
   try {
-    const q = query(collection(db, "trips"), orderBy("createdAt", "desc"));
+    // [UPDATE 4 - SECURITY FILTER] Filter keluar trip berstatus 'archived'
+    // Nota: Jika error "index needed", buka console browser & klik link Firebase
+    const q = query(
+      collection(db, "trips"), 
+      where("status", "!=", "archived"), 
+      orderBy("createdAt", "desc")
+    );
+
     const querySnapshot = await getDocs(q);
     trips.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) { 
     console.error("Error fetching trips:", error);
-    // Mock Data
-    trips.value = [
-       { id: 1, title: 'Hiking Gunung Nuang', location: 'Selangor', difficulty: 'Hard', category: 'hiking', status: 'open', price: 50, maxSlots: 20, currentSlots: 5, startDate: '2023-12-25', image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=800' },
-       { id: 2, title: 'Camping di Janda Baik', location: 'Pahang', difficulty: 'Easy', category: 'camping', status: 'open', price: 120, maxSlots: 10, currentSlots: 8, startDate: '2024-01-10', image: 'https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?w=800' },
-       { id: 3, title: 'White Water Rafting', location: 'Perak', difficulty: 'Moderate', category: 'rafting', status: 'open', price: 180, maxSlots: 15, currentSlots: 2, startDate: '2024-02-05', image: 'https://images.unsplash.com/photo-1530866495561-507c9faab2ed?w=800' }
-    ];
   } finally { 
     loading.value = false; 
   }

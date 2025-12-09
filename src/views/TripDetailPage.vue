@@ -1,12 +1,10 @@
 <template>
   <div class="trip-detail-page">
     
-    <!-- BACKGROUND LAYERS -->
     <div class="contour-lines"></div>
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <!-- MAIN CONTAINER (Padding 120px) -->
     <div class="content-container" style="padding-top: 120px; padding-bottom: 4rem;">
 
       <div v-if="loading" class="loading-container">
@@ -16,10 +14,8 @@
 
       <div v-else-if="trip" class="fade-up">
         
-        <!-- 🔥 HERO GALLERY (BENTO GRID) 🔥 -->
         <div class="hero-gallery-wrapper mb-8">
           
-          <!-- Desktop Grid -->
           <div class="desktop-gallery">
             <div class="gallery-item main-item" 
                  :style="{ backgroundImage: `url(${displayImages[0]})` }"
@@ -36,12 +32,10 @@
               </div>
             </div>
             
-            <!-- Button View Photos -->
             <button class="btn-show-all" @click="openLightbox(0)">
               <i class="fas fa-images mr-2"></i> {{ t('trip.viewPhotos') || 'Lihat Gambar' }}
             </button>
             
-            <!-- Title Overlay -->
             <div class="gallery-title-overlay">
               <span class="badge-cat">{{ trip.category }}</span>
               <h1>{{ trip.title }}</h1>
@@ -53,7 +47,6 @@
             </div>
           </div>
 
-          <!-- Mobile Swiper -->
           <div class="mobile-gallery">
             <swiper
               :modules="[Pagination, Navigation]"
@@ -75,19 +68,15 @@
           </div>
         </div>
 
-        <!-- MAIN LAYOUT -->
         <div class="main-layout">
           
-          <!-- LEFT CONTENT -->
           <div class="left-content">
             
-            <!-- About -->
             <div class="glass-panel mb-6">
               <h3><i class="fas fa-book-open text-purple-400 mr-2"></i> {{ t('trip.about') || 'Tentang Trip' }}</h3>
               <p class="desc-text">{{ trip.description }}</p>
             </div>
 
-            <!-- Schedule -->
             <div class="glass-panel mb-6">
               <h3><i class="far fa-calendar-alt text-orange-400 mr-2"></i> {{ t('trip.schedule') || 'Jadual' }}</h3>
               <div class="date-row">
@@ -103,7 +92,6 @@
               </div>
             </div>
 
-            <!-- Info Cards Grid -->
             <div class="info-grid mb-6">
               <div class="info-card warning" v-if="trip.mandatory">
                 <h4><i class="fas fa-exclamation-triangle mr-1"></i> {{ t('createTrip.mandatory') }}</h4>
@@ -119,7 +107,6 @@
               </div>
             </div>
 
-            <!-- Includes -->
             <div class="glass-panel mb-6" v-if="trip.includes && trip.includes.length">
               <h3><i class="fas fa-check-circle text-green-400 mr-2"></i> {{ t('createTrip.includes') }}</h3>
               <ul class="includes-list">
@@ -129,7 +116,6 @@
               </ul>
             </div>
 
-            <!-- Organizer Card -->
             <div class="glass-panel organizer-card" @click="$router.push(`/user/${trip.organizerId}`)">
               <div class="flex items-center gap-4">
                 <img :src="trip.organizerImage || 'https://i.pravatar.cc/150?img=3'" class="org-avatar" />
@@ -143,8 +129,21 @@
 
           </div>
 
-          <!-- RIGHT SIDEBAR (Sticky) -->
           <div class="right-sidebar">
+            
+            <div v-if="isOwner" class="glass-panel mb-4 border border-red-500/30 bg-red-900/10">
+               <h3 class="text-red-400 text-sm mb-3 font-bold uppercase tracking-widest border-b border-red-500/20 pb-2">
+                 <i class="fas fa-user-shield mr-2"></i> Zon Penganjur
+               </h3>
+               <button @click="archiveTrip" :disabled="isProcessing" class="w-full btn-delete-soft">
+                 <i class="fas fa-trash-alt mr-2"></i>
+                 {{ isProcessing ? 'Memproses...' : 'Padam Trip (Arkib)' }}
+               </button>
+               <p class="text-xs text-red-300 mt-2 italic text-center">
+                 * Data tidak dipadam kekal, hanya diarkibkan demi keselamatan.
+               </p>
+            </div>
+
             <div class="glass-panel price-card">
               <div class="price-tag">
                 <span class="currency">RM</span>
@@ -181,7 +180,6 @@
         <button @click="$router.push('/trips')" class="btn-back">{{ t('trip.backList') }}</button>
       </div>
 
-      <!-- Lightbox -->
       <VueEasyLightbox
         :visible="visibleRef"
         :imgs="displayImages"
@@ -195,10 +193,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { db } from '../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { db, auth } from '../firebaseConfig'; // Import Auth
+import { doc, getDoc, updateDoc } from 'firebase/firestore'; // Guna updateDoc, bukan deleteDoc
 
 // @ts-ignore
 import VueEasyLightbox from 'vue-easy-lightbox';
@@ -215,8 +213,10 @@ import 'swiper/css/navigation';
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 const trip = ref<any>(null);
 const loading = ref(true);
+const isProcessing = ref(false);
 
 // Lightbox State
 const visibleRef = ref(false);
@@ -241,6 +241,37 @@ const displayImages = computed(() => {
   return new Array(5).fill(trip.value?.image || 'https://via.placeholder.com/1200x500');
 });
 
+// [SECURITY] Check Owner
+const isOwner = computed(() => {
+  return auth.currentUser && trip.value && auth.currentUser.uid === trip.value.organizerId;
+});
+
+// [SECURITY] Soft Delete Function
+const archiveTrip = async () => {
+  if (!confirm("Adakah anda pasti? Trip akan diarkibkan dan tidak lagi kelihatan kepada umum.")) return;
+  
+  isProcessing.value = true;
+  try {
+    const tripRef = doc(db, "trips", trip.value.id);
+    
+    // SOFT DELETE: Tukar status kepada 'archived'.
+    // Rules Firestore akan halang 'deleteDoc', tapi benarkan update status ke 'archived'
+    await updateDoc(tripRef, {
+      status: 'archived',
+      isVisible: false,
+      archivedAt: new Date()
+    });
+
+    alert("Trip berjaya dipadam (diarkibkan).");
+    router.push('/trips');
+  } catch (error) {
+    console.error("Error archiving trip:", error);
+    alert("Gagal memadam trip. Sila cuba lagi.");
+  } finally {
+    isProcessing.value = false;
+  }
+};
+
 const openLightbox = (index: number) => {
   indexRef.value = index;
   visibleRef.value = true;
@@ -256,7 +287,13 @@ onMounted(async () => {
     const docRef = doc(db, "trips", tripId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      trip.value = docSnap.data();
+      const data = docSnap.data();
+      // Pilihan: Redirect jika user biasa cuba akses trip archived
+      if (data.status === 'archived' && (!auth.currentUser || auth.currentUser.uid !== data.organizerId)) {
+         trip.value = null; // Tunjuk 'Trip Not Found'
+      } else {
+         trip.value = { id: docSnap.id, ...data };
+      }
     }
   } catch (error) {
     console.error("Error:", error);
@@ -398,6 +435,25 @@ onMounted(async () => {
 }
 .btn-join:hover { transform: translateY(-2px); }
 .btn-join.disabled { background: rgba(255,255,255,0.1); color: #666; cursor: not-allowed; box-shadow: none; transform: none; background-image: none; }
+
+/* DELETE SOFT BUTTON */
+.btn-delete-soft {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: 0.3s;
+}
+.btn-delete-soft:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: white;
+}
+.btn-delete-soft:disabled {
+  opacity: 0.5; cursor: not-allowed;
+}
 
 .note { font-size: 0.8rem; color: #64748b; line-height: 1.4; margin-top: 1rem; font-style: italic; }
 
