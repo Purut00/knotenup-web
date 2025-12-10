@@ -49,7 +49,7 @@ if (typeof window !== "undefined") {
   try {
     initializeAppCheck(app, {
       // ⚠️ GANTI 'MASUKKAN_SITE_KEY_RECAPTCHA_V3_DISINI' DENGAN KEY ANDA
-      provider: new ReCaptchaV3Provider('MASUKKAN_SITE_KEY_RECAPTCHA_V3_DISINI'),
+      provider: new ReCaptchaV3Provider('6Ldu9SYsAAAAAH8yG6B4s50JguN5c8NpWO6OBQ8S'),
       
       // Auto refresh token supaya user tak kena kick out
       isTokenAutoRefreshEnabled: true 
