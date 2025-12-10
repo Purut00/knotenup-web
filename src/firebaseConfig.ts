@@ -1,17 +1,28 @@
 import { initializeApp } from "firebase/app";
-import { GoogleAuthProvider, FacebookAuthProvider, OAuthProvider } from "firebase/auth";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  FacebookAuthProvider, 
+  OAuthProvider, 
+ // connectAuthEmulator 
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  //connectFirestoreEmulator 
+} from "firebase/firestore";
+import { 
+  getStorage, 
+  //connectStorageEmulator 
+} from "firebase/storage";
 
-//import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-//import { getAuth, connectAuthEmulator } from "firebase/auth";
-//import { getStorage, connectStorageEmulator } from "firebase/storage";
+// 🔥 1. IMPORT APP CHECK
+import { 
+  initializeAppCheck, 
+  ReCaptchaV3Provider 
+} from "firebase/app-check"; 
 
-// ⚠️ PENTING: Nanti anda perlu ganti kod ini dengan config dari Firebase Console anda sendiri.
-// Buat masa ni, kita letak placeholder supaya kod tak error.
 const firebaseConfig = {
-  apiKey: "AIzaSyDjycGE-Pr8EtRAoX9cj-bNXuhtFKb-NyA",
+  apiKey: "AIzaSyDjycGE-Pr8EtRAoX9cj-bNXuhtFKb-NyA", // Pastikan ini betul dari console
   authDomain: "kpv6-4af4c.firebaseapp.com",
   projectId: "kpv6-4af4c",
   storageBucket: "kpv6-4af4c.firebasestorage.app",
@@ -22,28 +33,45 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// 🔥 2. INITIALIZE APP CHECK (THE SECURITY SHIELD)
+// Semak jika kod berjalan di browser (bukan server-side rendering)
+if (typeof window !== "undefined") {
+  
+  // Untuk Localhost Testing supaya tak kena block
+  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+    // Ini akan print "Debug Token" di console browser. 
+    // Copy token itu dan letak di Firebase Console > App Check > Apps > Manage Debug Tokens
+    (self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    console.log("🛡️ App Check: Running in Debug Mode");
+  }
+
+  try {
+    initializeAppCheck(app, {
+      // ⚠️ GANTI 'MASUKKAN_SITE_KEY_RECAPTCHA_V3_DISINI' DENGAN KEY ANDA
+      provider: new ReCaptchaV3Provider('MASUKKAN_SITE_KEY_RECAPTCHA_V3_DISINI'),
+      
+      // Auto refresh token supaya user tak kena kick out
+      isTokenAutoRefreshEnabled: true 
+    });
+    console.log("🛡️ App Check: Activated");
+  } catch (e) {
+    console.error("🛡️ App Check Error:", e);
+  }
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// Connect to Emulators (Optional - kalau anda guna untuk development)
+// if (location.hostname === "localhost") {
+//   connectAuthEmulator(auth, "http://127.0.0.1:9099");
+//   connectFirestoreEmulator(db, "127.0.0.1", 8080);
+//   connectStorageEmulator(storage, "127.0.0.1", 9199);
+// }
 
-//const db = getFirestore(app);
-//const auth = getAuth(app);
-//const storage = getStorage(app);
-
-// Connect to Emulators if in development mode
-
-//if (location.hostname === "localhost") {
- // console.log("🔥 Sedang guna Emulator!");
-  
-  // Port ni MESTI sama dengan screenshot anda tadi
-  //connectAuthEmulator(auth, "http://127.0.0.1:9099");     
-  //connectFirestoreEmulator(db, "127.0.0.1", 8080);
-  //onnectStorageEmulator(storage, "127.0.0.1", 9199);
-//}
-
-
-// Setup Providers (Google, FB, Apple)
+// Setup Providers
 const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
