@@ -1,15 +1,12 @@
 <template>
   <div class="create-spot-page">
     
-    <!-- BACKGROUND LAYERS -->
     <div class="contour-lines"></div>
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <!-- MAIN CONTAINER (Padding Besar Untuk Elak Navbar) -->
     <div class="container pt-44 pb-20">
       
-      <!-- HEADER -->
       <div class="text-center mb-10 relative z-10">
         <h1 class="text-4xl font-bold text-white mb-2">
           {{ isEditMode ? t('createSpot.editTitle') : (t('createSpot.title') || 'Kongsi Lokasi Baru') }}
@@ -19,7 +16,6 @@
         </p>
       </div>
 
-      <!-- STEPPER (Horizontal) -->
       <div class="stepper-wrapper relative z-10">
         <div class="step-item" :class="{ active: currentStep >= 1, done: currentStep > 1 }">
           <div class="step-circle">1</div>
@@ -32,10 +28,8 @@
         </div>
       </div>
 
-      <!-- FORM GLASS CARD -->
       <div class="glass-form-card relative z-10 fade-up">
         
-        <!-- STEP 1: INFO ASAS -->
         <div v-if="currentStep === 1">
           <h2 class="section-title">{{ t('createSpot.section1.title') || 'Maklumat Lokasi' }}</h2>
           
@@ -50,13 +44,47 @@
               :disabled="isEditMode"
             />
             <small v-if="duplicateWarning && !isEditMode" class="text-red-400 font-bold mt-1 block">
-               ⚠️ {{ t('createSpot.duplicateWarn') || 'Nama ini mungkin sudah wujud.' }}
+                ⚠️ {{ t('createSpot.duplicateWarn') || 'Nama ini mungkin sudah wujud.' }}
             </small>
           </div>
 
           <div class="form-group">
             <label>{{ t('createSpot.viaLabel') || 'Laluan Masuk (Via)' }}</label>
             <input type="text" v-model="form.via" class="glass-input" :placeholder="t('createSpot.viaPlaceholder')" />
+          </div>
+
+          <div class="form-group mb-6">
+             <div class="flex justify-between items-end mb-2">
+                <label class="block text-gray-300 font-bold">📍 Lokasi & Koordinat</label>
+                <button @click.prevent="detectCurrentLocation" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-md border border-blue-400/30">
+                  <i class="fas fa-location-arrow"></i> Auto-Detect GPS
+                </button>
+             </div>
+
+             <div id="picker-map" class="h-64 w-full rounded-xl border border-white/20 z-0 mb-3 shadow-inner"></div>
+             
+             <p v-if="detectedAddress" class="text-xs text-green-400 mb-3 flex items-center gap-1">
+                <i class="fas fa-check-circle"></i> Lokasi dikesan: <span class="font-bold text-white">{{ detectedAddress }}</span>
+             </p>
+
+             <div class="grid grid-cols-2 gap-4">
+               <div>
+                 <label class="text-xs text-gray-400 uppercase font-bold mb-1 block">Latitude</label>
+                 <input 
+                   type="number" step="any" v-model="form.latitude" 
+                   class="glass-input text-sm" placeholder="Cth: 4.2105" 
+                   @change="updateMapFromInput"
+                 />
+               </div>
+               <div>
+                 <label class="text-xs text-gray-400 uppercase font-bold mb-1 block">Longitude</label>
+                 <input 
+                   type="number" step="any" v-model="form.longitude" 
+                   class="glass-input text-sm" placeholder="Cth: 101.9758" 
+                   @change="updateMapFromInput"
+                 />
+               </div>
+             </div>
           </div>
 
           <div class="form-row">
@@ -122,7 +150,7 @@
           </div>
 
           <div class="form-group mt-4">
-            <label>{{ t('createSpot.mapLabel') || 'Link Google Maps' }}</label>
+            <label>{{ t('createSpot.mapLabel') || 'Link Google Maps (Optional)' }}</label>
             <input type="text" v-model="form.mapsLink" class="glass-input" :placeholder="t('createSpot.mapPlaceholder')" />
           </div>
 
@@ -141,7 +169,6 @@
           </div>
         </div>
 
-        <!-- STEP 2: GALERI & DETAIL -->
         <div v-if="currentStep === 2">
           <h2 class="section-title">Galeri & Info Lanjut</h2>
 
@@ -162,27 +189,26 @@
           </div>
 
           <div class="form-group mt-6">
-             <label>💡 {{ t('createSpot.labels.tips') || 'Tips Pendaki' }}</label>
-             <textarea v-model="form.tips" rows="2" class="glass-input" placeholder="Cth: Bawa air secukupnya, pacat banyak..."></textarea>
+              <label>💡 {{ t('createSpot.labels.tips') || 'Tips Pendaki' }}</label>
+              <textarea v-model="form.tips" rows="2" class="glass-input" placeholder="Cth: Bawa air secukupnya, pacat banyak..."></textarea>
           </div>
 
           <div class="form-group">
-             <label>🚗 {{ t('createSpot.labels.parking') || 'Info Parking' }}</label>
-             <input type="text" v-model="form.parking" class="glass-input" placeholder="Cth: RM5 per entry, tepi jalan" />
+              <label>🚗 {{ t('createSpot.labels.parking') || 'Info Parking' }}</label>
+              <input type="text" v-model="form.parking" class="glass-input" placeholder="Cth: RM5 per entry, tepi jalan" />
           </div>
 
           <div class="form-group">
-             <label>📍 {{ t('createSpot.labels.checkpoint') || 'Checkpoints' }}</label>
-             <textarea v-model="form.checkpointDetail" rows="3" class="glass-input" placeholder="Senarai CP, punca air, campsite..."></textarea>
+              <label>📍 {{ t('createSpot.labels.checkpoint') || 'Checkpoints' }}</label>
+              <textarea v-model="form.checkpointDetail" rows="3" class="glass-input" placeholder="Senarai CP, punca air, campsite..."></textarea>
           </div>
 
           <div class="form-group">
-             <label>📝 {{ t('createSpot.labels.other') || 'Deskripsi Penuh' }}</label>
-             <textarea v-model="form.description" rows="4" class="glass-input" placeholder="Ceritakan pengalaman atau info tambahan..."></textarea>
+              <label>📝 {{ t('createSpot.labels.other') || 'Deskripsi Penuh' }}</label>
+              <textarea v-model="form.description" rows="4" class="glass-input" placeholder="Ceritakan pengalaman atau info tambahan..."></textarea>
           </div>
         </div>
 
-        <!-- ACTION BUTTONS -->
         <div class="form-actions mt-8 flex justify-between items-center">
            <button v-if="currentStep === 1" class="btn-back" @click="$router.back()">
              Batal
@@ -211,10 +237,24 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { auth, db, storage } from '../firebaseConfig';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc, GeoPoint } from 'firebase/firestore'; 
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { MALAYSIA_STATES } from '../constants/data';
 import { isSpam } from '../utils/spamFilter';
+import L from 'leaflet'; // Import Leaflet
+import 'leaflet/dist/leaflet.css'; // Import CSS Leaflet
+
+// Fix Leaflet Icons
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 const { t } = useI18n();
 const router = useRouter();
@@ -234,12 +274,119 @@ const newImageFiles = ref<File[]>([]);
 const existingImageUrls = ref<string[]>([]);
 const gpxFile = ref<File | null>(null);
 
+// Map Handling
+const detectedAddress = ref('');
+let mapPicker: any = null;
+let markerPicker: any = null;
+
 const form = reactive({
   name: '', via: '', state: '', height: null, difficulty: 'Moderate',
   permit: 'No', guideRequired: 'No', mapsLink: '', 
   tips: '', parking: '', checkpointDetail: '', description: '', 
-  images: [] as string[], gpxUrl: ''
+  images: [] as string[], gpxUrl: '',
+  latitude: '', 
+  longitude: '' 
 });
+
+// INIT MAP (Topography)
+const initPickerMap = () => {
+  if (mapPicker) return; // Prevent re-init
+  
+  // Default: Center of Peninsular Malaysia
+  const startLat = form.latitude ? parseFloat(form.latitude) : 4.2105;
+  const startLng = form.longitude ? parseFloat(form.longitude) : 101.9758;
+  const zoomLevel = form.latitude ? 12 : 6;
+
+  mapPicker = L.map('picker-map').setView([startLat, startLng], zoomLevel);
+
+  // Guna OpenTopoMap untuk Contour
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 17,
+    attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)'
+  }).addTo(mapPicker);
+
+  // Jika ada koordinat, letak marker
+  if (form.latitude && form.longitude) {
+    markerPicker = L.marker([startLat, startLng], { draggable: true }).addTo(mapPicker);
+    setupMarkerEvents();
+  }
+
+  // Event Klik Peta
+  mapPicker.on('click', async (e: any) => {
+    const { lat, lng } = e.latlng;
+    updateMarkerPosition(lat, lng);
+    await reverseGeocode(lat, lng);
+  });
+};
+
+const setupMarkerEvents = () => {
+  if (!markerPicker) return;
+  markerPicker.on('dragend', async (event: any) => {
+    const position = event.target.getLatLng();
+    updateFormCoords(position.lat, position.lng);
+    await reverseGeocode(position.lat, position.lng);
+  });
+}
+
+const updateMarkerPosition = (lat: number, lng: number) => {
+  if (markerPicker) {
+    markerPicker.setLatLng([lat, lng]);
+  } else {
+    markerPicker = L.marker([lat, lng], { draggable: true }).addTo(mapPicker);
+    setupMarkerEvents();
+  }
+  updateFormCoords(lat, lng);
+};
+
+const updateFormCoords = (lat: number, lng: number) => {
+  form.latitude = lat.toFixed(5);
+  form.longitude = lng.toFixed(5);
+};
+
+// Update Map bila User taip manual
+const updateMapFromInput = () => {
+  const lat = parseFloat(form.latitude);
+  const lng = parseFloat(form.longitude);
+  if (!isNaN(lat) && !isNaN(lng) && mapPicker) {
+    updateMarkerPosition(lat, lng);
+    mapPicker.setView([lat, lng], 13);
+  }
+};
+
+// Auto Detect GPS
+const detectCurrentLocation = () => {
+  if (!navigator.geolocation) return alert("Browser ini tidak menyokong Geolocation.");
+  
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const { latitude, longitude } = pos.coords;
+    updateMarkerPosition(latitude, longitude);
+    mapPicker.setView([latitude, longitude], 13);
+    reverseGeocode(latitude, longitude);
+  }, (err) => {
+    console.error(err);
+    alert("Gagal mendapatkan lokasi GPS. Pastikan Location Service aktif.");
+  });
+};
+
+// Reverse Geocode (Nominatim)
+const reverseGeocode = async (lat: number, lng: number) => {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+    const data = await res.json();
+    if (data && data.address) {
+      const city = data.address.city || data.address.town || data.address.village || '';
+      const state = data.address.state || '';
+      detectedAddress.value = [city, state].filter(Boolean).join(', ');
+      
+      // Auto-fill state jika kosong dan valid
+      if (!form.state && state && MALAYSIA_STATES.includes(state)) {
+        form.state = state;
+      }
+    }
+  } catch (e) {
+    console.error("Geocoding failed:", e);
+  }
+};
 
 onMounted(async () => {
   if (spotId) {
@@ -250,6 +397,12 @@ onMounted(async () => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         Object.assign(form, data);
+        
+        if (data.location) {
+            form.latitude = data.location.latitude;
+            form.longitude = data.location.longitude;
+        }
+
         if (data.image && (!data.images || data.images.length === 0)) form.images = [data.image];
         existingImageUrls.value = [...form.images];
         previewImages.value = [...form.images];
@@ -257,6 +410,11 @@ onMounted(async () => {
     } catch (e) { console.error(e); }
     finally { loading.value = false; }
   }
+
+  // Init Map lepas DOM ready
+  setTimeout(() => {
+    initPickerMap();
+  }, 500);
 });
 
 const nextStep = () => {
@@ -271,6 +429,11 @@ const nextStep = () => {
 const prevStep = () => {
   currentStep.value = 1;
   window.scrollTo(0, 0);
+  // Re-init map bila back ke step 1 (sebab DOM hilang)
+  setTimeout(() => {
+     mapPicker = null; // Reset instance
+     initPickerMap();
+  }, 100);
 };
 
 const triggerMultiUpload = () => { multiFileInput.value?.click(); };
@@ -345,17 +508,27 @@ const submitSpot = async () => {
       gpxDownloadUrl = await getDownloadURL(snap.ref);
     }
 
+    // Convert string lat/lng to number
+    const lat = parseFloat(form.latitude) || 0;
+    const lng = parseFloat(form.longitude) || 0;
+
     const spotData = {
       ...form, 
       images: finalImages,
       image: finalImages[0] || '',
       gpxUrl: gpxDownloadUrl,
-      name_lowercase: form.name.toLowerCase().trim()
+      name_lowercase: form.name.toLowerCase().trim(),
+      location: new GeoPoint(lat, lng) 
     };
 
     if (isEditMode.value) {
-      // Logic update... (simplified for brevity)
-      alert("Kemaskini berjaya (Mock)!");
+      // Logic update sebenar
+      await updateDoc(doc(db, 'spots', spotId), {
+         ...spotData,
+         lastEditedBy: auth.currentUser.displayName || 'User',
+         lastEditedAt: serverTimestamp()
+      });
+      alert("Kemaskini berjaya!");
       router.push('/spots/' + spotId);
     } else {
       await addDoc(collection(db, 'spots'), {
@@ -374,6 +547,9 @@ const submitSpot = async () => {
     loading.value = false;
   }
 };
+
+// Tambah import updateDoc yang tertinggal dalam list import asal
+import { updateDoc } from 'firebase/firestore';
 </script>
 
 <style scoped>
@@ -438,7 +614,6 @@ const submitSpot = async () => {
 }
 .glass-input:focus { border-color: #6c63ff; background: rgba(0,0,0,0.5); }
 
-/* 🔥 FIX DROPDOWN BACKGROUND (DARK MODE) 🔥 */
 .glass-input option { 
   background-color: #1e293b; 
   color: white; 

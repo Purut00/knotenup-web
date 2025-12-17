@@ -72,6 +72,27 @@
           
           <div class="left-content">
             
+            <div v-if="trip.spotId" 
+                 class="glass-panel mb-6 bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30 cursor-pointer hover:border-purple-400 transition group"
+                 @click="$router.push('/spots/' + trip.spotId)">
+              <div class="flex items-center justify-between">
+                <div>
+                   <small class="text-purple-300 uppercase font-bold tracking-wider text-xs flex items-center gap-2">
+                     <i class="fas fa-mountain"></i> Info Lokasi Rasmi
+                   </small>
+                   <h3 class="text-xl font-bold text-white m-0 border-none p-0 flex items-center gap-2 group-hover:text-purple-300 transition mt-1">
+                     {{ trip.spotName || 'Lihat Detail Gunung/Bukit' }}
+                   </h3>
+                   <p class="text-sm text-gray-300 mt-1">
+                     Klik untuk lihat info penuh (GPX, Review, Fasiliti & Peta).
+                   </p>
+                </div>
+                <div class="text-2xl text-purple-400 group-hover:translate-x-2 transition">
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+              </div>
+            </div>
+
             <div class="glass-panel mb-6">
               <h3><i class="fas fa-book-open text-purple-400 mr-2"></i> {{ t('trip.about') || 'Tentang Trip' }}</h3>
               <p class="desc-text">{{ trip.description }}</p>
@@ -196,7 +217,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { db, auth } from '../firebaseConfig'; // Import Auth
-import { doc, getDoc, updateDoc } from 'firebase/firestore'; // Guna updateDoc, bukan deleteDoc
+import { doc, getDoc, updateDoc } from 'firebase/firestore'; 
 
 // @ts-ignore
 import VueEasyLightbox from 'vue-easy-lightbox';
@@ -255,7 +276,6 @@ const archiveTrip = async () => {
     const tripRef = doc(db, "trips", trip.value.id);
     
     // SOFT DELETE: Tukar status kepada 'archived'.
-    // Rules Firestore akan halang 'deleteDoc', tapi benarkan update status ke 'archived'
     await updateDoc(tripRef, {
       status: 'archived',
       isVisible: false,

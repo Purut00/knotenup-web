@@ -221,6 +221,16 @@
               </div>
            </div>
 
+           <div class="tool-card" style="border: 1px solid #e74c3c;">
+               <div class="icon-bg" style="background: rgba(231, 76, 60, 0.2);">🗺️</div>
+               <h4 style="color: #ff8787;">Real Maps Import</h4>
+               <p>Import 300 data bukit dari fail JSON.</p>
+               <div class="action-row">
+               <button @click="seedRealSpots" class="btn-tool" style="background: #e74c3c;">
+                 MULA IMPORT
+               </button>
+               </div>
+            </div>
         </div>
       </div>
 
@@ -256,7 +266,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { collection, getDocs, deleteDoc, doc, getDoc, setDoc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 // IMPORT SEMUA FUNGSI SEEDER BARU
-import { seedTrips, seedForumPosts, seedServices, seedSpots } from '../utils/seeder';
+import { seedTrips, seedForumPosts, seedServices, seedSpots, seedRealSpots } from '../utils/seeder';
+
 
 const router = useRouter();
 const isAdmin = ref(false);

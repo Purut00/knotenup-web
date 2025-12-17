@@ -86,21 +86,52 @@
             </div>
           </div>
 
-          <div v-if="locationType === 'malaysia'" class="form-row mt-4">
-            <div class="form-group">
-              <label>Negeri</label>
-              <div class="select-wrapper">
-                  <select v-model="form.state" class="glass-input">
-                    <option disabled value="">Pilih Negeri</option>
-                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
-                  </select>
-                  <i class="fas fa-chevron-down select-arrow"></i>
+          <div v-if="locationType === 'malaysia'">
+            
+            <div class="form-row mt-4">
+              <div class="form-group">
+                <label>Negeri (Wajib)</label>
+                <div class="select-wrapper">
+                    <select v-model="form.state" class="glass-input" @change="resetSpotSelection">
+                      <option disabled value="">Pilih Negeri...</option>
+                      <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Tempat Spesifik / Kawasan</label>
+                <input type="text" v-model="form.placeName" class="glass-input" :placeholder="t('createTrip.specificPlace') || 'Cth: Taman Negara'" />
               </div>
             </div>
-            <div class="form-group">
-              <label>Tempat Spesifik</label>
-              <input type="text" v-model="form.placeName" class="glass-input" :placeholder="t('createTrip.specificPlace') || 'Cth: Taman Negara'" />
+
+            <div class="form-group mt-4 p-4 rounded-lg border border-dashed border-gray-600 bg-gray-800/30">
+              <label class="flex justify-between items-center">
+                 <span>🔗 Link ke Info Lokasi (Spot)</span>
+                 <span v-if="autoDetected" class="text-green-400 text-xs font-bold animate-pulse">
+                   ✨ Lokasi dikesan dari tajuk!
+                 </span>
+              </label>
+              
+              <div class="select-wrapper mt-2">
+                 <select v-model="form.spotId" @change="handleSpotChange" class="glass-input" :disabled="!form.state">
+                   <option value="">-- {{ form.state ? 'Pilih Lokasi di ' + form.state : 'Sila Pilih Negeri Dahulu' }} --</option>
+                   <option v-for="spot in filteredSpots" :key="spot.id" :value="spot.id">
+                     {{ spot.name }} ({{ spot.height }}m)
+                   </option>
+                 </select>
+                 <i class="fas fa-chevron-down select-arrow"></i>
+              </div>
+              
+              <div class="mt-2 text-xs text-gray-400 flex justify-between">
+                <span>*Menghubungkan trip dengan info bukit memudahkan peserta.</span>
+                <span v-if="form.state && filteredSpots.length === 0" class="text-orange-400">
+                  Tiada lokasi berdaftar di negeri ini lagi.
+                </span>
+              </div>
             </div>
+
           </div>
 
           <div v-else class="form-group mt-4">
@@ -224,33 +255,98 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue'; // Added watch
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ACTIVITY_CATEGORIES, TRIP_SERVICES, MALAYSIA_STATES } from '../constants/data';
 import { auth, db, storage } from '../firebaseConfig';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; 
+import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore'; 
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { isSpam } from '../utils/spamFilter';
-import { validateImageFile } from '../utils/security'; // Import helper tadi
+import { validateImageFile } from '../utils/security'; 
 
 const { t } = useI18n(); 
 const router = useRouter();
 const currentStep = ref(1);
 const loading = ref(false);
 const locationType = ref('malaysia');
+const autoDetected = ref(false);
 
 // Logic Gambar
 const previewImages = ref<string[]>(Array.from({ length: 5 }).map(() => ''));
 const rawFiles = ref<(File | null)[]>(Array.from({ length: 5 }).map(() => null));
 
+// Logic Spots 
+const spots = ref<any[]>([]); 
+
 const form = reactive({
   title: '', category: '', difficulty: 'Moderate', 
   state: '', placeName: '', overseasLocation: '', 
+  spotId: '', spotName: '', 
   startDate: '', endDate: '',   
   price: null, maxSlots: null, groupLink: '', description: '',
   tips: '', mandatory: '', recommended: '', includes: [] as string[]
 });
+
+// Fetch Spots on mount
+onMounted(async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "spots"));
+    spots.value = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      name: doc.data().name,
+      state: doc.data().state,
+      height: doc.data().height
+    }));
+  } catch (error) {
+    console.error("Error fetching spots:", error);
+  }
+});
+
+// 1. FILTERED SPOTS Logic (Selesaikan masalah 500 spots)
+const filteredSpots = computed(() => {
+  if (!form.state) return [];
+  // Hanya tunjuk spot yang negerinya SAMA dengan negeri yang user pilih
+  return spots.value.filter(s => s.state === form.state);
+});
+
+// 2. SMART DETECT Logic (Dari Tajuk)
+watch(() => form.title, (newTitle) => {
+  if (!newTitle || newTitle.length < 4) return;
+  
+  const lowerTitle = newTitle.toLowerCase();
+  
+  // Cari spot yang namanya ada dalam tajuk
+  const foundSpot = spots.value.find(s => lowerTitle.includes(s.name.toLowerCase()));
+  
+  if (foundSpot) {
+     form.state = foundSpot.state; // Auto set negeri
+     form.spotId = foundSpot.id;   // Auto set spot
+     form.spotName = foundSpot.name;
+     form.placeName = foundSpot.name;
+     autoDetected.value = true;
+     
+     // Hilangkan hint selepas 3 saat
+     setTimeout(() => autoDetected.value = false, 3000);
+  }
+});
+
+// Reset Spot jika user tukar negeri manual
+const resetSpotSelection = () => {
+  form.spotId = '';
+  form.spotName = '';
+};
+
+// Handle Spot Selection Manual
+const handleSpotChange = () => {
+  const selected = spots.value.find(s => s.id === form.spotId);
+  if (selected) {
+     form.spotName = selected.name;
+     form.placeName = selected.name; // Auto fill place name
+  } else {
+    form.spotName = '';
+  }
+};
 
 // Duration Logic
 const computedDuration = computed(() => {
@@ -280,7 +376,6 @@ const triggerUpload = (index: number) => {
   if(input) input.click();
 };
 
-// [UPDATED] File Handler dengan Security Check
 const handleImageSelect = async (event: Event, index: number) => {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files[0]) {
@@ -289,7 +384,7 @@ const handleImageSelect = async (event: Event, index: number) => {
     // 1. Validasi Saiz (Max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert("Fail terlalu besar (Max 5MB).");
-      target.value = ''; // Reset input
+      target.value = ''; 
       return;
     }
 
@@ -297,7 +392,7 @@ const handleImageSelect = async (event: Event, index: number) => {
     const isValid = await validateImageFile(file);
     if (!isValid) {
       alert("Amaran Keselamatan: Fail ini dikesan bukan gambar sebenar atau rosak.");
-      target.value = ''; // Reset input
+      target.value = ''; 
       return;
     }
     
@@ -349,8 +444,12 @@ const submitForm = async () => {
       organizerId: auth.currentUser.uid,
       organizerName: auth.currentUser.displayName || 'Organizer',
       organizerImage: auth.currentUser.photoURL || '',
+      // Ensure spot data is saved (if selected)
+      spotId: form.spotId || null,
+      spotName: form.spotName || null
     };
 
+    // Cleanup redundant fields before saving (Standard Practice)
     delete (tripData as any).state;
     delete (tripData as any).placeName;
     delete (tripData as any).overseasLocation;

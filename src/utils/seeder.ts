@@ -1,6 +1,9 @@
 import { db, auth } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-
+// 1. Tambah import ini di bahagian paling atas file
+import { GeoPoint } from 'firebase/firestore'; 
+// Pastikan anda dah letak fail bukit_clean.json dalam folder src/utils/
+import mapData from './bukit_clean.json';
 // --- DATA LISTS (Campuran Semua Kategori) ---
 
 const tripTitles = [
@@ -210,4 +213,88 @@ export const seedSpots = async (count: number = 5) => {
     try { await addDoc(collection(db, "spots"), data); } catch (e) { console.error(e); }
   }
   alert(`✅ ${count} Spot berjaya dijana!`);
+};
+
+export const seedRealSpots = async () => {
+  if (!auth.currentUser) return alert("Sila login sebagai admin.");
+  
+  const places = mapData.features || [];
+  
+  if(!confirm(`Adakah anda pasti nak import ${places.length} data bukit?`)) return;
+
+  console.log(`Mula memproses ${places.length} data...`);
+  let count = 0;
+
+  for (const item of places) {
+    try {
+      // 1. AMBIL KOORDINAT (GeoJSON: [Lng, Lat])
+      // Google Maps export susunan dia [Longitude, Latitude, Altitude]
+      const lng = item.geometry.coordinates[0] || 0;
+      const lat = item.geometry.coordinates[1] || 0;
+      
+// FIX 1: Tukar nama variable 'props' ke 'itemProps' untuk elak error 'Redeclare'
+      // FIX 2: Guna '(item.properties as any)' untuk paksa TypeScript berhenti check type JSON
+      const itemProps = (item.properties || {}) as any;
+      
+      // 2. NAMA
+      const name = (itemProps.name || itemProps.Name || "Unknown Spot") + "";
+
+      // 3. DESCRIPTION & HEIGHT (Logic selamat)
+      let rawDesc = "";
+      let height = 0;
+
+      // Kita check description wujud dulu
+      if (itemProps.description) {
+        // Kalau ia object (ada .value)
+        if (typeof itemProps.description === 'object' && itemProps.description.value) {
+           // FIX 3: Pastikan ia ditukar ke String, dan handle null/undefined
+           rawDesc = String(itemProps.description.value || ""); 
+        } 
+        // Kalau ia string biasa
+        else if (typeof itemProps.description === 'string') {
+           rawDesc = String(itemProps.description || "");
+        }
+      }
+
+      // Cari Height guna Regex
+      const heightMatch = rawDesc.match(/Height\s*\(m\)\s*(\d+)/i);
+      if (heightMatch) {
+        height = parseInt(heightMatch[1]);
+      } else {
+        const nameMatch = name.match(/(\d+)\s*m/i);
+        if (nameMatch) height = parseInt(nameMatch[1]);
+      }
+
+      // Bersihkan description
+      const cleanDesc = rawDesc
+        .replace(/<[^>]*>?/gm, ' ') 
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ') 
+        .trim();
+
+      // 4. MASUK DATABASE
+      await addDoc(collection(db, "spots"), {
+        name: name,
+        location: new GeoPoint(lat, lng),
+        height: Number(height),
+        category: "Mountain", 
+        state: "Malaysia",
+        difficulty: height > 1000 ? "Hard" : "Moderate",
+        description: cleanDesc || `Lokasi hiking: ${name}`,
+        images: [],
+        features: [],
+        contributorId: auth.currentUser?.uid || "admin",
+        createdAt: serverTimestamp(),
+        isVisible: true
+      });
+
+      count++;
+      console.log(`[OK] ${name} (${height}m)`);
+      
+    } catch (e) {
+      console.error("Gagal import item:", item, e);
+    }
+  }
+  
+  alert(`✅ Siap! ${count} bukit berjaya diimport.`);
 };

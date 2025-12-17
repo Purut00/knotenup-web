@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- FUNGSI BANTUAN ---
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // --- RULES ---
+
+    // 1. USERS
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isOwner(userId);
+    }
+
+    // 2. TRIPS
+    match /trips/{tripId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (resource.data.organizerId == request.auth.uid);
+    }
+
+    // 3. FORUM
+    match /forum_posts/{postId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid);
+      
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuthenticated();
+        allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid);
+      }
+    }
+
+    // 4. SPOTS & OTHERS
+    match /{document=**} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+  }
+}

@@ -1,12 +1,10 @@
 <template>
   <div class="spot-detail-page">
     
-    <!-- BACKGROUND LAYERS -->
     <div class="contour-lines"></div>
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <!-- LOADING STATE -->
     <div v-if="loading" class="loading-container">
       <div class="glass-card inline-block px-8 py-6">
           <i class="fas fa-spinner fa-spin text-3xl text-purple-400 mb-3"></i>
@@ -14,7 +12,6 @@
       </div>
     </div>
 
-    <!-- EMPTY STATE -->
     <div v-else-if="!spot" class="error-container">
       <div class="glass-card inline-block px-8 py-6 border-red-500/30 border">
           <i class="fas fa-exclamation-triangle text-3xl text-red-400 mb-3"></i>
@@ -23,10 +20,8 @@
       </div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div v-else class="container relative z-10" style="padding-top: 150px; padding-bottom: 80px;">
       
-      <!-- HERO GALLERY -->
       <div class="hero-gallery-wrapper mb-8 fade-up">
         <div class="desktop-gallery hidden md:grid">
           <div class="gallery-item main-item" 
@@ -54,7 +49,6 @@
           </button>
         </div>
 
-        <!-- MOBILE GALLERY -->
         <div class="mobile-gallery md:hidden rounded-2xl overflow-hidden relative h-[350px]">
           <swiper
             :modules="[Pagination, Navigation]"
@@ -76,13 +70,40 @@
         </div>
       </div>
 
-      <!-- CONTENT GRID -->
+      <div v-if="spot.gpxUrl || spot.location" class="mb-8 fade-up delay-100">
+         <div class="glass-card p-1 overflow-hidden relative group">
+            <div class="absolute top-4 left-4 z-[400] bg-black/60 backdrop-blur px-4 py-2 rounded-lg border border-white/10">
+               <h3 class="font-bold text-white flex items-center gap-2">
+                 <i class="fas fa-mountain text-orange-400"></i> Peta Topografi & Laluan
+               </h3>
+            </div>
+
+            <div v-if="spot.gpxUrl" class="absolute bottom-4 right-4 z-[400]">
+               <a :href="spot.gpxUrl" download class="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-lg shadow-lg transition transform hover:-translate-y-1">
+                  <i class="fas fa-file-download"></i> Download GPX
+               </a>
+            </div>
+
+            <div id="spot-map" class="w-full h-[500px] rounded-xl z-0 bg-gray-900"></div>
+         </div>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-up delay-100">
         
-        <!-- LEFT COLUMN (Main Info) -->
         <div class="lg:col-span-2 space-y-8">
+
+            <div v-if="relatedTrips.length > 0" class="glass-card p-6 md:p-8 border-l-4 border-orange-500">
+               <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                 <i class="fas fa-hiking text-orange-400"></i> Trip Akan Datang di Sini
+               </h3>
+               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <TripCard v-for="trip in relatedTrips" :key="trip.id" :trip="trip" />
+               </div>
+               <div class="mt-4 text-center">
+                 <small class="text-gray-400 italic">Senarai trip yang masih dibuka untuk pendaftaran.</small>
+               </div>
+            </div>
             
-            <!-- INFO CARD -->
             <div class="glass-card p-6 md:p-8">
                 <div class="flex flex-wrap justify-between items-start mb-6 gap-4">
                     <h3 class="text-xl font-bold text-white">{{ t('spotDetail.locationInfo') }}</h3>
@@ -105,16 +126,13 @@
                 </div>
                 <p v-if="translationError" class="text-red-400 text-xs mb-4">⚠️ {{ t('spotDetail.translationError') }}</p>
 
-                <!-- EXTRA INFO GRID (Dikemaskini: Kos dibuang, Fasiliti ditambah nanti) -->
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
                     
-                    <!-- Box 1: Via -->
                     <div class="info-box">
                         <span class="info-label">🛤️ {{ t('spotDetail.via') }}</span>
                         <span class="info-value">{{ spot.via || '-' }}</span>
                     </div>
 
-                    <!-- Box 2: Guide -->
                     <div class="info-box">
                         <span class="info-label">👮 Guide</span>
                         <span class="info-value font-bold" :class="spot.guideRequired === 'Yes' ? 'text-red-400' : 'text-green-400'">
@@ -122,28 +140,30 @@
                         </span>
                     </div>
 
-                    <!-- Box 3: Duration (Masa) -->
                     <div class="info-box">
                         <span class="info-label">⏱️ Masa</span>
                         <span class="info-value">{{ spot.duration || '-' }}</span>
                     </div>
 
-                    <!-- Box 4: Distance (Jarak) -->
                     <div class="info-box">
                         <span class="info-label">📏 Jarak</span>
                         <span class="info-value">{{ spot.distance ? spot.distance + ' km' : '-' }}</span>
                     </div>
 
-                    <!-- Box 5: Difficulty (Tahap) -->
                     <div class="info-box">
                         <span class="info-label">💪 Tahap</span>
                         <span class="info-value">{{ getLevelLabel(spot.difficulty) }}</span>
                     </div>
-                    
-                    <!-- Kos Dibuang seperti diminta -->
+
+                    <div class="info-box" v-if="spot.location">
+                        <span class="info-label">📍 Koordinat</span>
+                        <span class="info-value text-xs font-mono">
+                          {{ spot.location.latitude.toFixed(4) }}, {{ spot.location.longitude.toFixed(4) }}
+                        </span>
+                    </div>
+
                 </div>
 
-                <!-- FACILITIES LIST (Paparan Fasiliti - Checkbox style) -->
                 <div v-if="spot.facilities && spot.facilities.length > 0" class="mb-6">
                     <h4 class="text-sm font-bold text-gray-400 mb-3 uppercase flex items-center gap-2">
                         <i class="fas fa-concierge-bell"></i> Fasiliti Disediakan
@@ -154,12 +174,10 @@
                         </span>
                     </div>
                 </div>
-                <!-- Fallback jika tiada fasiliti tapi user nak tahu -->
                 <div v-else class="mb-6 p-3 bg-white/5 rounded-lg border border-dashed border-white/10 text-center">
                     <p class="text-xs text-gray-500 italic">Tiada maklumat fasiliti disenaraikan.</p>
                 </div>
 
-                <!-- PERMIT ALERT -->
                 <div v-if="spot.permit && spot.permit !== 'Tidak Perlu' && spot.permit !== 'No'" class="bg-orange-900/20 border border-orange-500/20 p-4 rounded-lg flex items-start gap-3">
                     <i class="fas fa-exclamation-triangle text-orange-400 mt-1"></i>
                     <div>
@@ -172,7 +190,6 @@
                     <span class="text-green-300 text-sm font-bold">{{ t('spotDetail.free') }} - {{ t('spotDetail.noPermitNeeded') }}</span>
                 </div>
 
-                <!-- CONTRIBUTOR & HISTORY -->
                 <div class="mt-8 pt-6 border-t border-white/10 flex justify-between items-center flex-wrap gap-4">
                     <div class="flex items-center gap-2">
                         <span class="text-gray-500 text-sm">{{ t('spotDetail.contributedBy') }}</span>
@@ -189,7 +206,6 @@
                 </p>
             </div>
 
-            <!-- REVIEW SECTION -->
             <div class="glass-card p-6 md:p-8">
                 <h3 class="text-xl font-bold text-white mb-6">💬 {{ t('spotDetail.reviewsTitle') }}</h3>
                 
@@ -236,10 +252,8 @@
 
         </div>
 
-        <!-- RIGHT COLUMN (Sidebar) -->
         <div class="space-y-6">
             
-            <!-- ACTIONS CARD -->
             <div class="glass-card p-4">
                  <button 
                     class="w-full py-3 rounded-lg font-bold transition text-sm flex items-center justify-center gap-2 mb-2 shadow-lg"
@@ -268,7 +282,6 @@
                  </div>
             </div>
 
-            <!-- COMMUNITY MODERATION (5 VOTES) -->
             <div v-if="suggestions.length > 0" class="glass-card p-5 border-l-4 border-l-yellow-500 relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-2 opacity-10"><i class="fas fa-hard-hat text-6xl text-yellow-500"></i></div>
                 <h4 class="font-bold text-yellow-500 mb-4 flex items-center gap-2">🚧 Semakan Komuniti</h4>
@@ -298,24 +311,17 @@
                 </div>
             </div>
 
-            <!-- GPX & MAPS -->
-            <div v-if="spot.gpxUrl" class="glass-card p-5">
-                <h3 class="font-bold text-white mb-4 flex items-center gap-2">🗺️ {{ t('spotDetail.trailMapGpx') }}</h3>
-                <div id="gpx-map" class="h-[250px] w-full rounded-lg z-0 mb-4 border border-white/10 grayscale-[30%]"></div>
-                <a :href="spot.gpxUrl" download class="block w-full py-2 bg-orange-700/80 hover:bg-orange-600 text-white text-center rounded-lg text-sm font-bold transition">
-                    📥 {{ t('spotDetail.downloadGpx') }}
-                </a>
-            </div>
-
-            <div v-else class="glass-card p-5 text-center">
-                <h3 class="font-bold text-white mb-2">{{ t('spotDetail.mapLocation') }}</h3>
-                <p class="text-sm text-gray-500 italic">{{ t('spotDetail.noGpx') }}</p>
-            </div>
-
             <div class="glass-card p-5">
                 <h3 class="font-bold text-white mb-2">{{ t('spotDetail.navigation') }}</h3>
-                <a :href="spot.mapsLink" target="_blank" class="flex items-center justify-center gap-2 w-full py-2 bg-blue-700/80 hover:bg-blue-600 text-white rounded-lg text-sm font-bold transition">
+                <a :href="spot.mapsLink" target="_blank" class="flex items-center justify-center gap-2 w-full py-2 bg-blue-700/80 hover:bg-blue-600 text-white rounded-lg text-sm font-bold transition mb-2">
                     🗺️ {{ t('spotDetail.openMap') }}
+                </a>
+                
+                <a v-if="spot.location" 
+                   :href="`https://www.google.com/maps/search/?api=1&query=${spot.location.latitude},${spot.location.longitude}`" 
+                   target="_blank" 
+                   class="flex items-center justify-center gap-2 w-full py-2 bg-green-700/80 hover:bg-green-600 text-white rounded-lg text-sm font-bold transition">
+                    📍 Google Maps (Koordinat)
                 </a>
             </div>
 
@@ -325,7 +331,6 @@
 
     <VueEasyLightbox :visible="visibleRef" :imgs="displayImages" :index="indexRef" @hide="onHide" />
 
-    <!-- MODAL: CREATE SUGGESTION -->
     <div v-if="showSuggestionModal" class="modal-overlay">
        <div class="glass-modal w-full max-w-lg">
          <h3 class="text-xl font-bold text-white mb-4">✏️ Cadang Perubahan</h3>
@@ -351,7 +356,6 @@
        </div>
     </div>
 
-    <!-- MODAL: VERIFY DIFF (VOTING POPUP) -->
     <div v-if="showDiffModal && selectedSugg" class="modal-overlay">
        <div class="glass-modal w-full max-w-2xl">
          <div class="flex justify-between items-start mb-4 border-b border-white/10 pb-4">
@@ -362,7 +366,6 @@
              <button class="text-gray-400 hover:text-white" @click="showDiffModal = false">✖</button>
          </div>
          
-         <!-- Diff Table -->
          <div class="overflow-x-auto mb-6 rounded-lg border border-white/10">
             <table class="w-full text-sm text-left">
                <thead class="bg-black/30 text-gray-400">
@@ -402,7 +405,6 @@
        </div>
     </div>
 
-    <!-- HISTORY MODAL -->
     <div v-if="showHistory" class="modal-overlay" @click.self="showHistory = false">
        <div class="glass-modal w-full max-w-lg">
          <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
@@ -434,8 +436,9 @@ import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n'; 
 import { auth, db } from '../firebaseConfig';
-import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, updateDoc, increment, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, updateDoc, increment, arrayUnion, where, getDocs } from 'firebase/firestore'; 
 import AuthorBadge from '../components/common/AuthorBadge.vue'; 
+import TripCard from '../components/trip/TripCard.vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-gpx';
@@ -469,7 +472,7 @@ const spotId = route.params.id as string;
 const spot = ref<any>(null);
 const loading = ref(true);
 const isAdmin = ref(false);
-const isOwner = ref(false); // New reactive state for owner check
+const isOwner = ref(false); 
 let mapInstance: any = null;
 const reviews = ref<any[]>([]);
 const newReviewText = ref('');
@@ -488,6 +491,8 @@ const translating = ref(false);
 const translationError = ref('');
 const gpxData = reactive({ distance: '0.00', elevationGain: '0', elevationLoss: '0', maxElevation: '0', minElevation: '0', movingTime: '-' });
 const ADMIN_EMAILS = ["knotenup@gmail.com", "admin@knotenup.com"];
+
+const relatedTrips = ref<any[]>([]); 
 
 const suggForm = reactive({ field: 'description', newValue: '' });
 
@@ -513,8 +518,8 @@ const translateField = (field: string) => {
         description: 'Deskripsi', 
         difficulty: 'Kesukaran', 
         duration: 'Masa', 
-        distance: 'Jarak',
-        permit: 'Permit',
+        distance: 'Jarak', 
+        permit: 'Permit', 
         via: 'Laluan / Via'
     };
     return map[field] || field;
@@ -526,27 +531,26 @@ const toggleTranslation = async () => {
   if (!spot.value.description) return;
   translating.value = true; translationError.value = '';
   try {
-     const targetLang = locale.value === 'ms' ? 'ms' : 'en'; 
-     const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(spot.value.description)}&langpair=Autodetect|${targetLang}`);
-     const data = await response.json();
-     if (data.responseData && data.responseData.translatedText) {
-       translatedDesc.value = data.responseData.translatedText;
-       showingTranslation.value = true;
-     } else { throw new Error("Translation failed"); }
+      const targetLang = locale.value === 'ms' ? 'ms' : 'en'; 
+      const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(spot.value.description)}&langpair=Autodetect|${targetLang}`);
+      const data = await response.json();
+      if (data.responseData && data.responseData.translatedText) {
+        translatedDesc.value = data.responseData.translatedText;
+        showingTranslation.value = true;
+      } else { throw new Error("Translation failed"); }
   } catch (e) { console.error(e); translationError.value = t('spotDetail.translationError'); } 
   finally { translating.value = false; }
 };
 
 const getLevelLabel = (level: string) => { if (!level) return ''; const key = level.toLowerCase(); return t(`components.${key}`) !== `components.${key}` ? t(`components.${key}`) : level; };
 
-// IMPROVED: Guide Label with Fallback
 const getGuideLabel = (val: string) => { 
-   const labels: any = {
+    const labels: any = {
        'Yes': t('createSpot.guideYes') !== 'createSpot.guideYes' ? t('createSpot.guideYes') : 'Wajib',
        'Optional': t('createSpot.guideOptional') !== 'createSpot.guideOptional' ? t('createSpot.guideOptional') : 'Pilihan',
        'No': t('createSpot.guideNo') !== 'createSpot.guideNo' ? t('createSpot.guideNo') : 'Tidak Perlu'
-   };
-   return labels[val] || val || 'Tidak Perlu';
+    };
+    return labels[val] || val || 'Tidak Perlu';
 };
 
 const formatTime = (ms: number) => { if (!ms || ms === 0) return '-'; const totalSeconds = ms / 1000; const hours = Math.floor(totalSeconds / 3600); const minutes = Math.floor((totalSeconds % 3600) / 60); if (hours > 0) return `${hours}j ${minutes}m`; return `${minutes} min`; };
@@ -556,8 +560,6 @@ const sortedReviews = computed(() => { return [...reviews.value].sort((a, b) => 
 const goToProfile = (userId: string) => { if (userId) router.push(`/user/${userId}`); };
 
 const openCheckModal = (sugg: any) => { selectedSugg.value = sugg; showDiffModal.value = true; };
-
-// --- LOGIC KOMUNITI & UNDIAN (5 UNDI) ---
 
 const submitSuggestion = async () => {
     if (!auth.currentUser) return alert(t('common.pleaseLogin'));
@@ -588,14 +590,12 @@ const submitSuggestion = async () => {
 const finalizeUpdate = async (sugg: any, forceAdmin = false) => {
    const editorName = forceAdmin ? ((sugg.suggestedBy || 'Admin') + " (Admin Force)") : (sugg.suggestedBy || 'Komuniti');
    
-   // 1. Update data utama
    await updateDoc(doc(db, "spots", spotId), { 
        [sugg.field]: sugg.newValue,
        lastEditedBy: editorName, 
        lastEditedAt: serverTimestamp() 
    });
    
-   // 2. Rekod dalam History
    await addDoc(collection(db, "spots", spotId, "history"), { 
        editorName: editorName, 
        editorId: sugg.suggestedById || 'system', 
@@ -604,7 +604,6 @@ const finalizeUpdate = async (sugg: any, forceAdmin = false) => {
        field: sugg.field
    });
    
-   // 3. Padam cadangan
    await deleteDoc(doc(db, "spots", spotId, "suggestions", sugg.id));
    alert(forceAdmin ? "Kemaskini dipaksa oleh Admin." : "Tahniah! Cadangan diluluskan komuniti."); 
    showDiffModal.value = false;
@@ -629,10 +628,8 @@ const confirmVote = async (sugg: any, voteType: 'approve' | 'reject') => {
       const newVotes = (sugg.votes || 0) + 1;
       
       if (newVotes >= VOTE_THRESHOLD) { 
-          // Cukup 5 undi -> LULUS
           await finalizeUpdate(sugg, false); 
       } else { 
-          // Belum cukup -> Tambah undi
           await updateDoc(suggRef, { votes: increment(1), votedUsers: arrayUnion(auth.currentUser.uid) }); 
           alert("Undian 'Setuju' diterima."); 
           showDiffModal.value = false; 
@@ -641,10 +638,8 @@ const confirmVote = async (sugg: any, voteType: 'approve' | 'reject') => {
       const newRejectVotes = (sugg.rejectVotes || 0) + 1;
       
       if (newRejectVotes >= VOTE_THRESHOLD) { 
-          // Cukup 5 undi tolak -> PADAM
           await rejectSuggestion(sugg.id); 
       } else { 
-          // Belum cukup -> Tambah undi tolak
           await updateDoc(suggRef, { rejectVotes: increment(1), votedUsers: arrayUnion(auth.currentUser.uid) }); 
           alert("Undian 'Tolak' diterima."); 
           showDiffModal.value = false; 
@@ -657,8 +652,6 @@ const adminReject = async (sugg: any) => {
     await deleteDoc(doc(db, "spots", spotId, "suggestions", sugg.id)); 
     alert("Cadangan ditolak oleh Admin."); 
 };
-
-// --- LAIN-LAIN ---
 
 const reportSpot = async () => { if (!auth.currentUser) return alert(t('common.loginToReport')); const reason = prompt(t('spotDetail.reportReasonPrompt')); if (reason) { await addDoc(collection(db, "reports"), { targetId: spotId, targetType: 'spot', reason: reason, reportedBy: auth.currentUser.uid, createdAt: serverTimestamp() }); alert(t('spotDetail.reportSuccess')); } };
 
@@ -687,18 +680,101 @@ const voteReview = async (review: any, val: number) => {
 
 const deleteReview = async (reviewId: string) => { if (!confirm(t('common.confirmDelete'))) return; try { await deleteDoc(doc(db, "spots", spotId, "reviews", reviewId)); } catch (e) { alert(t('common.failed')); } };
 
-const initMap = () => { if (!spot.value.gpxUrl) return; nextTick(() => { const mapElement = document.getElementById('gpx-map'); if (!mapElement) return; if (mapInstance) { mapInstance.remove(); mapInstance = null; } mapInstance = L.map('gpx-map', { scrollWheelZoom: false }).setView([4.2105, 101.9758], 6); L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM &copy; CARTO', maxZoom: 19 }).addTo(mapInstance); setTimeout(() => { if(mapInstance) mapInstance.invalidateSize(); }, 300); new (L as any).GPX(spot.value.gpxUrl, { async: true, marker_options: { startIconUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-icon-start.png', endIconUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-icon-end.png', shadowUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-shadow.png' }, polyline_options: { color: '#e67e22', opacity: 0.8, weight: 5, lineCap: 'round' } }).on('loaded', function(e: any) { if(mapInstance) { mapInstance.fitBounds(e.target.getBounds()); setTimeout(() => { mapInstance.invalidateSize(); }, 200); const gpx = e.target; gpxData.distance = (gpx.get_distance() / 1000).toFixed(2); gpxData.elevationGain = gpx.get_elevation_gain().toFixed(0); gpxData.elevationLoss = gpx.get_elevation_loss().toFixed(0); gpxData.maxElevation = gpx.get_elevation_max().toFixed(0); gpxData.minElevation = gpx.get_elevation_min().toFixed(0); gpxData.movingTime = formatTime(gpx.get_moving_time()); } }).addTo(mapInstance); }); };
+// --- MAP INIT LOGIC UPDATED ---
+const initMap = () => {
+  // 1. Safety check: Kalau tak ada data, stop.
+  if (!spot.value || (!spot.value.gpxUrl && !spot.value.location)) return;
+
+  nextTick(() => {
+    const mapElement = document.getElementById('spot-map');
+    
+    // 2. RETRY LOGIC: Kalau div 'spot-map' belum wujud (sebab loading/v-if), cuba lagi dalam 300ms
+    if (!mapElement) {
+        console.log("Map element not found yet, retrying...");
+        setTimeout(initMap, 300);
+        return;
+    }
+
+    // 3. Reset map lama jika ada
+    if (mapInstance) { 
+        mapInstance.remove(); 
+        mapInstance = null; 
+    }
+
+    // 4. Setup Default Coordinates
+    const defaultLat = spot.value.location ? spot.value.location.latitude : 4.2105;
+    const defaultLng = spot.value.location ? spot.value.location.longitude : 101.9758;
+
+    // 5. Create Map
+    mapInstance = L.map('spot-map', { scrollWheelZoom: false }).setView([defaultLat, defaultLng], 12);
+
+    // Guna Esri World Topo (Paling stabil)
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)'
+
+    }).addTo(mapInstance);
+
+    // Add Marker
+    if (spot.value.location) {
+        L.marker([spot.value.location.latitude, spot.value.location.longitude])
+         .addTo(mapInstance)
+         .bindPopup(`<b>${spot.value.name}</b><br>Lokasi Utama`);
+    }
+
+    // 6. CRITICAL FIX: Invalidate Size selepas animasi CSS 'fade-up' selesai
+    // Animasi CSS selalunya ambil masa 0.6s - 0.8s. Kita refresh saiz map lepas 1 saat.
+    setTimeout(() => {
+        if (mapInstance) mapInstance.invalidateSize();
+    }, 1000);
+
+    // 7. Load GPX (Jika ada)
+    if (spot.value.gpxUrl) {
+        new (L as any).GPX(spot.value.gpxUrl, {
+            async: true,
+            marker_options: {
+                startIconUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-icon-start.png',
+                endIconUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-icon-end.png',
+                shadowUrl: 'https://raw.githubusercontent.com/mpetazzoni/leaflet-gpx/master/pin-shadow.png'
+            },
+            polyline_options: { color: '#e67e22', opacity: 0.8, weight: 5, lineCap: 'round' }
+        }).on('loaded', function (e: any) {
+            if (mapInstance) {
+                mapInstance.fitBounds(e.target.getBounds());
+                // Refresh size sekali lagi lepas fit bounds
+                setTimeout(() => { mapInstance.invalidateSize(); }, 200);
+                
+                const gpx = e.target;
+                gpxData.distance = (gpx.get_distance() / 1000).toFixed(2);
+                // ... update gpxData lain ...
+            }
+        }).addTo(mapInstance);
+    }
+  });
+};
 
 onMounted(async () => {
   try {
     const docSnap = await getDoc(doc(db, "spots", spotId));
     if (docSnap.exists()) { 
         spot.value = docSnap.data(); 
-        // Check Owner Logic
         if (auth.currentUser && spot.value.contributorId === auth.currentUser.uid) {
             isOwner.value = true;
         }
-        if (spot.value.gpxUrl) setTimeout(() => initMap(), 100); 
+        
+        // Init Map if GPX OR Location exists
+        if (spot.value.gpxUrl || spot.value.location) {
+             setTimeout(() => initMap(), 100); 
+        }
+
+        const tripQ = query(
+            collection(db, "trips"), 
+            where("spotId", "==", spotId), 
+            where("status", "==", "open") 
+        );
+        const tripSnap = await getDocs(tripQ);
+        relatedTrips.value = tripSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
     }
     if (auth.currentUser && ADMIN_EMAILS.includes(auth.currentUser.email!)) isAdmin.value = true;
     
@@ -735,16 +811,16 @@ onUnmounted(() => { if (mapInstance) { mapInstance.remove(); mapInstance = null;
 
 /* --- GLASS COMPONENTS (DARKER & REDUCED BLUR) --- */
 .glass-card {
-  background: rgba(15, 23, 42, 0.75); /* Darker Slate Blue background */
+  background: rgba(15, 23, 42, 0.75); 
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px; 
-  backdrop-filter: blur(10px); /* Reduced blur from 20px */
+  backdrop-filter: blur(10px); 
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
 .glass-input {
   width: 100%; padding: 12px; border-radius: 10px; 
-  border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 0, 0, 0.4); /* Darker Input */
+  border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 0, 0, 0.4); 
   color: white; outline: none; transition: 0.3s;
 }
 .glass-input:focus { border-color: #6c63ff; background: rgba(0, 0, 0, 0.6); }
@@ -800,11 +876,11 @@ onUnmounted(() => { if (mapInstance) { mapInstance.remove(); mapInstance = null;
 .btn-cancel-small:hover { background: rgba(255,255,255,0.15); color: white; }
 
 /* --- MODAL (Adjusted for less blur & darkness) --- */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 1rem; } /* Reduced blur */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 1rem; } 
 .glass-modal { 
-    background: rgba(15, 23, 42, 0.95); /* Solid dark slate */
+    background: rgba(15, 23, 42, 0.95); 
     padding: 2rem; border-radius: 20px; 
-    border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     max-height: 90vh; overflow-y: auto;
 }
 
