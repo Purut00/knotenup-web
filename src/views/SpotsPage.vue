@@ -1,23 +1,18 @@
 <template>
   <div class="spots-page">
     
-    <!-- BACKGROUND LAYERS -->
     <div class="contour-lines"></div>
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <!-- MAIN CONTAINER -->
-    <!-- Guna style margin-top manual untuk paksa turun ke bawah -->
     <div class="container main-content" style="padding-top: 10px; padding-bottom: 3rem;">
       
-      <!-- HEADER SECTION -->
       <div class="header-section mb-8 relative z-10 flex flex-col md:flex-row justify-between items-end gap-4">
         <div class="text-center md:text-left">
           <h1 class="text-3xl font-bold text-white mb-2">{{ t('spots.title') || 'Lokasi Menarik' }}</h1>
           <p class="text-gray-400 max-w-lg">{{ t('spots.sub') || 'Temui gunung, bukit, air terjun dan lokasi rekreasi terbaik di Malaysia.' }}</p>
         </div>
         
-        <!-- BUTTON: Tema Ungu -->
         <button class="btn-create-spot" @click="$router.push('/create-spot')">
           <span class="btn-content">
             <i class="fas fa-plus-circle text-xl"></i>
@@ -27,11 +22,9 @@
         </button>
       </div>
 
-      <!-- FILTER SECTION -->
       <div class="filter-section mb-8 relative z-10">
         <div class="filter-container">
           
-          <!-- Row 1: Search Bar (Memanjang) -->
           <div class="search-row">
             <div class="search-wrapper-full">
                <i class="fas fa-search search-icon"></i>
@@ -45,10 +38,7 @@
             </div>
           </div>
 
-          <!-- Row 2: Filters (Bawah Search Bar) -->
           <div class="filters-row mt-4">
-             
-             <!-- Filter: State -->
              <div class="select-wrapper">
                 <i class="fas fa-map-marker-alt select-icon text-red-400"></i>
                 <select v-model="filterState" class="custom-select">
@@ -57,7 +47,6 @@
                 </select>
              </div>
 
-             <!-- Filter: Category -->
              <div class="select-wrapper">
                 <i class="fas fa-tree select-icon text-purple-400"></i>
                 <select v-model="filterCategory" class="custom-select">
@@ -70,7 +59,6 @@
                 </select>
              </div>
 
-             <!-- Reset -->
              <button 
                 v-if="searchQuery || filterState || filterCategory" 
                 class="btn-reset" 
@@ -83,67 +71,73 @@
         </div>
       </div>
 
-      <!-- CONTENT GRID -->
       <div class="content-area relative z-10">
         
-        <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-gray-400">
+        <div v-if="initialLoading" class="flex flex-col items-center justify-center py-20 text-gray-400">
           <div class="spinner mb-4"></div>
           <p>{{ t('common.loading') }}...</p>
         </div>
         
-        <!-- Empty State -->
         <div v-else-if="filteredSpots.length === 0" class="empty-state glass-panel">
           <i class="fas fa-mountain text-4xl mb-4 opacity-30 text-gray-400"></i>
           <h3 class="text-lg font-bold text-gray-300">{{ t('spots.empty') || 'Tiada Lokasi Dijumpai' }}</h3>
           <p class="text-gray-500 text-sm">Jadilah yang pertama menambah lokasi ini!</p>
         </div>
 
-        <!-- Spot Grid -->
-        <div v-else class="spot-grid">
-          <div 
-            v-for="spot in filteredSpots" 
-            :key="spot.id" 
-            class="spot-card glass-card" 
-            @click="$router.push('/spots/' + spot.id)"
-          >
-            <!-- Image Area -->
-            <div class="card-img" :style="{ backgroundImage: `url(${spot.image || 'https://via.placeholder.com/300'})` }">
-              <div class="overlay-gradient"></div>
-              
-              <span class="level-badge" :class="spot.difficulty ? spot.difficulty.toLowerCase() : 'easy'">
-                 {{ getLevelLabel(spot.difficulty) }}
-              </span>
+        <div v-else>
+            <div class="spot-grid">
+            <div 
+                v-for="spot in filteredSpots" 
+                :key="spot.id" 
+                class="spot-card glass-card" 
+                @click="$router.push('/spots/' + spot.id)"
+            >
+                <div class="card-img" :style="{ backgroundImage: `url(${spot.image || 'https://via.placeholder.com/300'})` }">
+                <div class="overlay-gradient"></div>
+                
+                <span class="level-badge" :class="spot.difficulty ? spot.difficulty.toLowerCase() : 'easy'">
+                    {{ getLevelLabel(spot.difficulty) }}
+                </span>
+                </div>
+
+                <div class="card-body">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-lg font-bold text-white leading-tight card-title transition-colors">
+                        {{ spot.name }}
+                    </h3>
+                </div>
+                
+                <div class="meta-info">
+                    <span class="flex items-center gap-1"><i class="fas fa-map-pin text-red-400 text-xs"></i> {{ spot.state }}</span>
+                    <span v-if="spot.height" class="flex items-center gap-1"><i class="fas fa-ruler-vertical text-blue-400 text-xs"></i> {{ spot.height }}m</span>
+                </div>
+                
+                <div class="tags-container">
+                    <span v-if="spot.permit === 'Yes' || spot.permit === 'Perlu'" class="tag permit">
+                        <i class="fas fa-file-signature mr-1"></i> {{ t('spots.permit') || 'Permit' }}
+                    </span>
+                    <span v-else class="tag free">
+                        <i class="fas fa-check-circle mr-1"></i> {{ t('spots.noPermit') || 'Bebas' }}
+                    </span>
+
+                    <span class="tag category">
+                        <i class="fas fa-tree mr-1"></i> {{ spot.category || 'Nature' }}
+                    </span>
+                </div>
+                </div>
+            </div>
             </div>
 
-            <!-- Body Area -->
-            <div class="card-body">
-              <div class="flex justify-between items-start mb-2">
-                <!-- Highlight Ungu bila Hover -->
-                <h3 class="text-lg font-bold text-white leading-tight card-title transition-colors">
-                    {{ spot.name }}
-                </h3>
-              </div>
-              
-              <div class="meta-info">
-                 <span class="flex items-center gap-1"><i class="fas fa-map-pin text-red-400 text-xs"></i> {{ spot.state }}</span>
-                 <span v-if="spot.height" class="flex items-center gap-1"><i class="fas fa-ruler-vertical text-blue-400 text-xs"></i> {{ spot.height }}m</span>
-              </div>
-              
-              <div class="tags-container">
-                <span v-if="spot.permit === 'Yes' || spot.permit === 'Perlu'" class="tag permit">
-                    <i class="fas fa-file-signature mr-1"></i> {{ t('spots.permit') || 'Permit' }}
-                </span>
-                <span v-else class="tag free">
-                    <i class="fas fa-check-circle mr-1"></i> {{ t('spots.noPermit') || 'Bebas' }}
-                </span>
-
-                <span class="tag category">
-                    <i class="fas fa-tree mr-1"></i> {{ spot.category || 'Nature' }}
-                </span>
-              </div>
+            <div v-if="loadingMore" class="flex justify-center items-center py-6">
+                <div class="spinner w-6 h-6 border-2"></div>
+                <span class="ml-3 text-gray-400 text-sm">Memuatkan lagi...</span>
             </div>
 
-          </div>
+            <div ref="bottomTrigger" class="h-10 mt-4"></div>
+            
+            <div v-if="allLoaded && filteredSpots.length > 0" class="text-center py-8 text-gray-500 text-xs uppercase tracking-widest opacity-50">
+                -- Semua lokasi telah dipaparkan --
+            </div>
         </div>
 
       </div>
@@ -152,19 +146,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, nextTick, onUnmounted } from 'vue'; // Tambah onUnmounted & nextTick
 import { useI18n } from 'vue-i18n';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, startAfter } from 'firebase/firestore';
 import { MALAYSIA_STATES } from '../constants/data';
 
 const { t } = useI18n();
-const loading = ref(true);
+
+// STATE
+const initialLoading = ref(true);
+const loadingMore = ref(false);
+const allLoaded = ref(false);
+const lastVisible = ref<any>(null);
+const bottomTrigger = ref<HTMLElement | null>(null);
+const BATCH_SIZE = 8;
+const observer = ref<IntersectionObserver | null>(null); // Simpan observer dalam ref
+
 const spots = ref<any[]>([]);
 const searchQuery = ref('');
 const filterState = ref('');
 const filterCategory = ref('');
 
+// --- HELPERS ---
 const getLevelLabel = (level: string) => {
   if (!level) return 'Easy';
   const key = level.toLowerCase();
@@ -178,6 +182,7 @@ const resetFilters = () => {
     filterCategory.value = '';
 };
 
+// --- COMPUTED ---
 const filteredSpots = computed(() => {
   return spots.value.filter(s => {
     const matchSearch = s.name.toLowerCase().includes(searchQuery.value.toLowerCase());
@@ -187,17 +192,112 @@ const filteredSpots = computed(() => {
   });
 });
 
-onMounted(async () => {
-  try {
-    const q = query(collection(db, "spots"), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
-    spots.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch (e) { console.error(e); }
-  finally { loading.value = false; }
+// --- FUNGSI UTAMA: SETUP OBSERVER ---
+const setupObserver = () => {
+    // Kalau observer dah ada, disconnect dulu (elak duplicate)
+    if (observer.value) observer.value.disconnect();
+
+    // Setup baru
+    observer.value = new IntersectionObserver((entries) => {
+        // Jika sensor kelihatan & tak tengah loading & data belum habis
+        if (entries[0]?.isIntersecting && !loadingMore.value && !allLoaded.value) {
+            console.log("Sensor nampak! Loading data seterusnya..."); // Debugging
+            loadMoreSpots();
+        }
+    }, {
+        rootMargin: '200px', // Trigger awal sikit (200px sebelum sampai bawah)
+    });
+
+    // Mula memerhati bila element wujud
+    if (bottomTrigger.value) {
+        observer.value.observe(bottomTrigger.value);
+    }
+};
+
+// --- LOAD DATA AWAL ---
+const fetchInitialSpots = async () => {
+    initialLoading.value = true;
+    allLoaded.value = false;
+    lastVisible.value = null;
+    spots.value = [];
+
+    try {
+        const q = query(
+            collection(db, "spots"), 
+            orderBy("createdAt", "desc"),
+            limit(BATCH_SIZE)
+        );
+        
+        const snap = await getDocs(q);
+        
+        if (!snap.empty) {
+            spots.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            lastVisible.value = snap.docs[snap.docs.length - 1];
+            
+            if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
+        } else {
+            allLoaded.value = true;
+        }
+    } catch (e) { 
+        console.error("Error fetching initial spots:", e); 
+    } finally { 
+        initialLoading.value = false; 
+        
+        // KUNCI PENYELESAIAN:
+        // Tunggu DOM update (nextTick), baru pasang sensor
+        nextTick(() => {
+            setupObserver();
+        });
+    }
+};
+
+// --- LOAD DATA SETERUSNYA ---
+const loadMoreSpots = async () => {
+    if (loadingMore.value || allLoaded.value) return;
+
+    loadingMore.value = true;
+
+    try {
+        // Delay sikit (artificial) kalau nak nampak spinner (optional)
+        // await new Promise(r => setTimeout(r, 500));
+
+        const q = query(
+            collection(db, "spots"), 
+            orderBy("createdAt", "desc"),
+            startAfter(lastVisible.value),
+            limit(BATCH_SIZE)
+        );
+
+        const snap = await getDocs(q);
+
+        if (!snap.empty) {
+            const newSpots = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            spots.value = [...spots.value, ...newSpots];
+            lastVisible.value = snap.docs[snap.docs.length - 1];
+            
+            if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
+        } else {
+            allLoaded.value = true;
+        }
+    } catch (e) {
+        console.error("Error loading more spots:", e);
+    } finally {
+        loadingMore.value = false;
+    }
+};
+
+// Lifecycle
+onMounted(() => {
+    fetchInitialSpots();
+});
+
+onUnmounted(() => {
+    if (observer.value) observer.value.disconnect();
 });
 </script>
 
 <style scoped>
+/* CSS ANDA KEKAL SAMA - TIADA PERUBAHAN */
 /* --- BASE THEME --- */
 .spots-page { 
   background-color: #0f172a; 
@@ -206,7 +306,7 @@ onMounted(async () => {
 
 /* FIX: Guna Margin Top Besar untuk elak Navbar */
 .main-content {
-  margin-top: 140px; /* Jarak selamat dari navbar */
+  margin-top: 140px; 
   padding-bottom: 3rem;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
@@ -241,7 +341,7 @@ onMounted(async () => {
 .btn-content {
   position: relative; z-index: 2;
   display: flex; align-items: center;
-  background: linear-gradient(135deg, #6c63ff, #5b54e0); /* Gradient Ungu */
+  background: linear-gradient(135deg, #6c63ff, #5b54e0); 
   color: white; padding: 12px 24px; border-radius: 50px;
   box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);
   transition: transform 0.2s;
@@ -315,16 +415,13 @@ onMounted(async () => {
   transition: 0.3s; cursor: pointer;
   display: flex; flex-direction: column;
 }
-/* HIGHLIGHT UNGU SINI */
 .glass-card:hover {
   transform: translateY(-5px);
   background: rgba(255, 255, 255, 0.06);
-  border-color: #6c63ff; /* Border Ungu bila hover */
-  box-shadow: 0 10px 30px rgba(108, 99, 255, 0.15); /* Shadow Ungu lembut */
+  border-color: #6c63ff; 
+  box-shadow: 0 10px 30px rgba(108, 99, 255, 0.15); 
 }
-.card-title:hover {
-  color: #a78bfa; /* Ungu cerah (Tailwind violet-400) */
-}
+.card-title:hover { color: #a78bfa; }
 
 .card-img { height: 180px; background-size: cover; position: relative; }
 .overlay-gradient {
@@ -342,9 +439,7 @@ onMounted(async () => {
 .level-badge.hard, .level-badge.extreme { background: #ef4444; }
 
 .card-body { padding: 1.2rem; display: flex; flex-direction: column; flex: 1; }
-
 .meta-info { font-size: 0.85rem; color: #94a3b8; display: flex; gap: 12px; margin-bottom: 12px; }
-
 .tags-container { margin-top: auto; display: flex; gap: 6px; flex-wrap: wrap; }
 .tag { font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: flex; align-items: center; }
 .tag.free { background: rgba(16, 185, 129, 0.2); color: #34d399; }
@@ -360,4 +455,30 @@ onMounted(async () => {
   .filters-row { flex-direction: column; }
   .select-wrapper { width: 100%; }
 }
+
+/* --- SKELETON LOADER ANIMATION --- */
+.skeleton-bg {
+  background: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(
+    90deg, 
+    rgba(255, 255, 255, 0) 0, 
+    rgba(255, 255, 255, 0.1) 20%, 
+    rgba(255, 255, 255, 0.2) 60%, 
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Helper classes untuk bentuk */
+.sk-img { height: 180px; width: 100%; border-radius: 0; } /* Sama tinggi dgn gambar sebenar */
+.sk-text { height: 20px; margin-bottom: 8px; }
+.sk-text-sm { height: 14px; margin-bottom: 6px; }
+.sk-tag { height: 24px; width: 60px; display: inline-block; margin-right: 8px; border-radius: 6px; }
 </style>
