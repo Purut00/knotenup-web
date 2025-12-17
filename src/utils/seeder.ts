@@ -258,11 +258,11 @@ export const seedRealSpots = async () => {
 
       // Cari Height guna Regex
       const heightMatch = rawDesc.match(/Height\s*\(m\)\s*(\d+)/i);
-      if (heightMatch) {
-        height = parseInt(heightMatch[1]);
+      if (heightMatch && heightMatch[1]) {
+        height = parseInt(heightMatch[1], 10);
       } else {
         const nameMatch = name.match(/(\d+)\s*m/i);
-        if (nameMatch) height = parseInt(nameMatch[1]);
+        if (nameMatch && nameMatch[1]) height = parseInt(nameMatch[1], 10);
       }
 
       // Bersihkan description
