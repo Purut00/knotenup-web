@@ -18,7 +18,8 @@ import SpotsPage from '../views/SpotsPage.vue';
 import SpotDetailPage from '../views/SpotDetailPage.vue';
 import CreateSpotPage from '../views/CreateSpotPage.vue';
 import ServiceDetailPage from '../views/ServiceDetailPage.vue';
-
+import CreateBuddyPage from '../views/CreateBuddyPage.vue';
+import BuddyPage from '../views/BuddyPage.vue';
 // Import Firebase untuk cek role sebelum masuk page
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
@@ -147,7 +148,18 @@ const routes = [
     path: '/privacy', 
     name: 'Privacy', 
     component: () => import('../views/PrivacyPage.vue') 
-  }
+  },
+  {
+    path: '/create-buddy',
+    name: 'CreateBuddy',
+    meta: { requiresAuth: true }, // Wajib login
+    component: CreateBuddyPage
+  },
+  {
+  path: '/buddies',
+  name: 'Buddies',
+  component: BuddyPage
+  },
 ]
 
 const router = createRouter({

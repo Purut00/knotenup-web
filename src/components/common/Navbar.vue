@@ -18,7 +18,7 @@
           <router-link to="/forum" class="nav-link">{{ t('navbar.forum') }}</router-link>
           <router-link to="/service" class="nav-link">{{ t('navbar.services') }}</router-link>
           <router-link to="/spots" class="nav-link">{{ t('navbar.spots') }}</router-link>
-          
+          <router-link to="/buddies" class="nav-link">Buddy</router-link>
           <router-link v-if="currentUser" to="/profile" class="nav-link font-semibold text-primary">
             {{ displayName || t('navbar.profile') }}
           </router-link>
@@ -177,3 +177,8 @@ const handleLogout = async () => {
   @apply block py-2 px-3 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50;
 }
 </style>
+
+{
+  "extends": ["stylelint-config-recommended", "stylelint-config-tailwindcss"],
+  "customSyntax": "postcss"
+}
