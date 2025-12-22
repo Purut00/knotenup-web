@@ -22,13 +22,14 @@ import {
 } from "firebase/app-check"; 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDjycGE-Pr8EtRAoX9cj-bNXuhtFKb-NyA", // Pastikan ini betul dari console
-  authDomain: "kpv6-4af4c.firebaseapp.com",
-  projectId: "kpv6-4af4c",
-  storageBucket: "kpv6-4af4c.firebasestorage.app",
-  messagingSenderId: "959484978054",
-  appId: "1:959484978054:web:59d7ab3f0d4a19dc45c207",
-  measurementId: "G-QT0DF01NPH"
+apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+
 };
 
 // Initialize Firebase

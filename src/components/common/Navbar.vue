@@ -34,6 +34,42 @@
           </router-link>
 
           <div class="flex items-center gap-3">
+            
+            <div class="relative" v-if="currentUser">
+              <button @click="toggleNotif" class="p-2 text-gray-600 hover:text-primary transition rounded-full hover:bg-gray-100 relative focus:outline-none">
+                <i class="fas fa-bell text-lg"></i>
+                <span v-if="unreadCount > 0" class="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border border-white shadow-sm">
+                  {{ unreadCount }}
+                </span>
+              </button>
+
+              <div v-if="showNotifDropdown" class="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden ring-1 ring-black ring-opacity-5">
+                 <div class="p-3 bg-gray-50 border-b flex justify-between items-center">
+                   <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Notifikasi</span>
+                   <button @click="showNotifDropdown = false" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-times"></i></button>
+                 </div>
+                 <div class="max-h-80 overflow-y-auto">
+                    <div v-if="notifications.length === 0" class="p-6 text-center text-gray-400 text-sm">
+                      <i class="far fa-bell-slash text-2xl mb-2 block opacity-50"></i>
+                      Tiada notifikasi baru.
+                    </div>
+                    <div v-for="notif in notifications" :key="notif.id" 
+                        @click="markAsRead(notif.id)"
+                        class="p-3 border-b cursor-pointer hover:bg-gray-50 transition"
+                        :class="notif.isRead ? 'opacity-60' : 'bg-blue-50/40'">
+                        <div class="flex gap-3">
+                           <div class="mt-1">
+                             <i :class="['fas', notif.type === 'success' ? 'fa-check-circle text-green-500' : 'fa-info-circle text-blue-500']"></i>
+                           </div>
+                           <div>
+                              <p class="text-sm text-gray-800 leading-snug">{{ notif.message }}</p>
+                              <span class="text-[10px] text-gray-400 mt-1 block">Baru saja</span>
+                           </div>
+                        </div>
+                    </div>
+                 </div>
+              </div>
+            </div>
             <select v-model="currentLang" @change="switchLanguage" class="bg-gray-100 border-none rounded-full px-7 py-1 text-sm focus:ring-2 focus:ring-primary cursor-pointer">
               <option value="en">🇬🇧 EN</option>
               <option value="ms">🇲🇾 MY</option>
@@ -85,7 +121,12 @@
            
            <div v-else class="space-y-3">
               <p class="text-gray-800 font-semibold">Hi, {{ displayName || 'User' }}</p>
-              <button @click="handleLogout" class="w-full py-2 border border-red-500 text-red-500 rounded-lg">
+              
+              <div class="flex items-center justify-between bg-blue-50 p-3 rounded-lg cursor-pointer hover:bg-blue-100 transition" @click="toggleNotif">
+                <span class="text-gray-700 font-medium text-sm flex items-center gap-2"><i class="fas fa-bell text-gray-500"></i> Notifikasi</span>
+                <span v-if="unreadCount > 0" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">{{ unreadCount }} Baru</span>
+              </div>
+              <button @click="handleLogout" class="w-full py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition">
                 {{ t('navbar.logout') }}
               </button>
            </div>
@@ -102,18 +143,34 @@ import { ref, onMounted, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import LoginModal from './LoginModal.vue';
-import { auth, db } from '../../firebaseConfig';
+import { auth, db } from '../../firebaseConfig'; 
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore'; 
+import { useNotifications } from '../../composables/useNotifications'; // Import Composable
 
 const { t, locale } = useI18n(); 
 const router = useRouter();
 const showLogin = ref(false);
-const isMobileMenuOpen = ref(false); // State baru untuk mobile menu
+const isMobileMenuOpen = ref(false); 
 const currentUser = ref<User | null>(null);
 const userRole = ref('user');
 const displayName = ref(''); 
 const currentLang = ref(locale.value);
+
+// [NEW] Notification Logic
+const { notifications, unreadCount, fetchNotifications, markAsRead } = useNotifications();
+const showNotifDropdown = ref(false);
+
+const toggleNotif = () => {
+  if (currentUser.value) {
+    if (!showNotifDropdown.value) {
+       // Fetch hanya bila buka
+       fetchNotifications(currentUser.value.uid);
+    }
+    showNotifDropdown.value = !showNotifDropdown.value;
+  }
+};
+// [END NEW]
 
 const getFirstName = (name: string | null | undefined): string | null => {
   if (!name) return null;
@@ -139,6 +196,10 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser.value = user;
+      
+      // Fetch awal untuk dapatkan unread count (jika perlu)
+      fetchNotifications(user.uid);
+
       onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -158,7 +219,7 @@ onMounted(() => {
 
 const handleLogout = async () => {
   await signOut(auth);
-  isMobileMenuOpen.value = false; // Tutup menu bila logout
+  isMobileMenuOpen.value = false; 
   router.push('/');
 };
 </script>
@@ -177,8 +238,3 @@ const handleLogout = async () => {
   @apply block py-2 px-3 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50;
 }
 </style>
-
-{
-  "extends": ["stylelint-config-recommended", "stylelint-config-tailwindcss"],
-  "customSyntax": "postcss"
-}

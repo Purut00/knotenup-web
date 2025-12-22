@@ -183,12 +183,27 @@
               </div>
 
               <div class="action-buttons mt-6">
-                <a v-if="trip.groupLink" :href="trip.groupLink" target="_blank" class="btn-join">
-                  <i class="fab fa-whatsapp text-xl mr-2"></i> {{ t('trip.joinChat') }}
-                </a>
-                <button v-else class="btn-join disabled" disabled>{{ t('trip.noLink') }}</button>
+                <div v-if="isOwner">
+                  <button class="btn-join disabled" disabled>Ini Trip Anda</button>
+                </div>
+                
+                <div v-else>
+                   <a 
+                      v-if="contactInfo && contactInfo.href !== '#'"
+                      :href="contactInfo.href" 
+                      target="_blank" 
+                      class="btn-join"
+                      :class="contactInfo.color"
+                   >
+                    <i :class="[contactInfo.icon, 'text-xl mr-2']"></i> {{ contactInfo.label }}
+                  </a>
+                  <button v-else class="btn-join disabled" disabled>{{ t('trip.noLink') }}</button>
+                  
+                  <p class="text-[10px] text-gray-400 text-center mt-2 italic">
+                     Link akan membawa anda ke WhatsApp/Email rasmi organizer.
+                  </p>
+                </div>
               </div>
-
               <p class="note mt-4">* {{ t('trip.paymentNote') }}</p>
             </div>
           </div>
@@ -216,8 +231,9 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { db, auth } from '../firebaseConfig'; // Import Auth
+import { db, auth } from '../firebaseConfig'; // Path asal
 import { doc, getDoc, updateDoc } from 'firebase/firestore'; 
+import { getContactLink } from '../utils/contactHelper'; // Import baru
 
 // @ts-ignore
 import VueEasyLightbox from 'vue-easy-lightbox';
@@ -236,6 +252,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const trip = ref<any>(null);
+const organizer = ref<any>(null); // State untuk simpan data organizer
 const loading = ref(true);
 const isProcessing = ref(false);
 
@@ -265,6 +282,12 @@ const displayImages = computed(() => {
 // [SECURITY] Check Owner
 const isOwner = computed(() => {
   return auth.currentUser && trip.value && auth.currentUser.uid === trip.value.organizerId;
+});
+
+// [NEW] Computed Contact Info
+const contactInfo = computed(() => {
+  if (!trip.value) return null;
+  return getContactLink(trip.value, organizer.value);
 });
 
 // [SECURITY] Soft Delete Function
@@ -313,6 +336,18 @@ onMounted(async () => {
          trip.value = null; // Tunjuk 'Trip Not Found'
       } else {
          trip.value = { id: docSnap.id, ...data };
+
+         // [NEW] Fetch Organizer Data (untuk dapatkan phone number dia)
+         if (trip.value.organizerId) {
+            try {
+              const orgSnap = await getDoc(doc(db, 'users', trip.value.organizerId));
+              if (orgSnap.exists()) {
+                organizer.value = orgSnap.data();
+              }
+            } catch (err) {
+              console.log("Organizer info restricted or not found");
+            }
+         }
       }
     }
   } catch (error) {
