@@ -1,67 +1,69 @@
 <template>
-  <div class="spots-page">
+  <div class="spots-page min-h-screen bg-slate-900 text-white relative overflow-x-hidden">
     
     <div class="contour-lines"></div>
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <div class="container main-content" style="padding-top: 10px; padding-bottom: 3rem;">
+    <div class="container mx-auto px-6 pt-24 pb-12 relative z-10 max-w-7xl">
       
-      <div class="header-section mb-8 relative z-10 flex flex-col md:flex-row justify-between items-end gap-4">
+      <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-10 animate-fade-in-up">
         <div class="text-center md:text-left">
-          <h1 class="text-3xl font-bold text-white mb-2">{{ t('spots.title') || 'Lokasi Menarik' }}</h1>
-          <p class="text-gray-400 max-w-lg">{{ t('spots.sub') || 'Temui gunung, bukit, air terjun dan lokasi rekreasi terbaik di Malaysia.' }}</p>
+          <h1 class="text-4xl font-extrabold text-white mb-3">{{ t('spots.title') || 'Lokasi Menarik' }}</h1>
+          <p class="text-gray-400 text-lg max-w-xl">{{ t('spots.sub') || 'Temui gunung, bukit, air terjun dan lokasi rekreasi terbaik di Malaysia.' }}</p>
         </div>
         
-        <button class="btn-create-spot" @click="$router.push('/create-spot')">
-          <span class="btn-content">
-            <i class="fas fa-plus-circle text-xl"></i>
-            <span class="text-sm font-bold ml-2 uppercase tracking-wide">{{ t('spots.addBtn') || 'Tambah Spot' }}</span>
+        <button 
+          class="group relative inline-flex items-center justify-center px-6 py-3 font-bold text-white transition-all duration-200 bg-transparent border-none cursor-pointer focus:outline-none"
+          @click="$router.push('/create-spot')"
+        >
+          <span class="absolute inset-0 w-full h-full -mt-1 rounded-full opacity-30 bg-gradient-to-r from-purple-600 to-blue-600 blur-lg group-hover:opacity-60 transition duration-200"></span>
+          <span class="relative flex items-center bg-gradient-to-r from-purple-600 to-blue-600 rounded-full px-6 py-3 shadow-xl hover:-translate-y-1 transition transform duration-200">
+             <i class="fas fa-plus-circle text-xl mr-2"></i>
+             <span class="uppercase tracking-wide text-sm">{{ t('spots.addBtn') || 'Tambah Spot' }}</span>
           </span>
-          <div class="btn-glow"></div>
         </button>
       </div>
 
-      <div class="filter-section mb-8 relative z-10">
-        <div class="filter-container">
+      <div class="mb-10 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div class="flex flex-col gap-4">
           
-          <div class="search-row">
-            <div class="search-wrapper-full">
-               <i class="fas fa-search search-icon"></i>
+          <div class="relative w-full">
+               <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
                <input 
                  type="text" 
-                 v-model="searchQuery"
-                 class="search-input-full"
+                 v-model="filters.searchQuery"
+                 class="w-full pl-12 pr-24 py-3 rounded-xl bg-black/20 border border-white/10 text-white placeholder-slate-500 focus:border-purple-500 focus:bg-black/30 outline-none transition"
                  :placeholder="t('spots.searchPlaceholder') || 'Cari nama bukit, gunung, sungai...'" 
                />
-               <button class="btn-search-main">Cari</button>
-            </div>
+               <button class="absolute right-2 top-2 bottom-2 bg-purple-600 hover:bg-purple-500 text-white px-5 rounded-lg font-semibold transition">
+                 Cari
+               </button>
           </div>
 
-          <div class="filters-row mt-4">
-             <div class="select-wrapper">
-                <i class="fas fa-map-marker-alt select-icon text-red-400"></i>
-                <select v-model="filterState" class="custom-select">
+          <div class="flex flex-wrap gap-3 items-center">
+             
+             <div class="relative flex-1 min-w-[180px]">
+                <i class="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-red-400 pointer-events-none"></i>
+                <select v-model="filters.state" class="custom-select pl-10">
                   <option value="">{{ t('spots.allStates') || 'Semua Negeri' }}</option>
                   <option v-for="s in MALAYSIA_STATES" :key="s" :value="s">{{ s }}</option>
                 </select>
              </div>
 
-             <div class="select-wrapper">
-                <i class="fas fa-tree select-icon text-purple-400"></i>
-                <select v-model="filterCategory" class="custom-select">
+             <div class="relative flex-1 min-w-[180px]">
+                <i class="fas fa-tree absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 pointer-events-none"></i>
+                <select v-model="filters.category" class="custom-select pl-10">
                   <option value="">Semua Jenis</option>
-                  <option value="Mountain">Gunung</option>
-                  <option value="Hill">Bukit</option>
-                  <option value="Waterfall">Air Terjun</option>
-                  <option value="Cave">Gua</option>
-                  <option value="Beach">Pantai</option>
+                  <option v-for="cat in SPOT_CATEGORIES" :key="cat.value" :value="cat.value">
+                    {{ cat.label }}
+                  </option>
                 </select>
              </div>
 
              <button 
-                v-if="searchQuery || filterState || filterCategory" 
-                class="btn-reset" 
+                v-if="hasActiveFilters" 
+                class="w-12 h-12 flex items-center justify-center rounded-xl bg-red-500/20 text-red-500 hover:bg-red-500/30 transition shadow-lg shrink-0" 
                 @click="resetFilters"
                 title="Reset Filter"
              >
@@ -71,71 +73,74 @@
         </div>
       </div>
 
-      <div class="content-area relative z-10">
+      <div class="relative z-10">
         
         <div v-if="initialLoading" class="flex flex-col items-center justify-center py-20 text-gray-400">
-          <div class="spinner mb-4"></div>
+          <div class="spinner w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mb-4"></div>
           <p>{{ t('common.loading') }}...</p>
         </div>
         
-        <div v-else-if="filteredSpots.length === 0" class="empty-state glass-panel">
-          <i class="fas fa-mountain text-4xl mb-4 opacity-30 text-gray-400"></i>
-          <h3 class="text-lg font-bold text-gray-300">{{ t('spots.empty') || 'Tiada Lokasi Dijumpai' }}</h3>
-          <p class="text-gray-500 text-sm">Jadilah yang pertama menambah lokasi ini!</p>
+        <div v-else-if="filteredSpots.length === 0" class="flex flex-col items-center justify-center py-20 bg-white/5 rounded-2xl border border-white/5 border-dashed text-gray-500">
+          <i class="fas fa-mountain text-5xl mb-4 opacity-30"></i>
+          <h3 class="text-xl font-bold text-gray-300">{{ t('spots.empty') || 'Tiada Lokasi Dijumpai' }}</h3>
+          <p class="mt-2 text-sm">Jadilah yang pertama menambah lokasi ini!</p>
+          <button @click="resetFilters" class="text-purple-400 hover:text-purple-300 underline mt-3 font-medium">Reset Filter</button>
         </div>
 
         <div v-else>
-            <div class="spot-grid">
-            <div 
-                v-for="spot in filteredSpots" 
-                :key="spot.id" 
-                class="spot-card glass-card" 
-                @click="$router.push('/spots/' + spot.id)"
-            >
-                <div class="card-img" :style="{ backgroundImage: `url(${spot.image || 'https://via.placeholder.com/300'})` }">
-                <div class="overlay-gradient"></div>
-                
-                <span class="level-badge" :class="spot.difficulty ? spot.difficulty.toLowerCase() : 'easy'">
-                    {{ getLevelLabel(spot.difficulty) }}
-                </span>
-                </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div 
+                    v-for="spot in filteredSpots" 
+                    :key="spot.id" 
+                    class="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:border-purple-500/30 transition duration-300 cursor-pointer flex flex-col"
+                    @click="$router.push('/spots/' + spot.id)"
+                >
+                    <div class="h-56 bg-cover bg-center relative" :style="{ backgroundImage: `url(${spot.image || 'https://via.placeholder.com/300'})` }">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent"></div>
+                        
+                        <span 
+                            class="absolute top-3 right-3 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-white shadow-md backdrop-blur-md"
+                            :class="getDifficultyColor(spot.difficulty)"
+                        >
+                            {{ getDifficultyLabel(spot.difficulty) }}
+                        </span>
+                    </div>
 
-                <div class="card-body">
-                <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-lg font-bold text-white leading-tight card-title transition-colors">
-                        {{ spot.name }}
-                    </h3>
-                </div>
-                
-                <div class="meta-info">
-                    <span class="flex items-center gap-1"><i class="fas fa-map-pin text-red-400 text-xs"></i> {{ spot.state }}</span>
-                    <span v-if="spot.height" class="flex items-center gap-1"><i class="fas fa-ruler-vertical text-blue-400 text-xs"></i> {{ spot.height }}m</span>
-                </div>
-                
-                <div class="tags-container">
-                    <span v-if="spot.permit === 'Yes' || spot.permit === 'Perlu'" class="tag permit">
-                        <i class="fas fa-file-signature mr-1"></i> {{ t('spots.permit') || 'Permit' }}
-                    </span>
-                    <span v-else class="tag free">
-                        <i class="fas fa-check-circle mr-1"></i> {{ t('spots.noPermit') || 'Bebas' }}
-                    </span>
+                    <div class="p-5 flex flex-col flex-1">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-purple-400 transition-colors line-clamp-1">
+                            {{ spot.name }}
+                        </h3>
+                        
+                        <div class="flex items-center gap-4 text-sm text-gray-400 mb-4">
+                            <span class="flex items-center gap-1.5"><i class="fas fa-map-pin text-red-400"></i> {{ spot.state }}</span>
+                            <span v-if="spot.height" class="flex items-center gap-1.5"><i class="fas fa-ruler-vertical text-blue-400"></i> {{ spot.height }}m</span>
+                        </div>
+                        
+                        <div class="mt-auto flex flex-wrap gap-2">
+                            <span 
+                                class="px-2.5 py-1 rounded-md text-xs font-semibold flex items-center"
+                                :class="(spot.permit === 'Yes' || spot.permit === 'Perlu') ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'"
+                            >
+                                <i class="mr-1.5" :class="(spot.permit === 'Yes' || spot.permit === 'Perlu') ? 'fas fa-file-signature' : 'fas fa-check-circle'"></i> 
+                                {{ (spot.permit === 'Yes' || spot.permit === 'Perlu') ? (t('spots.permit') || 'Permit') : (t('spots.noPermit') || 'Bebas') }}
+                            </span>
 
-                    <span class="tag category">
-                        <i class="fas fa-tree mr-1"></i> {{ spot.category || 'Nature' }}
-                    </span>
-                </div>
+                            <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white/10 text-gray-300 flex items-center">
+                                <i class="fas fa-tree mr-1.5"></i> {{ spot.category || 'Nature' }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <div v-if="loadingMore" class="flex justify-center items-center py-8">
+                <div class="spinner w-8 h-8 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin"></div>
+                <span class="ml-3 text-gray-400 font-medium animate-pulse">Memuatkan lagi...</span>
             </div>
 
-            <div v-if="loadingMore" class="flex justify-center items-center py-6">
-                <div class="spinner w-6 h-6 border-2"></div>
-                <span class="ml-3 text-gray-400 text-sm">Memuatkan lagi...</span>
-            </div>
-
-            <div ref="bottomTrigger" class="h-10 mt-4"></div>
+            <div ref="bottomTrigger" class="h-10 mt-4 pointer-events-none"></div>
             
-            <div v-if="allLoaded && filteredSpots.length > 0" class="text-center py-8 text-gray-500 text-xs uppercase tracking-widest opacity-50">
+            <div v-if="allLoaded && filteredSpots.length > 0" class="text-center py-10 text-gray-500 text-xs uppercase tracking-widest opacity-50">
                 -- Semua lokasi telah dipaparkan --
             </div>
         </div>
@@ -146,75 +151,85 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick, onUnmounted } from 'vue'; // Tambah onUnmounted & nextTick
+import { ref, reactive, onMounted, computed, nextTick, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, query, orderBy, limit, startAfter } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, startAfter, type QueryDocumentSnapshot } from 'firebase/firestore';
+
+// Imports (Constants & Types)
 import { MALAYSIA_STATES } from '../constants/data';
+import { SPOT_CATEGORIES, DIFFICULTY_LEVELS } from '../constants/spotData';
+import type { Spot } from '../types';
 
 const { t } = useI18n();
+
+// CONSTANTS
+const BATCH_SIZE = 8;
 
 // STATE
 const initialLoading = ref(true);
 const loadingMore = ref(false);
 const allLoaded = ref(false);
-const lastVisible = ref<any>(null);
+const lastVisible = ref<QueryDocumentSnapshot | null>(null); // Type Safe Firestore Snapshot
 const bottomTrigger = ref<HTMLElement | null>(null);
-const BATCH_SIZE = 8;
-const observer = ref<IntersectionObserver | null>(null); // Simpan observer dalam ref
+const observer = ref<IntersectionObserver | null>(null);
 
-const spots = ref<any[]>([]);
-const searchQuery = ref('');
-const filterState = ref('');
-const filterCategory = ref('');
+const spots = ref<Spot[]>([]); // Type Safe Array
+
+// Reactive Filters
+const filters = reactive({
+    searchQuery: '',
+    state: '',
+    category: ''
+});
 
 // --- HELPERS ---
-const getLevelLabel = (level: string) => {
-  if (!level) return 'Easy';
-  const key = level.toLowerCase();
-  const labels: any = { easy: 'Mudah', moderate: 'Sederhana', hard: 'Sukar', extreme: 'Extreme' };
-  return t(`components.${key}`) !== `components.${key}` ? t(`components.${key}`) : (labels[key] || level);
+const getDifficultyLabel = (level: string) => {
+    if (!level) return 'Easy';
+    const found = DIFFICULTY_LEVELS.find(l => l.value.toLowerCase() === level.toLowerCase());
+    return found ? found.label : level;
+};
+
+const getDifficultyColor = (level: string) => {
+    if (!level) return 'bg-emerald-500';
+    const found = DIFFICULTY_LEVELS.find(l => l.value.toLowerCase() === level.toLowerCase());
+    return found ? found.color : 'bg-gray-500';
 };
 
 const resetFilters = () => {
-    searchQuery.value = '';
-    filterState.value = '';
-    filterCategory.value = '';
+    filters.searchQuery = '';
+    filters.state = '';
+    filters.category = '';
 };
 
 // --- COMPUTED ---
+const hasActiveFilters = computed(() => !!filters.searchQuery || !!filters.state || !!filters.category);
+
 const filteredSpots = computed(() => {
   return spots.value.filter(s => {
-    const matchSearch = s.name.toLowerCase().includes(searchQuery.value.toLowerCase());
-    const matchState = filterState.value === '' || s.state === filterState.value;
-    const matchCat = filterCategory.value === '' || (s.category && s.category === filterCategory.value);
+    const matchSearch = s.name.toLowerCase().includes(filters.searchQuery.toLowerCase());
+    const matchState = filters.state === '' || s.state === filters.state;
+    const matchCat = filters.category === '' || (s.category && s.category === filters.category);
     return matchSearch && matchState && matchCat;
   });
 });
 
-// --- FUNGSI UTAMA: SETUP OBSERVER ---
+// --- INFINITE SCROLL LOGIC ---
 const setupObserver = () => {
-    // Kalau observer dah ada, disconnect dulu (elak duplicate)
     if (observer.value) observer.value.disconnect();
 
-    // Setup baru
     observer.value = new IntersectionObserver((entries) => {
-        // Jika sensor kelihatan & tak tengah loading & data belum habis
         if (entries[0]?.isIntersecting && !loadingMore.value && !allLoaded.value) {
-            console.log("Sensor nampak! Loading data seterusnya..."); // Debugging
             loadMoreSpots();
         }
-    }, {
-        rootMargin: '200px', // Trigger awal sikit (200px sebelum sampai bawah)
-    });
+    }, { rootMargin: '200px' });
 
-    // Mula memerhati bila element wujud
     if (bottomTrigger.value) {
         observer.value.observe(bottomTrigger.value);
     }
 };
 
-// --- LOAD DATA AWAL ---
+// Fetch Initial
 const fetchInitialSpots = async () => {
     initialLoading.value = true;
     allLoaded.value = false;
@@ -231,36 +246,28 @@ const fetchInitialSpots = async () => {
         const snap = await getDocs(q);
         
         if (!snap.empty) {
-            spots.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            lastVisible.value = snap.docs[snap.docs.length - 1];
-            
+            spots.value = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Spot[];
+            const lastDoc = snap.docs[snap.docs.length - 1];
+            if (lastDoc) lastVisible.value = lastDoc;
             if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
         } else {
             allLoaded.value = true;
         }
     } catch (e) { 
-        console.error("Error fetching initial spots:", e); 
+        console.error("Error fetching spots:", e); 
     } finally { 
         initialLoading.value = false; 
-        
-        // KUNCI PENYELESAIAN:
-        // Tunggu DOM update (nextTick), baru pasang sensor
-        nextTick(() => {
-            setupObserver();
-        });
+        nextTick(() => setupObserver());
     }
 };
 
-// --- LOAD DATA SETERUSNYA ---
+// Load More
 const loadMoreSpots = async () => {
-    if (loadingMore.value || allLoaded.value) return;
+    if (loadingMore.value || allLoaded.value || !lastVisible.value) return;
 
     loadingMore.value = true;
 
     try {
-        // Delay sikit (artificial) kalau nak nampak spinner (optional)
-        // await new Promise(r => setTimeout(r, 500));
-
         const q = query(
             collection(db, "spots"), 
             orderBy("createdAt", "desc"),
@@ -271,10 +278,10 @@ const loadMoreSpots = async () => {
         const snap = await getDocs(q);
 
         if (!snap.empty) {
-            const newSpots = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            const newSpots = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Spot[];
             spots.value = [...spots.value, ...newSpots];
-            lastVisible.value = snap.docs[snap.docs.length - 1];
-            
+            const lastDoc = snap.docs[snap.docs.length - 1];
+            if (lastDoc) lastVisible.value = lastDoc;
             if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
         } else {
             allLoaded.value = true;
@@ -297,188 +304,33 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* CSS ANDA KEKAL SAMA - TIADA PERUBAHAN */
-/* --- BASE THEME --- */
-.spots-page { 
-  background-color: #0f172a; 
-  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
-}
-
-/* FIX: Guna Margin Top Besar untuk elak Navbar */
-.main-content {
-  margin-top: 140px; 
-  padding-bottom: 3rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-  position: relative;
-  z-index: 2;
-}
-
-/* GLOWS */
+/* Page Theme */
 .page-glow-purple {
-  position: absolute; top: -10%; right: -10%; width: 60vw; height: 60vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
+  position: absolute; top: 0; right: 0; width: 60vw; height: 60vw;
+  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%; z-index: 0;
 }
 .page-glow-orange {
-  position: absolute; bottom: -10%; left: -10%; width: 60vw; height: 60vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
+  position: absolute; bottom: 0; left: 0; width: 60vw; height: 60vw;
+  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%; z-index: 0;
 }
 .contour-lines {
-  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
+  position: absolute; inset: 0; z-index: 0; opacity: 0.08; pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: cover; pointer-events: none;
+  background-size: cover;
 }
 
-/* --- HEADER BUTTON (UNGU) --- */
-.btn-create-spot {
-  position: relative;
-  background: transparent; border: none; padding: 0; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.btn-content {
-  position: relative; z-index: 2;
-  display: flex; align-items: center;
-  background: linear-gradient(135deg, #6c63ff, #5b54e0); 
-  color: white; padding: 12px 24px; border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);
-  transition: transform 0.2s;
-}
-.btn-create-spot:hover .btn-content { transform: translateY(-2px); background: linear-gradient(135deg, #5b54e0, #4c46c0); }
-.btn-glow {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  background: #6c63ff; filter: blur(15px); opacity: 0.5; z-index: 1;
-  transition: opacity 0.3s;
-}
-.btn-create-spot:hover .btn-glow { opacity: 0.8; }
-
-/* --- FILTER SECTION --- */
-.filter-section {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px; padding: 1.5rem;
-  backdrop-filter: blur(10px);
-}
-.filter-container { display: flex; flex-direction: column; gap: 8px; }
-
-/* Search Row */
-.search-row { width: 100%; }
-.search-wrapper-full { position: relative; display: flex; width: 100%; align-items: center; }
-.search-input-full {
-  width: 100%; padding: 10px 100px 10px 44px;
-  border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.2); color: white; outline: none; transition: 0.3s; font-size: 1rem;
-}
-.search-input-full:focus { border-color: #6c63ff; background: rgba(0,0,0,0.4); }
-.search-icon { position: absolute; left: 16px; color: #94a3b8; font-size: 1.1rem; }
-.btn-search-main {
-  position: absolute; right: 4px; top: 4px; bottom: 4px;
-  background: #6c63ff; color: white; border: none; padding: 0 20px;
-  border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;
-}
-.btn-search-main:hover { background: #5b54e0; }
-
-/* Filters Row */
-.filters-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-.select-wrapper { position: relative; flex: 1; min-width: 160px; }
+/* Custom Select Styling */
 .custom-select {
-  width: 100%; appearance: none; padding: 10px 36px 10px 38px;
-  border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.2); color: #e2e8f0; outline: none; cursor: pointer; transition: 0.3s;
+  width: 100%; appearance: none; padding: 12px 36px 12px 38px;
+  border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.2); color: #e2e8f0;
+  outline: none; cursor: pointer; transition: 0.3s;
 }
 .custom-select:hover { background: rgba(0,0,0,0.3); }
 .custom-select:focus { border-color: #6c63ff; }
-.select-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+
+/* Arrow for Select */
 .select-wrapper::after {
   content: '▼'; font-size: 0.7rem; color: #94a3b8; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none;
 }
-.btn-reset {
-  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-  border-radius: 10px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; cursor: pointer;
-}
-.btn-reset:hover { background: rgba(239, 68, 68, 0.3); }
-
-/* --- GRID & CARDS --- */
-.spot-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 24px;
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px; overflow: hidden;
-  backdrop-filter: blur(10px);
-  transition: 0.3s; cursor: pointer;
-  display: flex; flex-direction: column;
-}
-.glass-card:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.06);
-  border-color: #6c63ff; 
-  box-shadow: 0 10px 30px rgba(108, 99, 255, 0.15); 
-}
-.card-title:hover { color: #a78bfa; }
-
-.card-img { height: 180px; background-size: cover; position: relative; }
-.overlay-gradient {
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(15, 23, 42, 0.8));
-}
-
-.level-badge {
-  position: absolute; top: 10px; right: 10px; padding: 4px 10px;
-  border-radius: 20px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
-  color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
-.level-badge.easy { background: #10b981; }
-.level-badge.moderate { background: #f59e0b; }
-.level-badge.hard, .level-badge.extreme { background: #ef4444; }
-
-.card-body { padding: 1.2rem; display: flex; flex-direction: column; flex: 1; }
-.meta-info { font-size: 0.85rem; color: #94a3b8; display: flex; gap: 12px; margin-bottom: 12px; }
-.tags-container { margin-top: auto; display: flex; gap: 6px; flex-wrap: wrap; }
-.tag { font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: flex; align-items: center; }
-.tag.free { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-.tag.permit { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-.tag.category { background: rgba(255,255,255,0.1); color: #cbd5e1; }
-
-.spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #6c63ff; border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.empty-state { text-align: center; padding: 3rem; display: flex; flex-direction: column; align-items: center; }
-
-@media (max-width: 768px) {
-  .header-section { flex-direction: column; text-align: center; align-items: center; }
-  .filters-row { flex-direction: column; }
-  .select-wrapper { width: 100%; }
-}
-
-/* --- SKELETON LOADER ANIMATION --- */
-.skeleton-bg {
-  background: rgba(255, 255, 255, 0.05);
-  background-image: linear-gradient(
-    90deg, 
-    rgba(255, 255, 255, 0) 0, 
-    rgba(255, 255, 255, 0.1) 20%, 
-    rgba(255, 255, 255, 0.2) 60%, 
-    rgba(255, 255, 255, 0)
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-  border-radius: 8px;
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* Helper classes untuk bentuk */
-.sk-img { height: 180px; width: 100%; border-radius: 0; } /* Sama tinggi dgn gambar sebenar */
-.sk-text { height: 20px; margin-bottom: 8px; }
-.sk-text-sm { height: 14px; margin-bottom: 6px; }
-.sk-tag { height: 24px; width: 60px; display: inline-block; margin-right: 8px; border-radius: 6px; }
 </style>

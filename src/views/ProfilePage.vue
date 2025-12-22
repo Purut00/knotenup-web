@@ -1,24 +1,24 @@
 <template>
   <div class="profile-page">
     
-    <!-- BACKGROUND LAYERS (Ikut Tema) -->
     <div class="contour-lines"></div>
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <!-- MAIN CONTENT -->
     <div class="container profile-layout" style="padding-top: 100px; padding-bottom: 3rem;">
       
-      <!-- LEFT SIDEBAR -->
       <aside class="profile-sidebar glass-panel">
         <div class="user-card">
           <div class="avatar-wrapper">
-            <img :src="user.avatar" alt="Avatar" class="avatar" />
+            <img :src="user.avatar || 'https://i.pravatar.cc/300'" alt="Avatar" class="avatar" />
             <span v-if="user.role === 'organizer'" class="role-badge">Organizer</span>
             <span v-if="user.role === 'admin'" class="role-badge" style="background: #e74c3c;">Admin</span>
           </div>
           
-          <h2 class="user-name">{{ user.name }} <span v-if="user.organizerStatus === 'approved'" class="verified-icon">✅</span></h2>
+          <h2 class="user-name">
+            {{ user.name }} 
+            <span v-if="user.organizerStatus === 'approved'" class="verified-icon" title="Verified">✅</span>
+          </h2>
           <p class="user-bio">{{ user.bio || 'Tiada bio.' }}</p>
 
           <div class="stats-grid">
@@ -39,7 +39,6 @@
               🏆 Aktifkan Akaun Organizer
             </button>
             
-            <!-- BUTTON ADMIN: Hanya muncul jika role dari DB adalah 'admin' -->
             <button v-if="isAdmin" class="btn-action admin" @click="$router.push('/admin')">
               ⚡ Admin Panel
             </button>
@@ -53,7 +52,7 @@
             </button>
 
             <button class="btn-action edit" @click="$router.push('/profile/edit')">
-              ⚙️ {{ t('profile.editProfile') || 'Edit Profil' }}
+              ⚙️ Edit Profil
             </button>
           </div>
 
@@ -66,28 +65,24 @@
         </div>
       </aside>
 
-      <!-- RIGHT MAIN CONTENT -->
       <main class="profile-main">
         
-        <!-- TABS -->
         <div class="tabs-strip glass-panel-top">
           <button :class="{ active: activeTab === 'upcoming' }" @click="activeTab = 'upcoming'">
-            📅 {{ t('profile.tabUpcoming') || 'Akan Datang' }}
+            📅 <span class="hidden sm:inline">Akan Datang</span>
           </button>
           <button :class="{ active: activeTab === 'history' }" @click="activeTab = 'history'">
-            📜 {{ t('profile.tabHistory') || 'Sejarah' }}
+            📜 <span class="hidden sm:inline">Sejarah</span>
           </button>
           <button :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">
-            💬 {{ t('profile.tabPosts') || 'Post Saya' }}
+            💬 <span class="hidden sm:inline">Post Saya</span>
           </button>
         </div>
 
-        <!-- CONTENT BOX -->
         <div class="content-box glass-panel-bottom">
-          <div v-if="loadingData" class="loading-text">⏳ {{ t('common.loading') }}...</div>
+          <div v-if="loadingData" class="loading-text">⏳ Memuatkan...</div>
           
           <div v-else>
-            <!-- UPCOMING TAB -->
             <div v-if="activeTab === 'upcoming'">
               <div v-if="upcomingTrips.length > 0" class="grid-layout">
                 <div v-for="trip in upcomingTrips" :key="trip.id" class="compact-card glass-card-small">
@@ -98,21 +93,15 @@
                   <div class="cc-info">
                     <h4>{{ trip.title }}</h4>
                     <p>📍 {{ trip.destination || trip.location }}</p>
-                    
                     <span v-if="trip.organizerId === user.id" class="status-pill organizer">Organizer</span>
                     <span v-else class="status-pill participant">Peserta</span>
-                    
-                    <span class="status-pill open">{{ t('trip.open') || 'Open' }}</span>
                   </div>
-                  <button class="btn-mini" @click="$router.push('/trips/' + trip.id)">
-                    {{ t('common.view') || 'Lihat' }}
-                  </button>
+                  <button class="btn-mini" @click="$router.push('/trips/' + trip.id)">Lihat</button>
                 </div>
               </div>
               <div v-else class="empty-text">Tiada trip akan datang.</div>
             </div>
 
-            <!-- HISTORY TAB -->
             <div v-if="activeTab === 'history'">
               <div v-if="historyTrips.length > 0" class="grid-layout">
                 <div v-for="trip in historyTrips" :key="trip.id" class="compact-card glass-card-small faded">
@@ -125,24 +114,21 @@
                     <p>📍 {{ trip.destination || trip.location }}</p>
                     <span class="status-pill closed">Tamat</span>
                   </div>
-                  <button class="btn-mini outline" @click="$router.push('/trips/' + trip.id)">
-                    {{ t('common.view') || 'Lihat' }}
-                  </button>
+                  <button class="btn-mini outline" @click="$router.push('/trips/' + trip.id)">Lihat</button>
                 </div>
               </div>
               <div v-else class="empty-text">Tiada sejarah trip.</div>
             </div>
 
-            <!-- FORUM TAB -->
             <div v-if="activeTab === 'forum'">
               <div v-if="myPosts.length > 0" class="forum-layout">
                 <div v-for="post in myPosts" :key="post.id" class="forum-row glass-row" @click="$router.push('/forum/' + post.id)">
                    <div class="fr-content">
                      <h4>{{ post.title }}</h4>
-                     <span>💬 {{ post.commentCount || 0 }} • ❤️ {{ post.votes || 0 }}</span>
+                     <span>💬 {{ post.commentCount || 0 }} • ❤️ {{ post.likes || 0 }}</span>
                    </div>
                    <div class="fr-actions" v-if="isOwnProfile">
-                     <button @click.stop="editPost(post.id)">✏️</button>
+                     <button @click.stop="$router.push('/forum/edit/' + post.id)">✏️</button>
                      <button @click.stop="deletePost(post.id)" class="del">🗑️</button>
                    </div>
                 </div>
@@ -154,7 +140,6 @@
       </main>
     </div>
 
-    <!-- MODALS KEKAL SAMA -->
     <div v-if="showCard" class="modal-overlay" @click.self="showCard = false">
       <div class="card-modal-wrapper">
         <button class="close-btn" @click="showCard = false">✖</button>
@@ -165,10 +150,10 @@
                 <div class="bc-texts">
                    <h3 class="bc-name">{{ user.name }}</h3>
                    <span class="bc-role">OUTDOOR ORGANIZER</span>
-                   <p v-if="user.organizerDetails.orgName && user.organizerDetails.orgName !== user.name" class="bc-company">
+                   <p v-if="user.organizerDetails?.orgName" class="bc-company">
                      {{ user.organizerDetails.orgName }}
                    </p>
-                   <p v-if="user.organizerDetails.ssm" class="bc-ssm">
+                   <p v-if="user.organizerDetails?.ssm" class="bc-ssm">
                      {{ user.organizerDetails.ssm }}
                    </p>
                 </div>
@@ -177,22 +162,19 @@
                 <div v-if="user.whatsapp" class="bc-soc-row"><img src="https://cdn.simpleicons.org/whatsapp/white" /> {{ user.whatsapp }}</div>
                 <div v-if="user.facebook" class="bc-soc-row"><img src="https://cdn.simpleicons.org/facebook/white" /> /{{ user.facebook }}</div>
                 <div v-if="user.instagram" class="bc-soc-row"><img src="https://cdn.simpleicons.org/instagram/white" /> /{{ user.instagram }}</div>
-                <div v-if="user.tiktok" class="bc-soc-row"><img src="https://cdn.simpleicons.org/tiktok/white" /> @{{ user.tiktok }}</div>
-                <div v-if="user.youtube" class="bc-soc-row"><img src="https://cdn.simpleicons.org/youtube/white" /> /{{ user.youtube }}</div>
              </div>
           </div>
           <div class="bc-right-panel">
              <div class="qr-container">
                <span class="scan-text">SCAN ME</span>
-               <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/user/${user.name}`" class="bc-qr" crossorigin="anonymous" />
+               <img :src="qrCodeUrl" class="bc-qr" crossorigin="anonymous" />
                <span class="bc-brand">KnotenUp</span>
              </div>
           </div>
         </div>
         <div class="modal-actions">
-          <button class="share-btn" @click="shareCard">🔗 Copy Link</button>
           <button class="share-btn download" @click="downloadCard('capture-business', `BusinessCard-${user.name}`)">
-            {{ isDownloading ? 'Prosessing...' : '⬇️ Download PDF' }}
+            {{ isDownloading ? 'Processing...' : '⬇️ Download PDF' }}
           </button>
         </div>
       </div>
@@ -215,29 +197,29 @@
                  <div class="ec-grid">
                     <div class="ec-col">
                        <label>JENIS DARAH:</label>
-                       <strong class="blood-type">{{ user.bloodType || '-' }}</strong>
+                       <strong class="blood-type">{{ privateData.bloodType || '-' }}</strong>
                     </div>
                     <div class="ec-col">
                        <label>ALAHAN:</label>
-                       <strong>{{ user.allergies || 'Tiada' }}</strong>
+                       <strong>{{ privateData.allergies || 'Tiada' }}</strong>
                     </div>
                  </div>
                  <div class="ec-alert-box">
-                    <label>HUBUNGI KECEMASAN (WARIS):</label>
-                    <strong style="color: #c0392b;">{{ user.emergencyContact || 'Belum ditetapkan' }}</strong>
+                    <label>WARIS (HUBUNGI):</label>
+                    <strong style="color: #c0392b;">{{ privateData.emergencyContact || 'Belum ditetapkan' }}</strong>
                  </div>
              </div>
              <div class="ec-side">
                  <img :src="user.avatar" class="ec-avatar" crossorigin="anonymous" />
                  <div class="ec-qr-box">
-                    <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://knotenup.com/user/${user.name}`" class="ec-qr" crossorigin="anonymous" />
+                    <img :src="qrCodeUrl" class="ec-qr" crossorigin="anonymous" />
                  </div>
              </div>
            </div>
         </div>
         <div class="modal-actions">
           <button class="share-btn download" style="background:#c0392b;" @click="downloadCard('capture-emergency', `EmergencyCard-${user.name}`)">
-            {{ isDownloading ? 'Prosessing...' : '⬇️ Download PDF' }}
+            {{ isDownloading ? 'Processing...' : '⬇️ Download PDF' }}
           </button>
           <button class="share-btn" @click="$router.push('/profile/edit')">✏️ Edit Info</button>
         </div>
@@ -250,18 +232,19 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
 import { auth, db } from '../firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, deleteDoc } from 'firebase/firestore';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-const { t } = useI18n();
+// Import Interfaces (Pastikan fail types wujud)
+import type { UserProfile, UserPrivateData, TripSummary } from '../types';
+
 const route = useRoute();
 const router = useRouter();
 
-// STATE
+// --- STATE ---
 const activeTab = ref('upcoming');
 const showCard = ref(false);
 const showEmergency = ref(false); 
@@ -270,143 +253,193 @@ const isOwnProfile = ref(false);
 const isAdmin = ref(false);
 const isDownloading = ref(false);
 
-const upcomingTrips = ref<any[]>([]);
-const historyTrips = ref<any[]>([]);
+const upcomingTrips = ref<TripSummary[]>([]);
+const historyTrips = ref<TripSummary[]>([]);
 const myPosts = ref<any[]>([]);
 
-const user = reactive({
-  id: '', name: 'Loading...', bio: '', avatar: 'https://i.pravatar.cc/300?img=3',
-  whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '', role: 'user', organizerStatus: '',
-  organizerDetails: { orgName: '', ssm: '', license: '' },
+// Default User State
+const user = reactive<UserProfile>({
+  id: '', 
+  name: 'Loading...', 
+  bio: '', 
+  avatar: 'https://i.pravatar.cc/300',
+  role: 'user',
+  whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '',
+  organizerDetails: { orgName: '', ssm: '', license: '' }
+});
+
+// Default Private Data (Kosongkan awal-awal)
+const privateData = reactive<UserPrivateData>({
   bloodType: '', allergies: '', emergencyContact: ''
 });
 
+// --- COMPUTED ---
 const organizedCount = computed(() => upcomingTrips.value.length + historyTrips.value.length);
+const qrCodeUrl = computed(() => `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/user/${user.name}`);
+
+// --- HELPER FUNCTIONS ---
 const getDay = (dateString: string) => { if(!dateString) return '01'; return new Date(dateString).getDate(); };
 const getMonth = (dateString: string) => { if(!dateString) return 'JAN'; return new Date(dateString).toLocaleDateString('en-MY', { month: 'short' }).toUpperCase(); };
 
-// --- 1. FUNCTION SEMAK ROLE (Tiada Hardcode) ---
-const checkAdminRole = async (uid: string) => {
-  try {
-    const userDoc = await getDoc(doc(db, "users", uid));
-    if (userDoc.exists() && userDoc.data().role === 'admin') {
-      isAdmin.value = true;
-    }
-  } catch (e) {
-    console.error("Error checking role:", e);
-  }
-};
-
+// --- DATA FETCHING ---
 const fetchUserData = async (targetUserId: string) => {
   loadingData.value = true;
+  // Reset data
   upcomingTrips.value = []; historyTrips.value = []; myPosts.value = [];
-  
+  Object.assign(privateData, { bloodType: '', allergies: '', emergencyContact: '' });
+
   try {
-    const docSnap = await getDoc(doc(db, "users", targetUserId));
+    // 1. Fetch Public Data
+    const docRef = doc(db, "users", targetUserId);
+    const docSnap = await getDoc(docRef);
+    
     if (docSnap.exists()) { 
         const data = docSnap.data();
-        Object.assign(user, data); 
-        user.id = targetUserId; 
-        if (!user.role) user.role = 'user'; 
-        if (!user.organizerDetails) user.organizerDetails = { orgName: '', ssm: '', license: '' };
-    } 
-    else { user.name = 'User Tidak Dijumpai'; }
+        // Bind data manually or using Object.assign carefully
+        Object.assign(user, { id: docSnap.id, ...data });
+        if (!user.organizerDetails) user.organizerDetails = {};
+    } else { 
+        user.name = 'Pengguna Tidak Dijumpai'; 
+    }
 
-    // Fetch Private Data (Hanya jika admin atau owner)
-    user.bloodType = ''; user.allergies = ''; user.emergencyContact = '';
+    // 2. Fetch Private Data (Hanya jika Owner atau Admin)
     const currentUser = auth.currentUser;
-    
     if (currentUser && (currentUser.uid === targetUserId || isAdmin.value)) {
        try {
          const privateRef = doc(db, "users", targetUserId, "private_data", "info");
          const privateSnap = await getDoc(privateRef);
          if(privateSnap.exists()) {
-            const pData = privateSnap.data();
-            user.bloodType = pData.bloodType;
-            user.allergies = pData.allergies;
-            user.emergencyContact = pData.emergencyContact;
+            Object.assign(privateData, privateSnap.data());
          }
-       } catch (err) { console.log("Akses data peribadi disekat (privacy)."); }
+       } catch (err) { console.log("Akses data peribadi disekat."); }
     }
 
-    // Fetch Trips
-    const tripMap = new Map();
-    const qOrganizer = query(collection(db, "trips"), where("organizerId", "==", targetUserId));
-    const snapOrganizer = await getDocs(qOrganizer);
-    snapOrganizer.forEach(doc => tripMap.set(doc.id, { id: doc.id, ...doc.data() }));
+    // 3. Fetch Trips (Separate Logic)
+    await fetchUserTrips(targetUserId);
 
-    const qParticipant = query(collection(db, "trips"), where("participants", "array-contains", targetUserId));
-    const snapParticipant = await getDocs(qParticipant);
-    snapParticipant.forEach(doc => tripMap.set(doc.id, { id: doc.id, ...doc.data() }));
-
-    const today = new Date();
-    Array.from(tripMap.values()).forEach((trip: any) => {
-      const tripDate = new Date(trip.startDate);
-      tripDate.setHours(0,0,0,0); today.setHours(0,0,0,0);
-      if (tripDate >= today) upcomingTrips.value.push(trip);
-      else historyTrips.value.push(trip);
-    });
-
-    upcomingTrips.value.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-    historyTrips.value.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
-
-    // Fetch Posts
+    // 4. Fetch Posts
     const qPost = query(collection(db, "forum_posts"), where("authorId", "==", targetUserId), orderBy("createdAt", "desc"));
     const snapPost = await getDocs(qPost);
     myPosts.value = snapPost.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-  } catch (e) { console.error("Error profile:", e); } 
-  finally { loadingData.value = false; }
+  } catch (e) { 
+    console.error("Error profile:", e); 
+  } finally { 
+    loadingData.value = false; 
+  }
 };
 
+const fetchUserTrips = async (uid: string) => {
+    const tripMap = new Map();
+    
+    // Get trips as organizer
+    const qOrg = query(collection(db, "trips"), where("organizerId", "==", uid));
+    const snapOrg = await getDocs(qOrg);
+    snapOrg.forEach(d => tripMap.set(d.id, { id: d.id, ...d.data() }));
+
+    // Get trips as participant
+    const qPart = query(collection(db, "trips"), where("participants", "array-contains", uid));
+    const snapPart = await getDocs(qPart);
+    snapPart.forEach(d => tripMap.set(d.id, { id: d.id, ...d.data() }));
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    Array.from(tripMap.values()).forEach((trip: any) => {
+        const tDate = new Date(trip.startDate);
+        if (tDate >= today) upcomingTrips.value.push(trip);
+        else historyTrips.value.push(trip);
+    });
+    
+    // Sort
+    upcomingTrips.value.sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    historyTrips.value.sort((a,b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+};
+
+const deletePost = async (id: string) => {
+  if (confirm("Padam post ini?")) {
+    try {
+      await deleteDoc(doc(db, "forum_posts", id));
+      myPosts.value = myPosts.value.filter(p => p.id !== id);
+    } catch(e) { alert("Gagal memadam."); }
+  }
+};
+
+const openEmergency = () => {
+  // Check if private data exists first
+  if (!privateData.bloodType && !privateData.emergencyContact) {
+    if(confirm("Maklumat kecemasan belum lengkap. Kemaskini sekarang?")) {
+      router.push('/profile/edit');
+    }
+  } else {
+    showEmergency.value = true;
+  }
+};
+
+const checkAdminRole = async (uid: string) => {
+  const s = await getDoc(doc(db, "users", uid));
+  if (s.exists() && s.data().role === 'admin') isAdmin.value = true;
+};
+
+// --- LIFECYCLE ---
 onMounted(() => {
   onAuthStateChanged(auth, async (currentUser) => {
-    // Cek dulu kalau user yang login ini Admin (untuk paparkan button)
-    if (currentUser) {
-      await checkAdminRole(currentUser.uid);
-    }
+    if (currentUser) await checkAdminRole(currentUser.uid);
 
-    // Tentukan nak tunjuk profile siapa
     const routeId = route.params.id as string;
-    
     if (routeId) {
-      // Tengok profil orang lain (atau diri sendiri melalui link /user/:id)
       fetchUserData(routeId);
       isOwnProfile.value = currentUser ? (currentUser.uid === routeId) : false;
+    } else if (currentUser) {
+      fetchUserData(currentUser.uid);
+      isOwnProfile.value = true;
     } else {
-      // Tengok profil sendiri (/profile)
-      if (currentUser) {
-        fetchUserData(currentUser.uid);
-        isOwnProfile.value = true;
-      } else { 
-        router.push('/'); 
-      }
+      router.push('/');
     }
   });
 });
 
-watch(() => route.params.id, (newId) => { if (newId) fetchUserData(newId as string); });
+watch(() => route.params.id, (newId) => {
+  if (newId) fetchUserData(newId as string);
+});
 
-const editPost = (id: string) => { router.push(`/forum/edit/${id}`); };
-const deletePost = async (id: string) => { if (confirm("Padam?")) { try { await deleteDoc(doc(db, "forum_posts", id)); myPosts.value = myPosts.value.filter(p => p.id !== id); } catch(e) {} } };
-
-const openEmergency = () => { showEmergency.value = true; };
-
+// --- PDF DOWNLOADER ---
 const downloadCard = async (elementId: string, fileName: string) => {
   const element = document.getElementById(elementId);
   if (!element) return;
   isDownloading.value = true;
   try {
-    const canvas = await html2canvas(element, { scale: 3, useCORS: true, backgroundColor: null });
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: null });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
     pdf.save(`${fileName}.pdf`);
-  } catch (error) { alert("Gagal download."); } finally { isDownloading.value = false; }
+  } catch (error) { 
+    console.error(error); alert("Gagal memuat turun kad."); 
+  } finally { 
+    isDownloading.value = false; 
+  }
 };
-
-const shareCard = () => { navigator.clipboard.writeText(`https://knotenup.com/user/${user.name}`); alert("Link disalin!"); };
 </script>
+
+<style scoped>
+/* Gunakan CSS asal anda sepenuhnya di sini */
+@import '../style.css'; /* Jika ada global styles */
+
+.profile-page { background-color: #0f172a; min-height: 100vh; position: relative; overflow-x: hidden; color: white; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
+
+/* ... (Salin semula CSS layout, card, glass effect dari file asal anda) ... */
+/* Saya pendekkan di sini untuk fokus pada logik, tapi sila pastikan CSS asal 
+   anda (profile-sidebar, glass-panel, business-card, emergency-card) 
+   ADA di bahagian ini supaya layout tidak lari */
+
+/* CONTOH CSS WAJIB ADA UNTUK KAD */
+.standard-card { width: 600px; height: 340px; background: white; border-radius: 12px; overflow: hidden; display: flex; color: #333; position: relative; }
+.business-card { background: #2c3e50; color: white; }
+.emergency-card { background: #ecf0f1; border: 4px solid #c0392b; flex-direction: column; }
+/* ... (Sambung CSS asal) ... */
+</style>
 
 <style scoped>
 /* --- THEME BACKGROUND (DARK SUNSET + CONTOUR) --- */

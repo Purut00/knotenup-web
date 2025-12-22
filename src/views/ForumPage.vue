@@ -1,139 +1,115 @@
 <template>
-  <div class="forum-page">
+  <div class="forum-page min-h-screen bg-slate-900 text-white relative overflow-hidden">
     
-    <!-- GLOW BACKGROUND (Sama macam Trip Page) -->
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <div class="container pt-8 pb-12">
+    <div class="container mx-auto px-4 pt-24 pb-12 relative z-10 max-w-6xl">
 
-      <!-- HEADER SIMPLE -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">Forum Komuniti</h1>
-        <p class="text-gray-400">Berhubung dan berkongsi pengalaman dengan rakan sealiran.</p>
-      </div>
+      <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-10 gap-6 animate-fade-in-up">
+        <div>
+          <h1 class="text-4xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400">
+            Komuniti & Diskusi
+          </h1>
+          <p class="text-gray-400 text-lg">Ruang untuk berkongsi pengalaman dan pertanyaan.</p>
+        </div>
 
-      <!-- FILTER SECTION (Glass Dark Theme) -->
-      <div class="filter-section mb-8">
-        <div class="filter-row">
-          
-          <!-- Search -->
-          <div class="search-wrapper">
-             <i class="fas fa-search search-icon"></i>
-             <input 
-               type="text" 
-               v-model="searchQuery"
-               class="search-input"
-               :placeholder="t('forum.searchPlaceholder') || 'Cari topik perbincangan...'" 
-             />
+        <div class="flex gap-3 w-full md:w-auto">
+          <div class="relative flex-grow md:w-64">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+            <input 
+              type="text" 
+              v-model="searchQuery"
+              placeholder="Cari topik..." 
+              class="w-full pl-10 pr-4 py-3 rounded-full bg-white/5 border border-white/10 focus:border-purple-500 focus:bg-black/30 outline-none transition text-white"
+            />
           </div>
 
-          <!-- Filters Wrapper -->
-          <div class="filters-wrapper">
-             
-             <!-- Filter: Category (Topik) -->
-             <div class="select-wrapper">
-                <i class="fas fa-folder select-icon text-purple-400"></i>
-                <select v-model="selectedCategory" class="custom-select">
-                  <option value="">{{ t('directory.catAll') || 'Semua Topik' }}</option>
-                  <option v-for="cat in popularCats" :key="cat" :value="cat">
-                    {{ cat }}
-                  </option>
-                </select>
-             </div>
-
-             <!-- Filter: Date/Sort -->
-             <div class="select-wrapper">
-                <i class="fas fa-sort-amount-down select-icon text-orange-400"></i>
-                <select v-model="filterSort" class="custom-select">
-                  <option value="new">🆕 Terkini</option>
-                  <option value="hot">🔥 Popular</option>
-                  <option value="old">📅 Lama</option>
-                </select>
-             </div>
-
-             <!-- Reset -->
-             <button 
-                v-if="searchQuery || selectedCategory || filterSort !== 'new'" 
-                class="btn-reset" 
-                @click="resetFilters"
-             >
-               <i class="fas fa-undo"></i>
-             </button>
-          </div>
+          <button 
+            @click="goToCreatePost"
+            class="bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-500 hover:to-orange-400 text-white px-6 py-3 rounded-full font-bold shadow-lg transform hover:-translate-y-1 transition flex items-center gap-2"
+          >
+            <i class="fas fa-pen"></i>
+            <span class="hidden sm:inline">Tulis Post</span>
+          </button>
         </div>
       </div>
 
-      <!-- MAIN LAYOUT GRID -->
-      <div class="forum-layout">
+      <div class="mb-8 overflow-x-auto pb-2 scrollbar-hide animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div class="flex gap-3 min-w-max">
+          <button 
+            class="px-5 py-2.5 rounded-full border border-white/10 transition font-medium flex items-center gap-2"
+            :class="selectedCategory === '' ? 'bg-purple-600 border-purple-500 text-white shadow-purple-500/30 shadow-lg' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'"
+            @click="selectedCategory = ''"
+          >
+            <i class="fas fa-layer-group"></i> Semua
+          </button>
+          
+          <button 
+            v-for="cat in FORUM_CATEGORIES" 
+            :key="cat.id"
+            class="px-5 py-2.5 rounded-full border border-white/10 transition font-medium flex items-center gap-2"
+            :class="selectedCategory === cat.id ? 'bg-purple-600 border-purple-500 text-white shadow-purple-500/30 shadow-lg' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'"
+            @click="selectedCategory = cat.id"
+          >
+            <i :class="[cat.icon, selectedCategory === cat.id ? 'text-white' : cat.color]"></i>
+            {{ cat.label }}
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <!-- LEFT COLUMN: FEED -->
-        <div class="feed-column">
+        <div class="lg:col-span-2 space-y-6">
           
-          <!-- Loading State -->
-          <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-gray-400">
-            <div class="spinner mb-4"></div>
-            <p>{{ t('common.loading') }}</p>
+          <div v-if="loading" class="py-12 text-center">
+             <div class="spinner w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mx-auto mb-3"></div>
+             <p class="text-gray-500">Memuatkan diskusi...</p>
           </div>
 
-          <!-- Post List -->
-          <div v-else-if="filteredPosts.length > 0" class="post-list">
-            <ForumPostCard v-for="post in filteredPosts" :key="post.id" :post="post" />
+          <div v-else-if="filteredPosts.length === 0" class="bg-white/5 rounded-2xl p-10 text-center border border-white/10 border-dashed">
+            <i class="fas fa-comments text-4xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-300">Tiada topik dijumpai</h3>
+            <p class="text-gray-500 mt-2">Cuba cari kata kunci lain atau mulakan topik baru.</p>
           </div>
 
-          <!-- Empty State -->
-          <div v-else class="empty-state">
-            <i class="far fa-comments text-4xl mb-4 opacity-30"></i>
-            <h3 class="text-lg font-bold text-gray-300">{{ t('forum.postNotFound') || 'Tiada Topik Ditemui' }}</h3>
-            <p class="text-gray-500 text-sm mb-4">Mulakan perbincangan baru sekarang!</p>
-            <button @click="$router.push('/forum/create')" class="btn-create-main">
-              {{ t('forum.createPost') || 'Cipta Post Baru' }}
-            </button>
+          <div v-else class="space-y-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <ForumPostCard 
+              v-for="post in filteredPosts" 
+              :key="post.id" 
+              :post="post" 
+            />
           </div>
-          
         </div>
 
-        <!-- RIGHT COLUMN: SIDEBAR -->
-        <div class="sidebar-column">
+        <div class="hidden lg:block space-y-6 animate-fade-in-right" style="animation-delay: 0.3s;">
           
-          <!-- Intro Widget -->
-          <div class="sidebar-widget">
-            <div class="widget-header">
-              <h3>{{ t('forum.sidebarAbout') || 'Tentang Forum' }}</h3>
-            </div>
-            <p class="text-sm text-gray-400 mb-4 leading-relaxed">
-              Ruang untuk komuniti berkongsi tips, itinerari, dan mencari rakan travel.
+          <div class="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
+            <h3 class="font-bold text-xl mb-4 text-white">Selamat Datang! 👋</h3>
+            <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+              Ini adalah ruang komuniti KnotEnUp. Sila hormat sesama ahli dan berkongsi info yang bermanfaat.
             </p>
-            
-            <div class="stats-row">
-                <div class="stat-item">
-                  <span class="stat-value">{{ posts.length }}</span>
-                  <span class="stat-label">Topik</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-value text-orange-400">Active</span>
-                  <span class="stat-label">Status</span>
-                </div>
+            <div class="grid grid-cols-2 gap-4 text-center">
+               <div class="bg-black/20 rounded-xl p-3">
+                 <div class="text-2xl font-bold text-purple-400">{{ posts.length }}</div>
+                 <div class="text-xs text-gray-500 uppercase tracking-wider">Topik</div>
+               </div>
+               <div class="bg-black/20 rounded-xl p-3">
+                 <div class="text-2xl font-bold text-orange-400">{{ totalComments }}</div>
+                 <div class="text-xs text-gray-500 uppercase tracking-wider">Komen</div>
+               </div>
             </div>
-
-            <button class="btn-create-post-sidebar" @click="$router.push('/forum/create')">
-              <i class="fas fa-pen mr-2"></i> {{ t('forum.createPost') || 'Tulis Topik' }}
-            </button>
           </div>
 
-          <!-- Popular Topics Widget -->
-          <div class="sidebar-widget">
-            <div class="widget-header">
-              <h3>{{ t('forum.sidebarTopic') || 'Topik Popular' }}</h3>
-            </div>
-            <ul class="topic-list">
-              <li @click="selectedCategory = ''" :class="{ active: selectedCategory === '' }">
-                <span>🌐 Semua</span>
-              </li>
-              <li v-for="cat in popularCats.slice(0, 5)" :key="cat" @click="selectedCategory = cat" :class="{ active: selectedCategory === cat }">
-                <span># {{ cat }}</span>
-              </li>
-            </ul>
+          <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+             <h3 class="font-bold text-lg mb-4 text-white flex items-center gap-2">
+               <i class="fas fa-shield-alt text-green-400"></i> Etika Forum
+             </h3>
+             <ul class="space-y-3 text-sm text-gray-400">
+               <li class="flex gap-2"><i class="fas fa-check text-green-500 mt-1"></i> Tiada unsur politik/kaum.</li>
+               <li class="flex gap-2"><i class="fas fa-check text-green-500 mt-1"></i> Dilarang spam iklan.</li>
+               <li class="flex gap-2"><i class="fas fa-check text-green-500 mt-1"></i> Hormat pendapat orang lain.</li>
+             </ul>
           </div>
 
         </div>
@@ -144,245 +120,94 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import ForumPostCard from '../components/forum/ForumPostCard.vue';
-import { useI18n } from 'vue-i18n';
-import { db } from '../firebaseConfig';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n'; // Jika perlu i18n
+import { db, auth } from '../firebaseConfig';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
-const { t } = useI18n();
+// Imports (Types & Constants & Utils)
+import ForumPostCard from '../components/forum/ForumPostCard.vue';
+import type { ForumPost } from '../types';
+import { FORUM_CATEGORIES } from '../constants/forumData';
+import { getTimeAgo } from '../utils/dateUtils'; // Pastikan fail ini wujud (seperti refactor sebelum ini)
+
+const router = useRouter();
+const { t } = useI18n(); // Guna 't' untuk translate timeAgo
+
+// State
+const posts = ref<ForumPost[]>([]);
+const loading = ref(true);
 const searchQuery = ref('');
 const selectedCategory = ref('');
-const filterSort = ref('new'); 
-const posts = ref<any[]>([]);
-const loading = ref(true);
 
-const popularCats = ['Hiking', 'Camping', 'Diving', 'Cycling', 'Climbing', 'Equipment', 'General'];
-
-const getTimeAgo = (timestamp: any) => {
-  if (!timestamp) return 'Baru';
-  const date = timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date();
-  const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (seconds < 60) return `${seconds}s`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
-};
-
-const resetFilters = () => {
-  searchQuery.value = '';
-  selectedCategory.value = '';
-  filterSort.value = 'new';
-};
-
-// Filter Logic
+// Computed
 const filteredPosts = computed(() => {
-  let result = [...posts.value]; 
-
-  // 1. Filter Kategori
-  if (selectedCategory.value) {
-    result = result.filter(p => p.category === selectedCategory.value);
-  }
-
-  // 2. Filter Search
-  if (searchQuery.value) {
-    const q = searchQuery.value.toLowerCase();
-    result = result.filter(p => 
-      p.title.toLowerCase().includes(q) || 
-      (p.excerpt && p.excerpt.toLowerCase().includes(q))
-    );
-  }
-
-  // 3. Sorting
-  if (filterSort.value === 'hot') {
-    result.sort((a, b) => (b.votes || 0) - (a.votes || 0));
-  } else if (filterSort.value === 'old') {
-    result.sort((a, b) => {
-        const dateA = a.createdAt ? a.createdAt.seconds : 0;
-        const dateB = b.createdAt ? b.createdAt.seconds : 0;
-        return dateA - dateB;
-    });
-  } else {
-    // Newest default
-    result.sort((a, b) => {
-        const dateA = a.createdAt ? a.createdAt.seconds : 0;
-        const dateB = b.createdAt ? b.createdAt.seconds : 0;
-        return dateB - dateA;
-    });
-  }
-
-  return result;
+  return posts.value.filter(post => {
+    const matchSearch = post.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+                        post.content.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchCat = selectedCategory.value ? post.category === selectedCategory.value : true;
+    return matchSearch && matchCat;
+  });
 });
 
+const totalComments = computed(() => {
+  return posts.value.reduce((acc, curr) => acc + (curr.commentCount || 0), 0);
+});
+
+// Actions
+const goToCreatePost = () => {
+  if (!auth.currentUser) {
+    alert("Sila log masuk untuk menulis post.");
+    // Boleh tambah modal login di sini nanti
+    return;
+  }
+  router.push('/forum/create');
+};
+
+// Fetch Data
 onMounted(async () => {
   try {
-    const q = query(collection(db, "forum_posts"), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
-    posts.value = snap.docs.map(doc => ({ 
-      id: doc.id, ...doc.data(), 
-      excerpt: doc.data().content,
-      timeAgo: getTimeAgo(doc.data().createdAt) 
-    }));
-  } catch (error) { 
-    console.error("Error fetching posts:", error); 
-    // Mock Data
-    posts.value = [
-        { id: '1', title: 'Port camping best di Janda Baik?', category: 'Camping', author: 'Ali', timeAgo: '2h', votes: 5, commentCount: 3, content: 'Minta cadangan campsite yang ada sungai dan toilet bersih.' },
-        { id: '2', title: 'Kasut hiking untuk beginner', category: 'Equipment', author: 'Siti', timeAgo: '5h', votes: 12, commentCount: 8, content: 'Bajet bawah RM200. Apa brand yang tahan lasak?' }
-    ];
-  } finally { 
-    loading.value = false; 
+    const q = query(
+      collection(db, "forum_posts"), 
+      orderBy("createdAt", "desc"),
+      limit(50) // Limit awal untuk performance
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    posts.value = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        // Guna utiliti untuk format masa
+        timeAgo: getTimeAgo(data.createdAt, t) 
+      } as ForumPost;
+    });
+
+  } catch (error) {
+    console.error("Error fetching forum posts:", error);
+  } finally {
+    loading.value = false;
   }
 });
 </script>
 
 <style scoped>
-/* --- THEME BACKGROUND (DARK SUNSET) --- */
-.forum-page { 
-  background-color: #0f172a; /* Dark Blue/Black base */
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-  color: white;
-}
-.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
-
-/* GLOW EFFECTS */
+/* Page Glow Backgrounds */
 .page-glow-purple {
-  position: absolute; top: 0; left: 0; width: 50vw; height: 50vw;
-  background: #6c63ff; filter: blur(120px); opacity: 0.15; pointer-events: none;
+  position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw;
+  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none;
   border-radius: 50%;
 }
 .page-glow-orange {
-  position: absolute; top: 20%; right: 0; width: 40vw; height: 40vw;
-  background: #ff8c42; filter: blur(120px); opacity: 0.1; pointer-events: none;
+  position: absolute; top: 10%; right: -10%; width: 40vw; height: 40vw;
+  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none;
   border-radius: 50%;
 }
 
-/* --- FILTER SECTION (Copy Style from Trip Page) --- */
-.filter-section {
-  background: rgba(255, 255, 255, 0.05); /* Glass Dark */
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 1.2rem;
-  backdrop-filter: blur(10px);
-}
-
-.filter-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-
-/* SEARCH */
-.search-wrapper { position: relative; flex-grow: 2; min-width: 250px; }
-.search-input {
-  width: 100%; padding: 12px 12px 12px 42px;
-  border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.2); color: white;
-  outline: none; transition: 0.3s;
-}
-.search-input:focus { border-color: #6c63ff; background: rgba(0,0,0,0.4); }
-.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-
-/* DROPDOWNS */
-.filters-wrapper { display: flex; gap: 10px; flex-wrap: wrap; flex-grow: 1; }
-.select-wrapper { position: relative; flex: 1; min-width: 140px; }
-.custom-select {
-  width: 100%; appearance: none;
-  padding: 12px 36px 12px 38px;
-  border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.2); color: #e2e8f0;
-  outline: none; cursor: pointer; transition: 0.3s;
-}
-.custom-select:hover { background: rgba(0,0,0,0.3); }
-.custom-select:focus { border-color: #6c63ff; }
-.select-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
-.select-wrapper::after {
-  content: '▼'; font-size: 0.7rem; color: #94a3b8;
-  position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none;
-}
-
-.btn-reset {
-  width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
-  border-radius: 10px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; cursor: pointer;
-}
-.btn-reset:hover { background: rgba(239, 68, 68, 0.3); }
-
-/* --- MAIN LAYOUT --- */
-.forum-layout {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 30px;
-}
-
-/* LEFT COLUMN */
-.post-list { display: flex; flex-direction: column; gap: 16px; }
-
-/* Loading & Empty */
-.spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #6c63ff; border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.empty-state {
-  text-align: center; padding: 3rem;
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 16px; backdrop-filter: blur(10px);
-}
-.btn-create-main {
-  background: #6c63ff; color: white; border: none; padding: 10px 24px; border-radius: 50px; font-weight: 600; cursor: pointer; transition: 0.2s;
-}
-.btn-create-main:hover { background: #5b54e0; transform: translateY(-2px); }
-
-/* RIGHT SIDEBAR (Dark Glass) */
-.sidebar-column { display: flex; flex-direction: column; gap: 1.5rem; }
-
-.sidebar-widget { 
-  background: rgba(255, 255, 255, 0.05); /* Dark Glass */
-  border-radius: 16px; 
-  border: 1px solid rgba(255, 255, 255, 0.1); 
-  padding: 1.5rem; 
-  backdrop-filter: blur(10px);
-}
-
-.widget-header h3 { 
-  margin: 0 0 1rem; 
-  font-size: 1.1rem; 
-  font-weight: 700; 
-  color: white;
-  border-left: 4px solid #6c63ff; 
-  padding-left: 10px; 
-}
-
-/* Stats */
-.stats-row {
-  display: flex; justify-content: space-between;
-  background: rgba(0,0,0,0.2);
-  border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;
-}
-.stat-item { text-align: center; flex: 1; }
-.stat-value { display: block; font-size: 1.2rem; font-weight: 800; color: #6c63ff; }
-.stat-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-
-.btn-create-post-sidebar {
-  width: 100%;
-  background: #6c63ff; color: white; border: none; padding: 0.9rem; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;
-}
-.btn-create-post-sidebar:hover { background: #5b54e0; box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3); }
-
-/* Topics List */
-.topic-list { list-style: none; padding: 0; margin: 0; }
-.topic-list li { 
-  padding: 10px 10px; 
-  border-bottom: 1px solid rgba(255,255,255,0.05); 
-  cursor: pointer; color: #cbd5e1; 
-  transition: all 0.2s; font-size: 0.95rem; 
-  border-radius: 6px;
-}
-.topic-list li:hover { background: rgba(255,255,255,0.05); color: #6c63ff; padding-left: 15px; }
-.topic-list li.active { background: rgba(108, 99, 255, 0.2); color: #6c63ff; font-weight: 600; padding-left: 15px; }
-
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  .forum-layout { grid-template-columns: 1fr; }
-  .sidebar-column { display: none; } /* Hide sidebar on mobile or move to bottom */
-}
+/* Hide Scrollbar helper */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 </style>

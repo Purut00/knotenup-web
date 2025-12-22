@@ -1,32 +1,31 @@
 <template>
-  <div class="home" :style="{ backgroundImage: `url(${bgImage})` }">
+  <div class="home min-h-screen bg-cover bg-fixed bg-center" :style="{ backgroundImage: `url(${bgImage})` }">
     
-    <!-- HERO SECTION -->
-    <div class="hero-header-section">
-      <div class="container text-center">
+    <div class="hero-header-section relative text-center pt-24 px-4 pb-12">
+      <div class="container mx-auto max-w-6xl relative z-10">
         <div class="hero-glow-purple"></div>
         <div class="hero-glow-orange"></div>
 
-        <h1 class="hero-title animate-fade-in-up">
+        <h1 class="hero-title animate-fade-in-up text-white font-extrabold text-5xl md:text-6xl mb-5 leading-tight">
           Terokai Keindahan <br>
           <span class="text-gradient-animate">{{ t('home.heroHighlight') || 'Alam Semulajadi' }}</span>
         </h1>
-        <p class="hero-subtitle animate-fade-in-up" style="animation-delay: 0.1s;">
+        <p class="hero-subtitle animate-fade-in-up text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light" style="animation-delay: 0.1s;">
           {{ t('home.heroSubtitle') || 'Temui aktiviti luar yang menarik, daripada hiking hingga menyelam.' }}
         </p>
 
-        <!-- SEARCH BAR -->
-        <div class="search-wrapper-floating animate-float" style="animation-delay: 0.2s;">
-          <div class="search-glow"></div>
-          <div class="search-box">
-             <i class="fas fa-location-dot search-icon-left"></i>
+        <div class="search-wrapper-floating animate-float mx-auto max-w-xl relative z-20" style="animation-delay: 0.2s;">
+          <div class="search-glow absolute -inset-1 bg-gradient-to-r from-purple-600 to-orange-500 rounded-full opacity-30 blur-md transition duration-300"></div>
+          <div class="search-box relative flex items-center bg-gray-900/80 backdrop-blur-md border border-white/10 rounded-full p-2 pl-6 shadow-2xl">
+             <i class="fas fa-location-dot text-purple-400 mr-4 text-xl"></i>
              <input 
                type="text" 
                v-model="searchQuery"
+               class="flex-1 bg-transparent border-none outline-none text-white text-base placeholder-gray-400"
                :placeholder="t('home.searchPlaceholder')" 
                @keyup.enter="executeSearch" 
              />
-             <button class="btn-search-sunset" @click="executeSearch">
+             <button class="btn-search-sunset bg-gradient-to-r from-purple-600 to-orange-500 text-white px-8 py-3 rounded-full font-semibold hover:-translate-y-0.5 transition shadow-lg" @click="executeSearch">
                {{ t('common.search') }}
              </button>
           </div>
@@ -34,108 +33,100 @@
       </div>
     </div>
 
-    <div class="main-content-wrapper container">
+    <div class="main-content-wrapper container mx-auto max-w-6xl px-6">
       
-      <!-- BANNER GRID SECTION -->
-      <section class="banner-grid-section animate-fade-in-up" style="animation-delay: 0.3s;">
-        <!-- Large Slider -->
-        <div class="banner-large-slider">
+      <section class="banner-grid-section animate-fade-in-up grid grid-cols-1 md:grid-cols-[2.5fr_1fr] gap-6 h-auto md:h-[420px] mb-16 mt-8" style="animation-delay: 0.3s;">
+        <div class="banner-large-slider rounded-3xl overflow-hidden shadow-2xl border border-white/5 h-[280px] md:h-full relative">
           <swiper
             :modules="[Autoplay, Pagination]"
             :slides-per-view="1"
             :loop="true"
             :autoplay="{ delay: 5000, disableOnInteraction: false }"
             :pagination="{ clickable: true }"
-            class="mySwiper"
+            class="mySwiper w-full h-full"
           >
             <swiper-slide v-for="(slide, index) in banners.largeSlides" :key="index">
               <div 
-                class="banner-slide-item" 
+                class="banner-slide-item w-full h-full bg-cover bg-center relative cursor-pointer group" 
                 :style="{ backgroundImage: `url(${slide.imageUrl})` }"
                 @click="goToLink(slide.linkUrl)"
               >
-                <div class="overlay-gradient-bottom"></div>
-                <div class="slide-caption" v-if="slide.title">
-                  <h3>{{ t(slide.title) }}</h3>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+                <div class="absolute bottom-8 left-8 z-10" v-if="slide.title">
+                  <h3 class="text-white text-3xl font-bold drop-shadow-lg group-hover:text-orange-400 transition-colors">{{ t(slide.title) }}</h3>
                 </div>
               </div>
             </swiper-slide>
           </swiper>
         </div>
         
-        <!-- Stacked Small Banners -->
-        <div class="banner-stack">
+        <div class="banner-stack hidden md:flex flex-col gap-6 h-full">
            <div 
-            class="banner-small" 
+            class="banner-small flex-1 rounded-3xl bg-cover bg-center cursor-pointer relative overflow-hidden border border-white/5 hover:-translate-y-1 transition transform duration-300" 
             :style="{ backgroundImage: `url(${banners.small1.imageUrl})` }"
             @click="goToLink(banners.small1.linkUrl)"
           >
-            <div class="overlay-hover"></div>
+            <div class="absolute inset-0 bg-black/20 hover:bg-transparent transition"></div>
           </div>
            <div 
-            class="banner-small" 
+            class="banner-small flex-1 rounded-3xl bg-cover bg-center cursor-pointer relative overflow-hidden border border-white/5 hover:-translate-y-1 transition transform duration-300" 
             :style="{ backgroundImage: `url(${banners.small2.imageUrl})` }"
             @click="goToLink(banners.small2.linkUrl)"
           >
-            <div class="overlay-hover"></div>
+            <div class="absolute inset-0 bg-black/20 hover:bg-transparent transition"></div>
           </div>
         </div>
       </section>
 
-      <!-- CATEGORY ICONS SECTION -->
-      <section class="category-section">
-        <div class="category-list">
+      <section class="category-section mb-16">
+        <div class="category-list flex gap-6 justify-start md:justify-center overflow-x-auto pb-4 scrollbar-hide">
           <div 
-            class="cat-item" 
-            v-for="item in popularActivities" 
+            class="cat-item flex flex-col items-center cursor-pointer min-w-[80px]" 
+            v-for="item in POPULAR_ACTIVITIES" 
             :key="item.key" 
             @click="filterBy(item.key)"
           >
-            <div class="cat-circle" :style="{ '--icon-color': item.color }">
+            <div class="cat-circle w-[70px] h-[70px] bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center text-2xl text-slate-400 mb-3 transition-all duration-300 hover:bg-[var(--icon-color)] hover:text-white hover:-translate-y-2 hover:shadow-lg hover:border-transparent" :style="{ '--icon-color': item.color }">
                <i :class="item.icon"></i>
             </div>
-            <span class="cat-label">{{ t('activities.' + item.key) }}</span>
+            <span class="cat-label text-sm font-medium text-slate-400">{{ t('activities.' + item.key) }}</span>
           </div>
           
-          <div class="cat-item" @click="$router.push('/trips')">
-            <div class="cat-circle more-circle">
+          <div class="cat-item flex flex-col items-center cursor-pointer min-w-[80px]" @click="$router.push('/trips')">
+            <div class="cat-circle more-circle w-[70px] h-[70px] bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center text-2xl text-pink-500 mb-3 transition-all duration-300 hover:bg-purple-600 hover:text-white hover:-translate-y-2 hover:shadow-lg">
                 <i class="fas fa-arrow-right"></i>
             </div>
-            <span class="cat-label">{{ t('home.more') }}</span>
+            <span class="cat-label text-sm font-medium text-slate-400">{{ t('home.more') }}</span>
           </div>
         </div>
       </section>
 
-      <!-- TRIP POPULAR SECTION -->
-      <section class="section-container">
-        <div class="section-header">
+      <section class="section-container mb-20">
+        <div class="section-header flex justify-between items-center mb-8 border-b border-white/5 pb-4">
           <div class="flex items-center gap-4">
-            <h3 class="section-title"><span class="text-gradient-animate">Trip Popular</span></h3>
+            <h3 class="section-title text-3xl font-bold text-white"><span class="text-gradient-animate">Trip Popular</span></h3>
             
-            <!-- BUTTON TOGGLE VIEW (Ditambah) -->
             <button 
               @click="isCompact = !isCompact"
-              class="toggle-view-btn"
+              class="toggle-view-btn bg-white/5 border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg hover:bg-white/10 hover:text-white transition flex items-center"
               :title="isCompact ? 'Tukar ke Grid Penuh' : 'Tukar ke Grid Ringkas'"
             >
               <i :class="isCompact ? 'fas fa-border-all' : 'fas fa-list-ul'"></i>
-              <span class="ml-2 text-xs font-medium hidden sm:inline">{{ isCompact ? 'Compact Grid' : 'Full Grid' }}</span>
+              <span class="ml-2 text-xs font-medium hidden sm:inline">{{ isCompact ? 'Compact' : 'Full' }}</span>
             </button>
           </div>
 
-          <a href="#" @click.prevent="$router.push('/trips')" class="see-more-link">
+          <a href="#" @click.prevent="$router.push('/trips')" class="see-more-link text-pink-400 hover:text-orange-400 flex items-center gap-2 text-sm bg-white/5 px-4 py-2 rounded-full transition hover:translate-x-1">
             {{ t('home.viewAll') }} <i class="fas fa-chevron-right text-xs"></i>
           </a>
         </div>
         
-        <div v-if="loadingTrips" class="loading-area">
-            <div class="spinner"></div>
+        <div v-if="loadingTrips" class="loading-area py-12 text-center text-gray-500">
+            <div class="spinner w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
             <span>{{ t('common.loading') }}</span>
         </div>
         
-        <!-- TRIP GRID (Diubah suai) -->
-        <!-- Jika isCompact: guna trip-grid-compact (2 cols). Jika tidak: trip-grid (auto-fill) -->
-        <div v-else-if="latestTrips.length > 0" :class="isCompact ? 'trip-grid-compact' : 'trip-grid'">
+        <div v-else-if="latestTrips.length > 0" :class="isCompact ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'">
           <TripCard 
             v-for="trip in latestTrips" 
             :key="trip.id" 
@@ -144,25 +135,24 @@
           />
         </div>
         
-        <div v-else class="empty-text">{{ t('home.noTrips') }}</div>
+        <div v-else class="empty-text text-center text-gray-500 py-12 italic">{{ t('home.noTrips') }}</div>
       </section>
 
-      <!-- FORUM SECTION -->
-      <section class="section-container">
-        <div class="section-header">
-          <h3 class="section-title"><span class="text-gradient-animate">{{ t('home.communityDiscuss') }}</span></h3>
-          <a href="#" @click.prevent="$router.push('/forum')" class="see-more-link">
+      <section class="section-container mb-20">
+        <div class="section-header flex justify-between items-center mb-8 border-b border-white/5 pb-4">
+          <h3 class="section-title text-3xl font-bold text-white"><span class="text-gradient-animate">{{ t('home.communityDiscuss') }}</span></h3>
+          <a href="#" @click.prevent="$router.push('/forum')" class="see-more-link text-pink-400 hover:text-orange-400 flex items-center gap-2 text-sm bg-white/5 px-4 py-2 rounded-full transition hover:translate-x-1">
             {{ t('home.goToForum') }} <i class="fas fa-chevron-right text-xs"></i>
           </a>
         </div>
 
-        <div v-if="loadingPosts" class="loading-area">
-             <div class="spinner"></div>
+        <div v-if="loadingPosts" class="loading-area py-12 text-center">
+             <div class="spinner w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mx-auto"></div>
         </div>
-        <div v-else-if="latestPosts.length > 0" class="forum-grid">
+        <div v-else-if="latestPosts.length > 0" class="forum-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <ForumPostCard v-for="post in latestPosts" :key="post.id" :post="post" />
         </div>
-        <div v-else class="empty-text">{{ t('home.noPosts') }}</div>
+        <div v-else class="empty-text text-center text-gray-500 py-12 italic">{{ t('home.noPosts') }}</div>
       </section>
 
     </div>
@@ -173,392 +163,125 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import TripCard from '../components/trip/TripCard.vue'; 
-import ForumPostCard from '../components/forum/ForumPostCard.vue'; 
-import { db } from '../firebaseConfig';
-import { collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
-// Import gambar
+// Firebase
+import { db } from '../firebaseConfig';
+import { collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
+
+// Components & Assets
+import TripCard from '../components/trip/TripCard.vue'; 
+import ForumPostCard from '../components/forum/ForumPostCard.vue'; 
 import bgImage from '../assets/bg-kp2.png';
+
+// Import Types, Utils, Constants (REFACTORED)
+import type { Trip, ForumPost, BannerSlide } from '../types';
+import { formatDate, getTimeAgo } from '../utils/dateUtils';
+import { POPULAR_ACTIVITIES, DEFAULT_BANNERS } from '../constants/homeData';
 
 const { t, locale } = useI18n();
 const router = useRouter();
 
-// State
-const latestTrips = ref<any[]>([]);
-const latestPosts = ref<any[]>([]);
+// State dengan Type Safety
+const latestTrips = ref<Trip[]>([]);
+const latestPosts = ref<ForumPost[]>([]);
 const loadingTrips = ref(true);
 const loadingPosts = ref(true);
 const searchQuery = ref('');
-
-// TOGGLE STATE (Ditambah)
 const isCompact = ref(false);
 
-// --- DATA: ACTIVITIES ---
-const popularActivities = [
-  { key: 'hiking',       icon: 'fas fa-hiking',          color: '#48bb78' },
-  { key: 'camping',      icon: 'fas fa-campground',      color: '#ed8936' },
-  { key: 'climbing',     icon: 'fas fa-mountain',        color: '#718096' },
-  { key: 'caving',       icon: 'fas fa-dungeon',         color: '#a0aec0' },
-  { key: 'kayaking',     icon: 'fas fa-sailboat',        color: '#38b2ac' },
-  { key: 'rafting',      icon: 'fas fa-water',           color: '#3182ce' },
-  { key: 'fishing',      icon: 'fas fa-fish',            color: '#2b6cb0' },
-  { key: 'paragliding',  icon: 'fas fa-paper-plane',     color: '#9f7aea' },
-];
-
-// DATA BANNER
-const defaultBanners = {
-  large: [
-    { imageUrl: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=800', linkUrl: '/trips', title: 'home.bannerExplore' },
-    { imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800', linkUrl: '/forum', title: 'home.bannerCommunity' }
-  ],
-  small1: { imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500', linkUrl: '/trips' },
-  small2: { imageUrl: 'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?w=500', linkUrl: '/trips' }
-};
-
 const banners = reactive({
-  largeSlides: [...defaultBanners.large],
-  small1: { ...defaultBanners.small1 },
-  small2: { ...defaultBanners.small2 }
+  largeSlides: [...DEFAULT_BANNERS.large] as BannerSlide[],
+  small1: { ...DEFAULT_BANNERS.small1 } as BannerSlide,
+  small2: { ...DEFAULT_BANNERS.small2 } as BannerSlide
 });
 
-// Helpers
-const formatDate = (dateString: string) => { 
-  if(!dateString) return ''; 
-  return new Date(dateString).toLocaleDateString(locale.value, { day: 'numeric', month: 'short' }); 
-};
-
-const getTimeAgo = (timestamp: any) => { 
-  if (!timestamp) return t('time.justNow'); 
-  const date = timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(); 
-  const now = new Date(); 
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000); 
-  if (seconds < 60) return `${seconds}${t('time.s')}`; 
-  const minutes = Math.floor(seconds / 60); 
-  if (minutes < 60) return `${minutes}${t('time.m')}`; 
-  const hours = Math.floor(minutes / 60); 
-  if (hours < 24) return `${hours}${t('time.h')}`; 
-  return `${Math.floor(hours / 24)}${t('time.d')}`; 
-};
-
+// Navigation Helpers
 const executeSearch = () => { if (searchQuery.value.trim()) router.push({ name: 'search', query: { q: searchQuery.value } }); };
 const filterBy = (activityKey: string) => { router.push({ path: '/trips', query: { category: activityKey } }); };
-const goToLink = (url: string) => { if (!url) return; if (url.startsWith('http')) window.open(url, '_blank'); else router.push(url); };
+const goToLink = (url: string) => { 
+  if (!url) return; 
+  if (url.startsWith('http')) window.open(url, '_blank'); 
+  else router.push(url); 
+};
 
+// Data Fetching
 onMounted(async () => {
+  // 1. Fetch Banners
   try {
     const docSnap = await getDoc(doc(db, "site_settings", "banners"));
     if (docSnap.exists()) { 
       const data = docSnap.data(); 
-      if(data.largeSlides && Array.isArray(data.largeSlides) && data.largeSlides.length > 0) banners.largeSlides = data.largeSlides;
+      if(data.largeSlides?.length) banners.largeSlides = data.largeSlides;
       if(data.small1?.imageUrl) Object.assign(banners.small1, data.small1); 
       if(data.small2?.imageUrl) Object.assign(banners.small2, data.small2); 
     }
-  } catch (e) { console.log("Default banners used"); }
+  } catch (e) { console.log("Using default banners"); }
 
-  // Fetch Trips
+  // 2. Fetch Trips
   try {
     const qTrips = query(collection(db, "trips"), orderBy("createdAt", "desc"), limit(8));
     const snapTrips = await getDocs(qTrips);
-    latestTrips.value = snapTrips.docs.map(doc => ({ id: doc.id, ...doc.data(), date: formatDate(doc.data().startDate) }));
-  } catch (e) {} finally { loadingTrips.value = false; }
+    latestTrips.value = snapTrips.docs.map(doc => {
+      const data = doc.data();
+      return { 
+        id: doc.id, 
+        ...data, 
+        date: formatDate(data.startDate, locale.value) // Guna utiliti baru
+      } as Trip;
+    });
+  } catch (e) { console.error("Error fetching trips:", e); } 
+  finally { loadingTrips.value = false; }
 
-  // Fetch Posts
+  // 3. Fetch Posts
   try {
     const qPosts = query(collection(db, "forum_posts"), orderBy("createdAt", "desc"), limit(4));
     const snapPosts = await getDocs(qPosts);
-    latestPosts.value = snapPosts.docs.map(doc => ({ id: doc.id, ...doc.data(), excerpt: doc.data().content, timeAgo: getTimeAgo(doc.data().createdAt) }));
-  } catch (e) {} finally { loadingPosts.value = false; }
+    latestPosts.value = snapPosts.docs.map(doc => {
+      const data = doc.data();
+      return { 
+        id: doc.id, 
+        ...data, 
+        excerpt: data.content, 
+        timeAgo: getTimeAgo(data.createdAt, t) // Guna utiliti baru
+      } as ForumPost;
+    });
+  } catch (e) { console.error("Error fetching posts:", e); } 
+  finally { loadingPosts.value = false; }
 });
 </script>
 
 <style scoped>
-.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
-
-.home {
-  min-height: 100vh;
-  background-size: cover;
-  background-position: center center;
-  background-attachment: fixed;
-}
-
-/* HERO SECTION */
-.hero-header-section {
-  padding: 6rem 1rem 3rem;
-  text-align: center;
-  position: relative;
-  background: transparent; 
-}
+/* Hanya CSS kritikal untuk glow dan animasi disimpan. 
+   Selebihnya telah digantikan dengan kelas Tailwind (w-full, h-full, absolute, dll). */
 
 /* Glow Decoration */
-.hero-glow-purple, .hero-glow-orange {
-  position: absolute;
-  filter: blur(80px);
-  z-index: -1;
-  opacity: 0.4;
-  pointer-events: none;
-}
 .hero-glow-purple {
-  width: 300px; height: 300px;
-  background: var(--c-sunset-purple);
-  top: -50px; left: 20%;
+  position: absolute; width: 300px; height: 300px;
+  background: #6c63ff; top: -50px; left: 20%;
+  filter: blur(80px); z-index: -1; opacity: 0.4;
 }
 .hero-glow-orange {
-  width: 250px; height: 250px;
-  background: var(--c-sunset-orange);
-  top: 50px; right: 20%;
+  position: absolute; width: 250px; height: 250px;
+  background: #ff8c42; top: 50px; right: 20%;
+  filter: blur(80px); z-index: -1; opacity: 0.4;
 }
 
-.hero-title {
-  font-size: 3rem;
-  font-weight: 800;
-  line-height: 1.1;
-  margin-bottom: 1.2rem;
-  color: #fff;
+/* Text Gradient Animation */
+.text-gradient-animate {
+  background: linear-gradient(270deg, #ff8c42, #6c63ff, #ff2e63);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-move 4s ease infinite;
 }
+@keyframes gradient-move { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-.hero-subtitle {
-  color: var(--text-secondary);
-  font-size: 1.15rem;
-  max-width: 600px;
-  margin: 0 auto 3rem;
-  font-weight: 300;
-}
-
-/* --- FLOATING SEARCH BAR (DARK THEME) --- */
-.search-wrapper-floating {
-  max-width: 600px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 10;
-}
-
-.search-glow {
-  position: absolute;
-  inset: -3px;
-  background: var(--gradient-sunset);
-  border-radius: 50px;
-  opacity: 0.3;
-  filter: blur(15px);
-  transition: opacity 0.3s;
-}
-.search-wrapper-floating:hover .search-glow { opacity: 0.6; }
-
-.search-box {
-  position: relative;
-  background: rgba(19, 6, 33, 0.8); 
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50px;
-  padding: 8px 8px 8px 25px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
-
-.search-icon-left { color: var(--c-sunset-purple); margin-right: 15px; font-size: 1.2rem; }
-
-.search-box input {
-  flex: 1; border: none; outline: none; background: transparent;
-  font-size: 1rem; color: #fff;
-}
-.search-box input:focus { border: none !important; box-shadow: none !important; }
-
-.btn-search-sunset {
-  background: var(--gradient-sunset);
-  color: white; border: none;
-  padding: 12px 36px; border-radius: 50px;
-  font-weight: 600; font-size: 0.95rem;
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-}
-.btn-search-sunset:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 5px 20px rgba(255, 126, 95, 0.4);
-}
-
-/* --- BANNER GRID --- */
-.banner-grid-section {
-  display: grid; grid-template-columns: 2.5fr 1fr; gap: 24px;
-  height: 420px; margin-bottom: 4rem; margin-top: 2rem;
-}
-
-.banner-large-slider {
-  border-radius: 24px; overflow: hidden; height: 100%;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-.mySwiper, .banner-slide-item { width: 100%; height: 100%; }
-.banner-slide-item {
-  background-size: cover; background-position: center;
-  position: relative; cursor: pointer;
-}
-
-.overlay-gradient-bottom {
-  position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(5,1,10,0.9) 0%, transparent 50%);
-}
-
-.slide-caption {
-  position: absolute; bottom: 30px; left: 30px; z-index: 2;
-}
-.slide-caption h3 {
-  color: white; font-size: 2rem; margin: 0; font-weight: 700;
-  text-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
-
-.banner-stack { display: flex; flex-direction: column; gap: 24px; height: 100%; }
-.banner-small {
-  flex: 1; border-radius: 24px; background-size: cover; background-position: center;
-  cursor: pointer; transition: transform 0.3s;
-  position: relative; overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-.banner-small:hover { transform: translateY(-5px); }
-
-.overlay-hover {
-  position: absolute; inset: 0; background: rgba(0,0,0,0.2);
-  transition: background 0.3s;
-}
-.banner-small:hover .overlay-hover { background: rgba(0,0,0,0); }
-
-
-/* --- CATEGORY ICONS --- */
-.category-section { margin-bottom: 4rem; padding: 10px 0; }
-.category-list {
-  display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
-}
-
-.cat-item {
-  display: flex; flex-direction: column; align-items: center;
-  cursor: pointer;
-}
-
-.cat-circle {
-  width: 70px; height: 70px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem;
-  margin-bottom: 12px;
-  color: #94a3b8; 
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.cat-circle i { transition: transform 0.3s; }
-
-.cat-item:hover .cat-circle {
-  transform: translateY(-8px);
-  box-shadow: 0 10px 25px -5px var(--icon-color), 0 0 10px rgba(255,255,255,0.1) inset;
-  color: white;
-  background: var(--icon-color);
-  border-color: transparent;
-}
-
-.cat-item:hover .cat-circle i { transform: scale(1.2); }
-.cat-item:hover .cat-label { color: white; }
-
-.more-circle { 
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--c-sunset-pink);
-}
-.cat-item:hover .more-circle {
-  background: var(--c-sunset-purple);
-  box-shadow: 0 10px 20px rgba(108, 99, 255, 0.4);
-}
-
-.cat-label { 
-  font-size: 0.9rem; font-weight: 500; 
-  color: var(--text-secondary); transition: color 0.3s; 
-}
-
-/* --- SECTION HEADERS --- */
-.section-container { margin-bottom: 5rem; }
-.section-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.section-title { font-size: 1.8rem; font-weight: 700; margin: 0; color: white; }
-.see-more-link {
-  color: var(--c-sunset-pink); font-size: 0.95rem;
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.03);
-  transition: all 0.3s;
-}
-.see-more-link:hover {
-  background: rgba(255,255,255,0.1);
-  color: var(--c-sunset-orange);
-  transform: translateX(5px);
-}
-
-/* --- TOGGLE BUTTON STYLE (Ditambah) --- */
-.toggle-view-btn {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #aaa;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-}
-.toggle-view-btn:hover {
-  background: rgba(255,255,255,0.1);
-  color: white;
-}
-
-/* GRIDS */
-.trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; }
-
-/* UPDATE: COMPACT GRID (2 Card Sebaris) */
-.trip-grid-compact {
-  display: grid; 
-  /* 2 Column untuk skrin sederhana ke atas */
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
-  gap: 20px;
-}
-
-.forum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
-.loading-area { text-align: center; padding: 3rem; color: var(--text-secondary); }
-
-.spinner {
-  width: 40px; height: 40px; margin: 0 auto 15px;
-  border: 3px solid rgba(255,255,255,0.1); 
-  border-top-color: var(--c-sunset-purple);
-  border-radius: 50%; animation: spin 1s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.empty-text { text-align: center; color: var(--text-secondary); padding: 3rem; font-style: italic; }
-
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .hero-title { font-size: 2.2rem; }
-  .search-wrapper-floating { margin: 0 10px; }
-  .search-box { padding-left: 15px; }
-  .btn-search-sunset { padding: 10px 20px; font-size: 0.9rem; }
-  
-  .banner-grid-section { grid-template-columns: 1fr; height: auto; gap: 20px; }
-  .banner-large-slider { height: 280px; }
-  .banner-stack { display: none; }
-  
-  .category-list { gap: 15px; justify-content: flex-start; overflow-x: auto; padding-bottom: 20px; padding-left: 5px; scrollbar-width: none; }
-  .category-list::-webkit-scrollbar { display: none; }
-  .cat-item { min-width: 80px; }
-  
-  .trip-grid { grid-template-columns: repeat(1, 1fr); gap: 20px; }
-  .trip-grid-compact { grid-template-columns: 1fr; } /* Mobile jadi 1 column */
-  .forum-grid { grid-template-columns: 1fr; }
-}
+/* Scrollbar Hide Helper (Jika Tailwind plugin tak ada) */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
