@@ -20,7 +20,7 @@ const scrollToBottom = () => {
 };
 
 // Fungsi untuk cari trip dalam database (Simple Search)
-const fetchRelatedTrips = async (keyword: string) => {
+const fetchRelatedTrips = async (_keyword: string) => {
   try {
     // Kita cari trip yang 'status' == 'open' (atau ikut field database anda)
     // Nota: Firestore tak ada 'LIKE' search, jadi kita tarik 5 trip terkini je sebagai cadangan

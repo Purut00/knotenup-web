@@ -231,7 +231,7 @@ onMounted(async () => {
         id: doc.id, 
         ...data, 
         date: formatDate(data.startDate, locale.value) // Guna utiliti baru
-      } as Trip;
+      } as unknown as Trip;
     });
   } catch (e) { console.error("Error fetching trips:", e); } 
   finally { loadingTrips.value = false; }
@@ -247,7 +247,7 @@ onMounted(async () => {
         ...data, 
         excerpt: data.content, 
         timeAgo: getTimeAgo(data.createdAt, t) // Guna utiliti baru
-      } as ForumPost;
+      } as unknown as ForumPost;
     });
   } catch (e) { console.error("Error fetching posts:", e); } 
   finally { loadingPosts.value = false; }
