@@ -106,6 +106,17 @@
 
           <div class="form-row">
             <div class="form-group">
+              <label>Jarak (KM)</label>
+              <input type="number" step="0.1" v-model="form.distance" class="glass-input" placeholder="Cth: 5.2" />
+            </div>
+            <div class="form-group">
+              <label>Anggaran Masa</label>
+              <input type="text" v-model="form.duration" class="glass-input" placeholder="Cth: 4 Jam / 2H1M" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
               <label>{{ t('createSpot.diffLabel') || 'Tahap Kesukaran' }}</label>
               <div class="select-wrapper">
                   <select v-model="form.difficulty" class="glass-input">
@@ -150,7 +161,7 @@
           </div>
 
           <div class="form-group mt-4">
-            <label>{{ t('createSpot.mapLabel') || 'Link Google Maps (Optional)' }}</label>
+            <label>Link Google Maps Trailhead (Optional)</label>
             <input type="text" v-model="form.mapsLink" class="glass-input" :placeholder="t('createSpot.mapPlaceholder')" />
           </div>
 
@@ -237,14 +248,13 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { auth, db, storage } from '../firebaseConfig';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc, GeoPoint } from 'firebase/firestore'; 
+import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc, GeoPoint, updateDoc } from 'firebase/firestore'; 
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { MALAYSIA_STATES } from '../constants/data';
 import { isSpam } from '../utils/spamFilter';
-import L from 'leaflet'; // Import Leaflet
-import 'leaflet/dist/leaflet.css'; // Import CSS Leaflet
+import L from 'leaflet'; 
+import 'leaflet/dist/leaflet.css'; 
 
-// Fix Leaflet Icons
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -268,13 +278,11 @@ const spotId = route.params.id as string;
 const multiFileInput = ref<HTMLInputElement | null>(null);
 const gpxInput = ref<HTMLInputElement>(null as any);
 
-// Image Handling
 const previewImages = ref<string[]>([]); 
 const newImageFiles = ref<File[]>([]); 
 const existingImageUrls = ref<string[]>([]);
 const gpxFile = ref<File | null>(null);
 
-// Map Handling
 const detectedAddress = ref('');
 let mapPicker: any = null;
 let markerPicker: any = null;
@@ -282,36 +290,32 @@ let markerPicker: any = null;
 const form = reactive({
   name: '', via: '', state: '', height: null, difficulty: 'Moderate',
   permit: 'No', guideRequired: 'No', mapsLink: '', 
+  distance: null, duration: '', // Added fields
   tips: '', parking: '', checkpointDetail: '', description: '', 
   images: [] as string[], gpxUrl: '',
   latitude: '', 
   longitude: '' 
 });
 
-// INIT MAP (Topography)
 const initPickerMap = () => {
-  if (mapPicker) return; // Prevent re-init
+  if (mapPicker) return; 
   
-  // Default: Center of Peninsular Malaysia
   const startLat = form.latitude ? parseFloat(form.latitude) : 4.2105;
   const startLng = form.longitude ? parseFloat(form.longitude) : 101.9758;
   const zoomLevel = form.latitude ? 12 : 6;
 
   mapPicker = L.map('picker-map').setView([startLat, startLng], zoomLevel);
 
-  // Guna OpenTopoMap untuk Contour
   L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     maxZoom: 17,
     attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)'
   }).addTo(mapPicker);
 
-  // Jika ada koordinat, letak marker
   if (form.latitude && form.longitude) {
     markerPicker = L.marker([startLat, startLng], { draggable: true }).addTo(mapPicker);
     setupMarkerEvents();
   }
 
-  // Event Klik Peta
   mapPicker.on('click', async (e: any) => {
     const { lat, lng } = e.latlng;
     updateMarkerPosition(lat, lng);
@@ -343,7 +347,6 @@ const updateFormCoords = (lat: number, lng: number) => {
   form.longitude = lng.toFixed(5);
 };
 
-// Update Map bila User taip manual
 const updateMapFromInput = () => {
   const lat = parseFloat(form.latitude);
   const lng = parseFloat(form.longitude);
@@ -353,7 +356,6 @@ const updateMapFromInput = () => {
   }
 };
 
-// Auto Detect GPS
 const detectCurrentLocation = () => {
   if (!navigator.geolocation) return alert("Browser ini tidak menyokong Geolocation.");
   
@@ -368,7 +370,6 @@ const detectCurrentLocation = () => {
   });
 };
 
-// Reverse Geocode (Nominatim)
 const reverseGeocode = async (lat: number, lng: number) => {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
@@ -378,7 +379,6 @@ const reverseGeocode = async (lat: number, lng: number) => {
       const state = data.address.state || '';
       detectedAddress.value = [city, state].filter(Boolean).join(', ');
       
-      // Auto-fill state jika kosong dan valid
       if (!form.state && state && MALAYSIA_STATES.includes(state)) {
         form.state = state;
       }
@@ -411,7 +411,6 @@ onMounted(async () => {
     finally { loading.value = false; }
   }
 
-  // Init Map lepas DOM ready
   setTimeout(() => {
     initPickerMap();
   }, 500);
@@ -429,9 +428,8 @@ const nextStep = () => {
 const prevStep = () => {
   currentStep.value = 1;
   window.scrollTo(0, 0);
-  // Re-init map bila back ke step 1 (sebab DOM hilang)
   setTimeout(() => {
-     mapPicker = null; // Reset instance
+     mapPicker = null; 
      initPickerMap();
   }, 100);
 };
@@ -508,7 +506,6 @@ const submitSpot = async () => {
       gpxDownloadUrl = await getDownloadURL(snap.ref);
     }
 
-    // Convert string lat/lng to number
     const lat = parseFloat(form.latitude) || 0;
     const lng = parseFloat(form.longitude) || 0;
 
@@ -522,7 +519,6 @@ const submitSpot = async () => {
     };
 
     if (isEditMode.value) {
-      // Logic update sebenar
       await updateDoc(doc(db, 'spots', spotId), {
          ...spotData,
          lastEditedBy: auth.currentUser.displayName || 'User',
@@ -547,9 +543,6 @@ const submitSpot = async () => {
     loading.value = false;
   }
 };
-
-// Tambah import updateDoc yang tertinggal dalam list import asal
-import { updateDoc } from 'firebase/firestore';
 </script>
 
 <style scoped>

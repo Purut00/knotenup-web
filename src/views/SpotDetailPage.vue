@@ -106,7 +106,7 @@
             
             <div class="glass-card p-6 md:p-8">
                 <div class="flex flex-wrap justify-between items-start mb-6 gap-4">
-                    <h3 class="text-xl font-bold text-white">{{ t('spotDetail.locationInfo') }}</h3>
+                    <h3 class="text-xl font-bold text-white">Maklumat Trek</h3>
                     <div class="flex items-center gap-3">
                          <button class="btn-icon-glass" @click="toggleTranslation" :disabled="translating" title="Translate">
                             <i class="fas fa-language"></i> 
@@ -126,11 +126,43 @@
                 </div>
                 <p v-if="translationError" class="text-red-400 text-xs mb-4">⚠️ {{ t('spotDetail.translationError') }}</p>
 
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                     
                     <div class="info-box">
-                        <span class="info-label">🛤️ {{ t('spotDetail.via') }}</span>
+                        <span class="info-label">🏳️ Negeri</span>
+                        <span class="info-value">{{ spot.state || '-' }}</span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">🏔️ Ketinggian</span>
+                        <span class="info-value">{{ spot.height ? spot.height + ' m' : '-' }}</span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">📏 Jarak</span>
+                        <span class="info-value">{{ spot.distance ? spot.distance + ' km' : '-' }}</span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">⏱️ Masa</span>
+                        <span class="info-value">{{ spot.duration || '-' }}</span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">🛤️ Via</span>
                         <span class="info-value">{{ spot.via || '-' }}</span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">💪 Tahap</span>
+                        <span class="info-value">{{ getLevelLabel(spot.difficulty) }}</span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">📜 Permit</span>
+                        <span class="info-value font-bold" :class="(!spot.permit || spot.permit === 'No' || spot.permit === 'Tidak Perlu') ? 'text-green-400' : 'text-orange-400'">
+                           {{ (!spot.permit || spot.permit === 'No' || spot.permit === 'Tidak Perlu') ? 'Tidak' : 'Perlu' }}
+                        </span>
                     </div>
 
                     <div class="info-box">
@@ -140,26 +172,36 @@
                         </span>
                     </div>
 
-                    <div class="info-box">
-                        <span class="info-label">⏱️ Masa</span>
-                        <span class="info-value">{{ spot.duration || '-' }}</span>
-                    </div>
-
-                    <div class="info-box">
-                        <span class="info-label">📏 Jarak</span>
-                        <span class="info-value">{{ spot.distance ? spot.distance + ' km' : '-' }}</span>
-                    </div>
-
-                    <div class="info-box">
-                        <span class="info-label">💪 Tahap</span>
-                        <span class="info-value">{{ getLevelLabel(spot.difficulty) }}</span>
-                    </div>
-
                     <div class="info-box" v-if="spot.location">
                         <span class="info-label">📍 Koordinat</span>
                         <span class="info-value text-xs font-mono">
                           {{ spot.location.latitude.toFixed(4) }}, {{ spot.location.longitude.toFixed(4) }}
                         </span>
+                    </div>
+                </div>
+
+                <div v-if="spot.parking" class="mb-6 p-3 bg-blue-900/20 border border-blue-500/20 rounded-lg flex items-start gap-3">
+                    <div class="mt-0.5"><i class="fas fa-parking text-blue-400 text-lg"></i></div>
+                    <div>
+                        <span class="block text-xs text-blue-300 uppercase font-bold mb-1">Info Parking</span>
+                        <span class="text-gray-200 text-sm">{{ spot.parking }}</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" v-if="spot.checkpointDetail || spot.tips">
+                    
+                    <div v-if="spot.checkpointDetail" class="p-4 rounded-xl bg-white/5 border border-white/5">
+                        <h4 class="text-orange-400 font-bold mb-2 flex items-center gap-2 text-sm uppercase">
+                            <i class="fas fa-map-signs"></i> Info Checkpoint
+                        </h4>
+                        <p class="text-sm text-gray-300 whitespace-pre-line">{{ spot.checkpointDetail }}</p>
+                    </div>
+
+                    <div v-if="spot.tips" class="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                        <h4 class="text-yellow-400 font-bold mb-2 flex items-center gap-2 text-sm uppercase">
+                            <i class="fas fa-lightbulb"></i> Tips Pendaki
+                        </h4>
+                        <p class="text-sm text-gray-300 whitespace-pre-line">{{ spot.tips }}</p>
                     </div>
 
                 </div>
@@ -173,21 +215,6 @@
                             <i class="fas fa-check"></i> {{ fac }}
                         </span>
                     </div>
-                </div>
-                <div v-else class="mb-6 p-3 bg-white/5 rounded-lg border border-dashed border-white/10 text-center">
-                    <p class="text-xs text-gray-500 italic">Tiada maklumat fasiliti disenaraikan.</p>
-                </div>
-
-                <div v-if="spot.permit && spot.permit !== 'Tidak Perlu' && spot.permit !== 'No'" class="bg-orange-900/20 border border-orange-500/20 p-4 rounded-lg flex items-start gap-3">
-                    <i class="fas fa-exclamation-triangle text-orange-400 mt-1"></i>
-                    <div>
-                        <strong class="text-orange-400 block text-sm">{{ t('spotDetail.permitRequired') }}</strong>
-                        <span class="text-gray-300 text-sm">{{ spot.permit }}</span>
-                    </div>
-                </div>
-                <div v-else class="bg-green-900/20 border border-green-500/20 p-4 rounded-lg flex items-center gap-3">
-                    <i class="fas fa-check-circle text-green-400"></i>
-                    <span class="text-green-300 text-sm font-bold">{{ t('spotDetail.free') }} - {{ t('spotDetail.noPermitNeeded') }}</span>
                 </div>
 
                 <div class="mt-8 pt-6 border-t border-white/10 flex justify-between items-center flex-wrap gap-4">
@@ -277,9 +304,6 @@
                         ⚙️ Edit Penuh (Admin/Owner)
                      </button>
                  </div>
-                 <div v-else class="text-center mt-2">
-                     <p class="text-[10px] text-gray-500 italic">Hanya Admin/Owner boleh edit penuh.</p>
-                 </div>
             </div>
 
             <div v-if="suggestions.length > 0" class="glass-card p-5 border-l-4 border-l-yellow-500 relative overflow-hidden">
@@ -314,14 +338,14 @@
             <div class="glass-card p-5">
                 <h3 class="font-bold text-white mb-2">{{ t('spotDetail.navigation') }}</h3>
                 <a :href="spot.mapsLink" target="_blank" class="flex items-center justify-center gap-2 w-full py-2 bg-blue-700/80 hover:bg-blue-600 text-white rounded-lg text-sm font-bold transition mb-2">
-                    🗺️ {{ t('spotDetail.openMap') }}
+                    🚗 📍 Trailhead (Google Maps)
                 </a>
                 
                 <a v-if="spot.location" 
                    :href="`https://www.google.com/maps/search/?api=1&query=${spot.location.latitude},${spot.location.longitude}`" 
                    target="_blank" 
                    class="flex items-center justify-center gap-2 w-full py-2 bg-green-700/80 hover:bg-green-600 text-white rounded-lg text-sm font-bold transition">
-                    📍 Google Maps (Koordinat)
+                    📍 Koordinat (Map)
                 </a>
             </div>
 
@@ -553,7 +577,6 @@ const getGuideLabel = (val: string) => {
     return labels[val] || val || 'Tidak Perlu';
 };
 
-//const formatTime = (ms: number) => { if (!ms || ms === 0) return '-'; const totalSeconds = ms / 1000; const hours = Math.floor(totalSeconds / 3600); const minutes = Math.floor((totalSeconds % 3600) / 60); if (hours > 0) return `${hours}j ${minutes}m`; return `${minutes} min`; };
 const formatDate = (timestamp: any) => { if (!timestamp) return ''; return new Date(timestamp.seconds * 1000).toLocaleDateString("en-MY", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' }); };
 const averageRating = computed(() => { if (reviews.value.length === 0) return 0; const total = reviews.value.reduce((acc, curr) => acc + (curr.rating || 0), 0); return (total / reviews.value.length).toFixed(1); });
 const sortedReviews = computed(() => { return [...reviews.value].sort((a, b) => (b.votes || 0) - (a.votes || 0)); });
@@ -680,55 +703,42 @@ const voteReview = async (review: any, val: number) => {
 
 const deleteReview = async (reviewId: string) => { if (!confirm(t('common.confirmDelete'))) return; try { await deleteDoc(doc(db, "spots", spotId, "reviews", reviewId)); } catch (e) { alert(t('common.failed')); } };
 
-// --- MAP INIT LOGIC UPDATED ---
 const initMap = () => {
-  // 1. Safety check: Kalau tak ada data, stop.
   if (!spot.value || (!spot.value.gpxUrl && !spot.value.location)) return;
 
   nextTick(() => {
     const mapElement = document.getElementById('spot-map');
     
-    // 2. RETRY LOGIC: Kalau div 'spot-map' belum wujud (sebab loading/v-if), cuba lagi dalam 300ms
     if (!mapElement) {
-        console.log("Map element not found yet, retrying...");
         setTimeout(initMap, 300);
         return;
     }
 
-    // 3. Reset map lama jika ada
     if (mapInstance) { 
         mapInstance.remove(); 
         mapInstance = null; 
     }
 
-    // 4. Setup Default Coordinates
     const defaultLat = spot.value.location ? spot.value.location.latitude : 4.2105;
     const defaultLng = spot.value.location ? spot.value.location.longitude : 101.9758;
 
-    // 5. Create Map
     mapInstance = L.map('spot-map', { scrollWheelZoom: false }).setView([defaultLat, defaultLng], 12);
 
-    // Guna Esri World Topo (Paling stabil)
-  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)'
-
+    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)'
     }).addTo(mapInstance);
 
-    // Add Marker
     if (spot.value.location) {
         L.marker([spot.value.location.latitude, spot.value.location.longitude])
          .addTo(mapInstance)
          .bindPopup(`<b>${spot.value.name}</b><br>Lokasi Utama`);
     }
 
-    // 6. CRITICAL FIX: Invalidate Size selepas animasi CSS 'fade-up' selesai
-    // Animasi CSS selalunya ambil masa 0.6s - 0.8s. Kita refresh saiz map lepas 1 saat.
     setTimeout(() => {
         if (mapInstance) mapInstance.invalidateSize();
     }, 1000);
 
-    // 7. Load GPX (Jika ada)
     if (spot.value.gpxUrl) {
         new (L as any).GPX(spot.value.gpxUrl, {
             async: true,
@@ -741,12 +751,10 @@ const initMap = () => {
         }).on('loaded', function (e: any) {
             if (mapInstance) {
                 mapInstance.fitBounds(e.target.getBounds());
-                // Refresh size sekali lagi lepas fit bounds
                 setTimeout(() => { mapInstance.invalidateSize(); }, 200);
                 
                 const gpx = e.target;
                 gpxData.distance = (gpx.get_distance() / 1000).toFixed(2);
-                // ... update gpxData lain ...
             }
         }).addTo(mapInstance);
     }
@@ -762,7 +770,6 @@ onMounted(async () => {
             isOwner.value = true;
         }
         
-        // Init Map if GPX OR Location exists
         if (spot.value.gpxUrl || spot.value.location) {
              setTimeout(() => initMap(), 100); 
         }

@@ -53,11 +53,11 @@
           </div>
         </div>
 
-        <div v-if="form.role === 'organizer'" class="mb-8 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
+        <div v-if="form.role === 'organizer' && form.organizerDetails" class="mb-8 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
            <h3 class="text-orange-400 font-bold mb-4">Maklumat Penganjur</h3>
            <div class="grid gap-3">
-             <input v-model="form.organizerDetails?.orgName" placeholder="Nama Organisasi" class="input-glass" />
-             <input v-model="form.organizerDetails?.ssm" placeholder="No. SSM" class="input-glass" />
+             <input v-model="form.organizerDetails.orgName" placeholder="Nama Organisasi" class="input-glass" />
+             <input v-model="form.organizerDetails.ssm" placeholder="No. SSM" class="input-glass" />
            </div>
         </div>
 
