@@ -45,12 +45,7 @@ const serviceNames = [
 
 const serviceCategories = ["Rental", "Guide", "Transport", "Chalet", "Campsite", "Food", "Photographer"];
 
-const spotNames = [
-  "Bukit Broga", "Gunung Nuang", "Air Terjun Chiling", "Pantai Kerachut",
-  "Gua Tempurung", "Bukit Tabur", "Gunung Angsi", "Lata Berembun", "Bukit Kutu"
-];
 
-const spotTypes = ["Hill", "Mountain", "Waterfall", "Beach", "Cave"];
 
 // --- HELPER FUNCTIONS ---
 
