@@ -2,14 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
 //import TripPage from '../views/TripPage.vue'
 //import ForumPage from '../views/ForumPage.vue'
-import ProfilePage from '../views/ProfilePage.vue'
+//import ProfilePage from '../views/ProfilePage.vue'
 //import CreateTripPage from '../views/CreateTripPage.vue';
 //import ForumCreatePostPage from '../views/ForumCreatePostPage.vue';
 //import EditProfilePage from '../views/EditProfilePage.vue';
 //import TripRequestPage from '../views/TripRequestPage.vue'
 //import TripDetailPage from '../views/TripDetailPage.vue';
 //import ForumDetailPage from '../views/ForumDetailPage.vue';
-import AdminPage from '../views/AdminPage.vue';
+//import AdminPage from '../views/AdminPage.vue';
 //import SearchResultsPage from '../views/SearchResultsPage.vue';
 //import ServicePage from '../views/ServicePage.vue';
 //import CreateServicePage from '../views/CreateServicePage.vue';
@@ -46,7 +46,7 @@ const routes = [
     path: '/profile',
     name: 'Profile',
     meta: { requiresAuth: true },
-    component: ProfilePage
+    component: () => import('../views/ProfilePage.vue')
   },
   {
     path: '/create-trip',
@@ -92,7 +92,7 @@ const routes = [
     path: '/admin',
     name: 'admin',
     meta: { requiresAdmin: true },
-    component: AdminPage,
+    component: () => import('../views/AdminPage.vue')
   },
   {
     path: '/search',
