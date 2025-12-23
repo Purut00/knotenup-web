@@ -33,10 +33,14 @@
                <input 
                  type="text" 
                  v-model="filters.searchQuery"
+                 @keyup.enter="handleSearch"
                  class="w-full pl-12 pr-24 py-3 rounded-xl bg-black/20 border border-white/10 text-white placeholder-slate-500 focus:border-purple-500 focus:bg-black/30 outline-none transition"
                  :placeholder="t('spots.searchPlaceholder') || 'Cari nama bukit, gunung, sungai...'" 
                />
-               <button class="absolute right-2 top-2 bottom-2 bg-purple-600 hover:bg-purple-500 text-white px-5 rounded-lg font-semibold transition">
+               <button 
+                 @click="handleSearch"
+                 class="absolute right-2 top-2 bottom-2 bg-purple-600 hover:bg-purple-500 text-white px-5 rounded-lg font-semibold transition"
+               >
                  Cari
                </button>
           </div>
@@ -45,7 +49,7 @@
              
              <div class="relative flex-1 min-w-[180px]">
                 <i class="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-red-400 pointer-events-none"></i>
-                <select v-model="filters.state" class="custom-select pl-10">
+                <select v-model="filters.state" class="custom-select pl-10" @change="handleSearch">
                   <option value="">{{ t('spots.allStates') || 'Semua Negeri' }}</option>
                   <option v-for="s in MALAYSIA_STATES" :key="s" :value="s">{{ s }}</option>
                 </select>
@@ -53,7 +57,7 @@
 
              <div class="relative flex-1 min-w-[180px]">
                 <i class="fas fa-tree absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 pointer-events-none"></i>
-                <select v-model="filters.category" class="custom-select pl-10">
+                <select v-model="filters.category" class="custom-select pl-10" @change="handleSearch">
                   <option value="">Semua Jenis</option>
                   <option v-for="cat in SPOT_CATEGORIES" :key="cat.value" :value="cat.value">
                     {{ cat.label }}
@@ -80,17 +84,17 @@
           <p>{{ t('common.loading') }}...</p>
         </div>
         
-        <div v-else-if="filteredSpots.length === 0" class="flex flex-col items-center justify-center py-20 bg-white/5 rounded-2xl border border-white/5 border-dashed text-gray-500">
+        <div v-else-if="spots.length === 0" class="flex flex-col items-center justify-center py-20 bg-white/5 rounded-2xl border border-white/5 border-dashed text-gray-500">
           <i class="fas fa-mountain text-5xl mb-4 opacity-30"></i>
           <h3 class="text-xl font-bold text-gray-300">{{ t('spots.empty') || 'Tiada Lokasi Dijumpai' }}</h3>
-          <p class="mt-2 text-sm">Jadilah yang pertama menambah lokasi ini!</p>
+          <p class="mt-2 text-sm">Cuba ubah kata kunci carian atau filter anda.</p>
           <button @click="resetFilters" class="text-purple-400 hover:text-purple-300 underline mt-3 font-medium">Reset Filter</button>
         </div>
 
         <div v-else>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <SpotCard 
-                    v-for="spot in filteredSpots" 
+                    v-for="spot in spots" 
                     :key="spot.id" 
                     :spot="spot" 
                 />
@@ -103,7 +107,7 @@
 
             <div ref="bottomTrigger" class="h-10 mt-4 pointer-events-none"></div>
             
-            <div v-if="allLoaded && filteredSpots.length > 0" class="text-center py-10 text-gray-500 text-xs uppercase tracking-widest opacity-50">
+            <div v-if="allLoaded && spots.length > 0" class="text-center py-10 text-gray-500 text-xs uppercase tracking-widest opacity-50">
                 -- Semua lokasi telah dipaparkan --
             </div>
         </div>
@@ -117,13 +121,16 @@
 import { ref, reactive, onMounted, computed, nextTick, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, query, orderBy, limit, startAfter, type QueryDocumentSnapshot } from 'firebase/firestore';
+// Import fungsi Firestore yang diperlukan
+import { collection, getDocs, query, orderBy, limit, startAfter, where, type QueryDocumentSnapshot } from 'firebase/firestore';
 
-// Imports (Constants & Types)
+// Imports Constants & Types
 import { MALAYSIA_STATES } from '../constants/data';
-import { SPOT_CATEGORIES } from '../constants/spotData'; // DIFFICULTY_LEVELS removed here as it's moved to SpotCard
+import { SPOT_CATEGORIES } from '../constants/spotData';
 import type { Spot } from '../types';
-import SpotCard from '../components/spot/SpotCard.vue'; // Import komponen baru
+
+// Import Component Baru
+import SpotCard from '../components/spot/SpotCard.vue';
 
 const { t } = useI18n();
 
@@ -134,11 +141,11 @@ const BATCH_SIZE = 8;
 const initialLoading = ref(true);
 const loadingMore = ref(false);
 const allLoaded = ref(false);
-const lastVisible = ref<QueryDocumentSnapshot | null>(null); // Type Safe Firestore Snapshot
+const lastVisible = ref<QueryDocumentSnapshot | null>(null);
 const bottomTrigger = ref<HTMLElement | null>(null);
 const observer = ref<IntersectionObserver | null>(null);
 
-const spots = ref<Spot[]>([]); // Type Safe Array
+const spots = ref<Spot[]>([]);
 
 // Reactive Filters
 const filters = reactive({
@@ -147,25 +154,128 @@ const filters = reactive({
     category: ''
 });
 
+// Computed untuk check jika filter aktif (untuk butang reset)
+const hasActiveFilters = computed(() => !!filters.searchQuery || !!filters.state || !!filters.category);
+
+// --- QUERY BUILDER (Server-Side Logic) ---
+const buildQuery = (isLoadMore = false) => {
+    const spotsRef = collection(db, "spots");
+    const constraints: any[] = [];
+
+    // 1. LOGIK SEARCH NAMA
+    if (filters.searchQuery.trim()) {
+        const searchTerm = filters.searchQuery.toLowerCase().trim();
+        // Cari nama yang bermula dengan input user
+        constraints.push(where('name_lowercase', '>=', searchTerm));
+        constraints.push(where('name_lowercase', '<=', searchTerm + '\uf8ff'));
+        // Bila guna range filter (>=), mesti order by field yang sama
+        constraints.push(orderBy('name_lowercase'));
+    } 
+    // 2. LOGIK JIKA TIADA SEARCH (Default)
+    else {
+        // Susun ikut tarikh paling baru
+        constraints.push(orderBy("createdAt", "desc"));
+    }
+
+    // 3. LOGIK FILTER NEGERI (Server Side)
+    // Note: Ini mungkin perlukan Composite Index di Firebase Console
+    if (filters.state) {
+        constraints.push(where('state', '==', filters.state));
+    }
+
+    // 4. LOGIK FILTER KATEGORI (Server Side)
+    if (filters.category) {
+        constraints.push(where('category', '==', filters.category));
+    }
+
+    // Limit sentiasa ada
+    constraints.push(limit(BATCH_SIZE));
+
+    // Pagination (Load More)
+    if (isLoadMore && lastVisible.value) {
+        constraints.push(startAfter(lastVisible.value));
+    }
+
+    return query(spotsRef, ...constraints);
+};
+
+// --- ACTIONS ---
+
+// Trigger Search (Dipanggil bila tekan Cari / Enter / Tukar Dropdown)
+const handleSearch = () => {
+    fetchInitialSpots();
+};
+
 const resetFilters = () => {
     filters.searchQuery = '';
     filters.state = '';
     filters.category = '';
+    handleSearch(); // Fetch semula data asal
 };
 
-// --- COMPUTED ---
-const hasActiveFilters = computed(() => !!filters.searchQuery || !!filters.state || !!filters.category);
+// Fetch Data Awal
+const fetchInitialSpots = async () => {
+    initialLoading.value = true;
+    allLoaded.value = false;
+    lastVisible.value = null;
+    spots.value = []; // PENTING: Kosongkan list lama
 
-const filteredSpots = computed(() => {
-  return spots.value.filter(s => {
-    const matchSearch = s.name.toLowerCase().includes(filters.searchQuery.toLowerCase());
-    const matchState = filters.state === '' || s.state === filters.state;
-    const matchCat = filters.category === '' || (s.category && s.category === filters.category);
-    return matchSearch && matchState && matchCat;
-  });
-});
+    try {
+        const q = buildQuery(false);
+        const snap = await getDocs(q);
+        
+        if (!snap.empty) {
+            spots.value = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Spot[];
+            const lastDoc = snap.docs[snap.docs.length - 1];
+            if (lastDoc) lastVisible.value = lastDoc;
+            if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
+        } else {
+            allLoaded.value = true;
+        }
+    } catch (e: any) { 
+        console.error("Error fetching spots:", e);
+        // Tip untuk developer:
+        if (e.message.includes("requires an index")) {
+            console.warn("⚠️ PERLU BUAT INDEX: Sila buka console browser dan klik link yang disediakan oleh Firebase.");
+            alert("Sistem sedang mengemaskini index database. Sila buka Console (F12) untuk link pembetulan.");
+        }
+    } finally { 
+        initialLoading.value = false; 
+        nextTick(() => setupObserver());
+    }
+};
 
-// --- INFINITE SCROLL LOGIC ---
+// Infinite Scroll Load More
+const loadMoreSpots = async () => {
+    if (loadingMore.value || allLoaded.value || !lastVisible.value) return;
+
+    loadingMore.value = true;
+
+    try {
+        const q = buildQuery(true);
+        const snap = await getDocs(q);
+
+        if (!snap.empty) {
+            const newSpots = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Spot[];
+            
+            // Tapis duplicate ID (Langkah berjaga-jaga)
+            const uniqueSpots = newSpots.filter(ns => !spots.value.some(s => s.id === ns.id));
+            spots.value = [...spots.value, ...uniqueSpots];
+
+            const lastDoc = snap.docs[snap.docs.length - 1];
+            if (lastDoc) lastVisible.value = lastDoc;
+            if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
+        } else {
+            allLoaded.value = true;
+        }
+    } catch (e) {
+        console.error("Error loading more spots:", e);
+    } finally {
+        loadingMore.value = false;
+    }
+};
+
+// --- OBSERVER ---
 const setupObserver = () => {
     if (observer.value) observer.value.disconnect();
 
@@ -177,70 +287,6 @@ const setupObserver = () => {
 
     if (bottomTrigger.value) {
         observer.value.observe(bottomTrigger.value);
-    }
-};
-
-// Fetch Initial
-const fetchInitialSpots = async () => {
-    initialLoading.value = true;
-    allLoaded.value = false;
-    lastVisible.value = null;
-    spots.value = [];
-
-    try {
-        const q = query(
-            collection(db, "spots"), 
-            orderBy("createdAt", "desc"),
-            limit(BATCH_SIZE)
-        );
-        
-        const snap = await getDocs(q);
-        
-        if (!snap.empty) {
-            spots.value = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Spot[];
-            const lastDoc = snap.docs[snap.docs.length - 1];
-            if (lastDoc) lastVisible.value = lastDoc;
-            if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
-        } else {
-            allLoaded.value = true;
-        }
-    } catch (e) { 
-        console.error("Error fetching spots:", e); 
-    } finally { 
-        initialLoading.value = false; 
-        nextTick(() => setupObserver());
-    }
-};
-
-// Load More
-const loadMoreSpots = async () => {
-    if (loadingMore.value || allLoaded.value || !lastVisible.value) return;
-
-    loadingMore.value = true;
-
-    try {
-        const q = query(
-            collection(db, "spots"), 
-            orderBy("createdAt", "desc"),
-            startAfter(lastVisible.value),
-            limit(BATCH_SIZE)
-        );
-
-        const snap = await getDocs(q);
-
-        if (!snap.empty) {
-            const newSpots = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Spot[];
-            spots.value = [...spots.value, ...newSpots];
-            const lastDoc = snap.docs[snap.docs.length - 1];
-            if (lastDoc) lastVisible.value = lastDoc;
-            if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
-        } else {
-            allLoaded.value = true;
-        }
-    } catch (e) {
-        console.error("Error loading more spots:", e);
-    } finally {
-        loadingMore.value = false;
     }
 };
 
@@ -280,7 +326,6 @@ onUnmounted(() => {
 .custom-select:hover { background: rgba(0,0,0,0.3); }
 .custom-select:focus { border-color: #6c63ff; }
 
-/* Arrow for Select */
 .select-wrapper::after {
   content: '▼'; font-size: 0.7rem; color: #94a3b8; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none;
 }
