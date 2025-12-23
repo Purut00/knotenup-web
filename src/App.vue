@@ -13,10 +13,14 @@
 </template>
 
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue';
 import Navbar from './components/common/Navbar.vue';
 import Footer from './components/common/Footer.vue';
-import SupportBot from './components/common/SupportBot.vue'; // Import komponen baru
+const SupportBot = defineAsyncComponent(() => 
+  import('./components/common/SupportBot.vue')
+);
 </script>
+
 
 <style>
 /* Styling global */
