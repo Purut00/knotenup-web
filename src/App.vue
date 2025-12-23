@@ -9,6 +9,8 @@
     <Footer />
 
     <SupportBot />
+    
+    <SpeedInsights />
   </div>
 </template>
 
@@ -16,6 +18,7 @@
 import { defineAsyncComponent } from 'vue';
 import Navbar from './components/common/Navbar.vue';
 import Footer from './components/common/Footer.vue';
+import { SpeedInsights } from '@vercel/speed-insights/vue';
 const SupportBot = defineAsyncComponent(() => 
   import('./components/common/SupportBot.vue')
 );
