@@ -6,7 +6,7 @@ import App from './App.vue'
 import router from './router' // <-- Import router kita
 import './style.css'
 import '@fortawesome/fontawesome-free/css/all.css'
-import '@fortawesome/fontawesome-free/js/all.js'
+//import '@fortawesome/fontawesome-free/js/all.js'
 
 // Import fail-fail terjemahan kita
 import ms from './locales/ms.json'
