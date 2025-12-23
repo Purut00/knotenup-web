@@ -110,7 +110,7 @@ const sendMessage = async () => {
                <span class="text-xl">🤖</span>
             </div>
             <div>
-              <h3 class="font-bold text-sm">KnotenUp Assistant</h3>
+              <h3 class="font-bold text-sm">AIfa</h3>
               <p class="text-[10px] opacity-90 flex items-center gap-1">
                 <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> Online
               </p>
@@ -124,7 +124,7 @@ const sendMessage = async () => {
         <div ref="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 text-sm scroll-smooth">
           <div v-if="messages.length === 0" class="text-center text-gray-400 mt-10 px-6">
             <div class="text-4xl mb-3">👋</div>
-            <p class="mb-2 text-gray-600 font-medium">Hai! Saya bot AI KnotenUp.</p>
+            <p class="mb-2 text-gray-600 font-medium">Hai! Saya AIfa.</p>
             <p class="text-xs">Boleh tanya: "Ada trip hiking tak minggu ni?"</p>
           </div>
 

@@ -7,7 +7,7 @@
         <div class="hero-glow-orange"></div>
 
         <h1 class="hero-title animate-fade-in-up text-white font-extrabold text-5xl md:text-6xl mb-5 leading-tight">
-          Terokai Keindahan <br>
+          Terokai Keindahan (dwi bahasa last, takyah komen pasal tu lagi..hahaha) <br>
           <span class="text-gradient-animate">{{ t('home.heroHighlight') || 'Alam Semulajadi' }}</span>
         </h1>
         <p class="hero-subtitle animate-fade-in-up text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light" style="animation-delay: 0.1s;">
