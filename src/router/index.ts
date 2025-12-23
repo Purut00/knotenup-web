@@ -1,25 +1,25 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
-import TripPage from '../views/TripPage.vue'
-import ForumPage from '../views/ForumPage.vue'
+//import TripPage from '../views/TripPage.vue'
+//import ForumPage from '../views/ForumPage.vue'
 import ProfilePage from '../views/ProfilePage.vue'
-import CreateTripPage from '../views/CreateTripPage.vue';
-import ForumCreatePostPage from '../views/ForumCreatePostPage.vue';
-import EditProfilePage from '../views/EditProfilePage.vue';
-import TripRequestPage from '../views/TripRequestPage.vue'
-import TripDetailPage from '../views/TripDetailPage.vue';
-import ForumDetailPage from '../views/ForumDetailPage.vue';
+//import CreateTripPage from '../views/CreateTripPage.vue';
+//import ForumCreatePostPage from '../views/ForumCreatePostPage.vue';
+//import EditProfilePage from '../views/EditProfilePage.vue';
+//import TripRequestPage from '../views/TripRequestPage.vue'
+//import TripDetailPage from '../views/TripDetailPage.vue';
+//import ForumDetailPage from '../views/ForumDetailPage.vue';
 import AdminPage from '../views/AdminPage.vue';
-import SearchResultsPage from '../views/SearchResultsPage.vue';
-import ServicePage from '../views/ServicePage.vue';
-import CreateServicePage from '../views/CreateServicePage.vue';
-import OrganizerRegistrationPage from '../views/OrganizerRegistrationPage.vue';
-import SpotsPage from '../views/SpotsPage.vue';
-import SpotDetailPage from '../views/SpotDetailPage.vue';
-import CreateSpotPage from '../views/CreateSpotPage.vue';
-import ServiceDetailPage from '../views/ServiceDetailPage.vue';
-import CreateBuddyPage from '../views/CreateBuddyPage.vue';
-import BuddyPage from '../views/BuddyPage.vue';
+//import SearchResultsPage from '../views/SearchResultsPage.vue';
+//import ServicePage from '../views/ServicePage.vue';
+//import CreateServicePage from '../views/CreateServicePage.vue';
+//import OrganizerRegistrationPage from '../views/OrganizerRegistrationPage.vue';
+//import SpotsPage from '../views/SpotsPage.vue';
+//import SpotDetailPage from '../views/SpotDetailPage.vue';
+//import CreateSpotPage from '../views/CreateSpotPage.vue';
+//import ServiceDetailPage from '../views/ServiceDetailPage.vue';
+//import CreateBuddyPage from '../views/CreateBuddyPage.vue';
+//import BuddyPage from '../views/BuddyPage.vue';
 // Import Firebase untuk cek role sebelum masuk page
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
@@ -34,12 +34,12 @@ const routes = [
   {
     path: '/trips',
     name: 'Trips',
-    component: TripPage
+    component: TripPage: () => import('../views/TripPage.vue')
   },
   {
     path: '/forum',
     name: 'Forum',
-    component: ForumPage
+    component: ForumPage: () => import('../views/ForumPage.vue')  
   },
   {
     path: '/profile',
@@ -51,37 +51,41 @@ const routes = [
     path: '/create-trip',
     name: 'CreateTrip',
     meta: { requiresAuth: true },
-    component: CreateTripPage
+    component: CreateTripPage: () => import('../views/CreateTripPage.vue')  
   },
   {
     path: '/forum/create',
     name: 'CreatePost',
-    component: ForumCreatePostPage
+    meta: { requiresAuth: true },
+    component: ForumCreatePostPage: () => import('../views/ForumCreatePostPage.vue')  
   },
   {
     path: '/profile/edit',
     name: 'EditProfile',
-    component: EditProfilePage
+    meta: { requiresAuth: true },
+    component: EditProfilePage: () => import('../views/EditProfilePage.vue')  
   },
   {
     path: '/requests',
     name: 'requests',
-    component: TripRequestPage
+    meta: { requiresAuth: true },
+    component: TripRequestPage: () => import('../views/TripRequestPage.vue')  
   },
   {
     path: '/trips/:id', 
     name: 'trip-detail',
-    component: TripDetailPage
+    component: TripDetailPage: () => import('../views/TripDetailPage.vue')  
   },
   {
     path: '/forum/:id',
     name: 'forum-detail',
-    component: ForumDetailPage
+    component: ForumDetailPage: () => import('../views/ForumDetailPage.vue')  
   },
   {
     path: '/forum/edit/:id',
     name: 'edit-post',
-    component: ForumCreatePostPage
+    meta: { requiresAuth: true },
+    component: ForumCreatePostPage: () => import('../views/ForumCreatePostPage.vue')  
   },
   {
     path: '/admin',
@@ -92,52 +96,57 @@ const routes = [
   {
     path: '/search',
     name: 'search',
-    component: SearchResultsPage
+    component: SearchResultsPage: () => import('../views/SearchResultsPage.vue')  
   },
   { 
     path: '/service', 
     name: 'service', 
-    component: ServicePage 
+    component: ServicePage: () => import('../views/ServicePage.vue')  
   },
   { 
     path: '/create-service', 
     name: 'create-service', 
-    component: CreateServicePage 
+    meta: { requiresAuth: true },
+    component: CreateServicePage: () => import('../views/CreateServicePage.vue')  
   },
   {
     path: '/user/:id', 
     name: 'public-profile',
-    component: ProfilePage
+    meta: { requiresAuth: true },
+    component: ProfilePage: () => import('../views/ProfilePage.vue')  
   },
   {
     path: '/be-organizer',
     name: 'be-organizer',
-    component: OrganizerRegistrationPage
+    meta: { requiresAuth: true },
+    component: OrganizerRegistrationPage: () => import('../views/OrganizerRegistrationPage.vue')  
   },
   { 
     path: '/spots',  
     name: 'spots', 
-    component: SpotsPage 
+    component: SpotsPage: () => import('../views/SpotsPage.vue')  
   },
   { 
     path: '/spots/:id', 
     name: 'spot-detail', 
-    component: SpotDetailPage 
+    component: SpotDetailPage : () => import('../views/SpotDetailPage.vue') 
   },
   { 
     path: '/create-spot', 
     name: 'create-spot', 
-    component: CreateSpotPage 
+    meta: { requiresAuth: true },
+    component: CreateSpotPage : () => import('../views/CreateSpotPage.vue') 
   },
   { 
     path: '/spots/edit/:id', 
     name: 'edit-spot', 
-    component: CreateSpotPage
+    meta: { requiresAuth: true },
+    component: CreateSpotPage: () => import('../views/CreateSpotPage.vue') 
   },
   {
     path: '/service/:id',
     name: 'service-detail',
-    component: ServiceDetailPage
+    component: ServiceDetailPage: () => import('../views/ServiceDetailPage.vue')  
   },
   { 
     path: '/terms', 
@@ -158,7 +167,7 @@ const routes = [
   {
   path: '/buddies',
   name: 'Buddies',
-  component: BuddyPage
+  component: BuddyPage: () => import('../views/BuddyPage.vue')  
   },
 ]
 
