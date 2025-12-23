@@ -132,10 +132,9 @@
               <label>{{ t('createSpot.permitLabel') || 'Status Permit' }}</label>
               <div class="select-wrapper">
                   <select v-model="form.permit" class="glass-input">
+                    <option value="Unknown">Tidak Diketahui</option>
                     <option value="No">{{ t('spots.noPermit') || 'Tidak Perlu' }}</option>
-                    <option value="Perlu (Pejabat Hutan)">Perlu (Pejabat Hutan)</option>
-                    <option value="Perlu (Polis)">Perlu (Polis)</option>
-                    <option value="Perlu (Swasta)">Perlu (Swasta)</option>
+                    <option value="Perlu">Perlu</option>
                   </select>
                   <i class="fas fa-chevron-down select-arrow"></i>
               </div>
@@ -145,6 +144,10 @@
           <div class="form-group mt-4">
             <label>{{ t('createSpot.guideLabel') || 'Keperluan Guide' }}</label>
             <div class="radio-group">
+              <label class="radio-card" :class="{ active: form.guideRequired === 'Unknown' }">
+                 <input type="radio" v-model="form.guideRequired" value="Unknown" hidden>
+                 <span>Tidak Diketahui</span>
+               </label>
                <label class="radio-card" :class="{ active: form.guideRequired === 'No' }">
                  <input type="radio" v-model="form.guideRequired" value="No" hidden>
                  <span>Tidak Perlu</span>

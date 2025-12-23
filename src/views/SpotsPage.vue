@@ -89,48 +89,11 @@
 
         <div v-else>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <div 
+                <SpotCard 
                     v-for="spot in filteredSpots" 
                     :key="spot.id" 
-                    class="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:border-purple-500/30 transition duration-300 cursor-pointer flex flex-col"
-                    @click="$router.push('/spots/' + spot.id)"
-                >
-                    <div class="h-56 bg-cover bg-center relative" :style="{ backgroundImage: `url(${spot.image || 'https://via.placeholder.com/300'})` }">
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent"></div>
-                        
-                        <span 
-                            class="absolute top-3 right-3 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-white shadow-md backdrop-blur-md"
-                            :class="getDifficultyColor(spot.difficulty)"
-                        >
-                            {{ getDifficultyLabel(spot.difficulty) }}
-                        </span>
-                    </div>
-
-                    <div class="p-5 flex flex-col flex-1">
-                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-purple-400 transition-colors line-clamp-1">
-                            {{ spot.name }}
-                        </h3>
-                        
-                        <div class="flex items-center gap-4 text-sm text-gray-400 mb-4">
-                            <span class="flex items-center gap-1.5"><i class="fas fa-map-pin text-red-400"></i> {{ spot.state }}</span>
-                            <span v-if="spot.height" class="flex items-center gap-1.5"><i class="fas fa-ruler-vertical text-blue-400"></i> {{ spot.height }}m</span>
-                        </div>
-                        
-                        <div class="mt-auto flex flex-wrap gap-2">
-                            <span 
-                                class="px-2.5 py-1 rounded-md text-xs font-semibold flex items-center"
-                                :class="(spot.permit === 'Yes' || spot.permit === 'Perlu') ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'"
-                            >
-                                <i class="mr-1.5" :class="(spot.permit === 'Yes' || spot.permit === 'Perlu') ? 'fas fa-file-signature' : 'fas fa-check-circle'"></i> 
-                                {{ (spot.permit === 'Yes' || spot.permit === 'Perlu') ? (t('spots.permit') || 'Permit') : (t('spots.noPermit') || 'Bebas') }}
-                            </span>
-
-                            <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white/10 text-gray-300 flex items-center">
-                                <i class="fas fa-tree mr-1.5"></i> {{ spot.category || 'Nature' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                    :spot="spot" 
+                />
             </div>
 
             <div v-if="loadingMore" class="flex justify-center items-center py-8">
@@ -158,8 +121,9 @@ import { collection, getDocs, query, orderBy, limit, startAfter, type QueryDocum
 
 // Imports (Constants & Types)
 import { MALAYSIA_STATES } from '../constants/data';
-import { SPOT_CATEGORIES, DIFFICULTY_LEVELS } from '../constants/spotData';
+import { SPOT_CATEGORIES } from '../constants/spotData'; // DIFFICULTY_LEVELS removed here as it's moved to SpotCard
 import type { Spot } from '../types';
+import SpotCard from '../components/spot/SpotCard.vue'; // Import komponen baru
 
 const { t } = useI18n();
 
@@ -182,19 +146,6 @@ const filters = reactive({
     state: '',
     category: ''
 });
-
-// --- HELPERS ---
-const getDifficultyLabel = (level: string) => {
-    if (!level) return 'Easy';
-    const found = DIFFICULTY_LEVELS.find(l => l.value.toLowerCase() === level.toLowerCase());
-    return found ? found.label : level;
-};
-
-const getDifficultyColor = (level: string) => {
-    if (!level) return 'bg-emerald-500';
-    const found = DIFFICULTY_LEVELS.find(l => l.value.toLowerCase() === level.toLowerCase());
-    return found ? found.color : 'bg-gray-500';
-};
 
 const resetFilters = () => {
     filters.searchQuery = '';
