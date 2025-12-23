@@ -1,9 +1,10 @@
 import { db, auth } from '../firebaseConfig';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, } from 'firebase/firestore';
 // 1. Tambah import ini di bahagian paling atas file
 import { GeoPoint } from 'firebase/firestore'; 
 // Pastikan anda dah letak fail bukit_clean.json dalam folder src/utils/
-import mapData from './bukit_clean.json';
+//import mapData from './bukit_clean.json';
+import mapData from "./gunung_siap_negeri.json";
 // --- DATA LISTS (Campuran Semua Kategori) ---
 
 const tripTitles = [
@@ -181,44 +182,12 @@ export const seedServices = async (count: number = 5) => {
 };
 
 // 4. SEED SPOTS
-export const seedSpots = async (count: number = 5) => {
-  if (!auth.currentUser) return alert("Sila login dahulu.");
-  const user = auth.currentUser;
-
-  console.log(`Menjana ${count} spot...`);
-
-  for (let i = 0; i < count; i++) {
-    const type = getRandom(spotTypes);
-    const data = {
-      name: getRandom(spotNames) + ` (Laluan ${Math.floor(Math.random() * 5) + 1})`,
-      category: type, // Eg: Hill, Waterfall
-      state: getRandom(locations),
-      height: Math.floor(Math.random() * 2000) + 300, // 300m - 2300m
-      difficulty: getRandom(["Easy", "Moderate", "Hard", "Extreme"]),
-      permit: getRandom(["Perlu (Pejabat Hutan)", "Perlu (Polis)", "Tidak Perlu"]),
-      guideRequired: getRandom(["Yes", "No", "Optional"]),
-      via: "Pintu Rimba Utama",
-      description: "Trek yang mencabar tetapi pemandangan di puncak sangat berbaloi. Sesuai untuk latihan stamina.",
-      tips: "Hati-hati banyak pacat selepas hujan.",
-      parking: "Parking disediakan RM5.",
-      checkpointDetail: "CP1 (Sungai) -> CP2 (Batu Besar) -> Puncak",
-      mapsLink: "https://maps.google.com",
-      image: getRandomImage('nature'),
-      images: [getRandomImage('nature'), getRandomImage('view')],
-      contributorId: user.uid,
-      contributorName: user.displayName || 'Contributor',
-      createdAt: serverTimestamp()
-    };
-
-    try { await addDoc(collection(db, "spots"), data); } catch (e) { console.error(e); }
-  }
-  alert(`✅ ${count} Spot berjaya dijana!`);
-};
-
 export const seedRealSpots = async () => {
   if (!auth.currentUser) return alert("Sila login sebagai admin.");
   
-  const places = mapData.features || [];
+  // UBAH SINI 1: Pastikan code boleh baca format Array (dari Python) atau Features (GeoJSON)
+  // Kalau data awak format '[{...}, {...}]', dia akan guna direct 'mapData'
+  const places = Array.isArray(mapData) ? mapData : ((mapData as any).features || []);
   
   if(!confirm(`Adakah anda pasti nak import ${places.length} data bukit?`)) return;
 
@@ -227,36 +196,46 @@ export const seedRealSpots = async () => {
 
   for (const item of places) {
     try {
-      // 1. AMBIL KOORDINAT (GeoJSON: [Lng, Lat])
-      // Google Maps export susunan dia [Longitude, Latitude, Altitude]
-      const lng = item.geometry.coordinates[0] || 0;
-      const lat = item.geometry.coordinates[1] || 0;
-      
-// FIX 1: Tukar nama variable 'props' ke 'itemProps' untuk elak error 'Redeclare'
-      // FIX 2: Guna '(item.properties as any)' untuk paksa TypeScript berhenti check type JSON
-      const itemProps = (item.properties || {}) as any;
+      // UBAH SINI 2: Setup variable props supaya boleh baca data dari Python (Flat) atau GeoJSON
+      // Kalau GeoJSON, data ada dalam .properties. Kalau Flat, data ada dalam item tu sendiri.
+      const itemProps = (item.properties || item || {}) as any;
+
+      // UBAH SINI 3: LOGIC AMBIL NEGERI
+      // Cari column 'state', 'admin1', atau 'State'. Kalau tak jumpa baru pakai "Malaysia"
+      const detectedState = itemProps.state || itemProps.admin1 || itemProps.State || "Malaysia";
+
+      // 1. AMBIL KOORDINAT 
+      // Kita kena check dua tempat sebab format Python & GeoJSON beza
+      let lng = 0;
+      let lat = 0;
+
+      if (item.geometry && item.geometry.coordinates) {
+         // Ini kalau format GeoJSON
+         lng = item.geometry.coordinates[0];
+         lat = item.geometry.coordinates[1];
+      } else {
+         // Ini kalau format Python (Flat JSON)
+         // Python selalunya guna key '@lat' atau 'lat'
+         lat = parseFloat(item['@lat'] || item.lat || 0);
+         lng = parseFloat(item['@lon'] || item.lon || item.lng || 0);
+      }
       
       // 2. NAMA
       const name = (itemProps.name || itemProps.Name || "Unknown Spot") + "";
 
-      // 3. DESCRIPTION & HEIGHT (Logic selamat)
+      // 3. DESCRIPTION & HEIGHT (Kekal macam code asal awak)
       let rawDesc = "";
       let height = 0;
 
-      // Kita check description wujud dulu
       if (itemProps.description) {
-        // Kalau ia object (ada .value)
         if (typeof itemProps.description === 'object' && itemProps.description.value) {
-           // FIX 3: Pastikan ia ditukar ke String, dan handle null/undefined
            rawDesc = String(itemProps.description.value || ""); 
         } 
-        // Kalau ia string biasa
         else if (typeof itemProps.description === 'string') {
            rawDesc = String(itemProps.description || "");
         }
       }
 
-      // Cari Height guna Regex
       const heightMatch = rawDesc.match(/Height\s*\(m\)\s*(\d+)/i);
       if (heightMatch && heightMatch[1]) {
         height = parseInt(heightMatch[1], 10);
@@ -265,10 +244,9 @@ export const seedRealSpots = async () => {
         if (nameMatch && nameMatch[1]) height = parseInt(nameMatch[1], 10);
       }
 
-      // Bersihkan description
       const cleanDesc = rawDesc
         .replace(/<[^>]*>?/gm, ' ') 
-        .replace(/&nbsp;/g, ' ')
+        .replace(/ /g, ' ')
         .replace(/\s+/g, ' ') 
         .trim();
 
@@ -278,9 +256,12 @@ export const seedRealSpots = async () => {
         location: new GeoPoint(lat, lng),
         height: Number(height),
         category: "Mountain", 
-        state: "Malaysia",
+        
+        // UBAH SINI 4: Jangan hardcode "Malaysia". Guna variable tadi.
+        state: detectedState, 
+        
         difficulty: height > 1000 ? "Hard" : "Moderate",
-        description: cleanDesc || `Lokasi hiking: ${name}`,
+        description: cleanDesc || `Lokasi hiking di ${detectedState}: ${name}`, // Update description sikit
         images: [],
         features: [],
         contributorId: auth.currentUser?.uid || "admin",
@@ -289,7 +270,7 @@ export const seedRealSpots = async () => {
       });
 
       count++;
-      console.log(`[OK] ${name} (${height}m)`);
+      console.log(`[OK] ${name} (${detectedState})`); // Console log boleh nampak negeri
       
     } catch (e) {
       console.error("Gagal import item:", item, e);

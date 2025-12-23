@@ -1,16 +1,13 @@
 <template>
   <div class="admin-page">
     
-    <!-- LOADING SCREEN -->
     <div v-if="checkingAccess" class="security-check">
       <div class="spinner"></div>
       <p>Verifikasi Identiti...</p>
     </div>
 
-    <!-- MAIN ADMIN UI -->
     <div v-else-if="isAdmin" class="admin-container fade-in">
       
-      <!-- HEADER -->
       <div class="header">
         <div>
           <h1>⚡ Admin Panel</h1>
@@ -21,7 +18,6 @@
         </div>
       </div>
 
-      <!-- TABS NAVIGATION -->
       <div class="admin-tabs custom-scrollbar">
         <button :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">📊 Dashboard</button>
         <button :class="{ active: activeTab === 'trips' }" @click="activeTab = 'trips'">🏕️ Trips <span v-if="counts.trips" class="badge">{{ counts.trips }}</span></button>
@@ -29,15 +25,9 @@
         <button :class="{ active: activeTab === 'services' }" @click="activeTab = 'services'">🛠️ Services <span v-if="counts.services" class="badge">{{ counts.services }}</span></button>
         <button :class="{ active: activeTab === 'spots' }" @click="activeTab = 'spots'">📍 Spots <span v-if="counts.spots" class="badge">{{ counts.spots }}</span></button>
         <button :class="{ active: activeTab === 'banners' }" @click="activeTab = 'banners'">🎨 Banners</button>
-        <!-- TAB DEV TOOLS -->
-        <button :class="{ active: activeTab === 'devtools' }" @click="activeTab = 'devtools'" style="color: #ff5e57; border-color: #ff5e57;">🤖 Bot Tools</button>
+        <button :class="{ active: activeTab === 'devtools' }" @click="activeTab = 'devtools'" style="color: #ff5e57; border-color: #ff5e57;">🤖 Data Tools</button>
       </div>
 
-      <!-- ... (KOD TAB DASHBOARD, TRIPS, FORUM, SERVICES, SPOTS, BANNERS DIKEKALKAN SEPERTI ASAL) ... -->
-      <!-- UNTUK JIMAT RUANG, SAYA HANYA PAPARKAN PERUBAHAN PADA TAB DEVTOOLS -->
-      <!-- Pastikan anda tidak memadam kod tab lain yang sedia ada -->
-
-      <!-- ==================== DASHBOARD TAB ==================== -->
       <div v-if="activeTab === 'dashboard'" class="tab-content fade-in">
          <div class="stats-grid">
             <div class="card"><h3>{{ users.length }}</h3><p>Total Users</p></div>
@@ -50,8 +40,8 @@
                <h3 class="text-yellow-400 mb-4">⏳ Permohonan Organizer ({{ pendingOrganizers.length }})</h3>
                <div v-if="pendingOrganizers.length > 0" class="list-wrapper">
                   <div v-for="user in pendingOrganizers" :key="user.id" class="list-item">
-                     <div class="info"><strong>{{ user.name }}</strong><small>{{ user.organizerDetails?.orgName }}</small></div>
-                     <button class="btn-approve" @click="approveOrganizer(user)">✅ Luluskan</button>
+                      <div class="info"><strong>{{ user.name }}</strong><small>{{ user.organizerDetails?.orgName }}</small></div>
+                      <button class="btn-approve" @click="approveOrganizer(user)">✅ Luluskan</button>
                   </div>
                </div>
                <p v-else class="empty-text">Tiada permohonan baru.</p>
@@ -64,7 +54,6 @@
          </div>
       </div>
 
-      <!-- TRIPS TAB -->
       <div v-if="activeTab === 'trips'" class="tab-content fade-in">
          <div class="tab-header"><h3>Pengurusan Trip</h3><input type="text" v-model="searchQuery" placeholder="Cari..." class="search-box"/></div>
          <div class="data-list">
@@ -82,7 +71,6 @@
          </div>
       </div>
 
-      <!-- FORUM TAB -->
       <div v-if="activeTab === 'forum'" class="tab-content fade-in">
          <div class="tab-header"><h3>Pengurusan Forum</h3><input type="text" v-model="searchQuery" placeholder="Cari..." class="search-box"/></div>
          <div class="data-list">
@@ -99,7 +87,6 @@
          </div>
       </div>
 
-      <!-- SERVICES TAB -->
       <div v-if="activeTab === 'services'" class="tab-content fade-in">
          <div class="tab-header"><h3>Pengurusan Servis</h3><input type="text" v-model="searchQuery" placeholder="Cari..." class="search-box"/></div>
          <div class="data-list">
@@ -114,7 +101,6 @@
          </div>
       </div>
 
-      <!-- SPOTS TAB -->
       <div v-if="activeTab === 'spots'" class="tab-content fade-in">
          <div class="tab-header"><h3>Pengurusan Spot</h3><input type="text" v-model="searchQuery" placeholder="Cari..." class="search-box"/></div>
          <div class="data-list">
@@ -129,7 +115,6 @@
          </div>
       </div>
 
-      <!-- BANNERS TAB -->
       <div v-if="activeTab === 'banners'" class="tab-content fade-in">
         <h3>🎨 Pengurusan Tampilan</h3>
         <div class="banner-manager-layout">
@@ -165,69 +150,26 @@
         </div>
       </div>
 
-      <!-- ==================== TAB DEV TOOLS (UPDATED) ==================== -->
       <div v-if="activeTab === 'devtools'" class="tab-content fade-in">
         <h3 class="text-red-400 mb-4 flex items-center gap-2">
-            <i class="fas fa-robot text-2xl"></i> Bot & Data Generator
+            <i class="fas fa-database text-2xl"></i> Import Data Sebenar
         </h3>
         <p class="text-gray-400 mb-6 bg-white/5 p-3 rounded-lg border border-white/10">
             <i class="fas fa-info-circle text-blue-400 mr-2"></i> 
-            Pilih jenis data yang anda mahu jana. Data palsu akan dimasukkan ke database untuk tujuan ujian UI.
+            Bahagian ini adalah untuk memasukkan data bukit/gunung sebenar dari fail JSON yang telah diproses.
         </p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-           
-           <!-- Card: Trip Seeder -->
-           <div class="tool-card">
-              <div class="icon-bg purple">🏔️</div>
-              <h4>Trips Generator</h4>
-              <p>Jana pelbagai trip (hiking, diving, dll).</p>
-              <div class="action-row">
-                 <input type="number" v-model="seedCounts.trips" min="1" max="20" class="mini-input-qty">
-                 <button @click="runSeeder('trips')" class="btn-tool purple">Jana</button>
-              </div>
-           </div>
-
-           <!-- Card: Forum Seeder -->
-           <div class="tool-card">
-              <div class="icon-bg blue">💬</div>
-              <h4>Forum Generator</h4>
-              <p>Jana topik perbincangan rawak.</p>
-              <div class="action-row">
-                 <input type="number" v-model="seedCounts.forum" min="1" max="20" class="mini-input-qty">
-                 <button @click="runSeeder('forum')" class="btn-tool blue">Jana</button>
-              </div>
-           </div>
-
-           <!-- Card: Service Seeder -->
-           <div class="tool-card">
-              <div class="icon-bg orange">🛠️</div>
-              <h4>Services Generator</h4>
-              <p>Jana iklan servis (rental, guide, dll).</p>
-              <div class="action-row">
-                 <input type="number" v-model="seedCounts.services" min="1" max="20" class="mini-input-qty">
-                 <button @click="runSeeder('services')" class="btn-tool orange">Jana</button>
-              </div>
-           </div>
-
-           <!-- Card: Spot Seeder -->
-           <div class="tool-card">
-              <div class="icon-bg green">📍</div>
-              <h4>Spots Generator</h4>
-              <p>Jana lokasi menarik (gunung, air terjun).</p>
-              <div class="action-row">
-                 <input type="number" v-model="seedCounts.spots" min="1" max="20" class="mini-input-qty">
-                 <button @click="runSeeder('spots')" class="btn-tool green">Jana</button>
-              </div>
-           </div>
-
-           <div class="tool-card" style="border: 1px solid #e74c3c;">
-               <div class="icon-bg" style="background: rgba(231, 76, 60, 0.2);">🗺️</div>
-               <h4 style="color: #ff8787;">Real Maps Import</h4>
-               <p>Import 300 data bukit dari fail JSON.</p>
-               <div class="action-row">
-               <button @click="seedRealSpots" class="btn-tool" style="background: #e74c3c;">
-                 MULA IMPORT
+        <div class="single-tool-container">
+           <div class="tool-card big-card" style="border: 1px solid #e74c3c;">
+               <div class="icon-bg" style="background: rgba(231, 76, 60, 0.2); width: 70px; height: 70px; font-size: 2rem;">🗺️</div>
+               <h4 style="color: #ff8787; font-size: 1.5rem; margin: 10px 0;">Real Maps Import</h4>
+               <p style="font-size: 1rem; max-width: 400px;">
+                 Import data bukit dari fail <code>gunung_siap_negeri.json</code>. 
+                 Sistem akan automatik memasukkan Nama, Lokasi, Ketinggian, dan Negeri ke dalam database.
+               </p>
+               <div class="action-row" style="justify-content: center; margin-top: 20px;">
+               <button @click="seedRealSpots" class="btn-tool" style="background: #e74c3c; padding: 15px 40px; font-size: 1.1rem;">
+                 MULA IMPORT DATA
                </button>
                </div>
             </div>
@@ -236,14 +178,12 @@
 
     </div>
     
-    <!-- ACCESS DENIED STATE -->
     <div v-else class="access-denied">
        <h1>⛔ AKSES DITOLAK</h1>
        <p>Cubaan menceroboh telah direkodkan.</p>
        <button @click="router.push('/')">Balik ke Home</button>
     </div>
 
-    <!-- REPORT MODAL -->
     <div v-if="showReportModal" class="modal-overlay" @click.self="showReportModal = false">
       <div class="glass-modal">
         <div class="modal-header"><h3>Laporan</h3><button class="close-btn" @click="showReportModal=false">✖</button></div>
@@ -265,9 +205,9 @@ import { auth, db, storage } from '../firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, getDocs, deleteDoc, doc, getDoc, setDoc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-// IMPORT SEMUA FUNGSI SEEDER BARU
-import { seedTrips, seedForumPosts, seedServices, seedSpots, seedRealSpots } from '../utils/seeder';
 
+// HANYA IMPORT REAL SPOTS SEEDER
+import { seedRealSpots } from '../utils/seeder';
 
 const router = useRouter();
 const isAdmin = ref(false);
@@ -276,14 +216,6 @@ const currentUserEmail = ref('');
 const activeTab = ref('dashboard');
 const searchQuery = ref('');
 const adminNote = ref('');
-
-// Seed Counts State
-const seedCounts = reactive({
-    trips: 5,
-    forum: 5,
-    services: 5,
-    spots: 5
-});
 
 // Data
 const trips = ref<any[]>([]);
@@ -314,20 +246,6 @@ const maskEmail = (email: string) => {
   const [name, domain] = email.split('@');
   if(!name || !domain) return email;
   return `${name.substring(0, 2)}***@${domain}`;
-};
-
-// --- FUNGSI BOT / SEEDER (UPDATED) ---
-const runSeeder = async (type: 'trips' | 'forum' | 'services' | 'spots') => {
-  const count = seedCounts[type];
-  if(!confirm(`Adakah anda pasti mahu menjana ${count} item untuk ${type}?`)) return;
-  
-  if (type === 'trips') await seedTrips(count);
-  else if (type === 'forum') await seedForumPosts(count);
-  else if (type === 'services') await seedServices(count);
-  else if (type === 'spots') await seedSpots(count);
-  
-  // Reload data setempat selepas generate (tak perlu refresh page penuh)
-  await loadAllData();
 };
 
 onMounted(() => {
@@ -517,23 +435,13 @@ const saveBanner = async (type: 'small1' | 'small2') => {
 .btn-approve { background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; float: right; }
 .btn-save-note { background: #27ae60; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
 
-/* BOT TOOLS */
+/* TOOL CARD SINGLE (FOR REAL IMPORT) */
+.single-tool-container { display: flex; justify-content: center; align-items: center; min-height: 400px; }
 .tool-card { background: #253342; padding: 1.5rem; border-radius: 12px; border: 1px solid #34495e; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.icon-bg { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 10px; }
-.icon-bg.purple { background: rgba(155, 89, 182, 0.2); }
-.icon-bg.blue { background: rgba(52, 152, 219, 0.2); }
-.icon-bg.orange { background: rgba(230, 126, 34, 0.2); }
-.icon-bg.green { background: rgba(46, 204, 113, 0.2); }
-.tool-card h4 { font-size: 1.1rem; margin-bottom: 5px; color: white; }
-.tool-card p { font-size: 0.85rem; color: #95a5a6; margin-bottom: 15px; flex: 1; }
-.action-row { display: flex; gap: 8px; width: 100%; }
-.mini-input-qty { width: 50px; background: #1a252f; border: 1px solid #555; color: white; text-align: center; border-radius: 6px; }
-.btn-tool { flex: 1; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; padding: 8px; transition: 0.2s; }
-.btn-tool:hover { filter: brightness(1.1); }
-.btn-tool.purple { background: #9b59b6; }
-.btn-tool.blue { background: #3498db; }
-.btn-tool.orange { background: #e67e22; }
-.btn-tool.green { background: #2ecc71; }
+.tool-card.big-card { width: 100%; max-width: 600px; padding: 3rem; }
+.icon-bg { border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.btn-tool { border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-tool:hover { filter: brightness(1.1); transform: scale(1.05); }
 
 /* BANNER MANAGER */
 .banner-manager-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
@@ -553,6 +461,6 @@ const saveBanner = async (type: 'small1' | 'small2') => {
 .modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #34495e; padding-bottom: 10px; margin-bottom: 10px; }
 .reporter-item { padding: 10px; border-bottom: 1px solid #34495e; }
 
-@media (max-width: 768px) { .dashboard-split, .banner-manager-layout { grid-template-columns: 1fr; } .grid-cols-4 { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .dashboard-split, .banner-manager-layout { grid-template-columns: 1fr; } }
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 </style>
