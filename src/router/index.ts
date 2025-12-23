@@ -20,6 +20,7 @@ import AdminPage from '../views/AdminPage.vue';
 //import ServiceDetailPage from '../views/ServiceDetailPage.vue';
 //import CreateBuddyPage from '../views/CreateBuddyPage.vue';
 //import BuddyPage from '../views/BuddyPage.vue';
+
 // Import Firebase untuk cek role sebelum masuk page
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
@@ -34,12 +35,12 @@ const routes = [
   {
     path: '/trips',
     name: 'Trips',
-    component: TripPage: () => import('../views/TripPage.vue')
+    component: () => import('../views/TripPage.vue')
   },
   {
     path: '/forum',
     name: 'Forum',
-    component: ForumPage: () => import('../views/ForumPage.vue')  
+    component:  () => import('../views/ForumPage.vue')  
   },
   {
     path: '/profile',
@@ -51,102 +52,102 @@ const routes = [
     path: '/create-trip',
     name: 'CreateTrip',
     meta: { requiresAuth: true },
-    component: CreateTripPage: () => import('../views/CreateTripPage.vue')  
+    component: () => import('../views/CreateTripPage.vue')
   },
   {
     path: '/forum/create',
     name: 'CreatePost',
     meta: { requiresAuth: true },
-    component: ForumCreatePostPage: () => import('../views/ForumCreatePostPage.vue')  
+    component: () => import('../views/ForumCreatePostPage.vue')
   },
   {
     path: '/profile/edit',
     name: 'EditProfile',
     meta: { requiresAuth: true },
-    component: EditProfilePage: () => import('../views/EditProfilePage.vue')  
+    component: () => import('../views/EditProfilePage.vue')
   },
   {
     path: '/requests',
     name: 'requests',
     meta: { requiresAuth: true },
-    component: TripRequestPage: () => import('../views/TripRequestPage.vue')  
+    component: () => import('../views/TripRequestPage.vue')
   },
   {
     path: '/trips/:id', 
     name: 'trip-detail',
-    component: TripDetailPage: () => import('../views/TripDetailPage.vue')  
+    component: () => import('../views/TripDetailPage.vue')
   },
   {
     path: '/forum/:id',
     name: 'forum-detail',
-    component: ForumDetailPage: () => import('../views/ForumDetailPage.vue')  
+    component: () => import('../views/ForumDetailPage.vue')
   },
   {
     path: '/forum/edit/:id',
     name: 'edit-post',
     meta: { requiresAuth: true },
-    component: ForumCreatePostPage: () => import('../views/ForumCreatePostPage.vue')  
+    component: () => import('../views/ForumCreatePostPage.vue')
   },
   {
     path: '/admin',
     name: 'admin',
+    meta: { requiresAdmin: true },
     component: AdminPage,
-    meta: { requiresAdmin: true }
   },
   {
     path: '/search',
     name: 'search',
-    component: SearchResultsPage: () => import('../views/SearchResultsPage.vue')  
+    component: () => import('../views/SearchResultsPage.vue')
   },
   { 
     path: '/service', 
     name: 'service', 
-    component: ServicePage: () => import('../views/ServicePage.vue')  
+    component: () => import('../views/ServicePage.vue')
   },
   { 
     path: '/create-service', 
     name: 'create-service', 
     meta: { requiresAuth: true },
-    component: CreateServicePage: () => import('../views/CreateServicePage.vue')  
+    component: () => import('../views/CreateServicePage.vue')
   },
   {
     path: '/user/:id', 
     name: 'public-profile',
     meta: { requiresAuth: true },
-    component: ProfilePage: () => import('../views/ProfilePage.vue')  
+    component: () => import('../views/ProfilePage.vue')
   },
   {
     path: '/be-organizer',
     name: 'be-organizer',
     meta: { requiresAuth: true },
-    component: OrganizerRegistrationPage: () => import('../views/OrganizerRegistrationPage.vue')  
+    component: () => import('../views/OrganizerRegistrationPage.vue')
   },
   { 
     path: '/spots',  
     name: 'spots', 
-    component: SpotsPage: () => import('../views/SpotsPage.vue')  
+    component: () => import('../views/SpotsPage.vue')
   },
   { 
     path: '/spots/:id', 
     name: 'spot-detail', 
-    component: SpotDetailPage : () => import('../views/SpotDetailPage.vue') 
+    component: () => import('../views/SpotDetailPage.vue')
   },
   { 
     path: '/create-spot', 
     name: 'create-spot', 
     meta: { requiresAuth: true },
-    component: CreateSpotPage : () => import('../views/CreateSpotPage.vue') 
+    component: () => import('../views/CreateSpotPage.vue')
   },
   { 
     path: '/spots/edit/:id', 
     name: 'edit-spot', 
     meta: { requiresAuth: true },
-    component: CreateSpotPage: () => import('../views/CreateSpotPage.vue') 
+    component: () => import('../views/CreateSpotPage.vue')
   },
   {
     path: '/service/:id',
     name: 'service-detail',
-    component: ServiceDetailPage: () => import('../views/ServiceDetailPage.vue')  
+    component: () => import('../views/ServiceDetailPage.vue')
   },
   { 
     path: '/terms', 
@@ -162,12 +163,12 @@ const routes = [
     path: '/create-buddy',
     name: 'CreateBuddy',
     meta: { requiresAuth: true }, // Wajib login
-    component: CreateBuddyPage
+    component: () => import('../views/CreateBuddyPage.vue')
   },
   {
-  path: '/buddies',
-  name: 'Buddies',
-  component: BuddyPage: () => import('../views/BuddyPage.vue')  
+    path: '/buddies',
+    name: 'Buddies',
+    component: () => import('../views/BuddyPage.vue')
   },
 ]
 
