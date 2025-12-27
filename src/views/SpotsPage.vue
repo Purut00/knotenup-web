@@ -14,10 +14,7 @@
         </div>
         
         <div class="flex gap-4">
-           <!-- ADMIN / DEV ONLY -->
-           <button @click="runSeeder" class="btn btn-outline border-emerald-500/50 text-emerald-400 text-xs">
-              <i class="fas fa-database mr-2"></i> Seed Data
-           </button>
+
 
            <button 
              class="group relative inline-flex items-center justify-center px-6 py-3 font-bold text-white transition-all duration-200 bg-transparent border-none cursor-pointer focus:outline-none"
@@ -41,6 +38,7 @@
                  type="text" 
                  v-model="filters.searchQuery"
                  @keyup.enter="handleSearch"
+                 @input="handleSearch"
                  class="w-full pl-12 pr-24 py-3 rounded-xl bg-black/20 border border-white/10 text-white placeholder-slate-500 focus:border-purple-500 focus:bg-black/30 outline-none transition"
                  :placeholder="t('spots.searchPlaceholder') || 'Cari nama bukit, gunung, sungai...'" 
                />
@@ -103,15 +101,12 @@
                 <SpotCard v-for="spot in spots" :key="spot.id" :spot="spot" />
             </div>
 
-            <div v-if="loadingMore" class="flex justify-center items-center py-8">
-                <div class="spinner w-8 h-8 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin"></div>
+            <!-- Footer Message (All loaded since we fetch all) -->
+            <div v-if="!initialLoading && spots.length > 0" class="text-center py-10 text-gray-500 text-xs uppercase tracking-widest opacity-50">
+                -- {{ spots.length }} Lokasi Dijumpai --
             </div>
-
-            <div ref="bottomTrigger" class="h-10 mt-4 pointer-events-none"></div>
             
-            <div v-if="allLoaded && spots.length > 0" class="text-center py-10 text-gray-500 text-xs uppercase tracking-widest opacity-50">
-                -- Semua lokasi telah dipaparkan --
-            </div>
+            <!-- Removed lazy load triggers -->
         </div>
 
       </div>
@@ -120,58 +115,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, onUnmounted } from 'vue';
+import { reactive, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MALAYSIA_STATES } from '../constants/data';
 import { SPOT_CATEGORIES } from '../constants/spotData';
 import SpotCard from '../components/spot/SpotCard.vue';
 import { useSpots } from '../composables/useSpots';
-import { seedSpots } from '../utils/seeder';
+
 
 const { t } = useI18n();
-const { spots, loading: initialLoading, loadingMore, allLoaded, fetchSpots } = useSpots();
-
-const bottomTrigger = ref<HTMLElement | null>(null);
-const observer = ref<IntersectionObserver | null>(null);
+const { spots, loading: initialLoading, fetchSpots } = useSpots();
 
 const filters = reactive({ searchQuery: '', state: '', category: '' });
 const hasActiveFilters = computed(() => !!filters.searchQuery || !!filters.state || !!filters.category);
 
-const handleSearch = () => { fetchSpots(filters, false); };
+const handleSearch = () => { fetchSpots(filters); };
 const resetFilters = () => {
     filters.searchQuery = ''; filters.state = ''; filters.category = '';
     handleSearch();
 };
 
-const runSeeder = async () => {
-   if(confirm("Adakah anda pasti mahu menjana data awal?")) {
-      await seedSpots();
-      handleSearch(); // Refresh list
-   }
-};
 
-const loadMoreSpots = () => { fetchSpots(filters, true); };
-
-const setupObserver = () => {
-    if (observer.value) observer.value.disconnect();
-    observer.value = new IntersectionObserver((entries) => {
-        if (entries[0]?.isIntersecting && !loadingMore.value && !allLoaded.value) {
-            loadMoreSpots();
-        }
-    }, { rootMargin: '200px' });
-    if (bottomTrigger.value) observer.value.observe(bottomTrigger.value);
-};
 
 onMounted(() => {
-    fetchSpots(filters, false).then(() => {
-      // Tunggu DOM update sikit
-      setTimeout(setupObserver, 500);
-    });
+    fetchSpots(filters);
 });
 
-onUnmounted(() => {
-    if (observer.value) observer.value.disconnect();
-});
 </script>
 
 <style scoped>

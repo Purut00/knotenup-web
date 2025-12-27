@@ -27,6 +27,7 @@
             <input 
                 v-model="searchInput" 
                 @keyup.enter="updateSearch"
+                @input="handleInput"
                 class="glass-input-search"
                 placeholder="Cari lokasi, aktiviti, atau topik..." 
             />
@@ -311,6 +312,11 @@ const performFilter = () => {
 
 const updateSearch = () => {
   router.push({ name: 'search', query: { q: searchInput.value } });
+};
+
+const handleInput = () => {
+  searchQuery.value = searchInput.value;
+  performFilter();
 };
 
 const formatDate = (timestamp: any) => {

@@ -1,85 +1,61 @@
 import { ref } from 'vue';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, getDoc, doc, query, where, orderBy, limit, startAfter, type QueryDocumentSnapshot } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, query, orderBy, limit, where } from 'firebase/firestore';
 import type { Spot } from '../types';
 
 export function useSpots() {
     const spots = ref<Spot[]>([]);
+    const masterSpots = ref<Spot[]>([]); // Store all spots here
     const loading = ref(false);
-    const loadingMore = ref(false);
     const error = ref<string | null>(null);
-    const allLoaded = ref(false);
-    const lastVisible = ref<QueryDocumentSnapshot | null>(null);
 
-    const BATCH_SIZE = 8;
+    // Limit to 500 to prevent overload, but usually enough for spots list
+    const FETCH_LIMIT = 500;
 
-    const buildQuery = (filters: any, isLoadMore = false) => {
-        const spotsRef = collection(db, "spots");
-        const constraints: any[] = [];
-
-        // Search
-        if (filters.searchQuery?.trim()) {
-            const term = filters.searchQuery.toLowerCase().trim();
-            constraints.push(where('name_lowercase', '>=', term));
-            constraints.push(where('name_lowercase', '<=', term + '\uf8ff'));
-            constraints.push(orderBy('name_lowercase'));
-        } else {
-            constraints.push(orderBy("createdAt", "desc"));
-        }
-
-        // Filters
-        if (filters.state) constraints.push(where('state', '==', filters.state));
-        if (filters.category) constraints.push(where('category', '==', filters.category));
-
-        // Limit
-        constraints.push(limit(BATCH_SIZE));
-
-        // Pagination
-        if (isLoadMore && lastVisible.value) constraints.push(startAfter(lastVisible.value));
-
-        return query(spotsRef, ...constraints);
-    };
-
-    const fetchSpots = async (filters: any = {}, isLoadMore = false) => {
-        if (isLoadMore) {
-            if (loadingMore.value || allLoaded.value) return;
-            loadingMore.value = true;
-        } else {
-            loading.value = true;
-            allLoaded.value = false;
-            lastVisible.value = null;
-            spots.value = [];
-        }
+    const fetchSpots = async (filters: any = {}, _isLoadMore = false) => {
+        // Ignored _isLoadMore (Lazy loading removed)
+        loading.value = true;
         error.value = null;
 
         try {
-            const q = buildQuery(filters, isLoadMore);
-            const snap = await getDocs(q);
-
-            if (!snap.empty) {
-                const newSpots = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Spot[];
-                if (isLoadMore) {
-                    // Filter duplicates
-                    const unique = newSpots.filter(ns => !spots.value.some(s => s.id === ns.id));
-                    spots.value.push(...unique);
-                } else {
-                    spots.value = newSpots;
-                }
-
-                lastVisible.value = snap.docs[snap.docs.length - 1] || null;
-                if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
-            } else {
-                allLoaded.value = true;
+            // 1. Fetch EVERYTHING (if empty)
+            if (masterSpots.value.length === 0) {
+                const spotsRef = collection(db, "spots");
+                // Only order by createdAt, no complex filtering here
+                const q = query(spotsRef, orderBy("createdAt", "desc"), limit(FETCH_LIMIT));
+                const snap = await getDocs(q);
+                masterSpots.value = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Spot[];
             }
+
+            // 2. Perform Client-Side Filtering
+            let results = [...masterSpots.value];
+
+            // Search Filter
+            if (filters.searchQuery?.trim()) {
+                const term = filters.searchQuery.toLowerCase().trim();
+                results = results.filter(s =>
+                    (s.name && s.name.toLowerCase().includes(term)) ||
+                    (s.state && s.state.toLowerCase().includes(term))
+                );
+            }
+
+            // State Filter
+            if (filters.state) {
+                results = results.filter(s => s.state === filters.state);
+            }
+
+            // Category Filter
+            if (filters.category) {
+                results = results.filter(s => s.category === filters.category);
+            }
+
+            spots.value = results;
+
         } catch (e: any) {
             console.error("Fetch spots error:", e);
             error.value = e.message;
-            if (e.message.includes("requires an index")) {
-                console.warn("⚠️ INDEX REQUIRED: Check Firebase Console.");
-            }
         } finally {
             loading.value = false;
-            loadingMore.value = false;
         }
     };
 
@@ -127,7 +103,7 @@ export function useSpots() {
     };
 
     return {
-        spots, loading, loadingMore, error, allLoaded,
+        spots, loading, error,
         fetchSpots, fetchSpotById, fetchRelatedTrips, translateDescription
     };
 }
