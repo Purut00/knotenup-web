@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { db } from '../../firebaseConfig';
-import { collection, query, orderBy, limit, getDocs, startAfter, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, startAfter, updateDoc, doc, deleteDoc, where } from 'firebase/firestore';
 
 const emit = defineEmits(['view-reports']);
 
@@ -60,15 +60,15 @@ const fetchTrips = async (isLoadMore = false) => {
         let q;
         const coll = collection(db, "trips");
         
-        if (searchQuery.value) {
-            // Simple title search (case-sensitive & prefix only in Firebase usually, so limit usage or use client filter if small enough? No, avoid all load)
-            // For now, simple recent list if no search. If search, try simple where clause.
-            // Note: Firebase 'array-contains' or fuzzy search requires index or 3rd party.
-            // We'll stick to recent list vs specific ID search? Or just Load Recent.
-            // Let's rely on recent list + client filter of loaded items for now? No, that defeats pagination.
-            // Just use recent list for now. Search is hard without proper index (Algolia/Typesense).
-             q = query(coll, orderBy("createdAt", "desc"), limit(PAGE_SIZE));
-             // If search logic involves fetching all, we warn user.
+        if (searchQuery.value && searchQuery.value.trim() !== '') {
+             const term = searchQuery.value.trim();
+             // Server-side Prefix Search on 'title'
+             // Note: Case-sensitive. 'Gunung' matches 'Gunung', but not 'gunung'.
+             q = query(coll, 
+                where("title", ">=", term), 
+                where("title", "<=", term + '\uf8ff'),
+                limit(PAGE_SIZE));
+             // Disabled orderBy("createdAt") during search to avoid index requirement.
         } else {
              if (isLoadMore && lastDoc.value) {
                  q = query(coll, orderBy("createdAt", "desc"), startAfter(lastDoc.value), limit(PAGE_SIZE));

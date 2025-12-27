@@ -345,7 +345,7 @@ onMounted(async () => {
                 organizer.value = orgSnap.data();
               }
             } catch (err) {
-              console.log("Organizer info restricted or not found");
+              // console.log("Organizer info restricted or not found");
             }
          }
       }

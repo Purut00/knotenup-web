@@ -62,7 +62,7 @@
               <!-- [NEW] TELEGRAM DEEP LINK BUTTON FOR VISITORS -->
               <a 
                  v-if="!isOwnProfile && user.telegramUsername" 
-                 :href="`https://t.me/${user.telegramUsername}`" 
+                 :href="`https://t.me/${user.telegramUsername.replace('@', '')}`" 
                  target="_blank"
                  class="btn-action telegram-btn flex items-center justify-center gap-2"
                  style="text-decoration:none;"
@@ -209,12 +209,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, onMounted, watch, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import ProfileCardGenerator from '../components/profile/ProfileCardGenerator.vue';
+
+// Lazy Load ProfileCardGenerator for performance
+const ProfileCardGenerator = defineAsyncComponent(() => 
+  import('../components/profile/ProfileCardGenerator.vue')
+);
 
 const route = useRoute();
 const router = useRouter();

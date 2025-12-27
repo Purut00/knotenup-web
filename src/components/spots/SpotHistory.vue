@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onUnmounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { db } from '../../firebaseConfig';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore'; 

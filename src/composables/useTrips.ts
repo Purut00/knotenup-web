@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { db } from '../firebaseConfig';
-import { collection, addDoc, doc, getDoc, updateDoc, query, where, getDocs, orderBy, limit, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc, query, getDocs, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 
 export function useTrips() {
     const loading = ref(false);

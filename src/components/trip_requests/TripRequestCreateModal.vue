@@ -76,7 +76,7 @@ import { ACTIVITY_CATEGORIES, MALAYSIA_STATES } from '../../constants/data';
 import { auth, db } from '../../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-const props = defineProps<{
+defineProps<{
   visible: boolean;
 }>();
 

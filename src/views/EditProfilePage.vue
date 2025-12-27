@@ -160,7 +160,7 @@ onMounted(() => {
         privateForm.allergies = pData.allergies || '';
         privateForm.emergencyContact = pData.emergencyContact || '';
       }
-    } catch (e) { console.log("Tiada data private"); }
+    } catch (e) { /* No private data found */ }
   });
 });
 

@@ -20,6 +20,7 @@
 
       <div class="admin-tabs custom-scrollbar">
         <button :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">📊 Dashboard</button>
+        <button :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">👥 Users</button>
         <button :class="{ active: activeTab === 'trips' }" @click="activeTab = 'trips'">🏕️ Trips</button>
         <button :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">💬 Forum</button>
         <button :class="{ active: activeTab === 'services' }" @click="activeTab = 'services'">🛠️ Services</button>
@@ -29,30 +30,9 @@
       </div>
 
       <!-- DASHBOARD -->
-      <div v-if="activeTab === 'dashboard'" class="tab-content fade-in">
-         <div class="stats-grid">
-            <!-- Stats disabled for performance (requires count queries) -->
-            <div class="card"><h3>Admin</h3><p>Control Center</p></div>
-         </div>
-         <div class="dashboard-split">
-            <div class="panel-section">
-               <h3 class="text-yellow-400 mb-4">⏳ Permohonan Organizer ({{ pendingOrganizers.length }})</h3>
-               <div v-if="loadingPending" class="text-white text-sm">Loading...</div>
-               <div v-else-if="pendingOrganizers.length > 0" class="list-wrapper">
-                  <div v-for="user in pendingOrganizers" :key="user.id" class="list-item">
-                      <div class="info"><strong>{{ user.name }}</strong><small>{{ user.organizerDetails?.orgName }}</small></div>
-                      <button class="btn-approve" @click="approveOrganizer(user)">✅ Luluskan</button>
-                  </div>
-               </div>
-               <p v-else class="empty-text">Tiada permohonan baru.</p>
-            </div>
-            <div class="panel-section">
-               <h3>📝 Admin Notes</h3>
-               <textarea v-model="adminNote" placeholder="Tulis nota penting..." class="note-area"></textarea>
-               <button class="btn-save-note" @click="saveNote">Simpan Nota</button>
-            </div>
-         </div>
-      </div>
+      <!-- COMPONENTS -->
+      <AdminDashboard v-if="activeTab === 'dashboard'" @switch-tab="(t) => activeTab = t" />
+      <AdminUsers v-if="activeTab === 'users'" />
 
       <!-- SUB COMPONENTS -->
       <AdminTrips v-if="activeTab === 'trips'" @view-reports="openReportModal" />
@@ -141,10 +121,12 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db, storage } from '../firebaseConfig'; 
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, getDocs, doc, getDoc, setDoc, updateDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, query, where } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 // COMPONENTS
+import AdminDashboard from '../components/admin/AdminDashboard.vue';
+import AdminUsers from '../components/admin/AdminUsers.vue';
 import AdminTrips from '../components/admin/AdminTrips.vue';
 import AdminSpots from '../components/admin/AdminSpots.vue';
 import AdminForum from '../components/admin/AdminForum.vue';
@@ -159,11 +141,6 @@ const isAdmin = ref(false);
 const checkingAccess = ref(true);
 const currentUserEmail = ref('');
 const activeTab = ref('dashboard');
-const adminNote = ref('');
-
-// Pending Organizers
-const pendingOrganizers = ref<any[]>([]);
-const loadingPending = ref(false);
 
 // Report Modal
 const showReportModal = ref(false);
@@ -185,8 +162,6 @@ const maskEmail = (email: string) => {
 };
 
 onMounted(() => {
-  adminNote.value = localStorage.getItem('adminNote') || '';
-  
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUserEmail.value = user.email || '';
@@ -195,7 +170,6 @@ onMounted(() => {
         if (userDoc.exists() && userDoc.data().role === 'admin') {
           isAdmin.value = true;
           loadBanners();
-          fetchPendingOrganizers(); // Only fetch pending
         } else {
           isAdmin.value = false;
         }
@@ -210,23 +184,6 @@ onMounted(() => {
   });
 });
 
-const fetchPendingOrganizers = async () => {
-    loadingPending.value = true;
-    try {
-        const q = query(collection(db, "users"), where("organizerStatus", "==", "pending"));
-        const snap = await getDocs(q);
-        pendingOrganizers.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch(e) { console.error(e); } finally { loadingPending.value = false; }
-};
-
-const approveOrganizer = async (user: any) => {
-  if(!confirm(`Luluskan ${user.name}?`)) return;
-  try {
-    await updateDoc(doc(db, "users", user.id), { role: 'organizer', organizerStatus: 'approved' });
-    pendingOrganizers.value = pendingOrganizers.value.filter(u => u.id !== user.id);
-  } catch(e) { alert("Gagal."); }
-};
-
 const openReportModal = async (targetId: string) => {
   try {
       const q = query(collection(db, "reports"), where("targetId", "==", targetId));
@@ -235,8 +192,6 @@ const openReportModal = async (targetId: string) => {
       showReportModal.value = true;
   } catch(e) { console.error(e); alert("Gagal fetch reports."); }
 };
-
-const saveNote = () => { localStorage.setItem('adminNote', adminNote.value); alert("Saved."); };
 
 // --- BANNERS LOGIC ---
 const loadBanners = async () => {

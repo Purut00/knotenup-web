@@ -7,7 +7,7 @@
         <div class="hero-glow-orange"></div>
 
         <h1 class="hero-title animate-fade-in-up text-white font-extrabold text-5xl md:text-6xl mb-5 leading-tight">
-          Terokai Keindahan (dwi bahasa last, takyah komen pasal tu lagi..hahaha) <br>
+          Terokai Keindahan<br>
           <span class="text-gradient-animate">{{ t('home.heroHighlight') || 'Alam Semulajadi' }}</span>
         </h1>
         <p class="hero-subtitle animate-fade-in-up text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light" style="animation-delay: 0.1s;">
@@ -219,7 +219,7 @@ onMounted(async () => {
       if(data.small1?.imageUrl) Object.assign(banners.small1, data.small1); 
       if(data.small2?.imageUrl) Object.assign(banners.small2, data.small2); 
     }
-  } catch (e) { console.log("Using default banners"); }
+  } catch (e) { /* silent fail for banners */ }
 
   // 2. Fetch Trips
   try {

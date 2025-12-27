@@ -88,11 +88,7 @@ const sortedReviews = computed(() => {
     return [...reviews.value].sort((a, b) => (b.votes || 0) - (a.votes || 0)); 
 });
 
-const averageRating = computed(() => { 
-    if (reviews.value.length === 0) return 0; 
-    const total = reviews.value.reduce((acc, curr) => acc + (curr.rating || 0), 0); 
-    return (total / reviews.value.length).toFixed(1); 
-});
+// Average rating logic removed as it's unused.
 
 // Explicitly expose averageRating if parent needs it? 
 // For now, parent calculates it from raw reviews (which it doesn't have anymore).

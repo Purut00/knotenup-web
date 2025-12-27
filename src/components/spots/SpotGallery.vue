@@ -84,7 +84,7 @@ import 'swiper/css/pagination';
 // @ts-ignore
 import 'swiper/css/navigation';
 
-const props = defineProps<{
+defineProps<{
   spot: any;
   images: string[];
 }>();

@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { db } from '../../firebaseConfig';
-import { collection, query, orderBy, limit, getDocs, startAfter, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, startAfter, updateDoc, doc, deleteDoc, where } from 'firebase/firestore';
 
 const emit = defineEmits(['view-reports']);
 
@@ -59,12 +59,19 @@ const fetchSpots = async (isLoadMore = false) => {
         let q;
         const coll = collection(db, "spots");
         
-        // Handling search would require indexed query or 3rd party search. 
-        // We stick to simple pagination by date for now to ensure performance.
-        if (isLoadMore && lastDoc.value) {
-            q = query(coll, orderBy("createdAt", "desc"), startAfter(lastDoc.value), limit(PAGE_SIZE));
+        if (searchQuery.value && searchQuery.value.trim() !== '') {
+            const term = searchQuery.value.trim();
+             // Server-side Prefix Search on 'name'
+            q = query(coll, 
+                where("name", ">=", term), 
+                where("name", "<=", term + '\uf8ff'),
+                limit(PAGE_SIZE));
         } else {
-            q = query(coll, orderBy("createdAt", "desc"), limit(PAGE_SIZE));
+            if (isLoadMore && lastDoc.value) {
+                q = query(coll, orderBy("createdAt", "desc"), startAfter(lastDoc.value), limit(PAGE_SIZE));
+            } else {
+                q = query(coll, orderBy("createdAt", "desc"), limit(PAGE_SIZE));
+            }
         }
 
         const snap = await getDocs(q);
