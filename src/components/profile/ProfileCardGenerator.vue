@@ -7,7 +7,7 @@
       <div v-if="type === 'business'" id="businessCard" class="standard-card business-card">
         <div class="bc-left-panel">
           <div class="bc-profile-header">
-            <img :src="userData.photoURL || 'https://i.pravatar.cc/150'" class="bc-avatar-square" crossorigin="anonymous" />
+            <img :src="userData.avatar || userData.photoURL || 'https://i.pravatar.cc/150'" class="bc-avatar-square" crossorigin="anonymous" />
             <div class="bc-texts">
                <h1 class="bc-name">{{ userData.name }}</h1>
                <div class="bc-role">{{ (userData.role || 'Member').toUpperCase() }}</div>
@@ -73,7 +73,7 @@
                </div>
             </div>
             <div class="ec-side">
-               <img :src="userData.photoURL || 'https://i.pravatar.cc/150'" class="ec-avatar" crossorigin="anonymous" />
+               <img :src="userData.avatar || userData.photoURL || 'https://i.pravatar.cc/150'" class="ec-avatar" crossorigin="anonymous" />
                <div class="ec-qr-box">
                   <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/emergency/${userData.id}`" crossorigin="anonymous">
                </div>

@@ -21,7 +21,7 @@
         
         <!-- SIDEBAR -->
         <aside class="profile-sidebar relative z-10">
-           <img :src="user.photoURL || 'https://i.pravatar.cc/150'" class="avatar" />
+           <img :src="user.avatar || user.photoURL || 'https://i.pravatar.cc/150'" class="avatar" />
            
            <div class="mb-2">
               <span class="role-badge" v-if="user.role !== 'user'">{{ user.role }}</span>
