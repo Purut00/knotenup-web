@@ -355,7 +355,8 @@ const submitSpot = async () => {
   try {
     const newUploadedUrls: string[] = [];
     for (const file of newImageFiles.value) {
-       const fileRef = storageRef(storage, `spots/images/${auth.currentUser.uid}_${Date.now()}_${file.name}`);
+       // [SECURE] Upload ke folder user sendiri
+       const fileRef = storageRef(storage, `uploads/${auth.currentUser.uid}/spots/images/${Date.now()}_${file.name}`);
        const snap = await uploadBytes(fileRef, file);
        const url = await getDownloadURL(snap.ref);
        newUploadedUrls.push(url);
@@ -365,7 +366,8 @@ const submitSpot = async () => {
 
     let gpxDownloadUrl = form.gpxUrl;
     if (gpxFile.value) {
-      const gpxRef = storageRef(storage, `spots/gpx/${auth.currentUser.uid}_${Date.now()}.gpx`);
+      // [SECURE] Upload ke folder user sendiri
+      const gpxRef = storageRef(storage, `uploads/${auth.currentUser.uid}/spots/gpx/${Date.now()}.gpx`);
       const snap = await uploadBytes(gpxRef, gpxFile.value);
       gpxDownloadUrl = await getDownloadURL(snap.ref);
     }

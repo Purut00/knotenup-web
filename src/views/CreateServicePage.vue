@@ -292,7 +292,7 @@ const submitService = async () => {
   if (rawFiles.value.length === 0) return alert("Sila upload gambar.");
 
   try {
-    const uploadedUrls = await uploadMultipleImages(rawFiles.value, `services/${auth.currentUser.uid}_${Date.now()}`);
+    const uploadedUrls = await uploadMultipleImages(rawFiles.value, `uploads/${auth.currentUser.uid}/services/${Date.now()}`);
     
     await createService({
       ownerId: auth.currentUser.uid,

@@ -360,7 +360,7 @@ const submitForm = async () => {
   if (isSpam(`${form.title} ${form.description}`)) return alert("Input dilarang.");
 
   try {
-    const uploadedUrls = await uploadMultipleImages(rawFiles.value, `trips/${auth.currentUser.uid}_${Date.now()}`);
+    const uploadedUrls = await uploadMultipleImages(rawFiles.value, `uploads/${auth.currentUser.uid}/trips/${Date.now()}`);
     const finalLoc = locationType.value === 'malaysia' ? `${form.placeName}, ${form.state}` : form.overseasLocation;
     
     // Create Trip using Composable

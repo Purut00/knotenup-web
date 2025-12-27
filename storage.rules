@@ -3,17 +3,29 @@ rules_version = '2';
 // Perhatikan baris ini: Mesti 'firebase.storage', BUKAN 'cloud.firestore'
 service firebase.storage {
   match /b/{bucket}/o {
+    // 1. PUBLIC READ (Images are public)
     match /{allPaths=**} {
-      // 1. Benarkan sesiapa sahaja MELIHAT gambar (Read)
       allow read: if true;
+    }
 
-      // 2. Benarkan upload/delete HANYA jika user semak mime type (Write)
-      // Allow write if authenticated AND (delete OR (create/update AND is image))
-      allow write: if request.auth != null && (
-        request.method == 'delete' || 
-        request.resource.contentType.matches('image/.*') || 
-        request.resource.contentType.matches('application/gpx+xml')
-      );
+    // 2. USER UPLOADS (Strict enforcement)
+    // Path: /uploads/{userId}/{...}
+    match /uploads/{userId}/{allPaths=**} {
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && request.resource.size < 5 * 1024 * 1024 // Max 5MB
+                   && (
+                     request.resource.contentType.matches('image/.*') || 
+                     request.resource.contentType.matches('application/gpx+xml')
+                   );
+    }
+
+    // 3. ADMIN BANNERS (Admin only)
+    match /banners/{allPaths=**} {
+      allow write: if request.auth != null 
+                   && request.auth.token.admin == true
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
     }
   }
 }

@@ -14,9 +14,15 @@ service cloud.firestore {
     // --- RULES ---
 
     // 1. USERS
+    // 1. USERS
     match /users/{userId} {
-      allow read: if true;
-      allow create, update: if isOwner(userId);
+      allow read: if true; // Public profile
+      allow create, update: if isOwner(userId); // Owner can edit profile
+
+      // [NEW] Private Data Subcollection - STRICTLY OWNER ONLY
+      match /private_data/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // 2. TRIPS

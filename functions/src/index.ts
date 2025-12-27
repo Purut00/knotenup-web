@@ -1,98 +1,93 @@
-import {onDocumentCreated} from "firebase-functions/v2/firestore";
-import * as admin from "firebase-admin";
+/**
+ * Import function triggers from their respective submodules:
+ *
+ * import {onCall} from "firebase-functions/v2/https";
+ * import {onDocumentWritten} from "firebase-functions/v2/firestore";
+ *
+ * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ */
+
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import * as logger from "firebase-functions/logger";
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
-// Initialize App sekali sahaja
-if (admin.apps.length === 0) {
-  admin.initializeApp();
-}
-const db = admin.firestore();
+initializeApp();
+const db = getFirestore();
 
-// ==========================================
-// FUNCTION 1: POST BARU (Topik)
-// Ganjaran: +10 XP, +1 Post Count
-// Ciri: Ada Anti-Spam (Cooldown 60 saat)
-// ==========================================
-export const checkForumSpam = onDocumentCreated(
-  "forum_posts/{postId}",
+// List of forbidden words (Case-insensitive)
+const BANNED_WORDS = [
+  "casino", "gambling", "poker", "viagra", "cryptocurrency",
+  "bitcoin", "free money", "scam", "nude", "xxx"
+];
+
+// Utility: Sanitize HTML (Basic strip tags)
+const stripHtml = (text: string): string => {
+  return text.replace(/<[^>]*>?/gm, "");
+};
+
+// Cloud Function (V2): Check Forum Post on Create
+export const checkForumPost = onDocumentCreated(
+  {
+    document: "forum_posts/{postId}",
+    region: "asia-southeast1"
+  },
   async (event) => {
-    const snapshot = event.data;
-    if (!snapshot) return;
+    const snap = event.data;
+    if (!snap) return; // Deleted event?
 
-    const postData = snapshot.data();
-    const userId = postData.authorId;
+    const data = snap.data();
+    const postId = event.params.postId;
+    const { title, content, authorId } = data;
 
-    if (!userId) {
-      logger.warn(`Post ${event.params.postId} tiada authorId.`);
-      return;
+    // 1. SANITIZATION (Strip HTML)
+    const cleanTitle = stripHtml(title || "");
+    const cleanContent = stripHtml(content || "");
+
+    let isModified = false;
+    if (cleanTitle !== title || cleanContent !== content) {
+      logger.info(`Sanitizing HTML for post ${postId}`);
+      await snap.ref.update({ title: cleanTitle, content: cleanContent });
+      isModified = true;
     }
 
-    const userRef = db.collection("users").doc(userId);
+    // 2. SPAM FILTER (Banned Words)
+    const combinedText = (cleanTitle + " " + cleanContent).toLowerCase();
+    const hasSpam = BANNED_WORDS.some((word) => combinedText.includes(word));
 
-    try {
-      const userDoc = await userRef.get();
-
-      // Bypass error TypeScript 'any'
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const userData = userDoc.data() as any;
-
-      // Semak masa post terakhir untuk Anti-Spam
-      const now = new Date();
-      const lastPostTime = userData?.lastPostTime?.toDate();
-
-      if (lastPostTime) {
-        const diff = (now.getTime() - lastPostTime.getTime()) / 1000;
-
-        if (diff < 60) {
-          await snapshot.ref.delete();
-          logger.info(`SPAM: User ${userId} laju sangat. Post dipadam.`);
-          return;
-        }
-      }
-
-      // Update User: Masa, Jumlah Post dan XP
-      await userRef.update({
-        lastPostTime: admin.firestore.FieldValue.serverTimestamp(),
-        postCount: admin.firestore.FieldValue.increment(1),
-        xp: admin.firestore.FieldValue.increment(10),
-      });
-
-      logger.info(`Post Reward: User ${userId} (+10 XP).`);
-    } catch (error) {
-      logger.error("Error dalam checkForumSpam:", error);
+    if (hasSpam) {
+      logger.warn(`Spam detected in post ${postId} by user ${authorId}. Deleting.`);
+      await snap.ref.delete();
+      return; // Stop execution
     }
-  }
-);
 
-// ==========================================
-// FUNCTION 2: KOMEN BARU (Reply)
-// Ganjaran: +2 XP sahaja
-// Ciri: Simple, tiada semakan spam berat
-// ==========================================
-export const onNewComment = onDocumentCreated(
-  "forum_posts/{postId}/comments/{commentId}",
-  async (event) => {
-    const snapshot = event.data;
-    if (!snapshot) return;
+    // 3. RATE LIMITING (Max 3 posts per minute)
+    // Check user's posts in the last 60 seconds
+    const oneMinuteAgo = Timestamp.fromMillis(Date.now() - 60 * 1000);
 
-    const commentData = snapshot.data();
-    const userId = commentData.authorId;
+    const recentPostsSnapshot = await db.collection("forum_posts")
+      .where("authorId", "==", authorId)
+      .where("createdAt", ">", oneMinuteAgo)
+      .get();
 
-    // Pastikan komen ada authorId
-    if (!userId) return;
+    // The current post is likely included in the count depending on timing/indexes,
+    // but typically cloud functions fire slightly after.
+    // If we have > 3 recent posts (including potentially this one if query catches it, or others),
+    // let's be strict. If the query returns 3 OR MORE documents created in last minute,
+    // we assume this NEW one is the 4th+ or abuse.
+    // (Note: This query needs a composite index `authorId + createdAt`. Cloud Functions logs will warn if missing.)
 
-    const userRef = db.collection("users").doc(userId);
+    if (recentPostsSnapshot.size > 3) {
+      logger.warn(`Rate limit exceeded for user ${authorId}. Deleting post ${postId}.`);
+      await snap.ref.delete();
+      // Optional: Add warning to user (Requires a 'notifications' collection or similar mechanism)
+    }
 
-    try {
-      // Terus update XP tanpa perlu baca data user dulu (Jimat Read)
-      await userRef.update({
-        xp: admin.firestore.FieldValue.increment(2),
-      });
-
-      logger.info(`Comment Reward: User ${userId} (+2 XP).`);
-    } catch (error) {
-      // Error biasa: User doc mungkin tak wujud
-      logger.error(`Gagal bagi point komen ke user ${userId}:`, error);
+    // If all checks pass, and we purely sanitized, we are good.
+    if (isModified) {
+      logger.info(`Post ${postId} passed checks (Sanitized).`);
+    } else {
+      logger.info(`Post ${postId} passed checks.`);
     }
   }
 );
