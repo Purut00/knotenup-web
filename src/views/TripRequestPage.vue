@@ -72,7 +72,8 @@
                 <i class="fas fa-undo"></i>
                 </button>
 
-                <button @click="fixOldData" class="btn-icon-glass" title="Fix Data Lama">
+                <!-- MIGRATION UTIL -->
+                <button @click="handleFixData" class="btn-icon-glass" title="Fix Data Lama">
                 <i class="fas fa-tools"></i>
                 </button>
              </div>
@@ -104,7 +105,7 @@
                {{ req.category || 'Umum' }}
             </div>
 
-            <button v-if="isOwner(req.userId)" class="btn-delete-card" @click="deleteRequest(req.id)">
+            <button v-if="isOwner(req.userId)" class="btn-delete-card" @click="handleDelete(req.id)">
                <i class="fas fa-trash"></i>
             </button>
 
@@ -114,7 +115,7 @@
                  <img :src="req.userAvatar || 'https://i.pravatar.cc/150?img=3'" class="avatar-sm" />
                  <div class="user-meta">
                    <span class="username truncate">{{ req.userName }}</span>
-                   <span class="time-ago">{{ formatDate(req.createdAt) }}</span>
+                   <span class="time-ago">{{ req.dateString || 'Baru saja' }}</span>
                  </div>
               </div>
 
@@ -203,99 +204,38 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { auth, db } from '../firebaseConfig';
-import { 
-  collection, getDocs, deleteDoc, doc, updateDoc,
-  query, orderBy, where, collectionGroup 
-} from 'firebase/firestore'; 
+import { doc, getDoc } from 'firebase/firestore'; 
 import { onAuthStateChanged } from 'firebase/auth';
 import { ACTIVITY_CATEGORIES, MALAYSIA_STATES } from '../constants/data'; 
+import { useTripRequests } from '../composables/useTripRequests';
+import { fixOldDataMessages } from '../utils/migrations';
 import TripRequestCreateModal from '../components/trip_requests/TripRequestCreateModal.vue';
 import TripRequestOfferModal from '../components/trip_requests/TripRequestOfferModal.vue';
 import TripRequestViewOffersModal from '../components/trip_requests/TripRequestViewOffersModal.vue';
 
 const { t } = useI18n();
-const router = useRouter();
+const { requests, loading, fetchRequests, deleteRequest, hasOffered, isOwner } = useTripRequests();
 
 const showCreateModal = ref(false);
 const showOfferModal = ref(false);
 const showViewOffersModal = ref(false);
-
-const loading = ref(true);
 const isCurrentUserOrganizer = ref(false);
-const requests = ref<any[]>([]);
 const selectedRequest = ref<any>(null);
-
-// State baru untuk track offer pengguna semasa
-const myOfferedRequestIds = ref<Set<string>>(new Set());
 
 const searchQuery = ref('');
 const filterCategory = ref('');
 const filterState = ref(''); 
 
-const formatDate = (timestamp: any) => {
-  if (!timestamp) return 'Baru saja';
-  const date = timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date();
-  return date.toLocaleDateString("en-MY", { day: 'numeric', month: 'short' });
-};
-
-const isOwner = (reqUserId: string): boolean => {
-  return auth.currentUser ? auth.currentUser.uid === reqUserId : false;
-};
-
-const hasOffered = (req: any): boolean => {
-  const currentUser = auth.currentUser;
-  if (!currentUser) return false;
-  if (myOfferedRequestIds.value.has(req.id)) return true;
-  if (req.offeredBy && req.offeredBy.includes(currentUser.uid)) return true;
-  return false;
-};
-
-const fetchRequests = async () => {
-  loading.value = true;
-  try {
-    const q = query(
-      collection(db, "trip_requests"), 
-      where("status", "==", "open"),
-      orderBy("createdAt", "desc")
-    );
-    const querySnapshot = await getDocs(q);
-    const fetchedData: any[] = [];
-    querySnapshot.forEach((doc) => {
-         const data = doc.data();
-         let dateString = '';
-         if (data.date) dateString = new Date(data.date).toLocaleDateString("en-MY", { day: 'numeric', month: 'short', year: 'numeric' });
-         fetchedData.push({ id: doc.id, ...data, dateString });
-    });
-    requests.value = fetchedData;
-    
-    if (auth.currentUser) {
-       await fetchMyOffers(auth.currentUser.uid);
+const handleDelete = async (id: string) => {
+    if(confirm(t('common.confirmDelete'))) {
+        await deleteRequest(id);
     }
-  } catch (e) {
-    console.error("Error fetching requests:", e);
-  } finally {
-    loading.value = false;
-  }
 };
 
-const fetchMyOffers = async (userId: string) => {
-  try {
-    const q = query(collectionGroup(db, 'offers'), where('organizerId', '==', userId));
-    const querySnapshot = await getDocs(q);
-    myOfferedRequestIds.value.clear(); // Clear old
-    querySnapshot.forEach((docSnap) => {
-      const parent = docSnap.ref.parent.parent; 
-      // Firestore subcollection parent is null if root? No, 'trip_requests/{id}/offers'. Parent is {id}.
-      // .parent is CollectionReference 'offers'. .parent.parent is DocumentReference 'trip_requests/{id}'
-      if (parent) {
-         myOfferedRequestIds.value.add(parent.id);
-      }
-    });
-  } catch (e) {
-    console.log("CollectionGroup query perlu index. Jika error, status tawaran mungkin tak persist selepas refresh.");
-  }
+const handleFixData = async () => {
+    await fixOldDataMessages();
+    fetchRequests();
 };
 
 const openOfferModal = (req: any) => {
@@ -308,34 +248,15 @@ const openViewOffers = (req: any) => {
     showViewOffersModal.value = true;
 };
 
-const handleOffered = (reqId: string) => {
-    if (reqId) myOfferedRequestIds.value.add(reqId);
-    // Optionally fetchRequests() to update card counters if needed
-};
-
-const deleteRequest = async (id: string) => {
-  if (!confirm(t('common.confirmDelete'))) return;
-  try {
-    await deleteDoc(doc(db, "trip_requests", id));
-    requests.value = requests.value.filter(r => r.id !== id);
-  } catch (e) { alert(t('common.error')); }
+const handleOffered = () => {
+    // Optionally trigger refresh or local update
+    fetchRequests(); 
 };
 
 const resetFilters = () => {
     searchQuery.value = '';
     filterCategory.value = '';
     filterState.value = '';
-};
-
-// Fix data legacy (keep this util for now as requested by analysis to keep functionalities)
-const fixOldData = async () => {
-    if(!confirm("Fix old data?")) return;
-    const snap = await getDocs(collection(db, "trip_requests"));
-    snap.forEach(async d => {
-        if (!d.data().category) await updateDoc(d.ref, { category: 'Hiking' });
-    });
-    alert("Fix done");
-    fetchRequests();
 };
 
 const filteredRequests = computed(() => {
@@ -353,8 +274,6 @@ const filteredRequests = computed(() => {
 onMounted(() => {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // Cek jika organizer (simple check dari ID token claims atau user doc - here simplifying)
-        // In real app, check user role from DB
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists() && userDoc.data().role === 'organizer') {
             isCurrentUserOrganizer.value = true;

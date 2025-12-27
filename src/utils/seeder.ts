@@ -1,5 +1,5 @@
 import { db } from '../firebaseConfig';
-import { collection, addDoc, getDocs, query, where, writeBatch, doc } from 'firebase/firestore';
+import { collection, writeBatch, doc } from 'firebase/firestore';
 
 const MALAYSIAN_SPOTS = [
   // PAHANG
@@ -70,4 +70,9 @@ export async function seedSpots() {
     console.error("Seeding failed:", error);
     return { success: false, error };
   }
+}
+
+export async function seedRealSpots() {
+  alert("Real data import feature is under maintenance. Please use the default seeder.");
+  console.warn("seedRealSpots not implemented yet.");
 }

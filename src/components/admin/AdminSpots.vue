@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { db } from '../../firebaseConfig';
-import { collection, query, orderBy, limit, getDocs, startAfter, where, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, startAfter, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 
 const emit = defineEmits(['view-reports']);
 

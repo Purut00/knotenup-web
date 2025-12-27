@@ -122,7 +122,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Spot } from '../types';
 import { MALAYSIA_STATES } from '../constants/data';
 import { SPOT_CATEGORIES } from '../constants/spotData';
 import SpotCard from '../components/spot/SpotCard.vue';

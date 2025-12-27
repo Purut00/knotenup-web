@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { db } from '../firebaseConfig';
 import { collection, getDocs, getDoc, doc, query, where, orderBy, limit, startAfter, type QueryDocumentSnapshot } from 'firebase/firestore';
 import type { Spot } from '../types';
@@ -66,7 +66,7 @@ export function useSpots() {
                     spots.value = newSpots;
                 }
 
-                lastVisible.value = snap.docs[snap.docs.length - 1];
+                lastVisible.value = snap.docs[snap.docs.length - 1] || null;
                 if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
             } else {
                 allLoaded.value = true;
@@ -97,5 +97,37 @@ export function useSpots() {
         }
     };
 
-    return { spots, loading, loadingMore, error, allLoaded, fetchSpots, fetchSpotById };
+    const fetchRelatedTrips = async (spotId: string) => {
+        try {
+            const tripQ = query(
+                collection(db, "trips"),
+                where("spotId", "==", spotId),
+                where("status", "==", "open")
+            );
+            const tripSnap = await getDocs(tripQ);
+            return tripSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (e) {
+            console.error("Error fetching related trips", e);
+            return [];
+        }
+    };
+
+    const translateDescription = async (text: string, locale: string) => {
+        try {
+            const targetLang = locale === 'ms' ? 'ms' : 'en';
+            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=Autodetect|${targetLang}`);
+            const data = await response.json();
+            if (data.responseData && data.responseData.translatedText) {
+                return data.responseData.translatedText;
+            }
+            throw new Error("Translation failed");
+        } catch (e) {
+            throw e;
+        }
+    };
+
+    return {
+        spots, loading, loadingMore, error, allLoaded,
+        fetchSpots, fetchSpotById, fetchRelatedTrips, translateDescription
+    };
 }

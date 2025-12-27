@@ -52,7 +52,7 @@
                             <i class="fas fa-language"></i> 
                             <span class="text-xs ml-1" v-if="translating">...</span>
                          </button>
-                         <button class="btn-icon-glass text-red-400 hover:text-red-300" @click="reportSpot" title="Report">
+                         <button class="btn-icon-glass text-red-400 hover:text-red-300" @click="handleReport" title="Report">
                             <i class="fas fa-flag"></i>
                          </button>
                     </div>
@@ -215,7 +215,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n'; 
 import { auth, db } from '../firebaseConfig';
-import { doc, getDoc, collection, addDoc, query, where, serverTimestamp, onSnapshot, getDocs } from 'firebase/firestore'; 
+import { doc, addDoc, collection, serverTimestamp, getDoc } from 'firebase/firestore'; 
 import AuthorBadge from '../components/common/AuthorBadge.vue'; 
 import TripCard from '../components/trip/TripCard.vue';
 import SpotGallery from '../components/spots/SpotGallery.vue';
@@ -223,14 +223,16 @@ import SpotMap from '../components/spots/SpotMap.vue';
 import SpotReviews from '../components/spots/SpotReviews.vue';
 import SpotSuggestions from '../components/spots/SpotSuggestions.vue';
 import SpotHistory from '../components/spots/SpotHistory.vue';
+import { useSpots } from '../composables/useSpots';
 
 const { t, locale } = useI18n(); 
 const route = useRoute();
 const router = useRouter(); 
 const spotId = route.params.id as string;
 
+const { fetchSpotById, fetchRelatedTrips, translateDescription, loading } = useSpots();
+
 const spot = ref<any>(null);
-const loading = ref(true);
 const isAdmin = ref(false);
 const isOwner = ref(false); 
 const showHistory = ref(false);
@@ -238,7 +240,6 @@ const translatedDesc = ref('');
 const showingTranslation = ref(false);
 const translating = ref(false);
 const translationError = ref('');
-const ADMIN_EMAILS = ["knotenup@gmail.com", "admin@knotenup.com"];
 
 const relatedTrips = ref<any[]>([]); 
 
@@ -262,15 +263,15 @@ const toggleTranslation = async () => {
   if (!spot.value.description) return;
   translating.value = true; translationError.value = '';
   try {
-      const targetLang = locale.value === 'ms' ? 'ms' : 'en'; 
-      const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(spot.value.description)}&langpair=Autodetect|${targetLang}`);
-      const data = await response.json();
-      if (data.responseData && data.responseData.translatedText) {
-        translatedDesc.value = data.responseData.translatedText;
-        showingTranslation.value = true;
-      } else { throw new Error("Translation failed"); }
-  } catch (e) { console.error(e); translationError.value = t('spotDetail.translationError'); } 
-  finally { translating.value = false; }
+      const text = await translateDescription(spot.value.description, locale.value);
+      translatedDesc.value = text;
+      showingTranslation.value = true;
+  } catch (e) { 
+      console.error(e); 
+      translationError.value = t('spotDetail.translationError'); 
+  } finally { 
+      translating.value = false; 
+  }
 };
 
 const getLevelLabel = (level: string) => { if (!level) return ''; const key = level.toLowerCase(); return t(`components.${key}`) !== `components.${key}` ? t(`components.${key}`) : level; };
@@ -286,32 +287,34 @@ const getGuideLabel = (val: string) => {
 
 const goToProfile = (userId: string) => { if (userId) router.push(`/user/${userId}`); };
 
-const reportSpot = async () => { if (!auth.currentUser) return alert(t('common.loginToReport')); const reason = prompt(t('spotDetail.reportReasonPrompt')); if (reason) { await addDoc(collection(db, "reports"), { targetId: spotId, targetType: 'spot', reason: reason, reportedBy: auth.currentUser.uid, createdAt: serverTimestamp() }); alert(t('spotDetail.reportSuccess')); } };
+const handleReport = async () => { 
+    if (!auth.currentUser) return alert(t('common.loginToReport')); 
+    const reason = prompt(t('spotDetail.reportReasonPrompt')); 
+    if (reason) { 
+        await addDoc(collection(db, "reports"), { targetId: spotId, targetType: 'spot', reason: reason, reportedBy: auth.currentUser.uid, createdAt: serverTimestamp() }); 
+        alert(t('spotDetail.reportSuccess')); 
+    } 
+};
 
 onMounted(async () => {
   try {
-    // Listen to real-time updates for the spot document itself so that approved suggestions reflect immediately
-    onSnapshot(doc(db, "spots", spotId), (docSnap) => {
-        if (docSnap.exists()) {
-            spot.value = docSnap.data();
-            if (auth.currentUser && spot.value.contributorId === auth.currentUser.uid) {
-                isOwner.value = true;
-            }
+    const data = await fetchSpotById(spotId);
+    if(data) {
+        spot.value = data;
+        if (auth.currentUser && spot.value.contributorId === auth.currentUser.uid) {
+            isOwner.value = true;
         }
-    });
-
-    // Related trips (Fetch once)
-    const tripQ = query(
-        collection(db, "trips"), 
-        where("spotId", "==", spotId), 
-        where("status", "==", "open") 
-    );
-    const tripSnap = await getDocs(tripQ);
-    relatedTrips.value = tripSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    if (auth.currentUser && ADMIN_EMAILS.includes(auth.currentUser.email!)) isAdmin.value = true;
+    }
     
-  } catch (e) { console.error(e); } finally { loading.value = false; }
+    relatedTrips.value = await fetchRelatedTrips(spotId);
+
+    // Check Admin (Ideally this should also be a composable or global state)
+    if (auth.currentUser) {
+        const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+        if (userDoc.exists() && userDoc.data().role === 'admin') isAdmin.value = true;
+    }
+    
+  } catch (e) { console.error(e); } 
 });
 </script>
 

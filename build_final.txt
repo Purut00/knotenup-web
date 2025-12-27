@@ -1,0 +1,11 @@
+
+> knotenup-web@0.0.0 build
+> vue-tsc -b && vite build
+
+src/components/common/LocationPicker.vue(40,39): error TS6133: 'nextTick' is declared but its value is never read.
+src/components/common/LocationPicker.vue(40,49): error TS6133: 'watch' is declared but its value is never read.
+src/components/spots/SpotGallery.vue(87,7): error TS6133: 'props' is declared but its value is never read.
+src/components/spots/SpotHistory.vue(32,15): error TS6133: 'onMounted' is declared but its value is never read.
+src/components/spots/SpotReviews.vue(91,7): error TS6133: 'averageRating' is declared but its value is never read.
+src/components/trip_requests/TripRequestCreateModal.vue(79,7): error TS6133: 'props' is declared but its value is never read.
+src/composables/useTrips.ts(3,61): error TS6133: 'where' is declared but its value is never read.

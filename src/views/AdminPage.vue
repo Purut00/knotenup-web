@@ -141,7 +141,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db, storage } from '../firebaseConfig'; 
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, getDocs, doc, getDoc, setDoc, updateDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, updateDoc, query, where } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 // COMPONENTS
