@@ -42,6 +42,7 @@
 import { ref, reactive } from 'vue';
 import { auth, db } from '../../firebaseConfig';
 import { collection, addDoc, updateDoc, doc, serverTimestamp, arrayUnion } from 'firebase/firestore';
+import { getEffectiveUserProfile } from '../../utils/userProfile';
 
 const props = defineProps<{
   visible: boolean;
@@ -64,14 +65,17 @@ const submit = async () => {
   submitting.value = true;
   try {
     const reqId = props.request.id;
+    // 0. Get effective profile
+    const userProfile = await getEffectiveUserProfile(auth.currentUser);
+
     // 1. Tambah offer ke subcollection
     await addDoc(collection(db, "trip_requests", reqId, "offers"), {
        offeredPrice: form.price,
        message: form.message,
        contact: form.contact,
        organizerId: auth.currentUser.uid,
-       organizerName: auth.currentUser.displayName || 'Organizer',
-       organizerAvatar: auth.currentUser.photoURL || '',
+       organizerName: userProfile.name,
+       organizerAvatar: userProfile.avatar,
        createdAt: serverTimestamp(),
        status: 'pending'
     });

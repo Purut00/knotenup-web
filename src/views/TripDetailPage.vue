@@ -139,10 +139,10 @@
 
             <div class="glass-panel organizer-card" @click="$router.push(`/user/${trip.organizerId}`)">
               <div class="flex items-center gap-4">
-                <img :src="trip.organizerImage || 'https://i.pravatar.cc/150?img=3'" class="org-avatar" />
+                <img :src="(organizer && organizer.avatar) || trip.organizerImage || 'https://i.pravatar.cc/150?img=3'" class="org-avatar" />
                 <div class="org-info">
                   <small class="text-gray-400 text-xs uppercase tracking-wider">{{ t('trip.organizedBy') }}</small>
-                  <h4>{{ trip.organizerName }}</h4>
+                  <h4>{{ (organizer && (organizer.name || organizer.fullName)) || trip.organizerName }}</h4>
                 </div>
               </div>
               <button class="btn-view-profile">{{ t('trip.viewProfile') }}</button>

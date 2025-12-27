@@ -112,11 +112,15 @@
             <div class="card-body">
               
               <div class="user-row mb-3">
-                 <img :src="req.userAvatar || 'https://i.pravatar.cc/150?img=3'" class="avatar-sm" />
-                 <div class="user-meta">
-                   <span class="username truncate">{{ req.userName }}</span>
-                   <span class="time-ago">{{ req.dateString || 'Baru saja' }}</span>
-                 </div>
+                 <AuthorBadge 
+                    :userId="req.userId" 
+                    :fallbackName="req.userName" 
+                    :fallbackAvatar="req.userAvatar"
+                 >
+                    <template #subtext>
+                       <span class="time-ago">{{ req.dateString || 'Baru saja' }}</span>
+                    </template>
+                 </AuthorBadge>
               </div>
 
               <h3 class="req-title mb-2">Ke: {{ req.destination }}</h3>
@@ -213,6 +217,7 @@ import { fixOldDataMessages } from '../utils/migrations';
 import TripRequestCreateModal from '../components/trip_requests/TripRequestCreateModal.vue';
 import TripRequestOfferModal from '../components/trip_requests/TripRequestOfferModal.vue';
 import TripRequestViewOffersModal from '../components/trip_requests/TripRequestViewOffersModal.vue';
+import AuthorBadge from '../components/common/AuthorBadge.vue';
 
 const { t } = useI18n();
 const { requests, loading, fetchRequests, deleteRequest, hasOffered, isOwner } = useTripRequests();
