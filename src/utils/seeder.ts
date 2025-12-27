@@ -72,7 +72,91 @@ export async function seedSpots() {
   }
 }
 
+import MOUNTAIN_DATA from './gunung_siap_negeri.json';
+import { GeoPoint } from 'firebase/firestore';
+
 export async function seedRealSpots() {
-  alert("Real data import feature is under maintenance. Please use the default seeder.");
-  console.warn("seedRealSpots not implemented yet.");
+  console.log("Starting real data seeding...");
+
+  // Confirmation
+  if (!confirm(`Are you sure you want to import ${MOUNTAIN_DATA.length} spots? This might take a while.`)) return;
+
+  const BATCH_SIZE = 450; // Firestore limit is 500
+  const chunks = [];
+
+  // Break into chunks
+  for (let i = 0; i < MOUNTAIN_DATA.length; i += BATCH_SIZE) {
+    chunks.push(MOUNTAIN_DATA.slice(i, i + BATCH_SIZE));
+  }
+
+  let totalProcessed = 0;
+  let totalBatches = chunks.length;
+
+  console.log(`Processing ${totalBatches} batches...`);
+
+  try {
+    for (let i = 0; i < chunks.length; i++) {
+      const batch = writeBatch(db);
+      const chunk = chunks[i];
+      if (!chunk) continue;
+
+      chunk.forEach((item: any) => {
+        const newDocRef = doc(collection(db, "spots"));
+
+        // Parse Height
+        let heightVal: number | null = item.ele ? parseInt(item.ele) : null;
+        if (heightVal !== null && isNaN(heightVal)) heightVal = null;
+
+        // Parse Lat/Lng
+        const lat = parseFloat(item["@lat"]);
+        const lng = parseFloat(item["@lon"]);
+
+        // Basic validation
+        if (!item.name || isNaN(lat) || isNaN(lng)) return;
+
+        const spotData = {
+          name: item.name,
+          name_lowercase: item.name.toLowerCase().trim(),
+          state: item.state || "Unknown",
+          height: heightVal,
+          location: new GeoPoint(lat, lng),
+          latitude: lat.toString(), // Keep string version for form compatibility
+          longitude: lng.toString(),
+
+          // Defaults
+          difficulty: "Moderate",
+          permit: "Unknown",
+          guideRequired: "Unknown",
+          description: "Imported from Mountain Database",
+          images: [],
+          tips: "",
+          parking: "",
+
+          // Meta
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          contributorName: "Admin Seeder",
+          contributorId: "system_admin",
+          isSystemSeeded: true, // Marker for cleanup if needed
+
+          rating: 0,
+          reviewCount: 0
+        };
+
+        batch.set(newDocRef, spotData);
+      });
+
+      await batch.commit();
+      totalProcessed += chunk.length;
+      console.log(`Committed batch ${i + 1}/${totalBatches}`);
+    }
+
+    alert(`Successfully imported ${totalProcessed} spots!`);
+    return { success: true, count: totalProcessed };
+
+  } catch (error) {
+    console.error("Seeding failed:", error);
+    alert("Seeding failed. Check console.");
+    return { success: false, error };
+  }
 }
