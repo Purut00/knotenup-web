@@ -15,6 +15,7 @@
         <div class="hidden md:flex items-center space-x-8">
           <router-link to="/" class="nav-link">{{ t('navbar.home') }}</router-link>
           <router-link to="/trips" class="nav-link">{{ t('navbar.trips') }}</router-link>
+          <router-link to="/buddies" class="nav-link">{{ t('navbar.buddy') }}</router-link>
           <router-link to="/forum" class="nav-link">{{ t('navbar.forum') }}</router-link>
           <router-link to="/service" class="nav-link">{{ t('navbar.services') }}</router-link>
           <router-link to="/spots" class="nav-link">{{ t('navbar.spots') }}</router-link>
@@ -26,6 +27,10 @@
         <div class="hidden md:flex items-center space-x-4">
           <router-link v-if="userRole === 'organizer'" to="/create-trip" class="btn btn-primary text-xs px-4 py-2">
             <i class="fas fa-plus mr-2"></i> {{ t('navbar.createTrip') }}
+          </router-link>
+
+          <router-link v-if="currentUser" to="/requests" class="btn btn-secondary text-xs px-4 py-2">
+             {{ t('navbar.requests') }}
           </router-link>
           
           <div class="flex items-center gap-3">
@@ -96,6 +101,8 @@
       <div class="px-4 pt-2 pb-6 space-y-2 flex flex-col">
         <router-link to="/" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.home') }}</router-link>
         <router-link to="/trips" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.trips') }}</router-link>
+        <router-link to="/buddies" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.buddy') }}</router-link>
+        <router-link v-if="currentUser" to="/requests" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.requests') }}</router-link>
         <router-link to="/forum" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.forum') }}</router-link>
         <router-link to="/service" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.services') }}</router-link>
 

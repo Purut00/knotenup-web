@@ -52,7 +52,25 @@
     "selectState": "选择州属",
     "submit": "提交",
     "uploading": "上传中...",
-    "view": "查看"
+    "view": "查看",
+    "processing": "处理中...",
+    "compact": "紧凑",
+    "full": "完整",
+    "switchToFull": "切换到完整网格",
+    "switchToCompact": "切换到紧凑网格"
+  },
+  "navbar": {
+    "home": "首页",
+    "trips": "行程",
+    "requests": "行程请求",
+    "forum": "论坛",
+    "services": "服务",
+    "spots": "景点",
+    "profile": "个人资料",
+    "login": "登录",
+    "logout": "登出",
+    "createTrip": "创建行程",
+    "buddy": "伙伴"
   },
   "components": {
     "allLevels": "所有等级",
@@ -109,13 +127,64 @@
     "successMsg": "服务宣传成功！",
     "title": "宣传服务",
     "uploadText": "点击上传",
-    "waLabel": "WhatsApp 号码 (无横杠)"
+    "waLabel": "WhatsApp 号码 (无横杠)",
+    "checkIn": "入住时间",
+    "checkOut": "退房时间",
+    "guideRatio": "向导比例",
+    "certification": "证书 / 执照",
+    "vehicleType": "车辆类型",
+    "coverageArea": "覆盖区域",
+    "maxPax": "最大人数 / 容量",
+    "equipmentList": "设备清单",
+    "pickupLocation": "接送地点",
+    "priceDisplayLabel": "价格显示 (简略)",
+    "serviceImages": "服务图片",
+    "ratioPlaceholder": "例如: 1:7",
+    "certPlaceholder": "WFA, 向导证...",
+    "vehiclePlaceholder": "例如: Hilux 4x4",
+    "waPlaceholder": "123456789",
+    "options": {
+      "day": "每天"
+    },
+    "stepLabels": {
+      "basic": "基本信息",
+      "details": "详情",
+      "gallery": "画廊"
+    },
+    "section1Header": "服务基本信息",
+    "section2Header": "{category} 详情",
+    "section3Header": "画廊与联系",
+    "imagesCount": "服务图片 ({count} / 10)",
+    "addBtn": "添加",
+    "fullDescLabel": "完整描述",
+    "fullDescPlaceholder": "描述您的服务亮点...",
+    "whatsappLabelSimple": "WhatsApp 号码"
   },
   "createSpot": {
     "addPhoto": "添加",
     "alerts": {
       "fillNameState": "请先填写景点名称和州属。",
-      "suggestionSent": "更新建议已发送！需要 5 个验证。"
+      "suggestionSent": "更新建议已发送！需要 5 个验证。",
+      "maxImages": "最多允许 10 张图片。",
+      "fileTooLarge": "文件 {name} 太大 (最大 5MB)。",
+      "spam": "输入包含禁止词语。",
+      "updateSuccess": "更新成功！",
+      "createSuccess": "景点添加成功！"
+    },
+    "distanceLabel": "距离 (KM)",
+    "durationLabel": "预计时长",
+    "durationPlaceholder": "例如：4 小时 / 2天1夜",
+    "distancePlaceholder": "例如：5.2",
+    "mapsLinkLabel": "Google Maps 登山口链接 (可选)",
+    "galleryInfoTitle": "画廊与详细信息",
+    "submitUpdate": "保存更改",
+    "submitCreate": "🚀 提交景点",
+    "chooseFile": "选择文件",
+    "options": {
+      "unknown": "未知",
+      "notRequired": "不需要",
+      "required": "需要",
+      "selectState": "选择州属"
     },
     "descLabel": "描述",
     "descPlaceholder": "告诉我们更多关于这个地方...",
@@ -139,6 +208,7 @@
     "heightLabel": "高度",
     "heightPlaceholder": "高度（米）",
     "imagesLabel": "画廊",
+    "imagesLabelLimit": "画廊 (最多 10 张)",
     "infoBox": {
       "gpx": "🗺️ GPX 文件对他人非常有帮助。",
       "name": "📍 确保地点名称准确。",
@@ -188,6 +258,68 @@
     "viaLabel": "途经 / 登山口",
     "viaPlaceholder": "例如：途经 Jungle Lodge"
   },
+  "createPostPage": {
+    "editTitle": "✏️ 更新话题",
+    "createTitle": "✍️ 创建新话题",
+    "sub": "在这里分享您的经验、问题或有趣的提示。",
+    "titleLabel": "讨论标题",
+    "titlePlaceholder": "例如：2024年京那巴鲁山之旅...",
+    "categoryLabel": "类别",
+    "categoryPlaceholder": "- 请选择类别 -",
+    "contentLabel": "内容",
+    "contentPlaceholder": "在这里写下更多详情...",
+    "wordCount": "字",
+    "cancel": "取消",
+    "processing": "处理中...",
+    "save": "保存更改",
+    "publish": "发布话题",
+    "alerts": {
+      "notFound": "未找到话题！",
+      "login": "请登录以发布。",
+      "fillAll": "请填写所有信息。",
+      "spam": "⚠️ 抱歉：您的帖子包含禁止词汇 (\"{word}\")。请遵守社区规范。",
+      "updateSuccess": "话题更新成功！",
+      "publishSuccess": "话题发布成功！",
+      "error": "处理请求失败。请重试。"
+    }
+  },
+  "createBuddy": {
+    "title": "寻找登山伙伴 (Buddy) 🥾",
+    "sub": "\"不需要向导，只需要朋友。一起来拼车吧！\"",
+    "sectionTitle": "休闲行程信息",
+    "locationLabel": "地点 / 山峰",
+    "locationPlaceholder": "例如: Gunung Datuk, Rembau",
+    "dateLabel": "日期",
+    "timeLabel": "集合时间",
+    "paceLabel": "预计配速",
+    "options": {
+      "pace": {
+        "relaxed": "休闲 (拍照打卡)",
+        "moderate": "中等 (训练)",
+        "fast": "快速 / 越野跑"
+      },
+      "transport": {
+        "self": "我独自前往",
+        "driver": "我有车 (有空位)",
+        "passenger": "我找顺风车 (分摊油费)"
+      }
+    },
+    "transportLabel": "交通状况 (拼车)",
+    "whatsappLabel": "WhatsApp 群组 / 个人链接",
+    "whatsappPlaceholder": "https://chat.whatsapp.com/...",
+    "whatsappHint": "*此链接将对感兴趣的人可见。",
+    "notesLabel": "额外备注 (可选)",
+    "notesPlaceholder": "例如: 在 Petronas 集合...",
+    "declaration": "免责声明与责任: 我明白这是一个没有官方向导的私人行程 (\"Open Trip\")。我完全对自己的安全及带去的朋友负责。本平台仅作为寻找伙伴的媒介。",
+    "submitBtn": "🚀 发布 Open Trip",
+    "loadingBtn": "发布中...",
+    "alerts": {
+      "login": "请先登录！",
+      "fillRequired": "请填写必要信息 (地点, 日期, WhatsApp 链接)。",
+      "success": "Buddy Trip 发布成功！",
+      "error": "创建行程失败。"
+    }
+  },
   "createTrip": {
     "basicInfo": "基本信息",
     "calculatedDuration": "时长（自动）",
@@ -201,6 +333,7 @@
     "desc": "完整描述",
     "descPlaceholder": "告诉我们关于这个行程...",
     "duration": "时长",
+    "durationFormat": "{days}天 {nights}夜",
     "endDate": "结束日期",
     "fullLocation": "完整地点",
     "galleryLabel": "行程画廊（最多 5 张）",
@@ -247,7 +380,22 @@
     "tipsPlaceholder": "例如：带充电宝、合适的鞋子...",
     "title": "创建新行程",
     "tripTitle": "行程标题",
-    "uploadImages": "上传图片"
+    "uploadImages": "上传图片",
+    "stateRequired": "州属 (必填)",
+    "specificPlace": "具体地点",
+    "fullLocation": "完整地点",
+    "tripImages": "行程图片 (最多 5 张)",
+    "spotLink": "关联景点信息 (Spot)",
+    "spotDetected": "✨ 已检测到景点!",
+    "noSpots": "未列出景点。",
+    "linkPrivacyNote": "*此链接仅对已加入的参与者可见。",
+    "spotHint": "*关联景点信息有助于参与者了解详情。",
+    "groupLinkPlaceholder": "https://chat.whatsapp.com/...",
+    "options": {
+      "easy": "简单",
+      "moderate": "中等",
+      "hard": "困难"
+    }
   },
   "directory": {
     "advertiseBtn": "📢 宣传您的服务",
@@ -325,24 +473,14 @@
     "searchPlaceholder": "搜索活动、地点或行程...",
     "tripSectionTitle": "受欢迎的",
     "viewAll": "查看全部",
-    "viewAllTrips": "查看所有行程"
+    "viewAllTrips": "查看所有行程",
+    "popularTripsHeader": "热门行程"
   },
   "levels": {
     "easy": "轻松 (简单)",
     "hard": "硬核 (困难)",
-    "moderate": "中等"
-  },
-  "navbar": {
-    "createTrip": "创建行程",
-    "forum": "论坛",
-    "home": "首页",
-    "login": "登录",
-    "logout": "登出",
-    "profile": "个人资料",
-    "requests": "行程请求",
-    "services": "服务",
-    "spots": "景点",
-    "trips": "行程"
+    "moderate": "中等",
+    "extreme": "⚫ 极限 (Extreme)"
   },
   "profile": {
     "bio": "个人简介",

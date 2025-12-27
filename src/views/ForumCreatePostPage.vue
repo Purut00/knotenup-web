@@ -13,9 +13,9 @@
       <div class="glass-form-container fade-up">
         <div class="header-section text-center mb-8">
             <h2 class="text-3xl font-bold text-white mb-2">
-                {{ isEditing ? '✏️ Kemaskini Topik' : '✍️ Cipta Topik Baru' }}
+                {{ isEditing ? t('createPostPage.editTitle') : t('createPostPage.createTitle') }}
             </h2>
-            <p class="text-gray-400 text-sm">Kongsi pengalaman, soalan, atau tips menarik anda di sini.</p>
+            <p class="text-gray-400 text-sm">{{ t('createPostPage.sub') }}</p>
         </div>
 
         <!-- FORM -->
@@ -23,21 +23,21 @@
             
             <!-- TAJUK -->
             <div class="form-group">
-                <label class="text-gray-300 font-semibold mb-2 block">Tajuk Perbincangan</label>
+                <label class="text-gray-300 font-semibold mb-2 block">{{ t('createPostPage.titleLabel') }}</label>
                 <input 
                     type="text" 
                     v-model="form.title" 
                     class="glass-input" 
-                    placeholder="Contoh: Trip ke Gunung Kinabalu 2024..." 
+                    :placeholder="t('createPostPage.titlePlaceholder')" 
                 />
             </div>
 
             <!-- KATEGORI -->
             <div class="form-group">
-                <label class="text-gray-300 font-semibold mb-2 block">Kategori</label>
+                <label class="text-gray-300 font-semibold mb-2 block">{{ t('createPostPage.categoryLabel') }}</label>
                 <div class="select-wrapper">
                     <select v-model="form.category" class="glass-input">
-                        <option disabled value="">- Sila Pilih Kategori -</option>
+                        <option disabled value="">{{ t('createPostPage.categoryPlaceholder') }}</option>
                         <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
                             <option v-for="item in group.items" :key="item" :value="item">{{ item }}</option>
                         </optgroup>
@@ -48,16 +48,16 @@
 
             <!-- KANDUNGAN -->
             <div class="form-group">
-                <label class="text-gray-300 font-semibold mb-2 block">Isi Kandungan</label>
+                <label class="text-gray-300 font-semibold mb-2 block">{{ t('createPostPage.contentLabel') }}</label>
                 <textarea 
                     v-model="form.content" 
                     rows="8" 
                     class="glass-input" 
-                    placeholder="Tulis butiran lanjut di sini..."
+                    :placeholder="t('createPostPage.contentPlaceholder')"
                 ></textarea>
                 <div class="text-right mt-1">
                     <small :class="wordCount > 500 ? 'text-red-400' : 'text-gray-500'">
-                        {{ wordCount }} patah perkataan
+                        {{ wordCount }} {{ t('createPostPage.wordCount') }}
                     </small>
                 </div>
             </div>
@@ -65,11 +65,11 @@
             <!-- ACTIONS -->
             <div class="form-actions mt-8 flex gap-4">
                 <button @click="$router.back()" class="btn-cancel">
-                    Batal
+                    {{ t('createPostPage.cancel') }}
                 </button>
                 <button @click="submitPost" class="btn-submit" :disabled="loading">
-                    <span v-if="loading"><i class="fas fa-spinner fa-spin mr-2"></i> Memproses...</span>
-                    <span v-else>{{ isEditing ? 'Simpan Perubahan' : 'Terbitkan Topik' }}</span>
+                    <span v-if="loading"><i class="fas fa-spinner fa-spin mr-2"></i> {{ t('createPostPage.processing') }}</span>
+                    <span v-else>{{ isEditing ? t('createPostPage.save') : t('createPostPage.publish') }}</span>
                 </button>
             </div>
 
@@ -82,14 +82,15 @@
 <script setup lang="ts">
 import { reactive, ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-// import { useI18n } from 'vue-i18n'; // Optional: Boleh uncomment jika guna i18n
+import { useI18n } from 'vue-i18n'; 
 import { ACTIVITY_CATEGORIES } from '../constants/data';
 import { auth, db } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { isSpam, getDetectedSpamWord } from '../utils/spamFilter';
 import { checkRateLimit } from '../utils/rateLimiter';
+import { getEffectiveUserProfile } from '../utils/userProfile';
 
-// const { t } = useI18n(); 
+const { t } = useI18n(); 
 const router = useRouter();
 const route = useRoute();
 const loading = ref(false);
@@ -116,7 +117,7 @@ onMounted(async () => {
         form.category = data.category;
         form.content = data.content;
       } else {
-        alert("Topik tidak dijumpai!");
+        alert(t('createPostPage.alerts.notFound'));
         router.push('/forum');
       }
     } catch (e) {
@@ -128,7 +129,7 @@ onMounted(async () => {
 });
 
 const submitPost = async () => {
-  if (!auth.currentUser) return alert("Sila log masuk untuk membuat hantaran.");
+  if (!auth.currentUser) return alert(t('createPostPage.alerts.login'));
 
   // 1. RATE LIMIT CHECK
   const limitCheck = checkRateLimit('create_post'); 
@@ -138,13 +139,13 @@ const submitPost = async () => {
   }
 
   // 2. EMPTY FIELDS CHECK
-  if(!form.title || !form.category || !form.content) return alert("Sila isi semua maklumat.");
+  if(!form.title || !form.category || !form.content) return alert(t('createPostPage.alerts.fillAll'));
 
   // 3. SPAM FILTER CHECK (PENTING: Check sebelum hantar ke DB!)
   const combinedText = `${form.title} ${form.content}`;
   if (isSpam(combinedText)) {
     const badWord = getDetectedSpamWord(combinedText);
-    alert(`⚠️ MAAF: Post anda mengandungi perkataan yang dilarang ("${badWord}"). Sila patuhi etika komuniti.`);
+    alert(t('createPostPage.alerts.spam', { word: badWord }));
     return; // Stop execution sini
   }
 
@@ -160,29 +161,32 @@ const submitPost = async () => {
         updatedAt: serverTimestamp(),
         isEdited: true
       });
-      alert("Topik berjaya dikemaskini!");
+      alert(t('createPostPage.alerts.updateSuccess'));
     } else {
       // MODE CREATE
+      // Get effective profile (Firestore > Auth)
+      const userProfile = await getEffectiveUserProfile(auth.currentUser);
+
       await addDoc(collection(db, "forum_posts"), {
         title: form.title,
         category: form.category,
         content: form.content,
         authorId: auth.currentUser.uid,
-        author: auth.currentUser.displayName || 'Anonymous',
-        authorAvatar: auth.currentUser.photoURL || '',
+        author: userProfile.name,
+        authorAvatar: userProfile.avatar,
         createdAt: serverTimestamp(),
         votes: 0,
         commentCount: 0,
         views: 0
       });
-      alert("Topik berjaya diterbitkan!");
+      alert(t('createPostPage.alerts.publishSuccess'));
     }
     
     router.push('/forum'); // Redirect balik ke forum
 
   } catch (error) {
     console.error("Error:", error);
-    alert("Gagal memproses permintaan. Sila cuba lagi.");
+    alert(t('createPostPage.alerts.error'));
   } finally {
     loading.value = false;
   }

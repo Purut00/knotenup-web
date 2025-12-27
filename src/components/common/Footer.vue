@@ -31,8 +31,8 @@
         <div>
           <h3 class="text-white font-bold uppercase tracking-wider text-sm mb-4">{{ t('footer.support') }}</h3>
           <ul class="space-y-2 text-sm">
-            <li><router-link to="/terms" class="hover:text-primary-400 transition-colors">{{ t('footer.terms') || 'Terma & Syarat' }}</router-link></li>
-            <li><router-link to="/privacy" class="hover:text-primary-400 transition-colors">{{ t('footer.privacy') || 'Dasar Privasi' }}</router-link></li>
+            <li><router-link to="/terms" class="hover:text-primary-400 transition-colors">{{ t('footer.terms') }}</router-link></li>
+            <li><router-link to="/privacy" class="hover:text-primary-400 transition-colors">{{ t('footer.privacy') }}</router-link></li>
             <li><a href="#" class="hover:text-primary-400 transition-colors">{{ t('footer.help') }}</a></li>
             <li><a href="#" class="hover:text-primary-400 transition-colors">{{ t('footer.contactAdmin') }}</a></li>
           </ul>

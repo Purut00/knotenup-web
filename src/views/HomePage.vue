@@ -7,7 +7,7 @@
         <div class="hero-glow-orange"></div>
 
         <h1 class="hero-title animate-fade-in-up text-white font-extrabold text-5xl md:text-6xl mb-5 leading-tight">
-          Terokai Keindahan<br>
+          {{ t('home.heroPrefix') }}<br>
           <span class="text-gradient-animate">{{ t('home.heroHighlight') || 'Alam Semulajadi' }}</span>
         </h1>
         <p class="hero-subtitle animate-fade-in-up text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light" style="animation-delay: 0.1s;">
@@ -104,15 +104,15 @@
       <section class="section-container mb-20">
         <div class="section-header flex justify-between items-center mb-8 border-b border-white/5 pb-4">
           <div class="flex items-center gap-4">
-            <h3 class="section-title text-3xl font-bold text-white"><span class="text-gradient-animate">Trip Popular</span></h3>
+            <h3 class="section-title text-3xl font-bold text-white"><span class="text-gradient-animate">{{ t('home.popularTripsHeader') }}</span></h3>
             
             <button 
               @click="isCompact = !isCompact"
               class="toggle-view-btn bg-white/5 border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg hover:bg-white/10 hover:text-white transition flex items-center"
-              :title="isCompact ? 'Tukar ke Grid Penuh' : 'Tukar ke Grid Ringkas'"
+              :title="isCompact ? t('common.switchToFull') : t('common.switchToCompact')"
             >
               <i :class="isCompact ? 'fas fa-border-all' : 'fas fa-list-ul'"></i>
-              <span class="ml-2 text-xs font-medium hidden sm:inline">{{ isCompact ? 'Compact' : 'Full' }}</span>
+              <span class="ml-2 text-xs font-medium hidden sm:inline">{{ isCompact ? t('common.compact') : t('common.full') }}</span>
             </button>
           </div>
 

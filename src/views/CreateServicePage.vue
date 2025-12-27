@@ -19,21 +19,21 @@
          <div class="flex flex-col items-center gap-2 transition-opacity duration-300" :class="{ 'opacity-100': currentStep >= 1, 'opacity-50': currentStep < 1 }">
             <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold bg-slate-900 transition-colors"
                  :class="currentStep > 1 ? 'border-purple-500 bg-purple-500 text-white' : 'border-purple-500 text-purple-500'">1</div>
-            <span class="text-xs font-bold uppercase tracking-wider">Info Asas</span>
+            <span class="text-xs font-bold uppercase tracking-wider">{{ t('createService.stepLabels.basic') }}</span>
          </div>
          <div class="w-16 h-0.5 mx-4 bg-white/10"></div>
          <!-- Step 2 -->
          <div class="flex flex-col items-center gap-2 transition-opacity duration-300" :class="{ 'opacity-100': currentStep >= 2, 'opacity-50': currentStep < 2 }">
             <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold bg-slate-900 transition-colors"
                  :class="currentStep > 2 ? 'border-purple-500 bg-purple-500 text-white' : (currentStep === 2 ? 'border-orange-500 text-orange-500' : 'border-purple-500 text-purple-500')">2</div>
-            <span class="text-xs font-bold uppercase tracking-wider">Perincian</span>
+            <span class="text-xs font-bold uppercase tracking-wider">{{ t('createService.stepLabels.details') }}</span>
          </div>
          <div class="w-16 h-0.5 mx-4 bg-white/10"></div>
          <!-- Step 3 -->
          <div class="flex flex-col items-center gap-2 transition-opacity duration-300" :class="{ 'opacity-100': currentStep >= 3, 'opacity-50': currentStep < 3 }">
             <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold bg-slate-900 transition-colors"
                  :class="currentStep === 3 ? 'border-orange-500 text-orange-500' : 'border-purple-500 text-purple-500'">3</div>
-            <span class="text-xs font-bold uppercase tracking-wider">Galeri</span>
+            <span class="text-xs font-bold uppercase tracking-wider">{{ t('createService.stepLabels.gallery') }}</span>
          </div>
       </div>
 
@@ -41,24 +41,24 @@
         
         <!-- STEP 1 -->
         <div v-if="currentStep === 1">
-          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">Info Asas Servis</h2>
+          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createService.section1Header') }}</h2>
           
           <div class="mb-6">
             <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.nameLabel') || 'Nama Servis / Tempat' }}</label>
-            <input type="text" v-model="form.name" class="glass-input" placeholder="Cth: Tapak Khemah Sg. Chiling" />
+            <input type="text" v-model="form.name" class="glass-input" :placeholder="t('createService.namePlaceholder')" />
           </div>
 
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.catLabel') || 'Kategori' }}</label>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.catLabel') }}</label>
             <div class="relative">
                 <select v-model="form.category" class="glass-input appearance-none">
-                  <option disabled value="">Sila Pilih...</option>
-                  <option value="Campsite">⛺ Campsite</option>
-                  <option value="Chalet">🏡 Chalet / Homestay</option>
-                  <option value="Guide">🧗 Guide / Malim</option>
-                  <option value="Transport">🚙 Transport (4x4/Van)</option>
-                  <option value="Rental">🎒 Sewaan Barang</option>
-                  <option value="Event">🚩 Event / Trip</option>
+                  <option disabled value="">{{ t('common.select') }}</option>
+                  <option value="Campsite">⛺ {{ t('services.campsite') || 'Campsite' }}</option>
+                  <option value="Chalet">🏡 {{ t('services.chalet') || 'Chalet / Homestay' }}</option>
+                  <option value="Guide">🧗 {{ t('services.guide') || 'Guide / Malim' }}</option>
+                  <option value="Transport">🚙 {{ t('services.transport') || 'Transport' }}</option>
+                  <option value="Rental">🎒 {{ t('services.equipment') || 'Sewaan Barang' }}</option>
+                  <option value="Event">🚩 {{ t('services.event') || 'Event / Trip' }}</option>
                 </select>
                 <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
             </div>
@@ -66,41 +66,41 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-2">Negeri</label>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createSpot.stateLabel') }}</label>
               <div class="relative">
                   <select v-model="form.state" class="glass-input appearance-none">
-                    <option disabled value="">Pilih Negeri</option>
-                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
+                    <option disabled value="">{{ t('createSpot.options.selectState') }}</option>
+                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ t('states.' + state) || state }}</option>
                   </select>
                   <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
               </div>
             </div>
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-2">Lokasi Spesifik</label>
-              <input type="text" v-model="form.location" class="glass-input" placeholder="Cth: Kuala Kubu Bharu" />
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.locLabel') }}</label>
+              <input type="text" v-model="form.location" class="glass-input" :placeholder="t('createService.locPlaceholder')" />
             </div>
           </div>
         </div>
 
         <!-- STEP 2 -->
         <div v-if="currentStep === 2">
-          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">Perincian {{ form.category || 'Servis' }}</h2>
+          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createService.section2Header', { category: form.category || 'Servis' }) }}</h2>
 
           <!-- Dynamic: Campsite/Chalet -->
           <div v-if="['Campsite', 'Chalet', 'Event'].includes(form.category)">
              <div class="grid grid-cols-2 gap-6 mb-6">
                 <div>
-                  <label class="block text-sm font-semibold text-slate-300 mb-2">Masa Check-In</label>
+                  <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.checkIn') }}</label>
                   <input type="time" v-model="form.checkIn" class="glass-input" />
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-slate-300 mb-2">Masa Check-Out</label>
+                  <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.checkOut') }}</label>
                   <input type="time" v-model="form.checkOut" class="glass-input" />
                 </div>
              </div>
              
              <div class="mb-6">
-               <label class="block text-sm font-semibold text-slate-300 mb-2">Fasiliti Disediakan</label>
+               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.facilitiesLabel') }}</label>
                <div class="flex flex-wrap gap-2">
                  <div v-for="fac in FACILITY_OPTIONS" :key="fac" 
                       class="px-4 py-2 rounded-full border border-white/10 bg-white/5 cursor-pointer text-sm text-slate-300 hover:bg-white/10 transition-all select-none"
@@ -116,40 +116,40 @@
           <div v-if="form.category === 'Guide'">
              <div class="grid grid-cols-2 gap-6 mb-6">
                 <div>
-                   <label class="block text-sm font-semibold text-slate-300 mb-2">Jenis Harga</label>
+                   <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.priceType') }}</label>
                    <select v-model="form.priceType" class="glass-input appearance-none">
-                     <option value="pax">Per Pax</option>
-                     <option value="group">Per Group</option>
-                     <option value="day">Per Hari</option>
+                     <option value="pax">{{ t('createService.options.pax') }}</option>
+                     <option value="group">{{ t('createService.options.group') }}</option>
+                     <option value="day">{{ t('createService.options.day') }}</option>
                    </select>
                 </div>
                 <div>
-                   <label class="block text-sm font-semibold text-slate-300 mb-2">Kadar Harga (RM)</label>
+                   <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.rateLabel') }}</label>
                    <input type="number" v-model="form.price" class="glass-input" placeholder="0" />
                 </div>
              </div>
              <div class="mb-6">
-                <label class="block text-sm font-semibold text-slate-300 mb-2">Nisbah Guide</label>
-                <input type="text" v-model="form.guideRatio" class="glass-input" placeholder="Cth: 1:7" />
+                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.guideRatio') }}</label>
+                <input type="text" v-model="form.guideRatio" class="glass-input" :placeholder="t('createService.ratioPlaceholder')" />
              </div>
              <div class="mb-6">
-                <label class="block text-sm font-semibold text-slate-300 mb-2">Sijil / Lesen</label>
-                <input type="text" v-model="form.certification" class="glass-input" placeholder="WFA, Malim..." />
+                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.certification') }}</label>
+                <input type="text" v-model="form.certification" class="glass-input" :placeholder="t('createService.certPlaceholder')" />
              </div>
           </div>
 
           <!-- Dynamic: Transport -->
           <div v-if="form.category === 'Transport'">
              <div class="mb-6">
-               <label class="block text-sm font-semibold text-slate-300 mb-2">Jenis Kenderaan</label>
-               <input type="text" v-model="form.vehicleType" class="glass-input" placeholder="Cth: Hilux 4x4" />
+               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.vehicleType') }}</label>
+               <input type="text" v-model="form.vehicleType" class="glass-input" :placeholder="t('createService.vehiclePlaceholder')" />
              </div>
              <div class="mb-6">
-               <label class="block text-sm font-semibold text-slate-300 mb-2">Kawasan Liputan</label>
+               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.coverageArea') }}</label>
                <textarea v-model="form.coverageArea" rows="2" class="glass-input"></textarea>
              </div>
              <div class="mb-6">
-               <label class="block text-sm font-semibold text-slate-300 mb-2">Max Penumpang</label>
+               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.maxPax') }}</label>
                <input type="number" v-model="form.maxPax" class="glass-input" />
              </div>
           </div>
@@ -157,32 +157,32 @@
           <!-- Rental -->
            <div v-if="form.category === 'Rental'">
              <div class="mb-6">
-               <label class="block text-sm font-semibold text-slate-300 mb-2">Senarai Barang</label>
+               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.equipmentList') }}</label>
                <textarea v-model="form.equipmentList" rows="5" class="glass-input"></textarea>
              </div>
              <div class="mb-6">
-               <label class="block text-sm font-semibold text-slate-300 mb-2">Pickup Location</label>
+               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.pickupLocation') }}</label>
                <input type="text" v-model="form.pickupLocation" class="glass-input" />
              </div>
           </div>
 
           <!-- General Price Field -->
           <div v-if="!['Guide', 'Rental'].includes(form.category)" class="mb-6">
-             <label class="block text-sm font-semibold text-slate-300 mb-2">Paparan Harga (Ringkas)</label>
-             <input type="text" v-model="form.priceDisplay" class="glass-input" placeholder="Cth: RM50 / malam" />
+             <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.priceDisplayLabel') }}</label>
+             <input type="text" v-model="form.priceDisplay" class="glass-input" :placeholder="t('createService.pricePlaceholder')" />
           </div>
         </div>
 
         <!-- STEP 3 -->
         <div v-if="currentStep === 3">
-          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">Galeri & Hubungan</h2>
+          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createService.section3Header') }}</h2>
           
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">Gambar Servis ({{ rawFiles.length }} / 10)</label>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.imagesCount', { count: rawFiles.length }) }}</label>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                <div class="h-24 border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 hover:border-purple-500 transition-all text-slate-400" @click="triggerMultiUpload" v-if="rawFiles.length < 10">
                  <i class="fas fa-plus text-xl mb-1 text-purple-400"></i>
-                 <span class="text-xs">Tambah</span>
+                 <span class="text-xs">{{ t('createService.addBtn') }}</span>
                </div>
                <input type="file" ref="multiFileInput" multiple accept="image/*" @change="handleMultiUpload" hidden />
 
@@ -194,12 +194,12 @@
           </div>
 
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">Deskripsi Penuh</label>
-            <textarea v-model="form.description" rows="5" class="glass-input" placeholder="Terangkan kelebihan servis anda..."></textarea>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.fullDescLabel') }}</label>
+            <textarea v-model="form.description" rows="5" class="glass-input" :placeholder="t('createService.fullDescPlaceholder')"></textarea>
           </div>
 
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">No. WhatsApp</label>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.whatsappLabelSimple') }}</label>
             <div class="flex items-center bg-slate-900/50 border border-white/10 rounded-xl overflow-hidden">
                <span class="px-4 py-3 text-slate-400 font-bold border-r border-white/10 bg-white/5">+60</span>
                <input type="number" v-model="form.whatsapp" class="flex-1 bg-transparent p-3 text-white outline-none" placeholder="123456789" />
@@ -210,15 +210,15 @@
         <!-- ACTIONS -->
         <div class="flex justify-between items-center mt-10">
            <button v-if="currentStep > 1" @click="prevStep" class="px-6 py-3 rounded-full border border-white/20 text-slate-300 font-bold hover:text-white hover:border-white transition-all">
-             <i class="fas fa-arrow-left mr-2"></i> Kembali
+             <i class="fas fa-arrow-left mr-2"></i> {{ t('common.back') }}
            </button>
            <div v-else></div>
 
            <button v-if="currentStep < 3" @click="nextStep" class="bg-gradient-to-br from-purple-600 to-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-purple-600/30 hover:-translate-y-1 transition-all">
-             Seterusnya <i class="fas fa-arrow-right ml-2"></i>
+             {{ t('common.next') }} <i class="fas fa-arrow-right ml-2"></i>
            </button>
            <button v-if="currentStep === 3" @click="submitService" class="bg-gradient-to-br from-orange-500 to-red-600 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-orange-500/30 hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isUploading || isCreating">
-             {{ (isUploading || isCreating) ? 'Sedang Memproses...' : '🚀 Terbitkan Iklan' }}
+             {{ (isUploading || isCreating) ? t('common.processing') : t('createService.submitBtn') }}
            </button>
         </div>
 
@@ -235,6 +235,7 @@ import { auth } from '../firebaseConfig';
 import { MALAYSIA_STATES } from '../constants/data';
 import { useServices } from '../composables/useServices'; 
 import { useStorage } from '../composables/useStorage'; 
+import { getEffectiveUserProfile } from '../utils/userProfile'; 
 
 const { t } = useI18n();
 const router = useRouter();
@@ -282,22 +283,25 @@ const toggleFacility = (fac: string) => {
   else form.facilities.push(fac);
 };
 const nextStep = () => {
-  if (currentStep.value === 1 && (!form.name || !form.category || !form.state)) return alert("Sila lengkapkan info asas.");
+  if (currentStep.value === 1 && (!form.name || !form.category || !form.state)) return alert(t('createService.errorBasic'));
   if (currentStep.value < 3) currentStep.value++;
 };
 const prevStep = () => { if (currentStep.value > 1) currentStep.value--; };
 
 const submitService = async () => {
-  if (!auth.currentUser) return alert("Sila login.");
-  if (rawFiles.value.length === 0) return alert("Sila upload gambar.");
+  if (!auth.currentUser) return alert(t('auth.loginRequired'));
+  if (rawFiles.value.length === 0) return alert(t('createService.errorImage'));
 
   try {
     const uploadedUrls = await uploadMultipleImages(rawFiles.value, `uploads/${auth.currentUser.uid}/services/${Date.now()}`);
     
+    // Get effective profile
+    const userProfile = await getEffectiveUserProfile(auth.currentUser);
+
     await createService({
       ownerId: auth.currentUser.uid,
-      ownerName: auth.currentUser.displayName || 'Organizer',
-      ownerAvatar: auth.currentUser.photoURL || '',
+      ownerName: userProfile.name,
+      ownerAvatar: userProfile.avatar,
       expiryDate: null, 
       name: form.name,
       category: form.category,
@@ -324,12 +328,12 @@ const submitService = async () => {
       }
     });
 
-    alert("Servis berjaya diterbitkan!");
+    alert(t('createService.successMsg'));
     router.push('/service');
 
   } catch (e) {
     console.error(e);
-    alert("Ralat sistem.");
+    alert(t('common.error'));
   }
 };
 </script>

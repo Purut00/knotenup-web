@@ -8,8 +8,8 @@
     <div class="container mx-auto px-6 pt-36 pb-20 relative z-10 max-w-4xl">
       
       <div class="text-center mb-10">
-        <h1 class="text-4xl md:text-5xl font-bold mb-3">{{ t('createTrip.heroTitle') || 'Cipta Trip Baru' }}</h1>
-        <p class="text-slate-400">"{{ t('createTrip.heroSub') || 'Bawa orang lain meneroka keindahan alam bersama anda.' }}"</p>
+        <h1 class="text-4xl md:text-5xl font-bold mb-3">{{ t('createTrip.heroTitle') }}</h1>
+        <p class="text-slate-400">"{{ t('createTrip.heroSub') }}"</p>
       </div>
 
       <!-- STEPPER -->
@@ -17,21 +17,21 @@
         <div class="flex flex-col items-center gap-2 transition-opacity duration-300" :class="{ 'opacity-100': currentStep >= 1, 'opacity-50': currentStep < 1 }">
           <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold bg-slate-900 transition-colors"
                :class="currentStep > 1 ? 'border-purple-500 bg-purple-500 text-white' : (currentStep === 1 ? 'border-orange-500 text-orange-500' : 'border-purple-500 text-purple-500')">1</div>
-          <span class="text-xs font-bold uppercase tracking-wider">{{ t('createTrip.step1') || 'Info Asas' }}</span>
+          <span class="text-xs font-bold uppercase tracking-wider">{{ t('createTrip.step1') }}</span>
         </div>
         <div class="w-16 h-0.5 mx-4 transition-all duration-300" :class="currentStep > 1 ? 'bg-gradient-to-r from-purple-500 to-orange-500' : 'bg-white/10'"></div>
         
         <div class="flex flex-col items-center gap-2 transition-opacity duration-300" :class="{ 'opacity-100': currentStep >= 2, 'opacity-50': currentStep < 2 }">
           <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold bg-slate-900 transition-colors"
                :class="currentStep > 2 ? 'border-purple-500 bg-purple-500 text-white' : (currentStep === 2 ? 'border-orange-500 text-orange-500' : 'border-purple-500 text-purple-500')">2</div>
-          <span class="text-xs font-bold uppercase tracking-wider">{{ t('createTrip.step2') || 'Logistik' }}</span>
+          <span class="text-xs font-bold uppercase tracking-wider">{{ t('createTrip.step2') }}</span>
         </div>
         <div class="w-16 h-0.5 mx-4 transition-all duration-300" :class="currentStep > 2 ? 'bg-gradient-to-r from-purple-500 to-orange-500' : 'bg-white/10'"></div>
 
         <div class="flex flex-col items-center gap-2 transition-opacity duration-300" :class="{ 'opacity-100': currentStep >= 3, 'opacity-50': currentStep < 3 }">
           <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold bg-slate-900 transition-colors"
                :class="currentStep === 3 ? 'border-orange-500 text-orange-500' : 'border-purple-500 text-purple-500'">3</div>
-          <span class="text-xs font-bold uppercase tracking-wider">{{ t('createTrip.step3') || 'Media' }}</span>
+          <span class="text-xs font-bold uppercase tracking-wider">{{ t('createTrip.step3') }}</span>
         </div>
       </div>
 
@@ -39,20 +39,20 @@
         
         <!-- STEP 1 -->
         <div v-if="currentStep === 1">
-          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createTrip.section1Title') || 'Maklumat Trip' }}</h2>
+          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createTrip.section1Title') }}</h2>
           
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.tripTitle') || 'Tajuk Trip' }}</label>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.tripTitle') }}</label>
             <input type="text" v-model="form.title" class="glass-input" 
-                   :placeholder="t('createTrip.placeholderTitle') || 'Cth: Hiking Gunung Kinabalu 3H2M'" />
+                   :placeholder="t('createTrip.placeholderTitle')" />
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.category') || 'Kategori Aktiviti' }}</label>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.category') }}</label>
               <div class="relative">
                   <select v-model="form.category" class="glass-input appearance-none">
-                    <option disabled value="">Sila Pilih...</option>
+                    <option disabled value="">{{ t('common.select') }}</option>
                     <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
                       <option v-for="item in group.items" :key="item" :value="item">{{ item }}</option>
                     </optgroup>
@@ -61,12 +61,12 @@
               </div>
             </div>
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.level') || 'Tahap Kesukaran' }}</label>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.level') }}</label>
               <div class="relative">
                   <select v-model="form.difficulty" class="glass-input appearance-none">
-                    <option value="Easy">Mudah</option>
-                    <option value="Moderate">Sederhana</option>
-                    <option value="Hard">Sukar</option>
+                    <option value="Easy">{{ t('createTrip.options.easy') }}</option>
+                    <option value="Moderate">{{ t('createTrip.options.moderate') }}</option>
+                    <option value="Hard">{{ t('createTrip.options.hard') }}</option>
                   </select>
                   <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
               </div>
@@ -79,12 +79,12 @@
                <label class="cursor-pointer px-4 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all flex items-center gap-2"
                       :class="{ 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20': locationType === 'malaysia' }">
                  <input type="radio" v-model="locationType" value="malaysia" hidden>
-                 <span>Dalam Malaysia</span>
+                 <span>{{ t('createTrip.inMalaysia') }}</span>
                </label>
                <label class="cursor-pointer px-4 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all flex items-center gap-2"
                       :class="{ 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20': locationType === 'overseas' }">
                  <input type="radio" v-model="locationType" value="overseas" hidden>
-                 <span>Luar Negara</span>
+                 <span>{{ t('createTrip.overseas') }}</span>
                </label>
             </div>
           </div>
@@ -92,96 +92,96 @@
           <div v-if="locationType === 'malaysia'">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
-                <label class="block text-sm font-semibold text-slate-300 mb-2">Negeri (Wajib)</label>
+                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.stateRequired') }}</label>
                 <div class="relative">
                     <select v-model="form.state" class="glass-input appearance-none" @change="resetSpotSelection">
-                      <option disabled value="">Pilih Negeri...</option>
-                      <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
+                      <option disabled value="">{{ t('createSpot.options.selectState') }}</option>
+                      <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ t('states.' + state) || state }}</option>
                     </select>
                     <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-semibold text-slate-300 mb-2">Tempat Spesifik</label>
-                <input type="text" v-model="form.placeName" class="glass-input" :placeholder="t('createTrip.specificPlace') || 'Cth: Taman Negara'" />
+                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.specificPlace') }}</label>
+                <input type="text" v-model="form.placeName" class="glass-input" :placeholder="t('createTrip.placeholderPlaceMy')" />
               </div>
             </div>
 
             <div class="p-4 rounded-xl border border-dashed border-slate-600 bg-slate-800/50 mb-6">
               <label class="flex justify-between items-center text-sm font-semibold text-slate-300 mb-2">
-                 <span>🔗 Link ke Info Lokasi (Spot)</span>
-                 <span v-if="autoDetected" class="text-green-400 text-xs font-bold animate-pulse">✨ Lokasi dikesan!</span>
+                 <span>🔗 {{ t('createTrip.spotLink') }}</span>
+                 <span v-if="autoDetected" class="text-green-400 text-xs font-bold animate-pulse">{{ t('createTrip.spotDetected') }}</span>
               </label>
               
               <div class="relative">
                  <select v-model="form.spotId" @change="handleSpotChange" class="glass-input appearance-none" :disabled="!form.state">
-                   <option value="">-- {{ form.state ? 'Pilih Lokasi di ' + form.state : 'Sila Pilih Negeri Dahulu' }} --</option>
+                   <option value="">-- {{ form.state ? t('common.select') : t('createSpot.options.selectState') }} --</option>
                    <option v-for="spot in filteredSpots" :key="spot.id" :value="spot.id">{{ spot.name }} ({{ spot.height }}m)</option>
                  </select>
                  <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
               </div>
               <p class="text-[10px] text-slate-400 mt-2 flex justify-between">
-                <span>*Menghubungkan trip dengan info bukit memudahkan peserta.</span>
-                <span v-if="form.state && filteredSpots.length === 0" class="text-orange-400">Tiada lokasi disenaraikan.</span>
+                <span>{{ t('createTrip.spotHint') }}</span>
+                <span v-if="form.state && filteredSpots.length === 0" class="text-orange-400">{{ t('createTrip.noSpots') }}</span>
               </p>
             </div>
           </div>
 
           <div v-else class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">Lokasi Penuh</label>
-            <input type="text" v-model="form.overseasLocation" class="glass-input" placeholder="Cth: Mount Fuji, Japan" />
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.fullLocation') }}</label>
+            <input type="text" v-model="form.overseasLocation" class="glass-input" :placeholder="t('createTrip.placeholderPlaceOverseas')" />
           </div>
         </div>
 
         <!-- STEP 2 -->
         <div v-if="currentStep === 2">
-          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createTrip.section2Title') || 'Tarikh & Harga' }}</h2>
+          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createTrip.section2Title') }}</h2>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.startDate') || 'Tarikh Mula' }}</label>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.startDate') }}</label>
               <input type="date" v-model="form.startDate" class="glass-input" />
             </div>
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.endDate') || 'Tarikh Tamat' }}</label>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.endDate') }}</label>
               <input type="date" v-model="form.endDate" :min="form.startDate" class="glass-input" />
             </div>
           </div>
           
           <div class="inline-block bg-purple-500/20 text-purple-300 px-4 py-1 rounded-full text-sm font-bold mb-6">
-            ⏳ Durasi: {{ computedDuration }}
+            ⏳ {{ t('createTrip.duration') }}: {{ computedDuration }}
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.price') || 'Harga Per Pax' }} (RM)</label>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.price') }} (RM)</label>
               <input type="number" v-model="form.price" class="glass-input" placeholder="0" />
             </div>
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.slots') || 'Jumlah Slot' }}</label>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.slots') }}</label>
               <input type="number" v-model="form.maxSlots" class="glass-input" placeholder="20" />
             </div>
           </div>
 
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.groupLink') || 'Link WhatsApp Group' }}</label>
-            <input type="text" v-model="form.groupLink" class="glass-input" placeholder="https://chat.whatsapp.com/..." />
-            <span class="text-xs text-slate-500 mt-1 block">*Link ini hanya dipaparkan kepada peserta yang sah.</span>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.groupLink') }}</label>
+            <input type="text" v-model="form.groupLink" class="glass-input" :placeholder="t('createTrip.groupLinkPlaceholder')" />
+            <span class="text-xs text-slate-500 mt-1 block">{{ t('createTrip.linkPrivacyNote') }}</span>
           </div>
         </div>
 
         <!-- STEP 3 -->
         <div v-if="currentStep === 3">
-          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createTrip.section3Title') || 'Galeri & Info Lanjut' }}</h2>
+          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createTrip.section3Title') }}</h2>
 
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">📸 Gambar Trip (Max 5)</label>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">📸 {{ t('createTrip.tripImages') }}</label>
             <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 h-64">
                <div class="bg-white/5 border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 hover:border-purple-500 transition-all bg-cover bg-center"
                     @click="triggerUpload(0)" :style="{ backgroundImage: `url(${previewImages[0]})` }">
                  <div v-if="!previewImages[0]" class="flex flex-col items-center text-slate-400">
                    <i class="fas fa-camera text-3xl mb-2 text-purple-400"></i>
-                   <span>Cover Photo</span>
+                   <span>{{ t('createTrip.coverPhoto') }}</span>
                  </div>
                  <input type="file" ref="fileInput0" @change="(e) => handleImageSelect(e, 0)" accept="image/*" hidden />
                </div>
@@ -197,27 +197,27 @@
           </div>
 
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.desc') || 'Deskripsi Penuh' }}</label>
-            <textarea v-model="form.description" rows="5" class="glass-input" placeholder="Tentatif, apa yang menarik..."></textarea>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.desc') }}</label>
+            <textarea v-model="form.description" rows="5" class="glass-input" :placeholder="t('createTrip.descPlaceholder')"></textarea>
           </div>
 
           <div class="space-y-4 mb-6">
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-1">⚠️ {{ t('createTrip.mandatory') || 'Wajib Bawa' }}</label>
-              <input type="text" v-model="form.mandatory" class="glass-input" placeholder="Headlamp, Kasut Hiking..." />
+              <label class="block text-sm font-semibold text-slate-300 mb-1">⚠️ {{ t('createTrip.mandatory') }}</label>
+              <input type="text" v-model="form.mandatory" class="glass-input" :placeholder="t('createTrip.mandatoryPlaceholder')" />
             </div>
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-1">💡 {{ t('createTrip.tips') || 'Tips Extra' }}</label>
-              <input type="text" v-model="form.tips" class="glass-input" placeholder="Bawa baju hujan..." />
+              <label class="block text-sm font-semibold text-slate-300 mb-1">💡 {{ t('createTrip.tips') }}</label>
+              <input type="text" v-model="form.tips" class="glass-input" :placeholder="t('createTrip.tipsPlaceholder')" />
             </div>
             <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-1">🎒 {{ t('createTrip.recommended') || 'Disyorkan' }}</label>
-              <input type="text" v-model="form.recommended" class="glass-input" placeholder="Powerbank, Tongkat..." />
+              <label class="block text-sm font-semibold text-slate-300 mb-1">🎒 {{ t('createTrip.recommended') }}</label>
+              <input type="text" v-model="form.recommended" class="glass-input" :placeholder="t('createTrip.recommendedPlaceholder')" />
             </div>
           </div>
 
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.includes') || 'Pakej Termasuk:' }}</label>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.includes') }}</label>
             <div class="flex flex-wrap gap-2">
               <div v-for="service in TRIP_SERVICES" :key="service" 
                    class="px-4 py-2 rounded-full border border-white/10 bg-white/5 cursor-pointer text-sm text-slate-300 hover:bg-white/10 transition-all select-none"
@@ -232,15 +232,15 @@
         <!-- ACTIONS -->
         <div class="flex justify-between items-center mt-10">
            <button v-if="currentStep > 1" @click="prevStep" class="px-6 py-3 rounded-full border border-white/20 text-slate-300 font-bold hover:text-white hover:border-white transition-all">
-             <i class="fas fa-arrow-left mr-2"></i> Kembali
+             <i class="fas fa-arrow-left mr-2"></i> {{ t('common.back') }}
            </button>
            <div v-else></div>
 
            <button v-if="currentStep < 3" @click="nextStep" class="bg-gradient-to-br from-purple-600 to-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-purple-600/30 hover:-translate-y-1 transition-all">
-             Seterusnya <i class="fas fa-arrow-right ml-2"></i>
+             {{ t('common.next') }} <i class="fas fa-arrow-right ml-2"></i>
            </button>
            <button v-if="currentStep === 3" @click="submitForm" class="bg-gradient-to-br from-orange-500 to-red-600 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-orange-500/30 hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isUploading || isCreating">
-             {{ (isUploading || isCreating) ? 'Sedang Memproses...' : '🚀 Terbitkan Trip' }}
+             {{ (isUploading || isCreating) ? t('common.processing') : t('createSpot.submitCreate') }}
            </button>
         </div>
 
@@ -259,6 +259,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { isSpam } from '../utils/spamFilter';
 import { useStorage } from '../composables/useStorage'; 
 import { useTrips } from '../composables/useTrips';
+import { getEffectiveUserProfile } from '../utils/userProfile';
 
 const { t } = useI18n(); 
 const router = useRouter();
@@ -326,9 +327,9 @@ const computedDuration = computed(() => {
   const end = new Date(form.endDate);
   const diffTime = end.getTime() - start.getTime();
   const diffDays = diffTime / (1000 * 3600 * 24);
-  if (diffDays < 0) return "Invalid"; 
-  if (diffDays === 0) return "Day Trip";
-  return `${diffDays + 1}H ${diffDays}M`;
+  if (diffDays < 0) return t('createTrip.dateError'); 
+  if (diffDays === 0) return t('createTrip.dayTrip');
+  return t('createTrip.durationFormat', { days: diffDays + 1, nights: diffDays });
 });
 
 const toggleService = (service: string) => {
@@ -356,13 +357,16 @@ const nextStep = () => { if (currentStep.value < 3) currentStep.value++; window.
 const prevStep = () => { if (currentStep.value > 1) currentStep.value--; window.scrollTo(0,0); };
 
 const submitForm = async () => {
-  if (!auth.currentUser) return alert(t('auth.loginRequired') || "Sila login.");
-  if (isSpam(`${form.title} ${form.description}`)) return alert("Input dilarang.");
+  if (!auth.currentUser) return alert(t('auth.loginRequired'));
+  if (isSpam(`${form.title} ${form.description}`)) return alert(t('createSpot.alerts.spam'));
 
   try {
     const uploadedUrls = await uploadMultipleImages(rawFiles.value, `uploads/${auth.currentUser.uid}/trips/${Date.now()}`);
     const finalLoc = locationType.value === 'malaysia' ? `${form.placeName}, ${form.state}` : form.overseasLocation;
     
+    // Get effective profile
+    const userProfile = await getEffectiveUserProfile(auth.currentUser);
+
     // Create Trip using Composable
     await createTrip({
       ...form,
@@ -377,18 +381,18 @@ const submitForm = async () => {
       currentSlots: 0,
       status: 'open',
       organizerId: auth.currentUser.uid,
-      organizerName: auth.currentUser.displayName || 'Organizer',
-      organizerImage: auth.currentUser.photoURL || '',
+      organizerName: userProfile.name,
+      organizerImage: userProfile.avatar,
       spotId: form.spotId || null,
       spotName: form.spotName || null
     });
     
-    alert("Trip berjaya diterbitkan!");
+    alert(t('createSpot.alerts.createSuccess'));
     router.push('/trips');
 
   } catch (error) {
     console.error("Error:", error);
-    alert("Gagal mencipta trip.");
+    alert(t('common.failed'));
   }
 };
 </script>

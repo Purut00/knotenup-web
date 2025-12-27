@@ -52,7 +52,25 @@
     "selectState": "Pilih Negeri",
     "submit": "Hantar",
     "uploading": "Sedang memuat naik...",
-    "view": "Lihat"
+    "view": "Lihat",
+    "processing": "Sedang Memproses...",
+    "compact": "Ringkas",
+    "full": "Penuh",
+    "switchToFull": "Tukar ke Grid Penuh",
+    "switchToCompact": "Tukar ke Grid Ringkas"
+  },
+  "navbar": {
+    "home": "Utama",
+    "trips": "Trip",
+    "requests": "Permintaan Trip",
+    "forum": "Forum",
+    "services": "Servis",
+    "spots": "Lokasi",
+    "profile": "Profil",
+    "login": "Log Masuk",
+    "logout": "Log Keluar",
+    "createTrip": "Cipta Trip",
+    "buddy": "Buddy"
   },
   "components": {
     "allLevels": "Semua Tahap",
@@ -109,13 +127,64 @@
     "successMsg": "Servis berjaya diiklankan!",
     "title": "Iklankan Servis",
     "uploadText": "Klik untuk muat naik",
-    "waLabel": "No. WhatsApp (Tanpa sengkang)"
+    "waLabel": "No. WhatsApp (Tanpa sengkang)",
+    "checkIn": "Masa Check-In",
+    "checkOut": "Masa Check-Out",
+    "guideRatio": "Nisbah Guide",
+    "certification": "Sijil / Lesen",
+    "vehicleType": "Jenis Kenderaan",
+    "coverageArea": "Kawasan Liputan",
+    "maxPax": "Max Penumpang / Kapasiti",
+    "equipmentList": "Senarai Barang",
+    "pickupLocation": "Lokasi Ambilan",
+    "priceDisplayLabel": "Paparan Harga (Ringkas)",
+    "serviceImages": "Gambar Servis",
+    "ratioPlaceholder": "Cth: 1:7",
+    "certPlaceholder": "WFA, Malim...",
+    "vehiclePlaceholder": "Cth: Hilux 4x4",
+    "waPlaceholder": "123456789",
+    "options": {
+      "day": "Per Hari"
+    },
+    "stepLabels": {
+      "basic": "Info Asas",
+      "details": "Perincian",
+      "gallery": "Galeri"
+    },
+    "section1Header": "Info Asas Servis",
+    "section2Header": "Perincian {category}",
+    "section3Header": "Galeri & Hubungan",
+    "imagesCount": "Gambar Servis ({count} / 10)",
+    "addBtn": "Tambah",
+    "fullDescLabel": "Deskripsi Penuh",
+    "fullDescPlaceholder": "Terangkan kelebihan servis anda...",
+    "whatsappLabelSimple": "No. WhatsApp"
   },
   "createSpot": {
     "addPhoto": "Tambah",
     "alerts": {
       "fillNameState": "Sila isi Nama Spot dan Negeri dahulu.",
-      "suggestionSent": "Cadangan kemas kini dihantar! Memerlukan 5 pengesahan."
+      "suggestionSent": "Cadangan kemas kini dihantar! Memerlukan 5 pengesahan.",
+      "maxImages": "Maksimum 10 gambar sahaja.",
+      "fileTooLarge": "Fail {name} terlalu besar (Max 5MB).",
+      "spam": "Input mengandungi perkataan dilarang.",
+      "updateSuccess": "Kemaskini berjaya!",
+      "createSuccess": "Spot berjaya ditambah!"
+    },
+    "distanceLabel": "Jarak (KM)",
+    "durationLabel": "Anggaran Masa",
+    "durationPlaceholder": "Cth: 4 Jam / 2H1M",
+    "distancePlaceholder": "Cth: 5.2",
+    "mapsLinkLabel": "Link Google Maps Trailhead (Optional)",
+    "galleryInfoTitle": "Galeri & Info Lanjut",
+    "submitUpdate": "Simpan Perubahan",
+    "submitCreate": "🚀 Hantar Spot",
+    "chooseFile": "Pilih Fail",
+    "options": {
+      "unknown": "Tidak Diketahui",
+      "notRequired": "Tidak Perlu",
+      "required": "Perlu",
+      "selectState": "Pilih Negeri"
     },
     "descLabel": "Penerangan",
     "descPlaceholder": "Ceritakan lebih lanjut tentang tempat ini...",
@@ -139,6 +208,7 @@
     "heightLabel": "Ketinggian",
     "heightPlaceholder": "Ketinggian dalam meter",
     "imagesLabel": "Galeri",
+    "imagesLabelLimit": "Galeri (Maks 10)",
     "infoBox": {
       "gpx": "🗺️ Fail GPX sangat membantu orang lain.",
       "name": "📍 Pastikan nama lokasi tepat.",
@@ -188,6 +258,68 @@
     "viaLabel": "Melalui / Pintu Rimba",
     "viaPlaceholder": "Contoh: Melalui Jungle Lodge"
   },
+  "createPostPage": {
+    "editTitle": "✏️ Kemaskini Topik",
+    "createTitle": "✍️ Cipta Topik Baru",
+    "sub": "Kongsi pengalaman, soalan, atau tips menarik anda di sini.",
+    "titleLabel": "Tajuk Perbincangan",
+    "titlePlaceholder": "Contoh: Trip ke Gunung Kinabalu 2024...",
+    "categoryLabel": "Kategori",
+    "categoryPlaceholder": "- Sila Pilih Kategori -",
+    "contentLabel": "Isi Kandungan",
+    "contentPlaceholder": "Tulis butiran lanjut di sini...",
+    "wordCount": "patah perkataan",
+    "cancel": "Batal",
+    "processing": "Memproses...",
+    "save": "Simpan Perubahan",
+    "publish": "Terbitkan Topik",
+    "alerts": {
+      "notFound": "Topik tidak dijumpai!",
+      "login": "Sila log masuk untuk membuat hantaran.",
+      "fillAll": "Sila isi semua maklumat.",
+      "spam": "⚠️ MAAF: Post anda mengandungi perkataan yang dilarang (\"{word}\"). Sila patuhi etika komuniti.",
+      "updateSuccess": "Topik berjaya dikemaskini!",
+      "publishSuccess": "Topik berjaya diterbitkan!",
+      "error": "Gagal memproses permintaan. Sila cuba lagi."
+    }
+  },
+  "createBuddy": {
+    "title": "Cari Geng Hiking (Buddy) 🥾",
+    "sub": "\"Tak perlu guide, cuma perlukan kawan. Jom tong-tong minyak!\"",
+    "sectionTitle": "Info Trip Santai",
+    "locationLabel": "Lokasi / Gunung",
+    "locationPlaceholder": "Cth: Gunung Datuk, Rembau",
+    "dateLabel": "Tarikh",
+    "timeLabel": "Masa Jumpa (Tayar Golek)",
+    "paceLabel": "Jangkaan Pace (Kelajuan)",
+    "options": {
+      "pace": {
+        "relaxed": "Santai (Banyak Bergambar)",
+        "moderate": "Sederhana (Training)",
+        "fast": "Laju / Trail Run"
+      },
+      "transport": {
+        "self": "Saya gerak sendiri",
+        "driver": "Saya bawa kereta (Ada kosong)",
+        "passenger": "Saya cari tumpang (Tong-tong minyak)"
+      }
+    },
+    "transportLabel": "Status Transport (Carpool)",
+    "whatsappLabel": "Link WhatsApp Group / Personal",
+    "whatsappPlaceholder": "https://chat.whatsapp.com/...",
+    "whatsappHint": "*Link ini akan dipaparkan kepada sesiapa yang berminat.",
+    "notesLabel": "Nota Tambahan (Optional)",
+    "notesPlaceholder": "Cth: Kita jumpa kat Petronas, pastu gerak sekali...",
+    "declaration": "PENAFIAN & TANGGUNGJAWAB: Saya faham ini adalah trip persendirian (\"Open Trip\") tanpa guide rasmi. Saya bertanggungjawab sepenuhnya atas keselamatan diri sendiri dan rakan yang saya bawa. Platform ini hanya medium pencarian kawan.",
+    "submitBtn": "🚀 Publish Open Trip",
+    "loadingBtn": "Sedang Publish...",
+    "alerts": {
+      "login": "Sila login dulu!",
+      "fillRequired": "Sila isi maklumat wajib (Lokasi, Tarikh, Link WhatsApp).",
+      "success": "Trip Buddy berjaya di-publish!",
+      "error": "Gagal mencipta trip."
+    }
+  },
   "createTrip": {
     "basicInfo": "Maklumat Asas",
     "calculatedDuration": "Durasi (Auto)",
@@ -201,9 +333,11 @@
     "desc": "Penerangan Penuh",
     "descPlaceholder": "Ceritakan tentang trip ini...",
     "duration": "Durasi",
+    "durationFormat": "{days}H {nights}M",
     "endDate": "Tarikh Tamat",
     "fullLocation": "Lokasi Penuh",
     "galleryLabel": "Galeri Trip (Maks 5)",
+    "coverPhotoHint": "Foto Utama",
     "groupLink": "Pautan Grup WhatsApp",
     "groupLinkHint": "Pautan ini hanya boleh dilihat oleh peserta yang menyertai.",
     "heroSub": "Setiap perjalanan bermula dengan langkah pertama (dan borang).",
@@ -247,7 +381,20 @@
     "tipsPlaceholder": "Cth: Bawa powerbank, kasut sesuai...",
     "title": "Cipta Trip Baru",
     "tripTitle": "Tajuk Trip",
-    "uploadImages": "Muat Naik Gambar"
+    "uploadImages": "Muat Naik Gambar",
+    "stateRequired": "Negeri (Wajib)",
+    "tripImages": "Gambar Trip (Max 5)",
+    "spotLink": "Link ke Info Lokasi (Spot)",
+    "spotDetected": "✨ Lokasi dikesan!",
+    "noSpots": "Tiada lokasi disenaraikan.",
+    "linkPrivacyNote": "*Pautan ini hanya dipaparkan kepada peserta yang sah.",
+    "spotHint": "*Menghubungkan trip dengan info bukit memudahkan peserta.",
+    "groupLinkPlaceholder": "https://chat.whatsapp.com/...",
+    "options": {
+      "easy": "Mudah",
+      "moderate": "Sederhana",
+      "hard": "Sukar"
+    }
   },
   "directory": {
     "advertiseBtn": "📢 Iklankan Servis Anda",
@@ -325,24 +472,14 @@
     "searchPlaceholder": "Cari aktiviti, lokasi, atau trip...",
     "tripSectionTitle": "Popular",
     "viewAll": "Lihat Semua",
-    "viewAllTrips": "Lihat Semua Trip"
+    "viewAllTrips": "Lihat Semua Trip",
+    "popularTripsHeader": "Trip Popular"
   },
   "levels": {
     "easy": "Santai (Mudah)",
     "hard": "Keras (Sukar)",
-    "moderate": "Sederhana"
-  },
-  "navbar": {
-    "createTrip": "Cipta Trip",
-    "forum": "Forum",
-    "home": "Laman Utama",
-    "login": "Log Masuk",
-    "logout": "Log Keluar",
-    "profile": "Profil",
-    "requests": "Permintaan Trip",
-    "services": "Servis",
-    "spots": "Lokasi",
-    "trips": "Trip"
+    "moderate": "Sederhana",
+    "extreme": "⚫ Extreme"
   },
   "profile": {
     "bio": "Bio Ringkas",

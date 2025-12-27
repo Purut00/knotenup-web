@@ -8,54 +8,54 @@
     <div class="container pt-32 pb-20">
       
       <div class="text-center mb-10 relative z-10">
-        <h1 class="text-4xl font-bold text-white mb-2">Cari Geng Hiking (Buddy) 🥾</h1>
-        <p class="text-gray-400">"Tak perlu guide, cuma perlukan kawan. Jom tong-tong minyak!"</p>
+        <h1 class="text-4xl font-bold text-white mb-2">{{ t('createBuddy.title') }}</h1>
+        <p class="text-gray-400">"{{ t('createBuddy.sub') }}"</p>
       </div>
 
       <div class="glass-form-card relative z-10 fade-up max-w-2xl mx-auto">
         
-        <h2 class="section-title">Info Trip Santai</h2>
+        <h2 class="section-title">{{ t('createBuddy.sectionTitle') }}</h2>
         
         <div class="form-group">
-          <label>Lokasi / Gunung</label>
+          <label>{{ t('createBuddy.locationLabel') }}</label>
           <input 
             type="text" 
             v-model="form.location" 
             class="glass-input" 
-            placeholder="Cth: Gunung Datuk, Rembau" 
+            :placeholder="t('createBuddy.locationPlaceholder')" 
           />
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Tarikh</label>
+            <label>{{ t('createBuddy.dateLabel') }}</label>
             <input type="date" v-model="form.date" class="glass-input" />
           </div>
           <div class="form-group">
-            <label>Masa Jumpa (Tayar Golek)</label>
+            <label>{{ t('createBuddy.timeLabel') }}</label>
             <input type="time" v-model="form.time" class="glass-input" />
           </div>
         </div>
 
         <div class="form-row mt-4">
           <div class="form-group">
-            <label>Jangkaan Pace (Kelajuan)</label>
+            <label>{{ t('createBuddy.paceLabel') }}</label>
             <div class="select-wrapper">
                 <select v-model="form.pace" class="glass-input">
-                  <option value="Santai (Bergambar)">Santai (Banyak Bergambar)</option>
-                  <option value="Sederhana">Sederhana (Training)</option>
-                  <option value="Laju (Pewai)">Laju / Trail Run</option>
+                  <option value="relaxed">{{ t('createBuddy.options.pace.relaxed') }}</option>
+                  <option value="moderate">{{ t('createBuddy.options.pace.moderate') }}</option>
+                  <option value="fast">{{ t('createBuddy.options.pace.fast') }}</option>
                 </select>
                 <i class="fas fa-chevron-down select-arrow"></i>
             </div>
           </div>
           <div class="form-group">
-             <label>Status Transport (Carpool)</label>
+             <label>{{ t('createBuddy.transportLabel') }}</label>
              <div class="select-wrapper">
                 <select v-model="form.carpool" class="glass-input">
-                  <option value="Sendiri">Saya gerak sendiri</option>
-                  <option value="Driver">Saya bawa kereta (Ada kosong)</option>
-                  <option value="Passenger">Saya cari tumpang (Tong-tong minyak)</option>
+                  <option value="self">{{ t('createBuddy.options.transport.self') }}</option>
+                  <option value="driver">{{ t('createBuddy.options.transport.driver') }}</option>
+                  <option value="passenger">{{ t('createBuddy.options.transport.passenger') }}</option>
                 </select>
                 <i class="fas fa-chevron-down select-arrow"></i>
             </div>
@@ -63,35 +63,35 @@
         </div>
 
         <div class="form-group mt-4">
-          <label>Link WhatsApp Group / Personal</label>
+          <label>{{ t('createBuddy.whatsappLabel') }}</label>
           <input 
             type="text" 
             v-model="form.whatsappLink" 
             class="glass-input" 
-            placeholder="https://chat.whatsapp.com/..." 
+            :placeholder="t('createBuddy.whatsappPlaceholder')" 
           />
           <small class="text-gray-400 mt-1 block text-xs">
-             *Link ini akan dipaparkan kepada sesiapa yang berminat.
+             {{ t('createBuddy.whatsappHint') }}
           </small>
         </div>
 
         <div class="form-group mt-4">
-           <label>Nota Tambahan (Optional)</label>
-           <textarea v-model="form.notes" rows="3" class="glass-input" placeholder="Cth: Kita jumpa kat Petronas, pastu gerak sekali..."></textarea>
+           <label>{{ t('createBuddy.notesLabel') }}</label>
+           <textarea v-model="form.notes" rows="3" class="glass-input" :placeholder="t('createBuddy.notesPlaceholder')"></textarea>
         </div>
 
         <div class="mt-6 p-4 rounded-lg bg-red-900/20 border border-red-500/30">
            <label class="flex items-start gap-3 cursor-pointer">
               <input type="checkbox" v-model="form.declaration" class="mt-1 w-5 h-5 accent-red-500" />
               <span class="text-sm text-gray-300">
-                <strong>PENAFIAN & TANGGUNGJAWAB:</strong> Saya faham ini adalah trip persendirian ("Open Trip") tanpa guide rasmi. Saya bertanggungjawab sepenuhnya atas keselamatan diri sendiri dan rakan yang saya bawa. Platform ini hanya medium pencarian kawan.
+                <strong>{{ t('createBuddy.declaration') }}</strong>
               </span>
            </label>
         </div>
 
         <div class="form-actions mt-8 flex justify-end">
            <button @click="submitForm" class="btn-submit" :disabled="loading || !form.declaration">
-             {{ loading ? 'Sedang Publish...' : '🚀 Publish Open Trip' }}
+             {{ loading ? t('createBuddy.loadingBtn') : t('createBuddy.submitBtn') }}
            </button>
         </div>
 
@@ -103,47 +103,52 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { auth, db } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; 
+import { getEffectiveUserProfile } from '../utils/userProfile'; 
 
 const router = useRouter();
+const { t } = useI18n();
 const loading = ref(false);
 
 const form = reactive({
   location: '',
   date: '',
   time: '',
-  pace: 'Santai (Bergambar)',
-  carpool: 'Sendiri',
+  pace: 'relaxed',
+  carpool: 'self',
   whatsappLink: '',
   notes: '',
   declaration: false
 });
 
 const submitForm = async () => {
-  if (!auth.currentUser) { alert("Sila login dulu!"); return; }
+  if (!auth.currentUser) { alert(t('createBuddy.alerts.login')); return; }
   if (!form.location || !form.date || !form.whatsappLink) {
-    alert("Sila isi maklumat wajib (Lokasi, Tarikh, Link WhatsApp).");
+    alert(t('createBuddy.alerts.fillRequired'));
     return;
   }
 
   loading.value = true;
 
   try {
+    const userProfile = await getEffectiveUserProfile(auth.currentUser);
+
     await addDoc(collection(db, 'buddies'), {
       ...form,
       hostId: auth.currentUser.uid,
-      hostName: auth.currentUser.displayName || 'Hiker',
-      hostAvatar: auth.currentUser.photoURL || '',
+      hostName: userProfile.name,
+      hostAvatar: userProfile.avatar,
       createdAt: serverTimestamp(),
       status: 'active' // active, full, expired
     });
 
-    alert("Trip Buddy berjaya di-publish!");
+    alert(t('createBuddy.alerts.success'));
     router.push('/forum'); // Atau redirect ke page senarai buddy nanti
   } catch (error) {
     console.error("Error:", error);
-    alert("Gagal mencipta trip.");
+    alert(t('createBuddy.alerts.error'));
   } finally {
     loading.value = false;
   }

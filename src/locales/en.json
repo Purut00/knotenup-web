@@ -22,7 +22,12 @@
     "pleaseLogin": "Please login to continue.",
     "loginToReport": "Please login to report.",
     "confirmDelete": "Are you sure you want to delete?",
-    "failed": "Operation failed."
+    "failed": "Operation failed.",
+    "processing": "Processing...",
+    "compact": "Compact",
+    "full": "Full",
+    "switchToFull": "Switch to Full Grid",
+    "switchToCompact": "Switch to Compact Grid"
   },
   "navbar": {
     "home": "Home",
@@ -34,7 +39,8 @@
     "profile": "Profile",
     "login": "Login",
     "logout": "Logout",
-    "createTrip": "Create Trip"
+    "createTrip": "Create Trip",
+    "buddy": "Buddy"
   },
   "home": {
     "heroTitle": "DISCOVER YOUR NEXT ADVENTURE",
@@ -56,7 +62,8 @@
     "heroHighlight": "of Nature",
     "heroSubtitle": "Discover exciting outdoor activities, from hiking to diving.",
     "tripSectionTitle": "Popular",
-    "popularHighlight": "Trips"
+    "popularHighlight": "Trips",
+    "popularTripsHeader": "Popular Trips"
   },
   "trip": {
     "headerTitle": "Explore Recreation Trips",
@@ -160,7 +167,7 @@
     "section3Sub": "Attract participants with stunning photos.",
     "basicInfo": "Basic Information",
     "tripTitle": "Trip Title",
-    "placeholderTitle": "E.g.: Hiking Mount Kinabalu",
+    "placeholderTitle": "E.g.: Hiking Mount Kinabalu 3D2N",
     "category": "Category",
     "level": "Difficulty Level",
     "locationType": "Location Type",
@@ -189,7 +196,7 @@
     "coverPhoto": "Cover Photo",
     "mainImage": "Main Image",
     "desc": "Full Description",
-    "descPlaceholder": "Tell us about this trip...",
+    "descPlaceholder": "Itinerary, what's interesting...",
     "tips": "Tips / Important Notes",
     "tipsPlaceholder": "E.g.: Bring powerbank, suitable shoes...",
     "mandatory": "Mandatory Items",
@@ -201,14 +208,66 @@
     "successMsg": "Trip published successfully!",
     "spamError": "Suspicious content detected.",
     "duration": "Duration",
+    "durationFormat": "{days}D {nights}N",
     "endDate": "End Date",
     "location": "Location / Destination",
-    "startDate": "Start Date"
+    "startDate": "Start Date",
+    "stateRequired": "State (Required)",
+    "tripImages": "Trip Images (Max 5)",
+    "spotLink": "Link to Spot Info",
+    "spotDetected": "✨ Spot detected!",
+    "noSpots": "No spots listed.",
+    "linkPrivacyNote": "*Link visible to joined participants only.",
+    "spotHint": "*Linking a spot helps participants find details.",
+    "groupLinkPlaceholder": "https://chat.whatsapp.com/...",
+    "options": {
+      "easy": "Easy",
+      "moderate": "Moderate",
+      "hard": "Hard"
+    }
+  },
+  "createBuddy": {
+    "title": "Find Hiking Buddies (Buddy) 🥾",
+    "sub": "\"No guide needed, just need friends. Lets carpool!\"",
+    "sectionTitle": "Casual Trip Info",
+    "locationLabel": "Location / Mountain",
+    "locationPlaceholder": "Eg: Gunung Datuk, Rembau",
+    "dateLabel": "Date",
+    "timeLabel": "Meetup Time (Rolling)",
+    "paceLabel": "Expected Pace",
+    "options": {
+      "pace": {
+        "relaxed": "Relaxed (Lots of Photos)",
+        "moderate": "Moderate (Training)",
+        "fast": "Fast / Trail Run"
+      },
+      "transport": {
+        "self": "I move alone",
+        "driver": "I have car (Empty seats)",
+        "passenger": "Looking for ride (Share fuel)"
+      }
+    },
+    "transportLabel": "Transport Status (Carpool)",
+    "whatsappLabel": "WhatsApp Group / Personal Link",
+    "whatsappPlaceholder": "https://chat.whatsapp.com/...",
+    "whatsappHint": "*This link will be visible to interested people.",
+    "notesLabel": "Extra Notes (Optional)",
+    "notesPlaceholder": "Eg: Meet at Petronas...",
+    "declaration": "DISCLAIMER & RESPONSIBILITY: I understand this is a private trip (\"Open Trip\") without an official guide. I am fully responsible for my own safety and friends I bring. This platform is only for finding friends.",
+    "submitBtn": "🚀 Publish Open Trip",
+    "loadingBtn": "Publishing...",
+    "alerts": {
+      "login": "Please login first!",
+      "fillRequired": "Please fill required info (Location, Date, WhatsApp Link).",
+      "success": "Buddy Trip published successfully!",
+      "error": "Failed to create trip."
+    }
   },
   "levels": {
     "easy": "Chill (Easy)",
     "moderate": "Moderate",
-    "hard": "Hardcore (Hard)"
+    "hard": "Hardcore (Hard)",
+    "extreme": "⚫ Extreme"
   },
   "forum": {
     "headerTitle": "KnotenUp Community Hub",
@@ -218,6 +277,31 @@
     "filterNew": "New",
     "filterTop": "Top",
     "createPost": "Create New Post",
+    "createPostPage": {
+      "editTitle": "✏️ Update Topic",
+      "createTitle": "✍️ Create New Topic",
+      "sub": "Share your experience, questions, or interesting tips here.",
+      "titleLabel": "Discussion Title",
+      "titlePlaceholder": "Eg: Trip to Mount Kinabalu 2024...",
+      "categoryLabel": "Category",
+      "categoryPlaceholder": "- Please Select Category -",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Write more details here...",
+      "wordCount": "words",
+      "cancel": "Cancel",
+      "processing": "Processing...",
+      "save": "Save Changes",
+      "publish": "Publish Topic",
+      "alerts": {
+        "notFound": "Topic not found!",
+        "login": "Please login to post.",
+        "fillAll": "Please fill all information.",
+        "spam": "⚠️ SORRY: Your post contains forbidden words (\"{word}\"). Please follow community ethics.",
+        "updateSuccess": "Topic updated successfully!",
+        "publishSuccess": "Topic published successfully!",
+        "error": "Failed to process request. Please try again."
+      }
+    },
     "sidebarAbout": "About Community",
     "sidebarTopic": "Filter by Activity",
     "comments": "Comments",
@@ -360,7 +444,38 @@
     "title": "Advertise Service",
     "sub": "Promote your campsite or service here.",
     "imgLabel": "Main Image",
-    "uploadText": "Click to upload"
+    "uploadText": "Click to upload",
+    "checkIn": "Check-In Time",
+    "checkOut": "Check-Out Time",
+    "guideRatio": "Guide Ratio",
+    "certification": "Certificate / License",
+    "vehicleType": "Vehicle Type",
+    "coverageArea": "Coverage Area",
+    "maxPax": "Max Pax",
+    "equipmentList": "Equipment List",
+    "pickupLocation": "Pickup Location",
+    "priceDisplayLabel": "Price Display (Simple)",
+    "serviceImages": "Service Images",
+    "ratioPlaceholder": "E.g.: 1:7",
+    "certPlaceholder": "WFA, Malim...",
+    "vehiclePlaceholder": "E.g.: Hilux 4x4",
+    "waPlaceholder": "123456789",
+    "options": {
+      "day": "Per Day"
+    },
+    "stepLabels": {
+      "basic": "Basic Info",
+      "details": "Details",
+      "gallery": "Gallery"
+    },
+    "section1Header": "Service Basic Info",
+    "section2Header": "{category} Details",
+    "section3Header": "Gallery & Contact",
+    "imagesCount": "Service Images ({count} / 10)",
+    "addBtn": "Add",
+    "fullDescLabel": "Full Description",
+    "fullDescPlaceholder": "Explain the highlights of your service...",
+    "whatsappLabelSimple": "WhatsApp No."
   },
   "service": {
     "info": "Service Info",
@@ -490,6 +605,7 @@
     "mapPlaceholder": "Paste link here",
     "gpxLabel": "GPX File",
     "imagesLabel": "Gallery",
+    "imagesLabelLimit": "Gallery (Max 10)",
     "descLabel": "Description",
     "descPlaceholder": "Tell us more about this place...",
     "submitBtn": "Submit Spot",
@@ -544,7 +660,27 @@
     },
     "alerts": {
       "fillNameState": "Please fill in Spot Name and State first.",
-      "suggestionSent": "Update suggestion sent! Needs 5 verifications."
+      "suggestionSent": "Update suggestion sent! Needs 5 verifications.",
+      "maxImages": "Maximum 10 images only.",
+      "fileTooLarge": "File {name} is too large (Max 5MB).",
+      "spam": "Input contains forbidden words.",
+      "updateSuccess": "Update successful!",
+      "createSuccess": "Spot added successfully!"
+    },
+    "distanceLabel": "Distance (KM)",
+    "durationLabel": "Estimated Duration",
+    "durationPlaceholder": "E.g.: 4 Hours / 2D1N",
+    "distancePlaceholder": "E.g.: 5.2",
+    "mapsLinkLabel": "Google Maps Trailhead Link (Optional)",
+    "galleryInfoTitle": "Gallery & Further Info",
+    "submitUpdate": "Save Changes",
+    "submitCreate": "🚀 Submit Spot",
+    "chooseFile": "Choose File",
+    "options": {
+      "unknown": "Unknown",
+      "notRequired": "Not Required",
+      "required": "Required",
+      "selectState": "Select State"
     }
   }
 }

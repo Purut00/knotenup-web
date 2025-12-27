@@ -9,32 +9,32 @@
       
       <div class="text-center mb-10 relative z-10">
         <h1 class="text-4xl font-bold text-white mb-2">
-          {{ isEditMode ? t('createSpot.editTitle') : (t('createSpot.title') || 'Kongsi Lokasi Baru') }}
+          {{ isEditMode ? t('createSpot.editTitle') : t('createSpot.title') }}
         </h1>
         <p class="text-gray-400">
-          {{ isEditMode ? t('createSpot.editSub') : (t('createSpot.sub') || 'Bantu komuniti temui tempat menarik.') }}
+          {{ isEditMode ? t('createSpot.editSub') : t('createSpot.sub') }}
         </p>
       </div>
 
       <div class="stepper-wrapper relative z-10">
         <div class="step-item" :class="{ active: currentStep >= 1, done: currentStep > 1 }">
           <div class="step-circle">1</div>
-          <span class="step-label">{{ t('createSpot.steps.step1') || 'Info Asas' }}</span>
+          <span class="step-label">{{ t('createSpot.steps.step1') }}</span>
         </div>
         <div class="step-line" :class="{ active: currentStep > 1 }"></div>
         <div class="step-item" :class="{ active: currentStep >= 2, done: currentStep > 2 }">
           <div class="step-circle">2</div>
-          <span class="step-label">{{ t('createSpot.steps.step2') || 'Galeri & Tips' }}</span>
+          <span class="step-label">{{ t('createSpot.steps.step2') }}</span>
         </div>
       </div>
 
       <div class="glass-form-card relative z-10 fade-up">
         
         <div v-if="currentStep === 1">
-          <h2 class="section-title">{{ t('createSpot.section1.title') || 'Maklumat Lokasi' }}</h2>
+          <h2 class="section-title">{{ t('createSpot.section1.title') }}</h2>
           
           <div class="form-group">
-            <label>{{ t('createSpot.nameLabel') || 'Nama Tempat' }}</label>
+            <label>{{ t('createSpot.nameLabel') }}</label>
             <input 
               type="text" 
               v-model="form.name" 
@@ -43,13 +43,13 @@
               @blur="checkDuplicate"
               :disabled="isEditMode"
             />
-            <small v-if="duplicateWarning && !isEditMode" class="text-red-400 font-bold mt-1 block">
-                ⚠️ {{ t('createSpot.duplicateWarn') || 'Nama ini mungkin sudah wujud.' }}
+             <small v-if="duplicateWarning && !isEditMode" class="text-red-400 font-bold mt-1 block">
+                ⚠️ {{ t('createSpot.duplicateWarn') }}
             </small>
           </div>
 
           <div class="form-group">
-            <label>{{ t('createSpot.viaLabel') || 'Laluan Masuk (Via)' }}</label>
+            <label>{{ t('createSpot.viaLabel') }}</label>
             <input type="text" v-model="form.via" class="glass-input" :placeholder="t('createSpot.viaPlaceholder')" />
           </div>
 
@@ -67,29 +67,29 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label>{{ t('createSpot.stateLabel') || 'Negeri' }}</label>
+              <label>{{ t('createSpot.stateLabel') }}</label>
               <div class="select-wrapper">
                   <select v-model="form.state" class="glass-input">
-                    <option disabled value="">Pilih Negeri</option>
-                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
+                    <option disabled value="">{{ t('createSpot.options.selectState') }}</option>
+                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ t('states.' + state) || state }}</option>
                   </select>
                   <i class="fas fa-chevron-down select-arrow"></i>
               </div>
             </div>
             <div class="form-group">
-              <label>{{ t('createSpot.heightLabel') || 'Ketinggian (m)' }}</label>
+              <label>{{ t('createSpot.heightLabel') }}</label>
               <input type="number" v-model="form.height" class="glass-input" :placeholder="t('createSpot.heightPlaceholder')" />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label>Jarak (KM)</label>
-              <input type="number" step="0.1" v-model="form.distance" class="glass-input" placeholder="Cth: 5.2" />
+              <label>{{ t('createSpot.distanceLabel') }}</label>
+              <input type="number" step="0.1" v-model="form.distance" class="glass-input" :placeholder="t('createSpot.distancePlaceholder')" />
             </div>
             <div class="form-group">
-              <label>Anggaran Masa</label>
-              <input type="text" v-model="form.duration" class="glass-input" placeholder="Cth: 4 Jam / 2H1M" />
+              <label>{{ t('createSpot.durationLabel') }}</label>
+              <input type="text" v-model="form.duration" class="glass-input" :placeholder="t('createSpot.durationPlaceholder')" />
             </div>
           </div>
 
@@ -98,21 +98,21 @@
               <label>{{ t('createSpot.diffLabel') || 'Tahap Kesukaran' }}</label>
               <div class="select-wrapper">
                   <select v-model="form.difficulty" class="glass-input">
-                    <option value="Easy">🟢 Mudah (Easy)</option>
-                    <option value="Moderate">🟡 Sederhana (Moderate)</option>
-                    <option value="Hard">🔴 Sukar (Hard)</option>
-                    <option value="Extreme">⚫ Extreme</option>
+                    <option value="Easy">{{ t('levels.easy') }}</option>
+                    <option value="Moderate">{{ t('levels.moderate') }}</option>
+                    <option value="Hard">{{ t('levels.hard') }}</option>
+                    <option value="Extreme">{{ t('levels.extreme') }}</option>
                   </select>
                   <i class="fas fa-chevron-down select-arrow"></i>
               </div>
             </div>
             <div class="form-group">
-              <label>{{ t('createSpot.permitLabel') || 'Status Permit' }}</label>
+              <label>{{ t('createSpot.permitLabel') }}</label>
               <div class="select-wrapper">
                   <select v-model="form.permit" class="glass-input">
-                    <option value="Unknown">Tidak Diketahui</option>
-                    <option value="No">{{ t('spots.noPermit') || 'Tidak Perlu' }}</option>
-                    <option value="Perlu">Perlu</option>
+                    <option value="Unknown">{{ t('createSpot.options.unknown') }}</option>
+                    <option value="No">{{ t('createSpot.options.notRequired') }}</option>
+                    <option value="Perlu">{{ t('createSpot.options.required') }}</option>
                   </select>
                   <i class="fas fa-chevron-down select-arrow"></i>
               </div>
@@ -120,56 +120,56 @@
           </div>
 
           <div class="form-group mt-4">
-            <label>{{ t('createSpot.guideLabel') || 'Keperluan Guide' }}</label>
+            <label>{{ t('createSpot.guideLabel') }}</label>
             <div class="radio-group">
               <label class="radio-card" :class="{ active: form.guideRequired === 'Unknown' }">
                  <input type="radio" v-model="form.guideRequired" value="Unknown" hidden>
-                 <span>Tidak Diketahui</span>
+                 <span>{{ t('createSpot.options.unknown') }}</span>
                </label>
                <label class="radio-card" :class="{ active: form.guideRequired === 'No' }">
                  <input type="radio" v-model="form.guideRequired" value="No" hidden>
-                 <span>Tidak Perlu</span>
+                 <span>{{ t('createSpot.options.notRequired') }}</span>
                </label>
                <label class="radio-card" :class="{ active: form.guideRequired === 'Optional' }">
                  <input type="radio" v-model="form.guideRequired" value="Optional" hidden>
-                 <span>Pilihan (Optional)</span>
+                 <span>{{ t('createSpot.guideOptions.optional') || 'Optional' }}</span>
                </label>
                <label class="radio-card" :class="{ active: form.guideRequired === 'Yes' }">
                  <input type="radio" v-model="form.guideRequired" value="Yes" hidden>
-                 <span>Wajib</span>
+                 <span>{{ t('createSpot.guideOptions.yes') || 'Mandatory' }}</span>
                </label>
             </div>
           </div>
 
           <div class="form-group mt-4">
-            <label>Link Google Maps Trailhead (Optional)</label>
+            <label>{{ t('createSpot.mapsLinkLabel') }}</label>
             <input type="text" v-model="form.mapsLink" class="glass-input" :placeholder="t('createSpot.mapPlaceholder')" />
           </div>
 
           <div class="form-group">
-            <label>{{ t('createSpot.gpxLabel') || 'Fail GPX Trail' }}</label>
+            <label>{{ t('createSpot.gpxLabel') }}</label>
             <div class="file-upload-box">
                <div class="file-info">
                  <i class="fas fa-map-marked-alt text-2xl mb-2 text-green-400"></i>
                  <span v-if="gpxFile" class="text-white font-bold">{{ gpxFile.name }}</span>
-                 <span v-else-if="form.gpxUrl" class="text-green-400 font-bold">Fail GPX Sedia Ada</span>
-                 <span v-else class="text-gray-400 text-sm">Upload fail .gpx (Optional)</span>
+                 <span v-else-if="form.gpxUrl" class="text-green-400 font-bold">{{ t('createSpot.gpx.existing') }}</span>
+                 <span v-else class="text-gray-400 text-sm">{{ t('createSpot.gpx.prompt') }}</span>
                </div>
                <input type="file" accept=".gpx" @change="handleGpxSelect" class="hidden-input" ref="gpxInput" />
-               <button class="btn-browse" @click="((gpxInput as any) || {}).click?.()">Pilih Fail</button>
+               <button class="btn-browse" @click="((gpxInput as any) || {}).click?.()">{{ t('createSpot.chooseFile') }}</button>
             </div>
           </div>
         </div>
 
         <div v-if="currentStep === 2">
-          <h2 class="section-title">Galeri & Info Lanjut</h2>
+          <h2 class="section-title">{{ t('createSpot.galleryInfoTitle') }}</h2>
 
           <div class="form-group">
-            <label>📸 {{ t('createSpot.imagesLabel') }} (Max 10)</label>
+            <label>📸 {{ t('createSpot.imagesLabelLimit') }}</label>
             <div class="upload-grid mt-2">
                <div class="upload-box" @click="triggerMultiUpload" v-if="previewImages.length < 10">
                  <i class="fas fa-plus text-2xl mb-2 text-purple-400"></i>
-                 <span>Tambah</span>
+                 <span>{{ t('createSpot.addPhoto') }}</span>
                </div>
                <input type="file" ref="multiFileInput" multiple accept="image/*" @change="handleImageSelect" hidden />
 
@@ -181,41 +181,41 @@
           </div>
 
           <div class="form-group mt-6">
-              <label>💡 {{ t('createSpot.labels.tips') || 'Tips Pendaki' }}</label>
-              <textarea v-model="form.tips" rows="2" class="glass-input" placeholder="Cth: Bawa air secukupnya, pacat banyak..."></textarea>
+              <label>💡 {{ t('createSpot.labels.tips') }}</label>
+              <textarea v-model="form.tips" rows="2" class="glass-input" :placeholder="t('createSpot.placeholders.tips')"></textarea>
           </div>
 
           <div class="form-group">
-              <label>🚗 {{ t('createSpot.labels.parking') || 'Info Parking' }}</label>
-              <input type="text" v-model="form.parking" class="glass-input" placeholder="Cth: RM5 per entry, tepi jalan" />
+              <label>🚗 {{ t('createSpot.labels.parking') }}</label>
+              <input type="text" v-model="form.parking" class="glass-input" :placeholder="t('createSpot.placeholders.parking')" />
           </div>
 
           <div class="form-group">
-              <label>📍 {{ t('createSpot.labels.checkpoint') || 'Checkpoints' }}</label>
-              <textarea v-model="form.checkpointDetail" rows="3" class="glass-input" placeholder="Senarai CP, punca air, campsite..."></textarea>
+              <label>📍 {{ t('createSpot.labels.checkpoint') }}</label>
+              <textarea v-model="form.checkpointDetail" rows="3" class="glass-input" :placeholder="t('createSpot.placeholders.checkpoint')"></textarea>
           </div>
 
           <div class="form-group">
-              <label>📝 {{ t('createSpot.labels.other') || 'Deskripsi Penuh' }}</label>
-              <textarea v-model="form.description" rows="4" class="glass-input" placeholder="Ceritakan pengalaman atau info tambahan..."></textarea>
+              <label>📝 {{ t('createSpot.labels.other') }}</label>
+              <textarea v-model="form.description" rows="4" class="glass-input" :placeholder="t('createSpot.descPlaceholder')"></textarea>
           </div>
         </div>
 
         <div class="form-actions mt-8 flex justify-between items-center">
            <button v-if="currentStep === 1" class="btn-back" @click="$router.back()">
-             Batal
+             {{ t('common.cancel') }}
            </button>
            <button v-if="currentStep === 2" class="btn-back" @click="prevStep">
-             <i class="fas fa-arrow-left mr-2"></i> Kembali
+             <i class="fas fa-arrow-left mr-2"></i> {{ t('common.back') }}
            </button>
            
            <div v-if="currentStep === 1" class="spacer"></div>
 
            <button v-if="currentStep === 1" @click="nextStep" class="btn-next">
-             Seterusnya <i class="fas fa-arrow-right ml-2"></i>
+             {{ t('common.next') }} <i class="fas fa-arrow-right ml-2"></i>
            </button>
            <button v-if="currentStep === 2" @click="submitSpot" class="btn-submit" :disabled="loading">
-             {{ loading ? 'Sedang Upload...' : (isEditMode ? 'Simpan Perubahan' : '🚀 Hantar Spot') }}
+             {{ loading ? t('common.uploading') : (isEditMode ? t('createSpot.submitUpdate') : t('createSpot.submitCreate')) }}
            </button>
         </div>
 
@@ -233,6 +233,7 @@ import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { MALAYSIA_STATES } from '../constants/data';
 import { isSpam } from '../utils/spamFilter';
+import { getEffectiveUserProfile } from '../utils/userProfile';
 import LocationPicker from '../components/common/LocationPicker.vue';
 
 const { t } = useI18n();
@@ -288,7 +289,7 @@ onMounted(async () => {
 
 const nextStep = () => {
   if (!form.name || !form.state) {
-    alert(t('createSpot.alerts.fillNameState') || "Sila isi Nama dan Negeri.");
+    alert(t('createSpot.alerts.fillNameState'));
     return;
   }
   currentStep.value = 2;
@@ -306,11 +307,11 @@ const handleImageSelect = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files) {
     const files = Array.from(target.files);
-    if (previewImages.value.length + files.length > 10) return alert("Maksimum 10 gambar sahaja.");
+    if (previewImages.value.length + files.length > 10) return alert(t('createSpot.alerts.maxImages'));
 
     for (const file of files) {
       if (file.size > 5 * 1024 * 1024) {
-        alert(`Fail ${file.name} terlalu besar (Max 5MB).`);
+        alert(t('createSpot.alerts.fileTooLarge', { name: file.name }));
         continue;
       }
       newImageFiles.value.push(file);
@@ -348,8 +349,8 @@ const checkDuplicate = async () => {
 };
 
 const submitSpot = async () => {
-  if (!auth.currentUser) return alert(t('auth.loginRequired') || "Sila login dahulu.");
-  if (isSpam(form.name) || isSpam(form.description) || isSpam(form.via)) return alert("Input mengandungi perkataan dilarang.");
+  if (!auth.currentUser) return alert(t('auth.loginRequired'));
+  if (isSpam(form.name) || isSpam(form.description) || isSpam(form.via)) return alert(t('createSpot.alerts.spam'));
 
   loading.value = true;
   try {
@@ -390,16 +391,19 @@ const submitSpot = async () => {
          lastEditedBy: auth.currentUser.displayName || 'User',
          lastEditedAt: serverTimestamp()
       });
-      alert("Kemaskini berjaya!");
+      alert(t('createSpot.alerts.updateSuccess'));
       router.push('/spots/' + spotId);
     } else {
+      // Get effective profile
+      const userProfile = await getEffectiveUserProfile(auth.currentUser);
+
       await addDoc(collection(db, 'spots'), {
         ...spotData,
         contributorId: auth.currentUser.uid,
-        contributorName: auth.currentUser.displayName || 'User',
+        contributorName: userProfile.name,
         createdAt: serverTimestamp()
       });
-      alert("Spot berjaya ditambah!");
+      alert(t('createSpot.alerts.createSuccess'));
       router.push('/spots');
     }
   } catch (e) {
