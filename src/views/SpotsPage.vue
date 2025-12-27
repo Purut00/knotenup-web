@@ -13,16 +13,23 @@
           <p class="text-gray-400 text-lg max-w-xl">{{ t('spots.sub') || 'Temui gunung, bukit, air terjun dan lokasi rekreasi terbaik di Malaysia.' }}</p>
         </div>
         
-        <button 
-          class="group relative inline-flex items-center justify-center px-6 py-3 font-bold text-white transition-all duration-200 bg-transparent border-none cursor-pointer focus:outline-none"
-          @click="$router.push('/create-spot')"
-        >
-          <span class="absolute inset-0 w-full h-full -mt-1 rounded-full opacity-30 bg-gradient-to-r from-purple-600 to-blue-600 blur-lg group-hover:opacity-60 transition duration-200"></span>
-          <span class="relative flex items-center bg-gradient-to-r from-purple-600 to-blue-600 rounded-full px-6 py-3 shadow-xl hover:-translate-y-1 transition transform duration-200">
-             <i class="fas fa-plus-circle text-xl mr-2"></i>
-             <span class="uppercase tracking-wide text-sm">{{ t('spots.addBtn') || 'Tambah Spot' }}</span>
-          </span>
-        </button>
+        <div class="flex gap-4">
+           <!-- ADMIN / DEV ONLY -->
+           <button @click="runSeeder" class="btn btn-outline border-emerald-500/50 text-emerald-400 text-xs">
+              <i class="fas fa-database mr-2"></i> Seed Data
+           </button>
+
+           <button 
+             class="group relative inline-flex items-center justify-center px-6 py-3 font-bold text-white transition-all duration-200 bg-transparent border-none cursor-pointer focus:outline-none"
+             @click="$router.push('/create-spot')"
+           >
+             <span class="absolute inset-0 w-full h-full -mt-1 rounded-full opacity-30 bg-gradient-to-r from-purple-600 to-blue-600 blur-lg group-hover:opacity-60 transition duration-200"></span>
+             <span class="relative flex items-center bg-gradient-to-r from-purple-600 to-blue-600 rounded-full px-6 py-3 shadow-xl hover:-translate-y-1 transition transform duration-200">
+                <i class="fas fa-plus-circle text-xl mr-2"></i>
+                <span class="uppercase tracking-wide text-sm">{{ t('spots.addBtn') || 'Tambah Spot' }}</span>
+             </span>
+           </button>
+        </div>
       </div>
 
       <div class="mb-10 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md animate-fade-in-up" style="animation-delay: 0.1s;">
@@ -79,7 +86,7 @@
 
       <div class="relative z-10">
         
-        <div v-if="initialLoading" class="flex flex-col items-center justify-center py-20 text-gray-400">
+        <div v-if="initialLoading && spots.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-400">
           <div class="spinner w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mb-4"></div>
           <p>{{ t('common.loading') }}...</p>
         </div>
@@ -87,22 +94,17 @@
         <div v-else-if="spots.length === 0" class="flex flex-col items-center justify-center py-20 bg-white/5 rounded-2xl border border-white/5 border-dashed text-gray-500">
           <i class="fas fa-mountain text-5xl mb-4 opacity-30"></i>
           <h3 class="text-xl font-bold text-gray-300">{{ t('spots.empty') || 'Tiada Lokasi Dijumpai' }}</h3>
-          <p class="mt-2 text-sm">Cuba ubah kata kunci carian atau filter anda.</p>
+          <p class="mt-2 text-sm">Masih belum ada lokasi tersenarai atau cuba filter lain.</p>
           <button @click="resetFilters" class="text-purple-400 hover:text-purple-300 underline mt-3 font-medium">Reset Filter</button>
         </div>
 
         <div v-else>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <SpotCard 
-                    v-for="spot in spots" 
-                    :key="spot.id" 
-                    :spot="spot" 
-                />
+                <SpotCard v-for="spot in spots" :key="spot.id" :spot="spot" />
             </div>
 
             <div v-if="loadingMore" class="flex justify-center items-center py-8">
                 <div class="spinner w-8 h-8 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin"></div>
-                <span class="ml-3 text-gray-400 font-medium animate-pulse">Memuatkan lagi...</span>
             </div>
 
             <div ref="bottomTrigger" class="h-10 mt-4 pointer-events-none"></div>
@@ -118,181 +120,54 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, nextTick, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, computed, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { db } from '../firebaseConfig';
-// Import fungsi Firestore yang diperlukan
-import { collection, getDocs, query, orderBy, limit, startAfter, where, type QueryDocumentSnapshot } from 'firebase/firestore';
-
-// Imports Constants & Types
+import type { Spot } from '../types';
 import { MALAYSIA_STATES } from '../constants/data';
 import { SPOT_CATEGORIES } from '../constants/spotData';
-import type { Spot } from '../types';
-
-// Import Component Baru
 import SpotCard from '../components/spot/SpotCard.vue';
+import { useSpots } from '../composables/useSpots';
+import { seedSpots } from '../utils/seeder';
 
 const { t } = useI18n();
+const { spots, loading: initialLoading, loadingMore, allLoaded, fetchSpots } = useSpots();
 
-// CONSTANTS
-const BATCH_SIZE = 8;
-
-// STATE
-const initialLoading = ref(true);
-const loadingMore = ref(false);
-const allLoaded = ref(false);
-const lastVisible = ref<QueryDocumentSnapshot | null>(null);
 const bottomTrigger = ref<HTMLElement | null>(null);
 const observer = ref<IntersectionObserver | null>(null);
 
-const spots = ref<Spot[]>([]);
-
-// Reactive Filters
-const filters = reactive({
-    searchQuery: '',
-    state: '',
-    category: ''
-});
-
-// Computed untuk check jika filter aktif (untuk butang reset)
+const filters = reactive({ searchQuery: '', state: '', category: '' });
 const hasActiveFilters = computed(() => !!filters.searchQuery || !!filters.state || !!filters.category);
 
-// --- QUERY BUILDER (Server-Side Logic) ---
-const buildQuery = (isLoadMore = false) => {
-    const spotsRef = collection(db, "spots");
-    const constraints: any[] = [];
-
-    // 1. LOGIK SEARCH NAMA
-    if (filters.searchQuery.trim()) {
-        const searchTerm = filters.searchQuery.toLowerCase().trim();
-        // Cari nama yang bermula dengan input user
-        constraints.push(where('name_lowercase', '>=', searchTerm));
-        constraints.push(where('name_lowercase', '<=', searchTerm + '\uf8ff'));
-        // Bila guna range filter (>=), mesti order by field yang sama
-        constraints.push(orderBy('name_lowercase'));
-    } 
-    // 2. LOGIK JIKA TIADA SEARCH (Default)
-    else {
-        // Susun ikut tarikh paling baru
-        constraints.push(orderBy("createdAt", "desc"));
-    }
-
-    // 3. LOGIK FILTER NEGERI (Server Side)
-    // Note: Ini mungkin perlukan Composite Index di Firebase Console
-    if (filters.state) {
-        constraints.push(where('state', '==', filters.state));
-    }
-
-    // 4. LOGIK FILTER KATEGORI (Server Side)
-    if (filters.category) {
-        constraints.push(where('category', '==', filters.category));
-    }
-
-    // Limit sentiasa ada
-    constraints.push(limit(BATCH_SIZE));
-
-    // Pagination (Load More)
-    if (isLoadMore && lastVisible.value) {
-        constraints.push(startAfter(lastVisible.value));
-    }
-
-    return query(spotsRef, ...constraints);
-};
-
-// --- ACTIONS ---
-
-// Trigger Search (Dipanggil bila tekan Cari / Enter / Tukar Dropdown)
-const handleSearch = () => {
-    fetchInitialSpots();
-};
-
+const handleSearch = () => { fetchSpots(filters, false); };
 const resetFilters = () => {
-    filters.searchQuery = '';
-    filters.state = '';
-    filters.category = '';
-    handleSearch(); // Fetch semula data asal
+    filters.searchQuery = ''; filters.state = ''; filters.category = '';
+    handleSearch();
 };
 
-// Fetch Data Awal
-const fetchInitialSpots = async () => {
-    initialLoading.value = true;
-    allLoaded.value = false;
-    lastVisible.value = null;
-    spots.value = []; // PENTING: Kosongkan list lama
-
-    try {
-        const q = buildQuery(false);
-        const snap = await getDocs(q);
-        
-        if (!snap.empty) {
-            spots.value = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Spot[];
-            const lastDoc = snap.docs[snap.docs.length - 1];
-            if (lastDoc) lastVisible.value = lastDoc;
-            if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
-        } else {
-            allLoaded.value = true;
-        }
-    } catch (e: any) { 
-        console.error("Error fetching spots:", e);
-        // Tip untuk developer:
-        if (e.message.includes("requires an index")) {
-            console.warn("⚠️ PERLU BUAT INDEX: Sila buka console browser dan klik link yang disediakan oleh Firebase.");
-            alert("Sistem sedang mengemaskini index database. Sila buka Console (F12) untuk link pembetulan.");
-        }
-    } finally { 
-        initialLoading.value = false; 
-        nextTick(() => setupObserver());
-    }
+const runSeeder = async () => {
+   if(confirm("Adakah anda pasti mahu menjana data awal?")) {
+      await seedSpots();
+      handleSearch(); // Refresh list
+   }
 };
 
-// Infinite Scroll Load More
-const loadMoreSpots = async () => {
-    if (loadingMore.value || allLoaded.value || !lastVisible.value) return;
+const loadMoreSpots = () => { fetchSpots(filters, true); };
 
-    loadingMore.value = true;
-
-    try {
-        const q = buildQuery(true);
-        const snap = await getDocs(q);
-
-        if (!snap.empty) {
-            const newSpots = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Spot[];
-            
-            // Tapis duplicate ID (Langkah berjaga-jaga)
-            const uniqueSpots = newSpots.filter(ns => !spots.value.some(s => s.id === ns.id));
-            spots.value = [...spots.value, ...uniqueSpots];
-
-            const lastDoc = snap.docs[snap.docs.length - 1];
-            if (lastDoc) lastVisible.value = lastDoc;
-            if (snap.docs.length < BATCH_SIZE) allLoaded.value = true;
-        } else {
-            allLoaded.value = true;
-        }
-    } catch (e) {
-        console.error("Error loading more spots:", e);
-    } finally {
-        loadingMore.value = false;
-    }
-};
-
-// --- OBSERVER ---
 const setupObserver = () => {
     if (observer.value) observer.value.disconnect();
-
     observer.value = new IntersectionObserver((entries) => {
         if (entries[0]?.isIntersecting && !loadingMore.value && !allLoaded.value) {
             loadMoreSpots();
         }
     }, { rootMargin: '200px' });
-
-    if (bottomTrigger.value) {
-        observer.value.observe(bottomTrigger.value);
-    }
+    if (bottomTrigger.value) observer.value.observe(bottomTrigger.value);
 };
 
-// Lifecycle
 onMounted(() => {
-    fetchInitialSpots();
+    fetchSpots(filters, false).then(() => {
+      // Tunggu DOM update sikit
+      setTimeout(setupObserver, 500);
+    });
 });
 
 onUnmounted(() => {
@@ -301,7 +176,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Page Theme */
 .page-glow-purple {
   position: absolute; top: 0; right: 0; width: 60vw; height: 60vw;
   background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%; z-index: 0;
@@ -316,7 +190,6 @@ onUnmounted(() => {
   background-size: cover;
 }
 
-/* Custom Select Styling */
 .custom-select {
   width: 100%; appearance: none; padding: 12px 36px 12px 38px;
   border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.1);
@@ -325,8 +198,4 @@ onUnmounted(() => {
 }
 .custom-select:hover { background: rgba(0,0,0,0.3); }
 .custom-select:focus { border-color: #6c63ff; }
-
-.select-wrapper::after {
-  content: '▼'; font-size: 0.7rem; color: #94a3b8; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none;
-}
 </style>

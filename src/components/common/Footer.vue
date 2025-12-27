@@ -1,53 +1,64 @@
 <template>
-  <footer class="footer">
-    <div class="container">
+  <footer class="bg-slate-900 border-t border-white/5 pt-16 mt-auto text-slate-300">
+    <div class="container-std">
       
-      <div class="footer-grid">
+      <!-- Footer Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-12 border-b border-white/5">
         
-        <div class="footer-col">
-          <h2 class="footer-logo">KnotenUp</h2>
-          <p class="footer-desc">{{ t('footer.desc') }}</p>
+        <!-- Logo Col -->
+        <div class="flex flex-col gap-4">
+          <h2 class="text-3xl font-display font-bold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent w-fit mb-0">
+            KnotenUp
+          </h2>
+          <p class="text-sm leading-relaxed text-slate-400 max-w-xs">
+            {{ t('footer.desc') }}
+          </p>
         </div>
 
-        <div class="footer-col">
-          <h3>{{ t('footer.quickLinks') }}</h3>
-          <ul>
-            <li><router-link to="/">{{ t('navbar.home') }}</router-link></li>
-            <li><router-link to="/trips">{{ t('navbar.trips') }}</router-link></li>
-            <li><router-link to="/service">{{ t('directory.title') }}</router-link></li>
-            <li><router-link to="/forum">{{ t('navbar.forum') }}</router-link></li>
-            <li><router-link to="/requests">{{ t('navbar.requests') }}</router-link></li>
+        <!-- Links Col -->
+        <div>
+          <h3 class="text-white font-bold uppercase tracking-wider text-sm mb-4">{{ t('footer.quickLinks') }}</h3>
+          <ul class="space-y-2 text-sm">
+            <li><router-link to="/" class="hover:text-primary-400 transition-colors">{{ t('navbar.home') }}</router-link></li>
+            <li><router-link to="/trips" class="hover:text-primary-400 transition-colors">{{ t('navbar.trips') }}</router-link></li>
+            <li><router-link to="/service" class="hover:text-primary-400 transition-colors">{{ t('directory.title') }}</router-link></li>
+            <li><router-link to="/forum" class="hover:text-primary-400 transition-colors">{{ t('navbar.forum') }}</router-link></li>
+            <li><router-link to="/requests" class="hover:text-primary-400 transition-colors">{{ t('navbar.requests') }}</router-link></li>
           </ul>
         </div>
 
-        <div class="footer-col">
-          <h3>{{ t('footer.support') }}</h3>
-          <ul>
-            <li>
-              <router-link to="/terms">{{ t('footer.terms') || 'Terma & Syarat' }}</router-link>
-            </li>
-            <li>
-              <router-link to="/privacy">{{ t('footer.privacy') || 'Dasar Privasi' }}</router-link>
-            </li>
-            <li><a href="#">{{ t('footer.help') }}</a></li>
-            <li><a href="#">{{ t('footer.contactAdmin') }}</a></li>
+        <!-- Support Col -->
+        <div>
+          <h3 class="text-white font-bold uppercase tracking-wider text-sm mb-4">{{ t('footer.support') }}</h3>
+          <ul class="space-y-2 text-sm">
+            <li><router-link to="/terms" class="hover:text-primary-400 transition-colors">{{ t('footer.terms') || 'Terma & Syarat' }}</router-link></li>
+            <li><router-link to="/privacy" class="hover:text-primary-400 transition-colors">{{ t('footer.privacy') || 'Dasar Privasi' }}</router-link></li>
+            <li><a href="#" class="hover:text-primary-400 transition-colors">{{ t('footer.help') }}</a></li>
+            <li><a href="#" class="hover:text-primary-400 transition-colors">{{ t('footer.contactAdmin') }}</a></li>
           </ul>
         </div>
 
-        <div class="footer-col">
-          <h3>{{ t('footer.contact') }}</h3>
-          <div class="social-icons">
-            <a href="#" target="_blank"><img src="https://cdn.simpleicons.org/facebook/white" alt="FB"></a>
-            <a href="#" target="_blank"><img src="https://cdn.simpleicons.org/instagram/white" alt="IG"></a>
-            <a href="#" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/white" alt="TT"></a>
-            <a href="#" target="_blank"><img src="https://cdn.simpleicons.org/youtube/white" alt="YT"></a>
+        <!-- Contact Col -->
+        <div>
+          <h3 class="text-white font-bold uppercase tracking-wider text-sm mb-4">{{ t('footer.contact') }}</h3>
+          <div class="flex gap-4 mb-4">
+            <a href="#" target="_blank" class="hover:scale-110 transition-transform opacity-70 hover:opacity-100">
+               <img src="https://cdn.simpleicons.org/facebook/white" alt="FB" class="w-5 h-5">
+            </a>
+            <a href="#" target="_blank" class="hover:scale-110 transition-transform opacity-70 hover:opacity-100">
+               <img src="https://cdn.simpleicons.org/instagram/white" alt="IG" class="w-5 h-5">
+            </a>
+            <a href="#" target="_blank" class="hover:scale-110 transition-transform opacity-70 hover:opacity-100">
+               <img src="https://cdn.simpleicons.org/tiktok/white" alt="TT" class="w-5 h-5">
+            </a>
           </div>
-          <p class="contact-email">admin@knotenup.com</p>
+          <p class="text-sm text-slate-400">admin@knotenup.com</p>
         </div>
 
       </div>
 
-      <div class="footer-bottom">
+      <!-- Copyright -->
+      <div class="py-6 text-center text-xs text-slate-600">
         <p>&copy; {{ currentYear }} KnotenUp. {{ t('footer.rights') }}</p>
       </div>
     </div>
@@ -56,138 +67,6 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-
 const { t } = useI18n();
 const currentYear = new Date().getFullYear();
 </script>
-
-<style scoped>
-.footer {
-  background-color: #2c3e50;
-  color: #ecf0f1;
-  padding-top: 4rem;
-  margin-top: auto; /* Tolak footer ke bawah jika page pendek */
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-/* GRID LAYOUT */
-.footer-grid {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr; /* Kolum 1 besar sikit */
-  gap: 2rem;
-  padding-bottom: 3rem;
-  border-bottom: 1px solid #34495e;
-}
-
-/* COLUMN STYLES */
-.footer-col h2.footer-logo {
-  color: #e67e22; /* Warna Oren Shopee/Theme */
-  font-size: 2rem;
-  margin: 0 0 1rem 0;
-  font-weight: 900;
-  letter-spacing: -1px;
-}
-
-.footer-col h3 {
-  color: #fff;
-  font-size: 1.1rem;
-  margin-bottom: 1.2rem;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.footer-desc {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: #bdc3c7;
-  max-width: 300px;
-}
-
-/* LINKS */
-.footer-col ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-col ul li {
-  margin-bottom: 0.8rem;
-}
-
-.footer-col ul li a {
-  text-decoration: none;
-  color: #bdc3c7;
-  font-size: 0.9rem;
-  transition: color 0.2s;
-}
-
-.footer-col ul li a:hover {
-  color: #e67e22; /* Hover jadi oren */
-  padding-left: 5px; /* Gerak sikit */
-}
-
-/* SOCIAL ICONS */
-.social-icons {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 1rem;
-}
-
-.social-icons img {
-  width: 24px;
-  height: 24px;
-  transition: transform 0.2s;
-  opacity: 0.8;
-}
-
-.social-icons a:hover img {
-  transform: scale(1.2);
-  opacity: 1;
-}
-
-.contact-email {
-  color: #bdc3c7;
-  font-size: 0.9rem;
-}
-
-/* BOTTOM COPYRIGHT */
-.footer-bottom {
-  padding: 1.5rem 0;
-  text-align: center;
-  color: #7f8c8d;
-  font-size: 0.85rem;
-}
-
-/* RESPONSIVE MOBILE */
-@media (max-width: 900px) {
-  .footer-grid {
-    grid-template-columns: 1fr 1fr; /* 2 Kolum per baris */
-  }
-}
-
-@media (max-width: 600px) {
-  .footer-grid {
-    grid-template-columns: 1fr; /* 1 Kolum memanjang */
-    text-align: center;
-  }
-  
-  .footer-desc {
-    margin: 0 auto; /* Centerkan teks description */
-  }
-
-  .social-icons {
-    justify-content: center;
-  }
-  
-  /* Centerkan list items */
-  .footer-col ul li a:hover {
-    padding-left: 0; 
-    color: #e67e22;
-  }
-}
-</style>

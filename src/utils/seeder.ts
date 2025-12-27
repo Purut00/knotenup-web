@@ -1,112 +1,73 @@
-import { collection, addDoc, GeoPoint, serverTimestamp } from "firebase/firestore";
-import { db, auth } from "../firebaseConfig";
-import mapData from "./gunung_siap_negeri.json"; // Pastikan path ini betul
+import { db } from '../firebaseConfig';
+import { collection, addDoc, getDocs, query, where, writeBatch, doc } from 'firebase/firestore';
 
-// Helper function (kekal sama)
-const cleanText = (text: any) => {
-  if (!text) return "";
-  const str = String(text);
-  return str.replace(/<[^>]*>?/gm, ' ').replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
-};
+const MALAYSIAN_SPOTS = [
+  // PAHANG
+  { name: "Gunung Tahan", state: "Pahang", height: 2187, difficulty: "Hard", category: "Mountain", lat: 4.633, lng: 102.233, description: "Gunung tertinggi di Semenanjung Malaysia. Laluan mencabar melalui Kuala Tahan atau Merapoh." },
+  { name: "Gunung Irau", state: "Pahang", height: 2110, difficulty: "Moderate", category: "Mountain", lat: 4.529, lng: 101.365, description: "Hutan mossy (lumut) yang sangat cantik, dikenali sebagai Mossy Forest." },
+  { name: "Bukit Fraser", state: "Pahang", height: 1200, difficulty: "Easy", category: "Hill", lat: 3.71, lng: 101.73, description: "Destinasi percutian tanah tinggi dengan pelbagai trail santai seperti Pine Tree Trail." },
 
-export const seedRealSpots = async () => {
-  if (!auth.currentUser) return alert("Sila login sebagai admin.");
-  
-  // Detect Format Data
-  const places = Array.isArray(mapData) ? mapData : ((mapData as any).features || []);
-  
-  if(!confirm(`Adakah anda pasti nak import ${places.length} data bukit?`)) return;
+  // PERAK
+  { name: "Gunung Korbu", state: "Perak", height: 2183, difficulty: "Hard", category: "Mountain", lat: 4.683, lng: 101.3, description: "Puncak kedua tertinggi di Semenanjung. Sebahagian daripada trans Titiwangsa V1/V2." },
+  { name: "Gunung Yong Belar", state: "Perak", height: 2181, difficulty: "Hard", category: "Mountain", lat: 4.65, lng: 101.36, description: "Salah satu G7. Trek mencabar dengan pemandangan 3 negeri dari puncak." },
+  { name: "Bukit Batu Putih", state: "Perak", height: 350, difficulty: "Easy", category: "Hill", lat: 4.2, lng: 100.56, description: "Terletak di Port Dickson, pemandangan laut yang sangat cantik dari puncak batu kapur." },
 
-  console.log(`Mula memproses ${places.length} data...`);
-  let count = 0;
+  // SELANGOR
+  { name: "Bukit Broga", state: "Selangor", height: 400, difficulty: "Easy", category: "Hill", lat: 2.93, lng: 101.9, description: "Sangat popular untuk sunrise. Laluan lalang yang mudah dan pemandangan luas." },
+  { name: "Gunung Nuang", state: "Selangor", height: 1493, difficulty: "Hard", category: "Mountain", lat: 3.26, lng: 101.9, description: "Gunung tertinggi di Selangor. Latihan ketahanan popular untuk pendaki." },
+  { name: "Bukit Tabur West", state: "Selangor", height: 396, difficulty: "Moderate", category: "Hill", lat: 3.23, lng: 101.75, description: "Permatang kuarza terpanjang di dunia. Pemandangan empangan klang gate yang ikonik." },
+  { name: "Bukit Gasing", state: "Selangor", height: 160, difficulty: "Easy", category: "Hill", lat: 3.09, lng: 101.65, description: "Hutan bandar yang popular di PJ, sesuai untuk latihan harian." },
 
-  for (const item of places) {
-    try {
-      const itemProps = (item.properties || item || {}) as any;
+  // JOHOR
+  { name: "Gunung Ledang", state: "Johor", height: 1276, difficulty: "Hard", category: "Mountain", lat: 2.37, lng: 102.6, description: "Gunung lagenda Puteri Gunung Ledang. Trek teknikal berbatu (KFC trail)." },
+  { name: "Gunung Bekok", state: "Johor", height: 953, difficulty: "Moderate", category: "Mountain", lat: 2.41, lng: 103.17, description: "Hutan simpan Labis, perlukan 4x4 untuk ke starting point. Pemandangan air terjun cantik." },
+  { name: "Bukit Batu Pahat", state: "Johor", height: 200, difficulty: "Easy", category: "Hill", lat: 1.85, lng: 102.93, description: "Popular dikalangan penduduk tempatan untuk riadah petang." },
 
-      // --- 1. LOGIC NEGERI (Kekal) ---
-      const detectedState = itemProps.state || itemProps.admin1 || itemProps.State || "Malaysia";
+  // SABAH & SARAWAK
+  { name: "Gunung Kinabalu", state: "Sabah", height: 4095, difficulty: "Hard", category: "Mountain", lat: 6.07, lng: 116.55, description: "Gunung tertinggi di Malaysia dan Asia Tenggara. Tapak Warisan Dunia UNESCO." },
+  { name: "Gunung Trusmadi", state: "Sabah", height: 2642, difficulty: "Hard", category: "Mountain", lat: 5.55, lng: 116.51, description: "Kedua tertinggi di Malaysia. Flora dan fauna yang sangat unik (Pitcher Plant)." },
+  { name: "Gunung Mulu", state: "Sarawak", height: 2376, difficulty: "Hard", category: "Mountain", lat: 4.04, lng: 114.93, description: "Terkenal dengan Mulu Pinnacles (Batu Kapur Tajam). Cabaran teknikal tinggi." },
 
-      // --- 2. LOGIC KOORDINAT (Kekal) ---
-      let lng = 0;
-      let lat = 0;
+  // N. SEMBILAN
+  { name: "Gunung Datuk", state: "Negeri Sembilan", height: 884, difficulty: "Moderate", category: "Mountain", lat: 2.55, lng: 102.21, description: "Puncak batu besar yang menawarkan pemandangan 360 darjah Selat Melaka." },
+  { name: "Gunung Angsi", state: "Negeri Sembilan", height: 825, difficulty: "Moderate", category: "Mountain", lat: 2.69, lng: 102.05, description: "Hutan rekreasi Ulu Bendul. Trek santai tapi mencabar stamina." },
 
-      if (item.geometry && item.geometry.coordinates) {
-         lng = item.geometry.coordinates[0];
-         lat = item.geometry.coordinates[1];
-      } else {
-         lat = parseFloat(item['@lat'] || item.lat || 0);
-         lng = parseFloat(item['@lon'] || item.lon || item.lng || 0);
-      }
-      
-      const name = (itemProps.name || itemProps.Name || "Unknown Spot") + "";
+  // OTHERS
+  { name: "Gunung Jerai", state: "Kedah", height: 1217, difficulty: "Moderate", category: "Mountain", lat: 5.79, lng: 100.43, description: "Gunung bersejarah yang menjadi panduan pelayar purba. Boleh naik van atau hiking." },
+  { name: "Bukit Bendera (Penang Hill)", state: "Pulau Pinang", height: 833, difficulty: "Easy", category: "Hill", lat: 5.42, lng: 100.27, description: "Tarikan pelancong utama, boleh hiking melalui Heritage Trail atau naik keretapi funikular." }
+];
 
-      // --- 3. LOGIC HEIGHT / ELEVATION (UPDATED) ---
-      let height = 0;
-      let rawDesc = "";
+export async function seedSpots() {
+  console.log("Starting seeding...");
+  const batch = writeBatch(db);
+  const spotsRef = collection(db, "spots");
 
-      // A. Cuba ambil terus dari data JSON (key: 'ele' atau 'elevation')
-      if (itemProps.ele) {
-        height = parseInt(itemProps.ele, 10);
-      } else if (itemProps.elevation) {
-        height = parseInt(itemProps.elevation, 10);
-      } else if (itemProps.height) { // Kadang-kadang key dia 'height'
-        height = parseInt(itemProps.height, 10);
-      }
+  try {
+    // Check existing to avoid duplicates (optional, but good practice)
+    // For simplicity, we just add. Real prod might check name.
 
-      // Prepare description text
-      if (itemProps.description) {
-        if (typeof itemProps.description === 'object' && itemProps.description.value) {
-           rawDesc = String(itemProps.description.value || ""); 
-        } 
-        else if (typeof itemProps.description === 'string') {
-           rawDesc = String(itemProps.description || "");
-        }
-      }
-
-      // B. Kalau Height masih 0, baru guna Regex cari dalam text (Fallback)
-      if (height === 0) {
-          const heightMatch = rawDesc.match(/Height\s*\(m\)\s*(\d+)/i);
-          if (heightMatch && heightMatch[1]) {
-            height = parseInt(heightMatch[1], 10);
-          } else {
-            const nameMatch = name.match(/(\d+)\s*m/i);
-            if (nameMatch && nameMatch[1]) height = parseInt(nameMatch[1], 10);
-          }
-      }
-
-      const cleanDesc = cleanText(rawDesc);
-
-      // --- 4. MASUK DATABASE (UPDATED PERMIT) ---
-      await addDoc(collection(db, "spots"), {
-        name: name,
-        location: new GeoPoint(lat, lng),
-        height: Number(height), // Akan jadi nombor ketinggian atau 0
-        category: "Mountain", 
-        
-        state: detectedState, 
-        
-        difficulty: height > 1000 ? "Hard" : "Moderate",
-        description: cleanDesc || `Lokasi hiking di ${detectedState}: ${name}`,
-        
-        // UPDATE BARU: Tambah Permit 'Tiada Data'
-        permit: "Tiada Data", 
-        
-        images: [],
-        features: [],
-        contributorId: auth.currentUser?.uid || "admin",
-        createdAt: serverTimestamp(),
-        isVisible: true
+    let count = 0;
+    for (const spot of MALAYSIAN_SPOTS) {
+      // Create a new doc ref for every spot
+      const newDocRef = doc(spotsRef);
+      batch.set(newDocRef, {
+        ...spot,
+        name_lowercase: spot.name.toLowerCase(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        permit: "Unknown", // Default
+        images: [], // Empty for now
+        rating: 0,
+        reviewCount: 0
       });
-
       count++;
-      // Check console log untuk tengok Elevation masuk ke tak
-      console.log(`[OK] ${name} | State: ${detectedState} | H: ${height}m`); 
-      
-    } catch (e) {
-      console.error("Gagal import item:", item, e);
     }
+
+    await batch.commit();
+    console.log(`Successfully seeded ${count} spots!`);
+    return { success: true, count };
+  } catch (error) {
+    console.error("Seeding failed:", error);
+    return { success: false, error };
   }
-  
-  alert(`✅ Siap! ${count} bukit berjaya diimport dengan Permit: 'Tiada Data'.`);
-};
+}

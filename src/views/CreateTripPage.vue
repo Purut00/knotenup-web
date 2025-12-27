@@ -1,85 +1,88 @@
 <template>
-  <div class="create-trip-page">
+  <div class="min-h-screen bg-slate-900 relative overflow-x-hidden text-white">
     
-    <div class="contour-lines"></div>
-    <div class="page-glow-purple"></div>
-    <div class="page-glow-orange"></div>
+    <div class="absolute inset-0 z-0 opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml,...')"></div>
+    <div class="absolute top-0 left-0 w-3/4 h-3/4 bg-purple-600/20 blur-[150px] rounded-full pointer-events-none"></div>
+    <div class="absolute bottom-0 right-0 w-3/4 h-3/4 bg-orange-500/10 blur-[150px] rounded-full pointer-events-none"></div>
 
-    <div class="container pt-44 pb-20">
+    <div class="container mx-auto px-6 pt-36 pb-20 relative z-10 max-w-4xl">
       
-      <div class="text-center mb-10 relative z-10">
-        <h1 class="text-4xl font-bold text-white mb-2">{{ t('createTrip.heroTitle') || 'Cipta Trip Baru' }}</h1>
-        <p class="text-gray-400">"{{ t('createTrip.heroSub') || 'Bawa orang lain meneroka keindahan alam bersama anda.' }}"</p>
+      <div class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-bold mb-3">{{ t('createTrip.heroTitle') || 'Cipta Trip Baru' }}</h1>
+        <p class="text-slate-400">"{{ t('createTrip.heroSub') || 'Bawa orang lain meneroka keindahan alam bersama anda.' }}"</p>
       </div>
 
-      <div class="stepper-wrapper relative z-10">
-        <div class="step-item" :class="{ active: currentStep >= 1, done: currentStep > 1 }">
-          <div class="step-circle">1</div>
-          <span class="step-label">{{ t('createTrip.step1') || 'Info Asas' }}</span>
+      <!-- STEPPER -->
+      <div class="flex items-center justify-center mb-10 relative z-10 hidden md:flex">
+        <div class="flex flex-col items-center gap-2 transition-opacity duration-300" :class="{ 'opacity-100': currentStep >= 1, 'opacity-50': currentStep < 1 }">
+          <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold bg-slate-900 transition-colors"
+               :class="currentStep > 1 ? 'border-purple-500 bg-purple-500 text-white' : (currentStep === 1 ? 'border-orange-500 text-orange-500' : 'border-purple-500 text-purple-500')">1</div>
+          <span class="text-xs font-bold uppercase tracking-wider">{{ t('createTrip.step1') || 'Info Asas' }}</span>
         </div>
-        <div class="step-line" :class="{ active: currentStep > 1 }"></div>
-        <div class="step-item" :class="{ active: currentStep >= 2, done: currentStep > 2 }">
-          <div class="step-circle">2</div>
-          <span class="step-label">{{ t('createTrip.step2') || 'Logistik' }}</span>
-        </div>
-        <div class="step-line" :class="{ active: currentStep > 2 }"></div>
-        <div class="step-item" :class="{ active: currentStep >= 3, done: currentStep > 3 }">
-          <div class="step-circle">3</div>
-          <span class="step-label">{{ t('createTrip.step3') || 'Media' }}</span>
-        </div>
-      </div>
-
-      <div class="glass-form-card relative z-10 fade-up">
+        <div class="w-16 h-0.5 mx-4 transition-all duration-300" :class="currentStep > 1 ? 'bg-gradient-to-r from-purple-500 to-orange-500' : 'bg-white/10'"></div>
         
+        <div class="flex flex-col items-center gap-2 transition-opacity duration-300" :class="{ 'opacity-100': currentStep >= 2, 'opacity-50': currentStep < 2 }">
+          <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold bg-slate-900 transition-colors"
+               :class="currentStep > 2 ? 'border-purple-500 bg-purple-500 text-white' : (currentStep === 2 ? 'border-orange-500 text-orange-500' : 'border-purple-500 text-purple-500')">2</div>
+          <span class="text-xs font-bold uppercase tracking-wider">{{ t('createTrip.step2') || 'Logistik' }}</span>
+        </div>
+        <div class="w-16 h-0.5 mx-4 transition-all duration-300" :class="currentStep > 2 ? 'bg-gradient-to-r from-purple-500 to-orange-500' : 'bg-white/10'"></div>
+
+        <div class="flex flex-col items-center gap-2 transition-opacity duration-300" :class="{ 'opacity-100': currentStep >= 3, 'opacity-50': currentStep < 3 }">
+          <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold bg-slate-900 transition-colors"
+               :class="currentStep === 3 ? 'border-orange-500 text-orange-500' : 'border-purple-500 text-purple-500'">3</div>
+          <span class="text-xs font-bold uppercase tracking-wider">{{ t('createTrip.step3') || 'Media' }}</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl relative z-10 fade-up">
+        
+        <!-- STEP 1 -->
         <div v-if="currentStep === 1">
-          <h2 class="section-title">{{ t('createTrip.section1Title') || 'Maklumat Trip' }}</h2>
+          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createTrip.section1Title') || 'Maklumat Trip' }}</h2>
           
-          <div class="form-group">
-            <label>{{ t('createTrip.tripTitle') || 'Tajuk Trip' }}</label>
-            <input 
-              type="text" 
-              v-model="form.title" 
-              class="glass-input" 
-              :placeholder="t('createTrip.placeholderTitle') || 'Cth: Hiking Gunung Kinabalu 3H2M'" 
-            />
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.tripTitle') || 'Tajuk Trip' }}</label>
+            <input type="text" v-model="form.title" class="glass-input" 
+                   :placeholder="t('createTrip.placeholderTitle') || 'Cth: Hiking Gunung Kinabalu 3H2M'" />
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>{{ t('createTrip.category') || 'Kategori Aktiviti' }}</label>
-              <div class="select-wrapper">
-                  <select v-model="form.category" class="glass-input">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.category') || 'Kategori Aktiviti' }}</label>
+              <div class="relative">
+                  <select v-model="form.category" class="glass-input appearance-none">
                     <option disabled value="">Sila Pilih...</option>
                     <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
-                      <option v-for="item in group.items" :key="item" :value="item">
-                        {{ item }}
-                      </option>
+                      <option v-for="item in group.items" :key="item" :value="item">{{ item }}</option>
                     </optgroup>
                   </select>
-                  <i class="fas fa-chevron-down select-arrow"></i>
+                  <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
               </div>
             </div>
-            <div class="form-group">
-              <label>{{ t('createTrip.level') || 'Tahap Kesukaran' }}</label>
-              <div class="select-wrapper">
-                  <select v-model="form.difficulty" class="glass-input">
+            <div>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.level') || 'Tahap Kesukaran' }}</label>
+              <div class="relative">
+                  <select v-model="form.difficulty" class="glass-input appearance-none">
                     <option value="Easy">Mudah</option>
                     <option value="Moderate">Sederhana</option>
                     <option value="Hard">Sukar</option>
                   </select>
-                  <i class="fas fa-chevron-down select-arrow"></i>
+                  <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
               </div>
             </div>
           </div>
 
-          <div class="form-group mt-4">
-            <label>{{ t('createTrip.locationType') || 'Lokasi' }}</label>
-            <div class="radio-group">
-               <label class="radio-card" :class="{ active: locationType === 'malaysia' }">
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.locationType') || 'Lokasi' }}</label>
+            <div class="flex gap-4">
+               <label class="cursor-pointer px-4 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all flex items-center gap-2"
+                      :class="{ 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20': locationType === 'malaysia' }">
                  <input type="radio" v-model="locationType" value="malaysia" hidden>
                  <span>Dalam Malaysia</span>
                </label>
-               <label class="radio-card" :class="{ active: locationType === 'overseas' }">
+               <label class="cursor-pointer px-4 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all flex items-center gap-2"
+                      :class="{ 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20': locationType === 'overseas' }">
                  <input type="radio" v-model="locationType" value="overseas" hidden>
                  <span>Luar Negara</span>
                </label>
@@ -87,113 +90,105 @@
           </div>
 
           <div v-if="locationType === 'malaysia'">
-            
-            <div class="form-row mt-4">
-              <div class="form-group">
-                <label>Negeri (Wajib)</label>
-                <div class="select-wrapper">
-                    <select v-model="form.state" class="glass-input" @change="resetSpotSelection">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+              <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-2">Negeri (Wajib)</label>
+                <div class="relative">
+                    <select v-model="form.state" class="glass-input appearance-none" @change="resetSpotSelection">
                       <option disabled value="">Pilih Negeri...</option>
                       <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
                     </select>
-                    <i class="fas fa-chevron-down select-arrow"></i>
+                    <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                 </div>
               </div>
-
-              <div class="form-group">
-                <label>Tempat Spesifik / Kawasan</label>
+              <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-2">Tempat Spesifik</label>
                 <input type="text" v-model="form.placeName" class="glass-input" :placeholder="t('createTrip.specificPlace') || 'Cth: Taman Negara'" />
               </div>
             </div>
 
-            <div class="form-group mt-4 p-4 rounded-lg border border-dashed border-gray-600 bg-gray-800/30">
-              <label class="flex justify-between items-center">
+            <div class="p-4 rounded-xl border border-dashed border-slate-600 bg-slate-800/50 mb-6">
+              <label class="flex justify-between items-center text-sm font-semibold text-slate-300 mb-2">
                  <span>🔗 Link ke Info Lokasi (Spot)</span>
-                 <span v-if="autoDetected" class="text-green-400 text-xs font-bold animate-pulse">
-                   ✨ Lokasi dikesan dari tajuk!
-                 </span>
+                 <span v-if="autoDetected" class="text-green-400 text-xs font-bold animate-pulse">✨ Lokasi dikesan!</span>
               </label>
               
-              <div class="select-wrapper mt-2">
-                 <select v-model="form.spotId" @change="handleSpotChange" class="glass-input" :disabled="!form.state">
+              <div class="relative">
+                 <select v-model="form.spotId" @change="handleSpotChange" class="glass-input appearance-none" :disabled="!form.state">
                    <option value="">-- {{ form.state ? 'Pilih Lokasi di ' + form.state : 'Sila Pilih Negeri Dahulu' }} --</option>
-                   <option v-for="spot in filteredSpots" :key="spot.id" :value="spot.id">
-                     {{ spot.name }} ({{ spot.height }}m)
-                   </option>
+                   <option v-for="spot in filteredSpots" :key="spot.id" :value="spot.id">{{ spot.name }} ({{ spot.height }}m)</option>
                  </select>
-                 <i class="fas fa-chevron-down select-arrow"></i>
+                 <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
               </div>
-              
-              <div class="mt-2 text-xs text-gray-400 flex justify-between">
+              <p class="text-[10px] text-slate-400 mt-2 flex justify-between">
                 <span>*Menghubungkan trip dengan info bukit memudahkan peserta.</span>
-                <span v-if="form.state && filteredSpots.length === 0" class="text-orange-400">
-                  Tiada lokasi berdaftar di negeri ini lagi.
-                </span>
-              </div>
+                <span v-if="form.state && filteredSpots.length === 0" class="text-orange-400">Tiada lokasi disenaraikan.</span>
+              </p>
             </div>
-
           </div>
 
-          <div v-else class="form-group mt-4">
-            <label>Lokasi Penuh</label>
-            <input type="text" v-model="form.overseasLocation" class="glass-input" :placeholder="t('createTrip.fullLocation') || 'Cth: Mount Fuji, Japan'" />
+          <div v-else class="mb-6">
+            <label class="block text-sm font-semibold text-slate-300 mb-2">Lokasi Penuh</label>
+            <input type="text" v-model="form.overseasLocation" class="glass-input" placeholder="Cth: Mount Fuji, Japan" />
           </div>
         </div>
 
+        <!-- STEP 2 -->
         <div v-if="currentStep === 2">
-          <h2 class="section-title">{{ t('createTrip.section2Title') || 'Tarikh & Harga' }}</h2>
+          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createTrip.section2Title') || 'Tarikh & Harga' }}</h2>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>{{ t('createTrip.startDate') || 'Tarikh Mula' }}</label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.startDate') || 'Tarikh Mula' }}</label>
               <input type="date" v-model="form.startDate" class="glass-input" />
             </div>
-            <div class="form-group">
-              <label>{{ t('createTrip.endDate') || 'Tarikh Tamat' }}</label>
+            <div>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.endDate') || 'Tarikh Tamat' }}</label>
               <input type="date" v-model="form.endDate" :min="form.startDate" class="glass-input" />
             </div>
           </div>
           
-          <div class="duration-pill mb-6">
+          <div class="inline-block bg-purple-500/20 text-purple-300 px-4 py-1 rounded-full text-sm font-bold mb-6">
             ⏳ Durasi: {{ computedDuration }}
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>{{ t('createTrip.price') || 'Harga Per Pax' }} (RM)</label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.price') || 'Harga Per Pax' }} (RM)</label>
               <input type="number" v-model="form.price" class="glass-input" placeholder="0" />
             </div>
-            <div class="form-group">
-              <label>{{ t('createTrip.slots') || 'Jumlah Slot' }}</label>
+            <div>
+              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.slots') || 'Jumlah Slot' }}</label>
               <input type="number" v-model="form.maxSlots" class="glass-input" placeholder="20" />
             </div>
           </div>
 
-          <div class="form-group mt-4">
-            <label>{{ t('createTrip.groupLink') || 'Link WhatsApp Group' }}</label>
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.groupLink') || 'Link WhatsApp Group' }}</label>
             <input type="text" v-model="form.groupLink" class="glass-input" placeholder="https://chat.whatsapp.com/..." />
-            <small class="text-gray-400 mt-1 block text-xs">
-               *Link ini hanya akan dipaparkan kepada peserta yang telah disahkan (Join).
-            </small>
+            <span class="text-xs text-slate-500 mt-1 block">*Link ini hanya dipaparkan kepada peserta yang sah.</span>
           </div>
         </div>
 
+        <!-- STEP 3 -->
         <div v-if="currentStep === 3">
-          <h2 class="section-title">{{ t('createTrip.section3Title') || 'Galeri & Info Lanjut' }}</h2>
+          <h2 class="text-2xl font-bold mb-6 border-b border-white/10 pb-4">{{ t('createTrip.section3Title') || 'Galeri & Info Lanjut' }}</h2>
 
-          <div class="form-group">
-            <label>📸 Gambar Trip (Max 5)</label>
-            <div class="upload-grid-trip mt-2">
-               <div class="main-upload" @click="triggerUpload(0)" :style="{ backgroundImage: `url(${previewImages[0]})` }">
-                 <div v-if="!previewImages[0]" class="placeholder-center">
-                   <i class="fas fa-camera text-2xl mb-2 text-purple-400"></i>
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-slate-300 mb-2">📸 Gambar Trip (Max 5)</label>
+            <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 h-64">
+               <div class="bg-white/5 border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 hover:border-purple-500 transition-all bg-cover bg-center"
+                    @click="triggerUpload(0)" :style="{ backgroundImage: `url(${previewImages[0]})` }">
+                 <div v-if="!previewImages[0]" class="flex flex-col items-center text-slate-400">
+                   <i class="fas fa-camera text-3xl mb-2 text-purple-400"></i>
                    <span>Cover Photo</span>
                  </div>
                  <input type="file" ref="fileInput0" @change="(e) => handleImageSelect(e, 0)" accept="image/*" hidden />
                </div>
                
-               <div class="sub-uploads">
-                 <div v-for="i in 4" :key="i" class="sub-box" @click="triggerUpload(i)" :style="{ backgroundImage: `url(${previewImages[i]})` }">
+               <div class="grid grid-cols-2 gap-4">
+                 <div v-for="i in 4" :key="i" class="bg-white/5 border border-dashed border-white/20 rounded-lg flex items-center justify-center cursor-pointer hover:border-purple-500 text-slate-500 text-2xl bg-cover bg-center"
+                      @click="triggerUpload(i)" :style="{ backgroundImage: `url(${previewImages[i]})` }">
                    <span v-if="!previewImages[i]">+</span>
                    <input type="file" :ref="'fileInput' + i" @change="(e) => handleImageSelect(e, i)" accept="image/*" hidden />
                  </div>
@@ -201,51 +196,51 @@
             </div>
           </div>
 
-          <div class="form-group mt-6">
-            <label>{{ t('createTrip.desc') || 'Deskripsi Penuh' }}</label>
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.desc') || 'Deskripsi Penuh' }}</label>
             <textarea v-model="form.description" rows="5" class="glass-input" placeholder="Tentatif, apa yang menarik..."></textarea>
           </div>
 
-          <div class="details-stack space-y-4">
-            <div class="form-group">
-              <label>⚠️ {{ t('createTrip.mandatory') || 'Wajib Bawa' }}</label>
+          <div class="space-y-4 mb-6">
+            <div>
+              <label class="block text-sm font-semibold text-slate-300 mb-1">⚠️ {{ t('createTrip.mandatory') || 'Wajib Bawa' }}</label>
               <input type="text" v-model="form.mandatory" class="glass-input" placeholder="Headlamp, Kasut Hiking..." />
             </div>
-            <div class="form-group">
-              <label>💡 {{ t('createTrip.tips') || 'Tips Extra' }}</label>
-              <input type="text" v-model="form.tips" class="glass-input" placeholder="Bawa baju hujan, training 2 minggu..." />
+            <div>
+              <label class="block text-sm font-semibold text-slate-300 mb-1">💡 {{ t('createTrip.tips') || 'Tips Extra' }}</label>
+              <input type="text" v-model="form.tips" class="glass-input" placeholder="Bawa baju hujan..." />
             </div>
-            <div class="form-group">
-              <label>🎒 {{ t('createTrip.recommended') || 'Disyorkan' }}</label>
+            <div>
+              <label class="block text-sm font-semibold text-slate-300 mb-1">🎒 {{ t('createTrip.recommended') || 'Disyorkan' }}</label>
               <input type="text" v-model="form.recommended" class="glass-input" placeholder="Powerbank, Tongkat..." />
             </div>
           </div>
 
-          <div class="form-group mt-6">
-            <label>{{ t('createTrip.includes') || 'Pakej Termasuk:' }}</label>
-            <div class="chips-container">
-              <div 
-                v-for="service in TRIP_SERVICES" 
-                :key="service" 
-                class="chip" 
-                :class="{ active: form.includes.includes(service) }"
-                @click="toggleService(service)"
-              >
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.includes') || 'Pakej Termasuk:' }}</label>
+            <div class="flex flex-wrap gap-2">
+              <div v-for="service in TRIP_SERVICES" :key="service" 
+                   class="px-4 py-2 rounded-full border border-white/10 bg-white/5 cursor-pointer text-sm text-slate-300 hover:bg-white/10 transition-all select-none"
+                   :class="{ 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20': form.includes.includes(service) }"
+                   @click="toggleService(service)">
                 {{ t('services.' + service) || service }}
               </div>
             </div>
           </div>
         </div>
 
-        <div class="form-actions mt-8 flex justify-between items-center">
-           <button v-if="currentStep > 1" @click="prevStep" class="btn-back">
+        <!-- ACTIONS -->
+        <div class="flex justify-between items-center mt-10">
+           <button v-if="currentStep > 1" @click="prevStep" class="px-6 py-3 rounded-full border border-white/20 text-slate-300 font-bold hover:text-white hover:border-white transition-all">
              <i class="fas fa-arrow-left mr-2"></i> Kembali
            </button>
-           <div v-else></div> <button v-if="currentStep < 3" @click="nextStep" class="btn-next">
+           <div v-else></div>
+
+           <button v-if="currentStep < 3" @click="nextStep" class="bg-gradient-to-br from-purple-600 to-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-purple-600/30 hover:-translate-y-1 transition-all">
              Seterusnya <i class="fas fa-arrow-right ml-2"></i>
            </button>
-           <button v-if="currentStep === 3" @click="submitForm" class="btn-submit" :disabled="loading">
-             {{ loading ? 'Sedang Upload...' : '🚀 Terbitkan Trip' }}
+           <button v-if="currentStep === 3" @click="submitForm" class="bg-gradient-to-br from-orange-500 to-red-600 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-orange-500/30 hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isUploading || isCreating">
+             {{ (isUploading || isCreating) ? 'Sedang Memproses...' : '🚀 Terbitkan Trip' }}
            </button>
         </div>
 
@@ -255,28 +250,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue'; // Added watch
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ACTIVITY_CATEGORIES, TRIP_SERVICES, MALAYSIA_STATES } from '../constants/data';
-import { auth, db, storage } from '../firebaseConfig';
-import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore'; 
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth, db } from '../firebaseConfig';
+import { collection, getDocs } from 'firebase/firestore'; 
 import { isSpam } from '../utils/spamFilter';
-import { validateImageFile } from '../utils/security'; 
+import { useStorage } from '../composables/useStorage'; 
+import { useTrips } from '../composables/useTrips';
 
 const { t } = useI18n(); 
 const router = useRouter();
+const { uploadMultipleImages, uploading: isUploading } = useStorage();
+const { createTrip, loading: isCreating } = useTrips();
+
 const currentStep = ref(1);
-const loading = ref(false);
 const locationType = ref('malaysia');
 const autoDetected = ref(false);
 
-// Logic Gambar
 const previewImages = ref<string[]>(Array.from({ length: 5 }).map(() => ''));
 const rawFiles = ref<(File | null)[]>(Array.from({ length: 5 }).map(() => null));
-
-// Logic Spots 
 const spots = ref<any[]>([]); 
 
 const form = reactive({
@@ -288,7 +282,6 @@ const form = reactive({
   tips: '', mandatory: '', recommended: '', includes: [] as string[]
 });
 
-// Fetch Spots on mount
 onMounted(async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "spots"));
@@ -298,77 +291,49 @@ onMounted(async () => {
       state: doc.data().state,
       height: doc.data().height
     }));
-  } catch (error) {
-    console.error("Error fetching spots:", error);
-  }
+  } catch (error) { console.error("Error spots:", error); }
 });
 
-// 1. FILTERED SPOTS Logic (Selesaikan masalah 500 spots)
 const filteredSpots = computed(() => {
   if (!form.state) return [];
-  // Hanya tunjuk spot yang negerinya SAMA dengan negeri yang user pilih
   return spots.value.filter(s => s.state === form.state);
 });
 
-// 2. SMART DETECT Logic (Dari Tajuk)
 watch(() => form.title, (newTitle) => {
   if (!newTitle || newTitle.length < 4) return;
-  
   const lowerTitle = newTitle.toLowerCase();
-  
-  // Cari spot yang namanya ada dalam tajuk
   const foundSpot = spots.value.find(s => lowerTitle.includes(s.name.toLowerCase()));
-  
   if (foundSpot) {
-     form.state = foundSpot.state; // Auto set negeri
-     form.spotId = foundSpot.id;   // Auto set spot
+     form.state = foundSpot.state; 
+     form.spotId = foundSpot.id;   
      form.spotName = foundSpot.name;
      form.placeName = foundSpot.name;
      autoDetected.value = true;
-     
-     // Hilangkan hint selepas 3 saat
      setTimeout(() => autoDetected.value = false, 3000);
   }
 });
 
-// Reset Spot jika user tukar negeri manual
-const resetSpotSelection = () => {
-  form.spotId = '';
-  form.spotName = '';
-};
-
-// Handle Spot Selection Manual
+const resetSpotSelection = () => { form.spotId = ''; form.spotName = ''; };
 const handleSpotChange = () => {
   const selected = spots.value.find(s => s.id === form.spotId);
-  if (selected) {
-     form.spotName = selected.name;
-     form.placeName = selected.name; // Auto fill place name
-  } else {
-    form.spotName = '';
-  }
+  if (selected) { form.spotName = selected.name; form.placeName = selected.name; }
+  else form.spotName = '';
 };
 
-// Duration Logic
 const computedDuration = computed(() => {
   if (!form.startDate || !form.endDate) return '-';
   const start = new Date(form.startDate);
   const end = new Date(form.endDate);
   const diffTime = end.getTime() - start.getTime();
   const diffDays = diffTime / (1000 * 3600 * 24);
-
-  if (diffDays < 0) return "Tarikh Tidak Sah"; 
+  if (diffDays < 0) return "Invalid"; 
   if (diffDays === 0) return "Day Trip";
-  
   return `${diffDays + 1}H ${diffDays}M`;
 });
 
-// Helpers
 const toggleService = (service: string) => {
-  if (form.includes.includes(service)) {
-    form.includes = form.includes.filter(i => i !== service);
-  } else {
-    form.includes.push(service);
-  }
+  if (form.includes.includes(service)) form.includes = form.includes.filter(i => i !== service);
+  else form.includes.push(service);
 };
 
 const triggerUpload = (index: number) => {
@@ -376,27 +341,10 @@ const triggerUpload = (index: number) => {
   if(input) input.click();
 };
 
-const handleImageSelect = async (event: Event, index: number) => {
+const handleImageSelect = (event: Event, index: number) => {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files[0]) {
     const file = target.files[0];
-    
-    // 1. Validasi Saiz (Max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Fail terlalu besar (Max 5MB).");
-      target.value = ''; 
-      return;
-    }
-
-    // 2. Validasi Security (Magic Bytes)
-    const isValid = await validateImageFile(file);
-    if (!isValid) {
-      alert("Amaran Keselamatan: Fail ini dikesan bukan gambar sebenar atau rosak.");
-      target.value = ''; 
-      return;
-    }
-    
-    // 3. Proses Fail
     rawFiles.value[index] = file;
     const reader = new FileReader();
     reader.onload = (e) => { if (e.target?.result) previewImages.value[index] = e.target.result as string; };
@@ -408,29 +356,17 @@ const nextStep = () => { if (currentStep.value < 3) currentStep.value++; window.
 const prevStep = () => { if (currentStep.value > 1) currentStep.value--; window.scrollTo(0,0); };
 
 const submitForm = async () => {
-  if (!auth.currentUser) { alert(t('auth.loginRequired') || "Sila login."); return; }
-  
-  const checkText = `${form.title} ${form.description}`;
-  if (isSpam(checkText)) { alert("Input mengandungi perkataan dilarang."); return; }
-
-  loading.value = true;
+  if (!auth.currentUser) return alert(t('auth.loginRequired') || "Sila login.");
+  if (isSpam(`${form.title} ${form.description}`)) return alert("Input dilarang.");
 
   try {
-    const uploadedUrls: string[] = [];
-    for (let i = 0; i < 5; i++) {
-      if (rawFiles.value[i]) {
-        const fileRef = storageRef(storage, `trips/${auth.currentUser.uid}_${Date.now()}_${i}.jpg`);
-        const snapshot = await uploadBytes(fileRef, rawFiles.value[i]!);
-        const url = await getDownloadURL(snapshot.ref);
-        uploadedUrls.push(url);
-      }
-    }
-
-    const finalLocation = locationType.value === 'malaysia' ? `${form.placeName}, ${form.state}` : form.overseasLocation;
-
-    const tripData = {
+    const uploadedUrls = await uploadMultipleImages(rawFiles.value, `trips/${auth.currentUser.uid}_${Date.now()}`);
+    const finalLoc = locationType.value === 'malaysia' ? `${form.placeName}, ${form.state}` : form.overseasLocation;
+    
+    // Create Trip using Composable
+    await createTrip({
       ...form,
-      location: finalLocation,
+      location: finalLoc,
       startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
       endDate: form.endDate ? new Date(form.endDate).toISOString() : null,
       duration: computedDuration.value, 
@@ -440,167 +376,33 @@ const submitForm = async () => {
       maxSlots: Number(form.maxSlots),
       currentSlots: 0,
       status: 'open',
-      createdAt: serverTimestamp(),
       organizerId: auth.currentUser.uid,
       organizerName: auth.currentUser.displayName || 'Organizer',
       organizerImage: auth.currentUser.photoURL || '',
-      // Ensure spot data is saved (if selected)
       spotId: form.spotId || null,
       spotName: form.spotName || null
-    };
-
-    // Cleanup redundant fields before saving (Standard Practice)
-    delete (tripData as any).state;
-    delete (tripData as any).placeName;
-    delete (tripData as any).overseasLocation;
-
-    await addDoc(collection(db, 'trips'), tripData);
+    });
+    
     alert("Trip berjaya diterbitkan!");
     router.push('/trips');
 
   } catch (error) {
     console.error("Error:", error);
     alert("Gagal mencipta trip.");
-  } finally {
-    loading.value = false;
   }
 };
 </script>
 
 <style scoped>
-/* --- BASE THEME (DARK) --- */
-.create-trip-page { 
-  background-color: #0f172a; 
-  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
-}
-.container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
-
-/* GLOWS */
-.page-glow-purple {
-  position: absolute; top: 0; left: 0; width: 60vw; height: 60vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
-}
-.page-glow-orange {
-  position: absolute; bottom: 0; right: 0; width: 60vw; height: 60vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
-}
-.contour-lines {
-  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: cover; pointer-events: none;
-}
-
-/* --- STEPPER --- */
-.stepper-wrapper {
-  display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;
-}
-.step-item { display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.5; transition: 0.3s; position: relative; z-index: 2; }
-.step-item.active { opacity: 1; }
-.step-circle {
-  width: 40px; height: 40px; border-radius: 50%; border: 2px solid #6c63ff; color: #6c63ff;
-  display: flex; align-items: center; justify-content: center; font-weight: bold; background: #0f172a;
-}
-.step-item.done .step-circle { background: #6c63ff; color: white; }
-.step-item.active .step-circle { border-color: #ff8c42; color: #ff8c42; }
-.step-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
-
-.step-line { width: 60px; height: 2px; background: rgba(255,255,255,0.1); margin: 0 10px; margin-bottom: 20px; transition: 0.3s; }
-.step-line.active { background: linear-gradient(90deg, #6c63ff, #ff8c42); }
-
-/* --- GLASS FORM CARD --- */
-.glass-form-card {
-  background: rgba(30, 41, 59, 0.6); 
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px; padding: 2.5rem;
-  backdrop-filter: blur(15px);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-}
-
-.section-title { font-size: 1.5rem; color: white; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; font-weight: 700; }
-
-.form-group { margin-bottom: 1.5rem; }
-.form-group label { display: block; font-size: 0.9rem; color: #cbd5e1; margin-bottom: 8px; font-weight: 600; }
-
-/* GLASS INPUT */
 .glass-input {
-  width: 100%; padding: 12px; border-radius: 10px; 
-  border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);
-  color: white; outline: none; transition: 0.3s; font-size: 1rem;
+  @apply w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300;
 }
-.glass-input:focus { border-color: #6c63ff; background: rgba(0,0,0,0.5); }
-
-/* Fix Dark Dropdown */
-.glass-input option, .glass-input optgroup { background-color: #1e293b; color: white; }
-
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-
-/* Custom Select Arrow */
-.select-wrapper { position: relative; }
-.select-arrow { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
-.glass-input { appearance: none; }
-
-/* RADIO GROUP */
-.radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
-.radio-card { 
-  padding: 10px 16px; border: 1px solid rgba(255,255,255,0.1); 
-  border-radius: 8px; cursor: pointer; transition: 0.2s; color: #cbd5e1; background: rgba(255,255,255,0.05);
+.glass-input:focus {
+  @apply border-purple-500 bg-slate-900/80;
 }
-.radio-card:hover { background: rgba(255,255,255,0.1); }
-.radio-card.active { 
-  background: #6c63ff; color: white; border-color: #6c63ff; 
-  box-shadow: 0 4px 10px rgba(108, 99, 255, 0.3); 
+.glass-input option, .glass-input optgroup {
+  @apply bg-slate-800 text-white;
 }
-
-/* CHIPS */
-.chips-container { display: flex; flex-wrap: wrap; gap: 10px; }
-.chip {
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-  padding: 8px 16px; border-radius: 50px; cursor: pointer; color: #cbd5e1; font-size: 0.9rem; transition: 0.2s;
-}
-.chip:hover { background: rgba(255,255,255,0.1); }
-.chip.active { background: #6c63ff; color: white; border-color: #6c63ff; box-shadow: 0 4px 10px rgba(108, 99, 255, 0.3); }
-
-.duration-pill { display: inline-block; background: rgba(108, 99, 255, 0.2); color: #a78bfa; padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
-
-/* TRIP GALLERY UPLOADER */
-.upload-grid-trip { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; height: 250px; }
-.main-upload { background: rgba(255,255,255,0.05); border-radius: 12px; border: 2px dashed rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; background-size: cover; background-position: center; transition: 0.2s; }
-.main-upload:hover { border-color: #6c63ff; background-color: rgba(255,255,255,0.08); }
-.placeholder-center { display: flex; flex-direction: column; align-items: center; color: #94a3b8; }
-
-.sub-uploads { display: grid; grid-template-rows: 1fr 1fr; grid-template-columns: 1fr 1fr; gap: 10px; }
-.sub-box { background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #94a3b8; font-size: 1.5rem; background-size: cover; background-position: center; transition: 0.2s; }
-.sub-box:hover { border-color: #6c63ff; color: #6c63ff; }
-
-/* ACTIONS */
-.btn-back { background: transparent; color: #94a3b8; border: 1px solid rgba(255,255,255,0.2); padding: 10px 24px; border-radius: 50px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-.btn-back:hover { color: white; border-color: white; }
-
-.btn-next { 
-  background: linear-gradient(135deg, #6c63ff, #5b54e0); color: white; 
-  border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700; 
-  cursor: pointer; box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4); transition: 0.2s;
-}
-.btn-next:hover { transform: translateY(-2px); }
-
-.btn-submit {
-  background: linear-gradient(135deg, #e67e22, #d35400); color: white;
-  border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700;
-  cursor: pointer; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4); transition: 0.2s;
-}
-.btn-submit:hover { transform: translateY(-2px); }
-.btn-submit:disabled { background: #555; cursor: not-allowed; transform: none; box-shadow: none; }
-
 .fade-up { animation: fadeUp 0.6s ease-out; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-@media (max-width: 768px) {
-  .form-row { grid-template-columns: 1fr; gap: 0; }
-  .stepper-wrapper { display: none; } 
-  .container { padding-top: 140px; }
-  .upload-grid-trip { grid-template-columns: 1fr; height: auto; }
-  .main-upload { height: 200px; margin-bottom: 10px; }
-  .sub-uploads { height: auto; grid-template-columns: 1fr 1fr; }
-  .sub-box { height: 100px; }
-}
 </style>

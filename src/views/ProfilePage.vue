@@ -5,316 +5,270 @@
     <div class="page-glow-purple"></div>
     <div class="page-glow-orange"></div>
 
-    <div class="container profile-layout" style="padding-top: 100px; padding-bottom: 3rem;">
+    <div class="container" style="padding-top: 100px; padding-bottom: 3rem;">
       
-      <aside class="profile-sidebar glass-panel">
-        <div class="user-card">
-          <div class="avatar-wrapper">
-            <img :src="user.avatar || 'https://i.pravatar.cc/300'" alt="Avatar" class="avatar" />
-            <span v-if="user.role === 'organizer'" class="role-badge">Organizer</span>
-            <span v-if="user.role === 'admin'" class="role-badge" style="background: #e74c3c;">Admin</span>
-          </div>
-          
-          <h2 class="user-name">
-            {{ user.name }} 
-            <span v-if="user.organizerStatus === 'approved'" class="verified-icon" title="Verified">✅</span>
-          </h2>
-          <p class="user-bio">{{ user.bio || 'Tiada bio.' }}</p>
+      <div v-if="loadingData" class="flex flex-col items-center justify-center py-20 text-gray-400">
+          <div class="spinner mb-4"></div>
+          <p>Memuatkan Profil...</p>
+      </div>
 
-          <div class="stats-grid">
-             <div class="stat-item"><strong>{{ organizedCount }}</strong><span>Trip</span></div>
-             <div class="stat-item"><strong>{{ myPosts.length }}</strong><span>Post</span></div>
-          </div>
+      <div v-else-if="!user" class="text-center py-20">
+          <h2 class="text-red-400 text-2xl font-bold">Pengguna Tidak Dijumpai</h2>
+          <button @click="$router.push('/')" class="mt-4 btn-mini outline">Kembali ke Home</button>
+      </div>
 
-          <div class="social-links">
-             <a v-if="user.whatsapp" :href="'https://wa.me/' + user.whatsapp" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25D366" /></a>
-             <a v-if="user.facebook" :href="'https://facebook.com/' + user.facebook" target="_blank"><img src="https://cdn.simpleicons.org/facebook/1877F2" /></a>
-             <a v-if="user.instagram" :href="'https://instagram.com/' + user.instagram" target="_blank"><img src="https://cdn.simpleicons.org/instagram/E4405F" /></a>
-             <a v-if="user.tiktok" :href="'https://tiktok.com/@' + user.tiktok" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/white" /></a>
-             <a v-if="user.youtube" :href="'https://youtube.com/' + user.youtube" target="_blank"><img src="https://cdn.simpleicons.org/youtube/FF0000" /></a>
-          </div>
-
-          <div class="action-stack" v-if="isOwnProfile">
-            <button v-if="user.role !== 'organizer' && user.role !== 'admin'" class="btn-action upgrade" @click="$router.push('/be-organizer')">
-              🏆 Aktifkan Akaun Organizer
-            </button>
-            
-            <button v-if="isAdmin" class="btn-action admin" @click="$router.push('/admin')">
-              ⚡ Admin Panel
-            </button>
-            
-            <button v-if="user.role === 'organizer'" class="btn-action card" @click="showCard = true">
-              🪪 Business Card
-            </button>
-
-            <button class="btn-action emergency" @click="openEmergency">
-              ⛑️ Emergency Card
-            </button>
-
-            <button class="btn-action edit" @click="$router.push('/profile/edit')">
-              ⚙️ Edit Profil
-            </button>
-          </div>
-
-          <div class="action-stack" v-else>
-             <a v-if="user.whatsapp" :href="'https://wa.me/' + user.whatsapp" target="_blank" class="btn-action contact">
-               📞 WhatsApp
-             </a>
-          </div>
-
-        </div>
-      </aside>
-
-      <main class="profile-main">
+      <div v-else class="profile-layout fade-up">
         
-        <div class="tabs-strip glass-panel-top">
-          <button :class="{ active: activeTab === 'upcoming' }" @click="activeTab = 'upcoming'">
-            📅 <span class="hidden sm:inline">Akan Datang</span>
-          </button>
-          <button :class="{ active: activeTab === 'history' }" @click="activeTab = 'history'">
-            📜 <span class="hidden sm:inline">Sejarah</span>
-          </button>
-          <button :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">
-            💬 <span class="hidden sm:inline">Post Saya</span>
-          </button>
-        </div>
-
-        <div class="content-box glass-panel-bottom">
-          <div v-if="loadingData" class="loading-text">⏳ Memuatkan...</div>
-          
-          <div v-else>
-            <div v-if="activeTab === 'upcoming'">
-              <div v-if="upcomingTrips.length > 0" class="grid-layout">
-                <div v-for="trip in upcomingTrips" :key="trip.id" class="compact-card glass-card-small">
-                  <div class="cc-date">
-                    <span class="d">{{ getDay(trip.startDate) }}</span>
-                    <span class="m">{{ getMonth(trip.startDate) }}</span>
-                  </div>
-                  <div class="cc-info">
-                    <h4>{{ trip.title }}</h4>
-                    <p>📍 {{ trip.destination || trip.location }}</p>
-                    <span v-if="trip.organizerId === user.id" class="status-pill organizer">Organizer</span>
-                    <span v-else class="status-pill participant">Peserta</span>
-                  </div>
-                  <button class="btn-mini" @click="$router.push('/trips/' + trip.id)">Lihat</button>
-                </div>
-              </div>
-              <div v-else class="empty-text">Tiada trip akan datang.</div>
-            </div>
-
-            <div v-if="activeTab === 'history'">
-              <div v-if="historyTrips.length > 0" class="grid-layout">
-                <div v-for="trip in historyTrips" :key="trip.id" class="compact-card glass-card-small faded">
-                  <div class="cc-date">
-                    <span class="d">{{ getDay(trip.startDate) }}</span>
-                    <span class="m">{{ getMonth(trip.startDate) }}</span>
-                  </div>
-                  <div class="cc-info">
-                    <h4>{{ trip.title }}</h4>
-                    <p>📍 {{ trip.destination || trip.location }}</p>
-                    <span class="status-pill closed">Tamat</span>
-                  </div>
-                  <button class="btn-mini outline" @click="$router.push('/trips/' + trip.id)">Lihat</button>
-                </div>
-              </div>
-              <div v-else class="empty-text">Tiada sejarah trip.</div>
-            </div>
-
-            <div v-if="activeTab === 'forum'">
-              <div v-if="myPosts.length > 0" class="forum-layout">
-                <div v-for="post in myPosts" :key="post.id" class="forum-row glass-row" @click="$router.push('/forum/' + post.id)">
-                   <div class="fr-content">
-                     <h4>{{ post.title }}</h4>
-                     <span>💬 {{ post.commentCount || 0 }} • ❤️ {{ post.likes || 0 }}</span>
-                   </div>
-                   <div class="fr-actions" v-if="isOwnProfile">
-                     <button @click.stop="$router.push('/forum/edit/' + post.id)">✏️</button>
-                     <button @click.stop="deletePost(post.id)" class="del">🗑️</button>
-                   </div>
-                </div>
-              </div>
-              <div v-else class="empty-text">Tiada post forum.</div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-
-    <div v-if="showCard" class="modal-overlay" @click.self="showCard = false">
-      <div class="card-modal-wrapper">
-        <button class="close-btn" @click="showCard = false">✖</button>
-        <div class="standard-card business-card" id="capture-business">
-          <div class="bc-left-panel">
-             <div class="bc-profile-header">
-                <img :src="user.avatar" class="bc-avatar-square" crossorigin="anonymous" />
-                <div class="bc-texts">
-                   <h3 class="bc-name">{{ user.name }}</h3>
-                   <span class="bc-role">OUTDOOR ORGANIZER</span>
-                   <p v-if="user.organizerDetails?.orgName" class="bc-company">
-                     {{ user.organizerDetails.orgName }}
-                   </p>
-                   <p v-if="user.organizerDetails?.ssm" class="bc-ssm">
-                     {{ user.organizerDetails.ssm }}
-                   </p>
-                </div>
-             </div>
-             <div class="bc-socials-list">
-                <div v-if="user.whatsapp" class="bc-soc-row"><img src="https://cdn.simpleicons.org/whatsapp/white" /> {{ user.whatsapp }}</div>
-                <div v-if="user.facebook" class="bc-soc-row"><img src="https://cdn.simpleicons.org/facebook/white" /> /{{ user.facebook }}</div>
-                <div v-if="user.instagram" class="bc-soc-row"><img src="https://cdn.simpleicons.org/instagram/white" /> /{{ user.instagram }}</div>
-             </div>
-          </div>
-          <div class="bc-right-panel">
-             <div class="qr-container">
-               <span class="scan-text">SCAN ME</span>
-               <img :src="qrCodeUrl" class="bc-qr" crossorigin="anonymous" />
-               <span class="bc-brand">KnotenUp</span>
-             </div>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="share-btn download" @click="downloadCard('capture-business', `BusinessCard-${user.name}`)">
-            {{ isDownloading ? 'Processing...' : '⬇️ Download PDF' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showEmergency" class="modal-overlay" @click.self="showEmergency = false">
-      <div class="card-modal-wrapper">
-        <button class="close-btn" @click="showEmergency = false">✖</button>
-        <div class="standard-card emergency-card" id="capture-emergency">
-           <div class="ec-header">
-             <h2>EMERGENCY INFO</h2>
-             <span>ID: {{ user.name }}</span>
+        <!-- SIDEBAR -->
+        <aside class="profile-sidebar relative z-10">
+           <img :src="user.photoURL || 'https://i.pravatar.cc/150'" class="avatar" />
+           
+           <div class="mb-2">
+              <span class="role-badge" v-if="user.role !== 'user'">{{ user.role }}</span>
+              <span class="role-badge" style="background:#2ecc71" v-if="user.organizerStatus === 'approved'">Organizer Sah</span>
            </div>
-           <div class="ec-body">
-             <div class="ec-main">
-                 <div class="ec-row">
-                    <label>NAMA:</label>
-                    <strong>{{ user.name }}</strong>
-                 </div>
-                 <div class="ec-grid">
-                    <div class="ec-col">
-                       <label>JENIS DARAH:</label>
-                       <strong class="blood-type">{{ privateData.bloodType || '-' }}</strong>
-                    </div>
-                    <div class="ec-col">
-                       <label>ALAHAN:</label>
-                       <strong>{{ privateData.allergies || 'Tiada' }}</strong>
+
+           <h1 class="user-name">{{ user.name }}</h1>
+           <p class="user-bio">{{ user.bio || 'Tiada bio.' }}</p>
+
+           <div class="stats-grid">
+              <div class="stat-item">
+                 <strong>{{ tripsAsOrganizer.length + tripsAsParticipant.length }}</strong>
+                 <span>Trips</span>
+              </div>
+              <div class="stat-item">
+                 <strong>{{ myPosts.length }}</strong>
+                 <span>Posts</span>
+              </div>
+           </div>
+
+           <div class="social-links" v-if="user.telegramUsername || user.instagram || user.facebook || user.tiktok">
+              <a v-if="user.telegramUsername" :href="`https://t.me/${user.telegramUsername}`" target="_blank" title="Telegram">
+                 <img src="https://img.icons8.com/fluency/48/telegram-app.png" alt="TG" />
+              </a>
+              <a v-if="user.instagram" :href="`https://instagram.com/${user.instagram}`" target="_blank">
+                 <img src="https://img.icons8.com/fluency/48/instagram-new.png" alt="IG" />
+              </a>
+              <a v-if="user.facebook" :href="user.facebook" target="_blank">
+                 <img src="https://img.icons8.com/fluency/48/facebook-new.png" alt="FB" />
+              </a>
+              <a v-if="user.tiktok" :href="user.tiktok" target="_blank">
+                 <img src="https://img.icons8.com/fluency/48/tiktok.png" alt="TT" />
+              </a>
+           </div>
+           
+           <!-- Actions -->
+           <div class="action-stack">
+              <!-- [NEW] TELEGRAM DEEP LINK BUTTON FOR VISITORS -->
+              <a 
+                 v-if="!isOwnProfile && user.telegramUsername" 
+                 :href="`https://t.me/${user.telegramUsername}`" 
+                 target="_blank"
+                 class="btn-action telegram-btn flex items-center justify-center gap-2"
+                 style="text-decoration:none;"
+              >
+                  <i class="fab fa-telegram-plane text-lg"></i> Chat via Telegram
+              </a>
+
+              <button v-if="isOwnProfile || isAdmin" class="btn-action" @click="$router.push('/profile/edit')">✏️ Edit Profil</button>
+              
+              <button v-if="isOwnProfile || isAdmin" class="btn-action" @click="openCard('business')">📇 Business Card</button>
+              
+              <button v-if="isOwnProfile || isAdmin" class="btn-action emergency" @click="openEmergency">🚨 Emergency Card</button>
+
+              <button v-if="isOwnProfile && user.role === 'user' && user.organizerStatus !== 'approved'" class="btn-action upgrade" @click="$router.push('/upgrade-organizer')">
+                  🚀 Jadi Organizer
+              </button>
+              <button v-if="isAdmin" class="btn-action admin" @click="$router.push('/admin')">
+                  ⚡ Admin Panel
+              </button>
+              <button v-if="isOwnProfile" class="btn-action" style="color:#ef4444; border-color: #ef4444;" @click="handleLogout">
+                  🚪 Logout
+              </button>
+           </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="profile-main relative z-10">
+           
+           <div class="tabs-strip">
+              <button :class="{ active: activeTab === 'trips' }" @click="activeTab = 'trips'">🏕️ Trips</button>
+              <button :class="{ active: activeTab === 'posts' }" @click="activeTab = 'posts'">💬 Forum Posts</button>
+              <button :class="{ active: activeTab === 'info' }" @click="activeTab = 'info'">📝 Biodata</button>
+           </div>
+
+           <div class="content-box">
+              
+              <!-- TRIPS TAB -->
+              <div v-if="activeTab === 'trips'" class="fade-in">
+                 
+                 <h3 class="text-xl font-bold mb-4 text-white">Upcoming Trips</h3>
+                 <div v-if="upcomingTrips.length === 0" class="empty-text">Tiada trip akan datang.</div>
+                 <div class="grid-layout mb-8">
+                    <div v-for="trip in upcomingTrips" :key="trip.id" class="compact-card" @click="goToTrip(trip.id)">
+                       <div class="cc-date">
+                          <span class="d">{{ new Date(trip.startDate).getDate() }}</span>
+                          <span class="m">{{ new Date(trip.startDate).toLocaleString('default', { month: 'short' }) }}</span>
+                       </div>
+                       <div class="cc-info">
+                          <h4>{{ trip.title }}</h4>
+                          <p>{{ trip.location || trip.destination }}</p>
+                          <span class="status-pill organizer" v-if="trip.organizerId === user.id">Organizer</span>
+                          <span class="status-pill participant" v-else>Participant</span>
+                       </div>
                     </div>
                  </div>
-                 <div class="ec-alert-box">
-                    <label>WARIS (HUBUNGI):</label>
-                    <strong style="color: #c0392b;">{{ privateData.emergencyContact || 'Belum ditetapkan' }}</strong>
+
+                 <h3 class="text-xl font-bold mb-4 text-gray-400">History</h3>
+                 <div v-if="historyTrips.length === 0" class="empty-text">Tiada sejarah trip.</div>
+                 <div class="grid-layout">
+                    <div v-for="trip in historyTrips" :key="trip.id" class="compact-card faded" @click="goToTrip(trip.id)">
+                       <div class="cc-date grayscale">
+                          <span class="d">{{ new Date(trip.startDate).getDate() }}</span>
+                          <span class="m">{{ new Date(trip.startDate).toLocaleString('default', { month: 'short' }) }}</span>
+                       </div>
+                       <div class="cc-info">
+                          <h4>{{ trip.title }}</h4>
+                          <p>{{ trip.location }}</p>
+                          <span class="status-pill closed">Completed</span>
+                       </div>
+                    </div>
                  </div>
-             </div>
-             <div class="ec-side">
-                 <img :src="user.avatar" class="ec-avatar" crossorigin="anonymous" />
-                 <div class="ec-qr-box">
-                    <img :src="qrCodeUrl" class="ec-qr" crossorigin="anonymous" />
+
+              </div>
+
+              <!-- POSTS TAB -->
+              <div v-if="activeTab === 'posts'" class="fade-in">
+                 <div v-if="myPosts.length === 0" class="empty-text">Belum ada post di forum.</div>
+                 <div class="forum-layout">
+                    <div v-for="post in myPosts" :key="post.id" class="forum-row" @click="router.push(`/forum/${post.id}`)">
+                       <div class="fr-content">
+                          <h4>{{ post.title }}</h4>
+                          <span>{{ new Date(post.createdAt.seconds * 1000).toLocaleDateString() }} • {{ post.category }}</span>
+                       </div>
+                       <div class="fr-actions" v-if="isOwnProfile || isAdmin">
+                          <button class="del" @click.stop="deletePost(post.id)">🗑️</button>
+                       </div>
+                    </div>
                  </div>
-             </div>
+              </div>
+
+              <!-- INFO TAB -->
+              <div v-if="activeTab === 'info'" class="fade-in">
+                 <div class="bg-white/5 p-6 rounded-xl border border-white/10">
+                    <h3 class="text-lg font-bold text-white mb-4">Maklumat Peribadi</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
+                       <div><strong>Email:</strong> {{ user.email }}</div>
+                       <div><strong>Phone:</strong> {{ user.phone || '-' }}</div>
+                       <div><strong>Lokasi:</strong> {{ user.location || '-' }}</div>
+                       <div><strong>Join Date:</strong> {{ user.createdAt ? new Date(user.createdAt.seconds*1000).toLocaleDateString() : '-' }}</div>
+                    </div>
+                    
+                    <div v-if="user.organizerDetails?.orgName" class="mt-6 pt-6 border-t border-white/10">
+                        <h3 class="text-lg font-bold text-green-400 mb-2">Organizer Info</h3>
+                        <p><strong>Organization:</strong> {{ user.organizerDetails.orgName }}</p>
+                        <p><strong>SSM No:</strong> {{ user.organizerDetails.ssmNo || '-' }}</p>
+                    </div>
+
+                    <div v-if="isOwnProfile || isAdmin" class="mt-6 pt-6 border-t border-white/10">
+                        <h3 class="text-lg font-bold text-red-400 mb-2 flex items-center gap-2">
+                           <i class="fas fa-lock"></i> Private / Emergency Info
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-4">Hanya anda dan admin boleh melihat info ini.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
+                           <div><strong>Nama Penuh (IC):</strong> {{ privateData.fullName || '-' }}</div>
+                           <div><strong>No. KP:</strong> {{ privateData.icNo || '-' }}</div>
+                           <div><strong>Contact Kecemasan:</strong> {{ privateData.emergencyContact || '-' }}</div>
+                           <div><strong>Hubungan:</strong> {{ privateData.emergencyRelationship || '-' }}</div>
+                           <div><strong>Jenis Darah:</strong> {{ privateData.bloodType || '-' }}</div>
+                           <div class="col-span-1 md:col-span-2 bg-red-900/20 p-3 rounded-lg border border-red-500/20">
+                             <strong>Medical Condition:</strong><br>
+                             {{ privateData.medicalCondition || 'Tiada' }}
+                           </div>
+                        </div>
+                    </div>
+                 </div>
+              </div>
+
            </div>
-        </div>
-        <div class="modal-actions">
-          <button class="share-btn download" style="background:#c0392b;" @click="downloadCard('capture-emergency', `EmergencyCard-${user.name}`)">
-            {{ isDownloading ? 'Processing...' : '⬇️ Download PDF' }}
-          </button>
-          <button class="share-btn" @click="$router.push('/profile/edit')">✏️ Edit Info</button>
-        </div>
+        </main>
+
       </div>
     </div>
+    
+    <!-- CARD GENERATOR MODAL -->
+    <ProfileCardGenerator 
+       v-model:visible="showCardModal" 
+       :type="cardType" 
+       :userData="user" 
+       :privateData="privateData" 
+    />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, watch } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { auth, db } from '../firebaseConfig';
-import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, deleteDoc } from 'firebase/firestore';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-
-// Import Interfaces (Pastikan fail types wujud)
-import type { UserProfile, UserPrivateData, TripSummary } from '../types';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import ProfileCardGenerator from '../components/profile/ProfileCardGenerator.vue';
 
 const route = useRoute();
 const router = useRouter();
 
-// --- STATE ---
-const activeTab = ref('upcoming');
-const showCard = ref(false);
-const showEmergency = ref(false); 
 const loadingData = ref(true);
 const isOwnProfile = ref(false);
 const isAdmin = ref(false);
-const isDownloading = ref(false);
+const activeTab = ref('trips');
 
-const upcomingTrips = ref<TripSummary[]>([]);
-const historyTrips = ref<TripSummary[]>([]);
+const user = ref<any>(null);
+const privateData = reactive<any>({});
 const myPosts = ref<any[]>([]);
 
-// Default User State
-const user = reactive<UserProfile>({
-  id: '', 
-  name: 'Loading...', 
-  bio: '', 
-  avatar: 'https://i.pravatar.cc/300',
-  role: 'user',
-  whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '',
-  organizerDetails: { orgName: '', ssm: '', license: '' }
-});
+const tripsAsOrganizer = ref<any[]>([]);
+const tripsAsParticipant = ref<any[]>([]);
+const upcomingTrips = ref<any[]>([]);
+const historyTrips = ref<any[]>([]);
 
-// Default Private Data (Kosongkan awal-awal)
-const privateData = reactive<UserPrivateData>({
-  bloodType: '', allergies: '', emergencyContact: ''
-});
+// Card Generator
+const showCardModal = ref(false);
+const cardType = ref<'business' | 'emergency'>('business');
 
-// --- COMPUTED ---
-const organizedCount = computed(() => upcomingTrips.value.length + historyTrips.value.length);
-const qrCodeUrl = computed(() => `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/user/${user.name}`);
+const handleLogout = async () => { await signOut(auth); router.push('/login'); };
 
-// --- HELPER FUNCTIONS ---
-const getDay = (dateString: string) => { if(!dateString) return '01'; return new Date(dateString).getDate(); };
-const getMonth = (dateString: string) => { if(!dateString) return 'JAN'; return new Date(dateString).toLocaleDateString('en-MY', { month: 'short' }).toUpperCase(); };
-
-// --- DATA FETCHING ---
 const fetchUserData = async (targetUserId: string) => {
   loadingData.value = true;
-  // Reset data
-  upcomingTrips.value = []; historyTrips.value = []; myPosts.value = [];
-  Object.assign(privateData, { bloodType: '', allergies: '', emergencyContact: '' });
-
+  user.value = null;
+  tripsAsOrganizer.value = [];
+  tripsAsParticipant.value = [];
+  upcomingTrips.value = [];
+  historyTrips.value = [];
+  myPosts.value = [];
+  
   try {
     // 1. Fetch Public Data
-    const docRef = doc(db, "users", targetUserId);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) { 
-        const data = docSnap.data();
-        // Bind data manually or using Object.assign carefully
-        Object.assign(user, { id: docSnap.id, ...data });
-        if (!user.organizerDetails) user.organizerDetails = {};
+    const userDoc = await getDoc(doc(db, "users", targetUserId));
+    if (userDoc.exists()) {
+        user.value = { id: userDoc.id, ...userDoc.data() };
+        if (!user.value.organizerDetails) user.value.organizerDetails = {};
     } else { 
-        user.name = 'Pengguna Tidak Dijumpai'; 
+        user.value = { name: 'Pengguna Tidak Dijumpai' }; 
     }
 
-    // 2. Fetch Private Data (Hanya jika Owner atau Admin)
+    // 2. Fetch Private Data (If owner or admin)
     const currentUser = auth.currentUser;
     if (currentUser && (currentUser.uid === targetUserId || isAdmin.value)) {
        try {
          const privateRef = doc(db, "users", targetUserId, "private_data", "info");
          const privateSnap = await getDoc(privateRef);
-         if(privateSnap.exists()) {
-            Object.assign(privateData, privateSnap.data());
-         }
-       } catch (err) { console.log("Akses data peribadi disekat."); }
+         if(privateSnap.exists()) Object.assign(privateData, privateSnap.data());
+       } catch (err) {}
     }
 
-    // 3. Fetch Trips (Separate Logic)
+    // 3. Fetch Trips
     await fetchUserTrips(targetUserId);
 
     // 4. Fetch Posts
@@ -322,22 +276,17 @@ const fetchUserData = async (targetUserId: string) => {
     const snapPost = await getDocs(qPost);
     myPosts.value = snapPost.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-  } catch (e) { 
-    console.error("Error profile:", e); 
-  } finally { 
-    loadingData.value = false; 
-  }
+  } catch (e) { console.error("Error profile:", e); } 
+  finally { loadingData.value = false; }
 };
 
 const fetchUserTrips = async (uid: string) => {
     const tripMap = new Map();
-    
-    // Get trips as organizer
+    // Organizer
     const qOrg = query(collection(db, "trips"), where("organizerId", "==", uid));
     const snapOrg = await getDocs(qOrg);
     snapOrg.forEach(d => tripMap.set(d.id, { id: d.id, ...d.data() }));
-
-    // Get trips as participant
+    // Participant
     const qPart = query(collection(db, "trips"), where("participants", "array-contains", uid));
     const snapPart = await getDocs(qPart);
     snapPart.forEach(d => tripMap.set(d.id, { id: d.id, ...d.data() }));
@@ -346,12 +295,15 @@ const fetchUserTrips = async (uid: string) => {
     today.setHours(0,0,0,0);
 
     Array.from(tripMap.values()).forEach((trip: any) => {
+        if (!trip.startDate) return;
         const tDate = new Date(trip.startDate);
         if (tDate >= today) upcomingTrips.value.push(trip);
         else historyTrips.value.push(trip);
+        
+        if (trip.organizerId === uid) tripsAsOrganizer.value.push(trip);
+        else tripsAsParticipant.value.push(trip);
     });
     
-    // Sort
     upcomingTrips.value.sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
     historyTrips.value.sort((a,b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 };
@@ -365,27 +317,31 @@ const deletePost = async (id: string) => {
   }
 };
 
+const openCard = (type: 'business' | 'emergency') => {
+    cardType.value = type;
+    showCardModal.value = true;
+};
+
 const openEmergency = () => {
-  // Check if private data exists first
   if (!privateData.bloodType && !privateData.emergencyContact) {
-    if(confirm("Maklumat kecemasan belum lengkap. Kemaskini sekarang?")) {
-      router.push('/profile/edit');
-    }
+    if(confirm("Maklumat kecemasan belum lengkap. Kemaskini sekarang?")) router.push('/profile/edit');
   } else {
-    showEmergency.value = true;
+    openCard('emergency');
   }
 };
 
 const checkAdminRole = async (uid: string) => {
-  const s = await getDoc(doc(db, "users", uid));
-  if (s.exists() && s.data().role === 'admin') isAdmin.value = true;
+  try {
+      const s = await getDoc(doc(db, "users", uid));
+      if (s.exists() && s.data().role === 'admin') isAdmin.value = true;
+  } catch(e){}
 };
 
-// --- LIFECYCLE ---
+const goToTrip = (id: string) => router.push(`/trips/${id}`);
+
 onMounted(() => {
   onAuthStateChanged(auth, async (currentUser) => {
     if (currentUser) await checkAdminRole(currentUser.uid);
-
     const routeId = route.params.id as string;
     if (routeId) {
       fetchUserData(routeId);
@@ -402,51 +358,10 @@ onMounted(() => {
 watch(() => route.params.id, (newId) => {
   if (newId) fetchUserData(newId as string);
 });
-
-// --- PDF DOWNLOADER ---
-const downloadCard = async (elementId: string, fileName: string) => {
-  const element = document.getElementById(elementId);
-  if (!element) return;
-  isDownloading.value = true;
-  try {
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: null });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
-    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-    pdf.save(`${fileName}.pdf`);
-  } catch (error) { 
-    console.error(error); alert("Gagal memuat turun kad."); 
-  } finally { 
-    isDownloading.value = false; 
-  }
-};
 </script>
 
 <style scoped>
-/* Gunakan CSS asal anda sepenuhnya di sini */
-@import '../style.css'; /* Jika ada global styles */
-
 .profile-page { background-color: #0f172a; min-height: 100vh; position: relative; overflow-x: hidden; color: white; }
-.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
-
-/* ... (Salin semula CSS layout, card, glass effect dari file asal anda) ... */
-/* Saya pendekkan di sini untuk fokus pada logik, tapi sila pastikan CSS asal 
-   anda (profile-sidebar, glass-panel, business-card, emergency-card) 
-   ADA di bahagian ini supaya layout tidak lari */
-
-/* CONTOH CSS WAJIB ADA UNTUK KAD */
-.standard-card { width: 600px; height: 340px; background: white; border-radius: 12px; overflow: hidden; display: flex; color: #333; position: relative; }
-.business-card { background: #2c3e50; color: white; }
-.emergency-card { background: #ecf0f1; border: 4px solid #c0392b; flex-direction: column; }
-/* ... (Sambung CSS asal) ... */
-</style>
-
-<style scoped>
-/* --- THEME BACKGROUND (DARK SUNSET + CONTOUR) --- */
-.profile-page { 
-  background-color: #0f172a; /* Dark Blue Base */
-  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
-}
 .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
 
 /* GLOWS */
@@ -464,10 +379,8 @@ const downloadCard = async (elementId: string, fileName: string) => {
   background-size: cover; pointer-events: none;
 }
 
-/* LAYOUT */
 .profile-layout { display: grid; grid-template-columns: 320px 1fr; gap: 2rem; position: relative; z-index: 2; }
 
-/* --- SIDEBAR (GLASS DARK) --- */
 .profile-sidebar { 
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -482,7 +395,7 @@ const downloadCard = async (elementId: string, fileName: string) => {
 
 .stats-grid { display: flex; justify-content: center; gap: 25px; margin: 1.5rem 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
 .stat-item { display: flex; flex-direction: column; }
-.stat-item strong { font-size: 1.3rem; color: #6c63ff; } /* Purple Stat */
+.stat-item strong { font-size: 1.3rem; color: #6c63ff; }
 .stat-item span { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
 
 .social-links { display: flex; justify-content: center; gap: 12px; margin-bottom: 1.5rem; }
@@ -500,8 +413,10 @@ const downloadCard = async (elementId: string, fileName: string) => {
 .btn-action.admin { background: linear-gradient(135deg, #e74c3c, #c0392b); border: none; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3); }
 .btn-action.emergency { border-color: #c0392b; color: #f87171; }
 .btn-action.emergency:hover { background: #c0392b; color: white; }
+.btn-action.telegram-btn { background: #229ED9; border: none; color: white; }
+.btn-action.telegram-btn:hover { background: #1a8cc2; transform: translateY(-2px); }
 
-/* --- MAIN CONTENT (GLASS DARK) --- */
+/* MAIN CONTENT */
 .profile-main { display: flex; flex-direction: column; }
 
 .tabs-strip { 
@@ -515,7 +430,7 @@ const downloadCard = async (elementId: string, fileName: string) => {
   color: #94a3b8; font-weight: 600; cursor: pointer; 
   border-bottom: 3px solid transparent; transition: color 0.3s;
 }
-.tabs-strip button.active { color: #6c63ff; border-bottom-color: #6c63ff; } /* Purple Active */
+.tabs-strip button.active { color: #6c63ff; border-bottom-color: #6c63ff; }
 
 .content-box { 
   background: rgba(255, 255, 255, 0.03); 
@@ -526,18 +441,18 @@ const downloadCard = async (elementId: string, fileName: string) => {
 
 .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
 
-/* Compact Card (Glass Small) */
+/* Compact Card */
 .compact-card { 
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; 
-  transition: transform 0.2s;
+  transition: transform 0.2s; cursor: pointer;
 }
 .compact-card:hover { transform: translateY(-3px); border-color: #6c63ff; }
 .compact-card.faded { opacity: 0.6; }
 
 .cc-date { 
-  background: rgba(108, 99, 255, 0.2); color: #a78bfa; /* Purple tint */
+  background: rgba(108, 99, 255, 0.2); color: #a78bfa; 
   padding: 8px 12px; border-radius: 8px; text-align: center; min-width: 60px; 
 }
 .d { display: block; font-weight: 800; font-size: 1.2rem; line-height: 1; }
@@ -547,7 +462,6 @@ const downloadCard = async (elementId: string, fileName: string) => {
 .cc-info h4 { margin: 0 0 5px 0; font-size: 1rem; color: white; font-weight: 600; }
 .cc-info p { margin: 0; font-size: 0.85rem; color: #94a3b8; }
 
-/* Status Pills */
 .status-pill { font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; margin-top: 5px; display: inline-block; margin-right: 5px; }
 .status-pill.open { background: rgba(16, 185, 129, 0.2); color: #34d399; }
 .status-pill.closed { background: rgba(255,255,255,0.1); color: #94a3b8; }
@@ -558,7 +472,6 @@ const downloadCard = async (elementId: string, fileName: string) => {
 .btn-mini:hover { background: #5b54e0; }
 .btn-mini.outline { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #ccc; }
 
-/* Forum Row (Glass) */
 .forum-layout { display: flex; flex-direction: column; gap: 10px; }
 .forum-row { 
   padding: 1.2rem; background: rgba(255,255,255,0.05); 
@@ -572,56 +485,12 @@ const downloadCard = async (elementId: string, fileName: string) => {
 .fr-actions button:hover { color: #6c63ff; }
 .fr-actions button.del:hover { color: #ef4444; }
 
-.empty-text, .loading-text { text-align: center; color: #64748b; padding: 3rem; font-style: italic; }
+.empty-text { text-align: center; color: #64748b; padding: 3rem; font-style: italic; }
+.spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.fade-up { animation: fadeUp 0.6s ease-out; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- MODAL (No Dark Theme Changes Needed for Card Logic) --- */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(8px); }
-.card-modal-wrapper { background: transparent; padding: 1rem; }
-.close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #fff; z-index: 10; }
-.modal-actions { padding: 1.5rem; display: flex; justify-content: center; gap: 10px; }
-.share-btn { padding: 0.6rem 1.5rem; border: none; background: white; border-radius: 50px; cursor: pointer; font-weight: bold; color: #333; transition: background 0.2s; }
-.share-btn:hover { background: #eee; }
-.share-btn.download { background-color: #e67e22; color: white; }
-
-/* CARD CSS KEKAL SAMA (PUTIH) UTK PRINTING */
-.standard-card { width: 600px; height: 340px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; position: relative; display: flex; font-family: 'Helvetica Neue', sans-serif; color: #333; }
-.business-card { background: #2c3e50; color: white; }
-.bc-left-panel { flex: 2; padding: 30px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
-.bc-profile-header { display: flex; align-items: center; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
-.bc-avatar-square { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; border: 3px solid #e67e22; background: #fff; }
-.bc-texts { display: flex; flex-direction: column; }
-.bc-name { font-size: 1.5rem; font-weight: 800; margin: 0; line-height: 1.1; color: white; }
-.bc-role { color: #e67e22; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; margin-top: 5px; }
-.bc-company { font-size: 0.9rem; color: #bdc3c7; margin: 5px 0 0 0; font-style: italic; }
-.bc-ssm { font-size: 0.65rem; color: #7f8c8d; margin: 0; }
-.bc-socials-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.bc-soc-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #ecf0f1; }
-.bc-soc-row img { width: 16px; height: 16px; opacity: 0.9; }
-.bc-right-panel { flex: 1; background: white; display: flex; align-items: center; justify-content: center; position: relative; clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%); margin-left: -20px; }
-.qr-container { display: flex; flex-direction: column; align-items: center; text-align: center; margin-left: 15px; }
-.scan-text { font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; color: #2c3e50; margin-bottom: 5px; }
-.bc-qr { width: 110px; height: 110px; }
-.bc-brand { font-weight: 900; font-size: 1.1rem; color: #2c3e50; margin-top: 5px; }
-
-.emergency-card { background: #ecf0f1; border: 4px solid #c0392b; flex-direction: column; }
-.ec-header { background: #c0392b; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 50px; }
-.ec-header h2 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
-.ec-header span { font-size: 0.8rem; opacity: 0.8; }
-.ec-body { display: flex; padding: 20px; height: calc(100% - 50px); }
-.ec-main { flex: 2; display: flex; flex-direction: column; justify-content: space-around; padding-right: 10px; }
-.ec-side { flex: 0.8; display: flex; flex-direction: column; align-items: center; border-left: 1px dashed #bdc3c7; padding-left: 10px; }
-.ec-row { border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; margin-bottom: 5px; }
-.ec-row label { font-size: 0.65rem; color: #7f8c8d; display: block; }
-.ec-row strong { font-size: 1rem; color: #2c3e50; }
-.ec-grid { display: flex; gap: 15px; margin-bottom: 5px; }
-.ec-col label { font-size: 0.65rem; color: #7f8c8d; display: block; }
-.blood-type { color: #c0392b; font-size: 1.4rem; font-weight: 900; }
-.ec-alert-box { background: #fadbd8; padding: 8px; border-radius: 5px; border: 1px solid #f5b7b1; }
-.ec-alert-box label { font-size: 0.65rem; color: #c0392b; font-weight: bold; display: block; }
-.ec-avatar { width: 80px; height: 80px; border-radius: 4px; border: 1px solid #bdc3c7; object-fit: cover; margin-bottom: 10px; }
-.ec-qr-box img { width: 80px; height: 80px; opacity: 0.8; }
-
-/* RESPONSIVE */
 @media (max-width: 768px) { 
   .profile-layout { grid-template-columns: 1fr; } 
   .tabs-strip { overflow-x: auto; }

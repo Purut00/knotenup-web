@@ -20,25 +20,25 @@
 
       <div class="admin-tabs custom-scrollbar">
         <button :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">📊 Dashboard</button>
-        <button :class="{ active: activeTab === 'trips' }" @click="activeTab = 'trips'">🏕️ Trips <span v-if="counts.trips" class="badge">{{ counts.trips }}</span></button>
-        <button :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">💬 Forum <span v-if="counts.forum" class="badge">{{ counts.forum }}</span></button>
-        <button :class="{ active: activeTab === 'services' }" @click="activeTab = 'services'">🛠️ Services <span v-if="counts.services" class="badge">{{ counts.services }}</span></button>
-        <button :class="{ active: activeTab === 'spots' }" @click="activeTab = 'spots'">📍 Spots <span v-if="counts.spots" class="badge">{{ counts.spots }}</span></button>
+        <button :class="{ active: activeTab === 'trips' }" @click="activeTab = 'trips'">🏕️ Trips</button>
+        <button :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">💬 Forum</button>
+        <button :class="{ active: activeTab === 'services' }" @click="activeTab = 'services'">🛠️ Services</button>
+        <button :class="{ active: activeTab === 'spots' }" @click="activeTab = 'spots'">📍 Spots</button>
         <button :class="{ active: activeTab === 'banners' }" @click="activeTab = 'banners'">🎨 Banners</button>
         <button :class="{ active: activeTab === 'devtools' }" @click="activeTab = 'devtools'" style="color: #ff5e57; border-color: #ff5e57;">🤖 Data Tools</button>
       </div>
 
+      <!-- DASHBOARD -->
       <div v-if="activeTab === 'dashboard'" class="tab-content fade-in">
          <div class="stats-grid">
-            <div class="card"><h3>{{ users.length }}</h3><p>Total Users</p></div>
-            <div class="card"><h3>{{ trips.length }}</h3><p>Total Trips</p></div>
-            <div class="card"><h3>{{ spots.length }}</h3><p>Total Spots</p></div>
-            <div class="card alert"><h3>{{ reports.length }}</h3><p>Total Reports</p></div>
+            <!-- Stats disabled for performance (requires count queries) -->
+            <div class="card"><h3>Admin</h3><p>Control Center</p></div>
          </div>
          <div class="dashboard-split">
             <div class="panel-section">
                <h3 class="text-yellow-400 mb-4">⏳ Permohonan Organizer ({{ pendingOrganizers.length }})</h3>
-               <div v-if="pendingOrganizers.length > 0" class="list-wrapper">
+               <div v-if="loadingPending" class="text-white text-sm">Loading...</div>
+               <div v-else-if="pendingOrganizers.length > 0" class="list-wrapper">
                   <div v-for="user in pendingOrganizers" :key="user.id" class="list-item">
                       <div class="info"><strong>{{ user.name }}</strong><small>{{ user.organizerDetails?.orgName }}</small></div>
                       <button class="btn-approve" @click="approveOrganizer(user)">✅ Luluskan</button>
@@ -54,67 +54,13 @@
          </div>
       </div>
 
-      <div v-if="activeTab === 'trips'" class="tab-content fade-in">
-         <div class="tab-header"><h3>Pengurusan Trip</h3><input type="text" v-model="searchQuery" placeholder="Cari..." class="search-box"/></div>
-         <div class="data-list">
-            <div v-for="trip in filteredTrips" :key="trip.id" class="data-item" :class="{ 'frozen-item': trip.isFrozen }">
-               <div class="item-main">
-                  <a :href="`/trips/${trip.id}`" target="_blank" class="item-title">{{ trip.title }} <span v-if="trip.isFrozen" class="frozen-badge">❄️ FROZEN</span></a>
-                  <div class="item-meta">{{ trip.organizerName }} • {{ trip.status }}</div>
-               </div>
-               <div class="item-actions">
-                  <button v-if="getReportCount(trip.id)" class="btn-report" @click="openReportModal(trip.id)">🚨 {{ getReportCount(trip.id) }} Reports</button>
-                  <button class="btn-action" :class="trip.isFrozen ? 'btn-unfreeze' : 'btn-freeze'" @click="toggleFreeze('trips', trip)">{{ trip.isFrozen ? 'Unfreeze' : 'Freeze' }}</button>
-                  <button class="btn-del" @click="deleteItem('trips', trip.id)">🗑️</button>
-               </div>
-            </div>
-         </div>
-      </div>
+      <!-- SUB COMPONENTS -->
+      <AdminTrips v-if="activeTab === 'trips'" @view-reports="openReportModal" />
+      <AdminForum v-if="activeTab === 'forum'" @view-reports="openReportModal" />
+      <AdminServices v-if="activeTab === 'services'" @view-reports="openReportModal" />
+      <AdminSpots v-if="activeTab === 'spots'" @view-reports="openReportModal" />
 
-      <div v-if="activeTab === 'forum'" class="tab-content fade-in">
-         <div class="tab-header"><h3>Pengurusan Forum</h3><input type="text" v-model="searchQuery" placeholder="Cari..." class="search-box"/></div>
-         <div class="data-list">
-            <div v-for="post in filteredPosts" :key="post.id" class="data-item" :class="{ 'frozen-item': post.isFrozen }">
-               <div class="item-main">
-                  <a :href="`/forum/${post.id}`" target="_blank" class="item-title">{{ post.title }} <span v-if="post.isFrozen" class="frozen-badge">❄️ FROZEN</span></a>
-               </div>
-               <div class="item-actions">
-                  <button v-if="getReportCount(post.id)" class="btn-report" @click="openReportModal(post.id)">🚨 {{ getReportCount(post.id) }} Reports</button>
-                  <button class="btn-action" :class="post.isFrozen ? 'btn-unfreeze' : 'btn-freeze'" @click="toggleFreeze('forum_posts', post)">{{ post.isFrozen ? 'Unfreeze' : 'Freeze' }}</button>
-                  <button class="btn-del" @click="deleteItem('forum_posts', post.id)">🗑️</button>
-               </div>
-            </div>
-         </div>
-      </div>
-
-      <div v-if="activeTab === 'services'" class="tab-content fade-in">
-         <div class="tab-header"><h3>Pengurusan Servis</h3><input type="text" v-model="searchQuery" placeholder="Cari..." class="search-box"/></div>
-         <div class="data-list">
-            <div v-for="item in filteredServices" :key="item.id" class="data-item" :class="{ 'frozen-item': item.isFrozen }">
-               <div class="item-main"><span class="item-title">{{ item.name }}</span></div>
-               <div class="item-actions">
-                  <button v-if="getReportCount(item.id)" class="btn-report" @click="openReportModal(item.id)">🚨 {{ getReportCount(item.id) }}</button>
-                  <button class="btn-action" :class="item.isFrozen ? 'btn-unfreeze' : 'btn-freeze'" @click="toggleFreeze('services', item)">{{ item.isFrozen ? 'Unfreeze' : 'Freeze' }}</button>
-                  <button class="btn-del" @click="deleteItem('services', item.id)">🗑️</button>
-               </div>
-            </div>
-         </div>
-      </div>
-
-      <div v-if="activeTab === 'spots'" class="tab-content fade-in">
-         <div class="tab-header"><h3>Pengurusan Spot</h3><input type="text" v-model="searchQuery" placeholder="Cari..." class="search-box"/></div>
-         <div class="data-list">
-            <div v-for="item in filteredSpots" :key="item.id" class="data-item" :class="{ 'frozen-item': item.isFrozen }">
-               <div class="item-main"><span class="item-title">{{ item.name }}</span></div>
-               <div class="item-actions">
-                  <button v-if="getReportCount(item.id)" class="btn-report" @click="openReportModal(item.id)">🚨 {{ getReportCount(item.id) }}</button>
-                  <button class="btn-action" :class="item.isFrozen ? 'btn-unfreeze' : 'btn-freeze'" @click="toggleFreeze('spots', item)">{{ item.isFrozen ? 'Unfreeze' : 'Freeze' }}</button>
-                  <button class="btn-del" @click="deleteItem('spots', item.id)">🗑️</button>
-               </div>
-            </div>
-         </div>
-      </div>
-
+      <!-- BANNERS MANAGER -->
       <div v-if="activeTab === 'banners'" class="tab-content fade-in">
         <h3>🎨 Pengurusan Tampilan</h3>
         <div class="banner-manager-layout">
@@ -150,6 +96,7 @@
         </div>
       </div>
 
+      <!-- DEVTOOLS -->
       <div v-if="activeTab === 'devtools'" class="tab-content fade-in">
         <h3 class="text-red-400 mb-4 flex items-center gap-2">
             <i class="fas fa-database text-2xl"></i> Import Data Sebenar
@@ -158,7 +105,6 @@
             <i class="fas fa-info-circle text-blue-400 mr-2"></i> 
             Bahagian ini adalah untuk memasukkan data bukit/gunung sebenar dari fail JSON yang telah diproses.
         </p>
-
         <div class="single-tool-container">
            <div class="tool-card big-card" style="border: 1px solid #e74c3c;">
                <div class="icon-bg" style="background: rgba(231, 76, 60, 0.2); width: 70px; height: 70px; font-size: 2rem;">🗺️</div>
@@ -184,29 +130,28 @@
        <button @click="router.push('/')">Balik ke Home</button>
     </div>
 
-    <div v-if="showReportModal" class="modal-overlay" @click.self="showReportModal = false">
-      <div class="glass-modal">
-        <div class="modal-header"><h3>Laporan</h3><button class="close-btn" @click="showReportModal=false">✖</button></div>
-        <div class="modal-body custom-scrollbar">
-           <div v-for="rep in currentReporters" :key="rep.id" class="reporter-item">
-              <strong>{{ rep.reporterName }}</strong>: "{{ rep.reason }}"
-           </div>
-        </div>
-      </div>
-    </div>
+    <!-- REPORT MODAL -->
+    <AdminReportModal v-model:visible="showReportModal" :reports="currentReports" />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db, storage } from '../firebaseConfig'; 
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, getDocs, deleteDoc, doc, getDoc, setDoc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, updateDoc, query, where, orderBy } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-// HANYA IMPORT REAL SPOTS SEEDER
+// COMPONENTS
+import AdminTrips from '../components/admin/AdminTrips.vue';
+import AdminSpots from '../components/admin/AdminSpots.vue';
+import AdminForum from '../components/admin/AdminForum.vue';
+import AdminServices from '../components/admin/AdminServices.vue';
+import AdminReportModal from '../components/admin/AdminReportModal.vue';
+
+// SEEDER
 import { seedRealSpots } from '../utils/seeder';
 
 const router = useRouter();
@@ -214,23 +159,15 @@ const isAdmin = ref(false);
 const checkingAccess = ref(true);
 const currentUserEmail = ref('');
 const activeTab = ref('dashboard');
-const searchQuery = ref('');
 const adminNote = ref('');
 
-// Data
-const trips = ref<any[]>([]);
-const spots = ref<any[]>([]); 
-const users = ref<any[]>([]);
-const reports = ref<any[]>([]); 
-const posts = ref<any[]>([]);
-const services = ref<any[]>([]);
+// Pending Organizers
+const pendingOrganizers = ref<any[]>([]);
+const loadingPending = ref(false);
 
 // Report Modal
 const showReportModal = ref(false);
-const currentReporters = ref<any[]>([]);
-
-// Counts
-const counts = reactive({ trips: 0, forum: 0, services: 0, spots: 0 });
+const currentReports = ref<any[]>([]);
 
 // Banners
 const loading = reactive({ slide: false, saveAll: false, small1: false, small2: false });
@@ -241,7 +178,6 @@ const banners = reactive({
 });
 const newSlide = reactive({ file: null as File | null, title: '', linkUrl: '' });
 
-// Helper: Mask Email
 const maskEmail = (email: string) => {
   const [name, domain] = email.split('@');
   if(!name || !domain) return email;
@@ -258,8 +194,8 @@ onMounted(() => {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists() && userDoc.data().role === 'admin') {
           isAdmin.value = true;
-          loadAllData();
           loadBanners();
+          fetchPendingOrganizers(); // Only fetch pending
         } else {
           isAdmin.value = false;
         }
@@ -274,78 +210,30 @@ onMounted(() => {
   });
 });
 
-const loadAllData = async () => {
-  try {
-    const [tripSnap, spotSnap, repSnap, userSnap, postSnap, serviceSnap] = await Promise.all([
-      getDocs(query(collection(db, "trips"), orderBy("createdAt", "desc"))),
-      getDocs(query(collection(db, "spots"), orderBy("createdAt", "desc"))),
-      getDocs(query(collection(db, "reports"), orderBy("createdAt", "desc"))),
-      getDocs(collection(db, "users")),
-      getDocs(query(collection(db, "forum_posts"), orderBy("createdAt", "desc"))),
-      getDocs(query(collection(db, "services"), orderBy("createdAt", "desc")))
-    ]);
-
-    trips.value = tripSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    spots.value = spotSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    reports.value = repSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    users.value = userSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    posts.value = postSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    services.value = serviceSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-    counts.trips = trips.value.length;
-    counts.forum = posts.value.length;
-    counts.services = services.value.length;
-    counts.spots = spots.value.length;
-  } catch(e) {
-    console.error("Error fetching admin data. Check Firestore rules.", e);
-    isAdmin.value = false;
-  }
-};
-
-// --- COMPUTED FILTERS ---
-const filteredTrips = computed(() => searchQuery.value ? trips.value.filter(t => t.title.toLowerCase().includes(searchQuery.value.toLowerCase())) : trips.value);
-const filteredPosts = computed(() => searchQuery.value ? posts.value.filter(p => p.title.toLowerCase().includes(searchQuery.value.toLowerCase())) : posts.value);
-const filteredServices = computed(() => searchQuery.value ? services.value.filter(s => s.name.toLowerCase().includes(searchQuery.value.toLowerCase())) : services.value);
-const filteredSpots = computed(() => searchQuery.value ? spots.value.filter(s => s.name.toLowerCase().includes(searchQuery.value.toLowerCase())) : spots.value);
-const pendingOrganizers = computed(() => users.value.filter(u => u.organizerStatus === 'pending'));
-
-// --- ACTIONS ---
-const toggleFreeze = async (collectionName: string, item: any) => {
-  if(!confirm("Ubah status freeze?")) return;
-  try {
-    await updateDoc(doc(db, collectionName, item.id), { isFrozen: !item.isFrozen });
-    item.isFrozen = !item.isFrozen;
-  } catch(e) { alert("Gagal update. Semak akses."); }
-};
-
-const deleteItem = async (collectionName: string, id: string) => {
-  if(!confirm("Padam item ini?")) return;
-  try {
-    await deleteDoc(doc(db, collectionName, id));
-    if(collectionName === 'trips') trips.value = trips.value.filter(i => i.id !== id);
-    if(collectionName === 'forum_posts') posts.value = posts.value.filter(i => i.id !== id);
-    if(collectionName === 'services') services.value = services.value.filter(i => i.id !== id);
-    if(collectionName === 'spots') spots.value = spots.value.filter(i => i.id !== id);
-  } catch(e) { alert("Gagal padam. Database dikunci."); }
-};
-
-const getReportCount = (targetId: string) => reports.value.filter(r => r.targetId === targetId).length;
-
-const openReportModal = async (targetId: string) => {
-  showReportModal.value = true;
-  const itemReports = reports.value.filter(r => r.targetId === targetId);
-  currentReporters.value = itemReports.map(rep => {
-    const user = users.value.find(u => u.id === rep.reportedBy);
-    return { ...rep, reporterName: user ? user.name : 'Unknown' };
-  });
+const fetchPendingOrganizers = async () => {
+    loadingPending.value = true;
+    try {
+        const q = query(collection(db, "users"), where("organizerStatus", "==", "pending"));
+        const snap = await getDocs(q);
+        pendingOrganizers.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch(e) { console.error(e); } finally { loadingPending.value = false; }
 };
 
 const approveOrganizer = async (user: any) => {
   if(!confirm(`Luluskan ${user.name}?`)) return;
   try {
     await updateDoc(doc(db, "users", user.id), { role: 'organizer', organizerStatus: 'approved' });
-    user.role = 'organizer'; user.organizerStatus = 'approved';
+    pendingOrganizers.value = pendingOrganizers.value.filter(u => u.id !== user.id);
   } catch(e) { alert("Gagal."); }
+};
+
+const openReportModal = async (targetId: string) => {
+  try {
+      const q = query(collection(db, "reports"), where("targetId", "==", targetId));
+      const snap = await getDocs(q);
+      currentReports.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      showReportModal.value = true;
+  } catch(e) { console.error(e); alert("Gagal fetch reports."); }
 };
 
 const saveNote = () => { localStorage.setItem('adminNote', adminNote.value); alert("Saved."); };
@@ -410,38 +298,20 @@ const saveBanner = async (type: 'small1' | 'small2') => {
 .admin-tabs { display: flex; gap: 10px; margin-bottom: 2rem; overflow-x: auto; }
 .admin-tabs button { background: #2c3e50; border: none; color: #bdc3c7; padding: 10px 20px; cursor: pointer; border-radius: 8px; font-weight: 600; white-space: nowrap; }
 .admin-tabs button.active { background: #3498db; color: white; }
-.badge { background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px; }
 
 /* LAYOUTS */
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
 .card { background: #2c3e50; padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #34495e; }
-.card.alert h3 { color: #e74c3c; }
 .card h3 { font-size: 2rem; margin: 0; color: #f1c40f; }
 .dashboard-split { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
 .panel-section { background: #2c3e50; padding: 1.5rem; border-radius: 12px; }
 .note-area { width: 100%; height: 100px; background: #34495e; border: none; color: white; padding: 1rem; margin-bottom: 10px; }
 
-/* DATA LISTS */
-.tab-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
-.search-box { padding: 8px; border-radius: 5px; border: none; background: #34495e; color: white; }
-.data-list { display: flex; flex-direction: column; gap: 10px; }
-.data-item { background: #2c3e50; padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #2ecc71; }
-.data-item.frozen-item { border-left-color: #3498db; opacity: 0.7; }
-.item-title { color: white; font-weight: bold; text-decoration: none; }
-.item-meta { color: #95a5a6; font-size: 0.8rem; }
-.item-actions { display: flex; gap: 5px; }
-.btn-del, .btn-freeze, .btn-unfreeze, .btn-report { padding: 5px 10px; border-radius: 5px; border: none; cursor: pointer; color: white; font-size: 0.8rem; }
-.btn-del { background: #e74c3c; } .btn-freeze { background: #3498db; } .btn-unfreeze { background: #f39c12; } .btn-report { background: #e74c3c; animation: pulse 2s infinite; }
-.btn-approve { background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; float: right; }
+.list-wrapper { display: flex; flex-direction: column; gap: 10px; }
+.list-item { background: #34495e; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+.info strong { display: block; color:white; } .info small { color: #bdc3c7; }
+.btn-approve { background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 .btn-save-note { background: #27ae60; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
-
-/* TOOL CARD SINGLE (FOR REAL IMPORT) */
-.single-tool-container { display: flex; justify-content: center; align-items: center; min-height: 400px; }
-.tool-card { background: #253342; padding: 1.5rem; border-radius: 12px; border: 1px solid #34495e; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.tool-card.big-card { width: 100%; max-width: 600px; padding: 3rem; }
-.icon-bg { border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-.btn-tool { border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
-.btn-tool:hover { filter: brightness(1.1); transform: scale(1.05); }
 
 /* BANNER MANAGER */
 .banner-manager-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
@@ -455,12 +325,13 @@ const saveBanner = async (type: 'small1' | 'small2') => {
 .btn-add { background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
 .btn-del-slide { background: none; border: none; color: #e74c3c; font-weight: bold; cursor: pointer; }
 
-/* MODAL */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-.glass-modal { background: #2c3e50; padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; border: 1px solid #34495e; }
-.modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #34495e; padding-bottom: 10px; margin-bottom: 10px; }
-.reporter-item { padding: 10px; border-bottom: 1px solid #34495e; }
+/* TOOL CARD */
+.single-tool-container { display: flex; justify-content: center; align-items: center; min-height: 400px; }
+.tool-card { background: #253342; padding: 1.5rem; border-radius: 12px; border: 1px solid #34495e; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.tool-card.big-card { width: 100%; max-width: 600px; padding: 3rem; }
+.icon-bg { border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.btn-tool { border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-tool:hover { filter: brightness(1.1); transform: scale(1.05); }
 
 @media (max-width: 768px) { .dashboard-split, .banner-manager-layout { grid-template-columns: 1fr; } }
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 </style>

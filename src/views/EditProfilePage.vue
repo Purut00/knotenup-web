@@ -65,6 +65,13 @@
           <h3 class="text-white font-bold mb-4">Pautan Sosial</h3>
           <div class="space-y-3">
             <div class="flex items-center gap-2">
+              <i class="fab fa-telegram text-blue-400 w-6 text-xl"></i>
+              <div class="relative w-full">
+                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">@</span>
+                 <input v-model="form.telegramUsername" placeholder="Telegram Username (tanpa @)" class="input-glass pl-8" />
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
               <i class="fab fa-whatsapp text-green-500 w-6"></i>
               <input v-model="form.whatsapp" placeholder="No. WhatsApp (e.g 6012345678)" class="input-glass" />
             </div>
@@ -113,7 +120,7 @@ const loading = ref(false);
 // State Public (Flat structure)
 const form = reactive<UserProfile>({
   id: '', name: '', bio: '', avatar: '', role: 'user',
-  whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '',
+  telegramUsername: '', whatsapp: '', facebook: '', instagram: '', tiktok: '', youtube: '',
   organizerDetails: { orgName: '', ssm: '', license: '' }
 });
 
@@ -135,6 +142,7 @@ onMounted(() => {
       form.bio = data.bio || '';
       form.avatar = data.avatar || '';
       form.role = data.role || 'user';
+      form.telegramUsername = data.telegramUsername || '';
       form.whatsapp = data.whatsapp || '';
       form.facebook = data.facebook || '';
       form.instagram = data.instagram || '';
@@ -184,6 +192,7 @@ const saveProfile = async () => {
       name: form.name,
       bio: form.bio,
       avatar: form.avatar,
+      telegramUsername: form.telegramUsername || '',
       whatsapp: form.whatsapp,
       facebook: form.facebook,
       instagram: form.instagram,

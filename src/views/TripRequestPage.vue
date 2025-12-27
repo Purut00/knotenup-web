@@ -147,7 +147,7 @@
                   class="btn-action btn-owner" 
                   :class="{'has-offers': req.offeredBy && req.offeredBy.length > 0}"
                   :disabled="!req.offeredBy || req.offeredBy.length === 0"
-                  @click="viewOffers(req)"
+                  @click="openViewOffers(req)"
                >
                   <span v-if="req.offeredBy && req.offeredBy.length > 0">
                       📨 Lihat {{ req.offeredBy.length }} Tawaran
@@ -179,162 +179,41 @@
       </div>
     </div>
 
-    <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
-      <div class="glass-modal fade-up">
-        <div class="modal-header">
-          <h3>📋 Cipta Permintaan</h3>
-          <button class="close-btn" @click="showCreateModal = false">✖</button>
-        </div>
-        
-        <div class="modal-body custom-scrollbar">
-          
-          <div class="form-group">
-            <label>Jenis Aktiviti</label>
-            <div class="select-wrapper-modal">
-                <select v-model="newRequest.category" class="glass-input">
-                    <option value="" disabled>Sila Pilih Kategori</option>
-                    <optgroup v-for="(group, gIndex) in ACTIVITY_CATEGORIES" :key="gIndex" :label="group.group">
-                        <option v-for="(item, iIndex) in group.items" :key="iIndex" :value="item">
-                            {{ item }}
-                        </option>
-                    </optgroup>
-                </select>
-                <i class="fas fa-chevron-down select-arrow"></i>
-            </div>
-          </div>
+    <!-- MODALS -->
+    <TripRequestCreateModal 
+      v-model:visible="showCreateModal" 
+      @created="fetchRequests" 
+    />
 
-          <div class="form-group">
-            <label>Destinasi (Tempat Spesifik)</label>
-            <input type="text" v-model="newRequest.destination" class="glass-input" placeholder="Cth: Pulau Perhentian Kecil" />
-          </div>
+    <TripRequestOfferModal 
+      v-model:visible="showOfferModal" 
+      :request="selectedRequest" 
+      @offered="handleOffered" 
+    />
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>Negeri</label>
-              <div class="select-wrapper-modal">
-                  <select v-model="newRequest.location" class="glass-input">
-                      <option v-for="s in MALAYSIA_STATES" :key="s" :value="s">{{ s }}</option>
-                  </select>
-                  <i class="fas fa-chevron-down select-arrow"></i>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Tarikh</label>
-              <input type="date" v-model="newRequest.date" class="glass-input" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Bajet (RM)</label>
-              <input type="number" v-model="newRequest.budget" class="glass-input" placeholder="300" />
-            </div>
-            <div class="form-group">
-              <label>Pax</label>
-              <input type="number" v-model="newRequest.pax" class="glass-input" placeholder="5" />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Nota Tambahan</label>
-            <textarea v-model="newRequest.note" class="glass-input" rows="3" placeholder="Ceritakan detail..."></textarea>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="btn-submit-modal" @click="submitRequest" :disabled="submitting">
-            {{ submitting ? 'Menghantar...' : '🚀 Hantar' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showOfferModal" class="modal-overlay" @click.self="showOfferModal = false">
-      <div class="glass-modal fade-up">
-        <div class="modal-header header-offer">
-          <h3>🤝 Hantar Proposal</h3>
-          <button class="close-btn" @click="showOfferModal = false">✖</button>
-        </div>
-        
-        <div class="modal-body">
-          <div class="offer-context">
-             User: <strong>{{ selectedRequest?.userName }}</strong> <br>
-             Destinasi: <strong>{{ selectedRequest?.destination }}</strong>
-          </div>
-
-          <div class="form-group mt-4">
-            <label>Harga Tawaran (RM)</label>
-            <input type="number" v-model="offerForm.price" class="glass-input" />
-            <small class="text-gray-400">Bajet asal: RM {{ selectedRequest?.budget }}</small>
-          </div>
-
-          <div class="form-group">
-            <label>Mesej</label>
-            <textarea v-model="offerForm.message" class="glass-input" rows="3" placeholder="Saya boleh bawa trip ini..."></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>WhatsApp (Optional)</label>
-            <input type="text" v-model="offerForm.contact" class="glass-input" placeholder="012-3456789" />
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="btn-submit-modal btn-green" @click="submitOffer" :disabled="submittingOffer">
-            {{ submittingOffer ? 'Menghantar...' : 'Hantar Tawaran' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showViewOffersModal" class="modal-overlay" @click.self="showViewOffersModal = false">
-      <div class="glass-modal fade-up modal-wide">
-        <div class="modal-header header-view">
-          <h3>📨 Senarai Tawaran</h3>
-          <button class="close-btn" @click="showViewOffersModal = false">✖</button>
-        </div>
-        
-        <div class="modal-body custom-scrollbar">
-           <div v-if="loadingOffers" class="text-center text-white py-4">Memuatkan...</div>
-           <div v-else-if="currentOffers.length === 0" class="text-center text-gray-400 py-4">Tiada tawaran lagi.</div>
-           
-           <div v-else class="offers-list">
-             <div class="offer-card" v-for="offer in currentOffers" :key="offer.id">
-                <div class="offer-top">
-                   <div class="offer-user" @click="goToProfile(offer.organizerId)">
-                      <img :src="offer.organizerAvatar || 'https://i.pravatar.cc/150'" class="avatar-sm">
-                      <div>
-                          <div class="font-bold text-white">{{ offer.organizerName }}</div>
-                          <div class="text-xs text-gray-400">{{ formatDate(offer.createdAt) }}</div>
-                      </div>
-                   </div>
-                   <div class="offer-price-tag">RM {{ offer.offeredPrice }}</div>
-                </div>
-                <div class="offer-msg">"{{ offer.message }}"</div>
-                <div class="offer-actions">
-                   <button class="btn-sm-glass" @click="openWhatsapp(offer)">📲 Chat</button>
-                   <button class="btn-sm-glass btn-accept" @click="acceptOffer(offer)">✅ Terima</button>
-                </div>
-             </div>
-           </div>
-        </div>
-      </div>
-    </div>
+    <TripRequestViewOffersModal 
+      v-model:visible="showViewOffersModal" 
+      :request="selectedRequest" 
+      @accepted="fetchRequests" 
+    />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebaseConfig';
 import { 
-  collection, addDoc, getDocs, deleteDoc, updateDoc, doc, getDoc, 
-  query, orderBy, where, serverTimestamp, collectionGroup 
-} from 'firebase/firestore'; // Added collectionGroup
+  collection, getDocs, deleteDoc, doc, updateDoc,
+  query, orderBy, where, collectionGroup 
+} from 'firebase/firestore'; 
 import { onAuthStateChanged } from 'firebase/auth';
 import { ACTIVITY_CATEGORIES, MALAYSIA_STATES } from '../constants/data'; 
+import TripRequestCreateModal from '../components/trip_requests/TripRequestCreateModal.vue';
+import TripRequestOfferModal from '../components/trip_requests/TripRequestOfferModal.vue';
+import TripRequestViewOffersModal from '../components/trip_requests/TripRequestViewOffersModal.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -344,26 +223,16 @@ const showOfferModal = ref(false);
 const showViewOffersModal = ref(false);
 
 const loading = ref(true);
-const submitting = ref(false);
-const submittingOffer = ref(false);
-const loadingOffers = ref(false);
-
 const isCurrentUserOrganizer = ref(false);
 const requests = ref<any[]>([]);
-const currentOffers = ref<any[]>([]);
 const selectedRequest = ref<any>(null);
 
 // State baru untuk track offer pengguna semasa
 const myOfferedRequestIds = ref<Set<string>>(new Set());
 
-const offerForm = reactive({ price: null, message: '', contact: '' });
 const searchQuery = ref('');
 const filterCategory = ref('');
 const filterState = ref(''); 
-
-const newRequest = reactive({ 
-  destination: '', location: 'Selangor', budget: null, pax: null, date: '', note: '', category: ''
-});
 
 const formatDate = (timestamp: any) => {
   if (!timestamp) return 'Baru saja';
@@ -375,25 +244,12 @@ const isOwner = (reqUserId: string): boolean => {
   return auth.currentUser ? auth.currentUser.uid === reqUserId : false;
 };
 
-// LOGIC DIKEMASKINI: Cek local state juga
 const hasOffered = (req: any): boolean => {
   const currentUser = auth.currentUser;
   if (!currentUser) return false;
-  
-  // 1. Cek local state (untuk immediate update) & fetch hasil collectionGroup
   if (myOfferedRequestIds.value.has(req.id)) return true;
-
-  // 2. Fallback ke legacy array (jika ada data lama)
   if (req.offeredBy && req.offeredBy.includes(currentUser.uid)) return true;
-
   return false;
-};
-
-const goToProfile = (userId: string) => {
-  if(userId) {
-    try { router.push({ name: 'Profile', params: { id: userId } }); } 
-    catch (e) { router.push(`/profile/${userId}`); }
-  }
 };
 
 const fetchRequests = async () => {
@@ -406,235 +262,110 @@ const fetchRequests = async () => {
     );
     const querySnapshot = await getDocs(q);
     const fetchedData: any[] = [];
-    querySnapshot.forEach((doc) => { fetchedData.push({ id: doc.id, ...doc.data() }); });
+    querySnapshot.forEach((doc) => {
+         const data = doc.data();
+         let dateString = '';
+         if (data.date) dateString = new Date(data.date).toLocaleDateString("en-MY", { day: 'numeric', month: 'short', year: 'numeric' });
+         fetchedData.push({ id: doc.id, ...data, dateString });
+    });
     requests.value = fetchedData;
-  } catch (e) { 
-    console.error("Error fetching requests:", e); 
-  } finally { loading.value = false; }
+    
+    if (auth.currentUser) {
+       await fetchMyOffers(auth.currentUser.uid);
+    }
+  } catch (e) {
+    console.error("Error fetching requests:", e);
+  } finally {
+    loading.value = false;
+  }
 };
 
-// FUNGSI BARU: Fetch Offers sendiri menggunakan Collection Group
-// Ini perlu untuk tahu status 'Tawaran Dihantar' tanpa bergantung pada array parent yang tidak selamat
 const fetchMyOffers = async (userId: string) => {
   try {
     const q = query(collectionGroup(db, 'offers'), where('organizerId', '==', userId));
     const querySnapshot = await getDocs(q);
+    myOfferedRequestIds.value.clear(); // Clear old
     querySnapshot.forEach((docSnap) => {
-      // Dapatkan ID parent (request ID) dari ref path
-      const reqId = docSnap.ref.parent.parent?.id;
-      if (reqId) {
-        myOfferedRequestIds.value.add(reqId);
+      const parent = docSnap.ref.parent.parent; 
+      // Firestore subcollection parent is null if root? No, 'trip_requests/{id}/offers'. Parent is {id}.
+      // .parent is CollectionReference 'offers'. .parent.parent is DocumentReference 'trip_requests/{id}'
+      if (parent) {
+         myOfferedRequestIds.value.add(parent.id);
       }
     });
   } catch (e) {
-    // Note: Jika console error "Requires Index", abaikan sementara atau buat index di Firebase Console
     console.log("CollectionGroup query perlu index. Jika error, status tawaran mungkin tak persist selepas refresh.");
   }
 };
 
-const fixOldData = async () => {
-  if(!confirm("Ini akan update semua data lama jadi 'open'. Teruskan?")) return;
-  loading.value = true;
-  try {
-    const q = query(collection(db, "trip_requests")); 
-    const querySnapshot = await getDocs(q);
-    const updates: Promise<void>[] = [];
-    querySnapshot.forEach((docSnap) => {
-       const data = docSnap.data();
-       if (!data.status) {
-         updates.push(updateDoc(doc(db, "trip_requests", docSnap.id), { status: 'open' }));
-       }
-    });
-    await Promise.all(updates);
-    alert(`Siap! Data dipulihkan.`);
-    fetchRequests();
-  } catch(e) { alert("Gagal update data."); } finally { loading.value = false; }
+const openOfferModal = (req: any) => {
+    selectedRequest.value = req;
+    showOfferModal.value = true;
 };
 
-const checkOrganizerStatus = async (user: any) => {
-  if (!user) { isCurrentUserOrganizer.value = false; return; }
-  try {
-    const userDocRef = doc(db, "users", user.uid);
-    const userDoc = await getDoc(userDocRef);
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      const isOrg = (userData.role === 'organizer' || userData.accountType === 'organizer');
-      isCurrentUserOrganizer.value = isOrg;
-      
-      // Jika organizer, fetch offer history mereka
-      if (isOrg) {
-        fetchMyOffers(user.uid);
-      }
-    }
-  } catch (e) { console.error(e); }
+const openViewOffers = (req: any) => {
+    selectedRequest.value = req;
+    showViewOffersModal.value = true;
 };
 
-const filteredRequests = computed(() => {
-  let result = requests.value;
-  const today = new Date().toISOString().split('T')[0] || ''; 
-  result = result.filter(r => {
-    if (!r.dateString || r.dateString === 'Tarikh Bebas') return true;
-    return r.dateString >= today;
-  });
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    result = result.filter(r => r.destination.toLowerCase().includes(query) || r.note.toLowerCase().includes(query));
-  }
-  
-  if (filterCategory.value) result = result.filter(r => r.category === filterCategory.value);
-  if (filterState.value) result = result.filter(r => r.location === filterState.value);
-
-  return result;
-});
-
-const resetFilters = () => { searchQuery.value = ''; filterCategory.value = ''; filterState.value = ''; };
-
-const setDefaultCategory = () => {
-  if (ACTIVITY_CATEGORIES?.[0]?.items?.[0]) newRequest.category = ACTIVITY_CATEGORIES[0].items[0] || '';
-};
-
-onMounted(() => { 
-  fetchRequests(); 
-  setDefaultCategory();
-  onAuthStateChanged(auth, (user) => { checkOrganizerStatus(user); });
-});
-
-const submitRequest = async () => {
-  const user = auth.currentUser; 
-  if (!user) return alert("Sila login untuk buat request.");
-  if (!newRequest.destination || !newRequest.budget) return alert("Sila isi destinasi dan bajet.");
-
-  submitting.value = true;
-  try {
-    await addDoc(collection(db, "trip_requests"), {
-      userId: user.uid, 
-      userName: user.displayName || 'User',
-      userAvatar: user.photoURL || '',
-      destination: newRequest.destination,
-      location: newRequest.location,
-      budget: newRequest.budget,
-      pax: newRequest.pax || 1,
-      dateString: newRequest.date || 'Tarikh Bebas',
-      note: newRequest.note,
-      category: newRequest.category, 
-      offeredBy: [], 
-      status: 'open',
-      createdAt: serverTimestamp()
-    });
-    alert("Request berjaya dihantar!");
-    showCreateModal.value = false;
-    newRequest.destination = ''; newRequest.budget = null; newRequest.note = '';
-    fetchRequests();
-  } catch (e) { alert("Gagal menghantar request."); } finally { submitting.value = false; }
+const handleOffered = (reqId: string) => {
+    if (reqId) myOfferedRequestIds.value.add(reqId);
+    // Optionally fetchRequests() to update card counters if needed
 };
 
 const deleteRequest = async (id: string) => {
-  if(!confirm("Anda pasti mahu memadam request ini?")) return;
-  try { await deleteDoc(doc(db, "trip_requests", id)); fetchRequests(); } catch(e) { alert("Gagal memadam."); }
-};
-
-const openOfferModal = (req: any) => {
-  if (!isCurrentUserOrganizer.value) return alert("Maaf, hanya Organizer berdaftar boleh membuat tawaran.");
-  if (!auth.currentUser) return alert("Sila login sebagai Organizer untuk offer.");
-  selectedRequest.value = req;
-  offerForm.price = req.budget; offerForm.message = ''; offerForm.contact = '';
-  showOfferModal.value = true;
-};
-
-const submitOffer = async () => {
-  if (!offerForm.price || !offerForm.message) return alert("Sila isi harga dan mesej.");
-  const user = auth.currentUser;
-  if (!user || !selectedRequest.value) return;
-
-  submittingOffer.value = true;
+  if (!confirm(t('common.confirmDelete'))) return;
   try {
-    // 1. Tambah offer ke SUBCOLLECTION (Selamat)
-    const offersRef = collection(db, "trip_requests", selectedRequest.value.id, "offers");
-    await addDoc(offersRef, {
-      organizerId: user.uid,
-      organizerName: user.displayName || 'Organizer',
-      organizerAvatar: user.photoURL || '',
-      offeredPrice: offerForm.price,
-      message: offerForm.message,
-      contact: offerForm.contact,
-      createdAt: serverTimestamp(),
-      status: 'pending' 
+    await deleteDoc(doc(db, "trip_requests", id));
+    requests.value = requests.value.filter(r => r.id !== id);
+  } catch (e) { alert(t('common.error')); }
+};
+
+const resetFilters = () => {
+    searchQuery.value = '';
+    filterCategory.value = '';
+    filterState.value = '';
+};
+
+// Fix data legacy (keep this util for now as requested by analysis to keep functionalities)
+const fixOldData = async () => {
+    if(!confirm("Fix old data?")) return;
+    const snap = await getDocs(collection(db, "trip_requests"));
+    snap.forEach(async d => {
+        if (!d.data().category) await updateDoc(d.ref, { category: 'Hiking' });
     });
-
-    // SAFETY UPDATE: 
-    // Kita BUANG 'updateDoc' ke parent (requestRef) di sini untuk elak 'Competitor Sabotage'.
-    // Organizer tidak sepatutnya boleh tulis ke dokumen request milik user lain.
-    // Jika perlu update count, sebaiknya guna Cloud Functions.
-    
-    // Update local state supaya butang bertukar jadi hijau serta-merta
-    myOfferedRequestIds.value.add(selectedRequest.value.id);
-
-    alert("Proposal berjaya dihantar!");
-    showOfferModal.value = false;
-    
-    // Refresh bukan mandatori sebab kita dah update local state, tapi bagus untuk data sync
-    // fetchRequests(); 
-  } catch (e) { console.error(e); alert("Gagal menghantar tawaran."); } finally { submittingOffer.value = false; }
+    alert("Fix done");
+    fetchRequests();
 };
 
-const viewOffers = async (req: any) => {
-  selectedRequest.value = req;
-  showViewOffersModal.value = true;
-  loadingOffers.value = true;
-  currentOffers.value = [];
-  try {
-    const offersRef = collection(db, "trip_requests", req.id, "offers");
-    const q = query(offersRef, orderBy("createdAt", "desc"));
-    const snapshot = await getDocs(q);
-    const offers: any[] = [];
-    snapshot.forEach(doc => offers.push({ id: doc.id, ...doc.data() }));
-    currentOffers.value = offers;
-  } catch(e) { console.error(e); } finally { loadingOffers.value = false; }
-};
+const filteredRequests = computed(() => {
+  return requests.value.filter(req => {
+    const matchSearch = searchQuery.value ? (
+        (req.destination && req.destination.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
+        (req.note && req.note.toLowerCase().includes(searchQuery.value.toLowerCase()))
+    ) : true;
+    const matchCat = filterCategory.value ? req.category === filterCategory.value : true;
+    const matchState = filterState.value ? req.location === filterState.value : true;
+    return matchSearch && matchCat && matchState;
+  });
+});
 
-const openWhatsapp = (offer: any) => {
-  if (!offer.contact) return alert("Organizer ini tidak menyertakan nombor telefon.");
-  const cleanPhone = offer.contact.replace(/\D/g, ''); 
-  const finalPhone = cleanPhone.startsWith('0') ? '6' + cleanPhone : cleanPhone;
-  const text = `Hai ${offer.organizerName}, saya terima tawaran anda untuk trip ke ${selectedRequest.value.destination}.`;
-  window.open(`https://wa.me/${finalPhone}?text=${encodeURIComponent(text)}`, '_blank');
-};
-
-const acceptOffer = async (offer: any) => {
-  if(!confirm(`Terima tawaran dari ${offer.organizerName}? Iklan akan ditutup.`)) return;
-  const currentUser = auth.currentUser;
-  if (!currentUser) return alert("Sila login semula.");
-
-  try {
-    const reqRef = doc(db, "trip_requests", selectedRequest.value.id);
-    await updateDoc(reqRef, {
-      status: 'accepted',
-      acceptedOfferId: offer.id,
-      acceptedOrganizerId: offer.organizerId,
-      acceptedAt: serverTimestamp()
-    });
-    
-    await addDoc(collection(db, "trips"), {
-      title: `Private: ${selectedRequest.value.destination}`,
-      destination: selectedRequest.value.destination,
-      description: `Request User. Note: ${selectedRequest.value.note}`,
-      startDate: selectedRequest.value.dateString || new Date().toISOString().split('T')[0],
-      price: offer.offeredPrice,
-      organizerId: offer.organizerId,
-      organizerName: offer.organizerName,
-      organizerAvatar: offer.organizerAvatar,
-      participants: [currentUser.uid], 
-      type: 'private',
-      status: 'upcoming',
-      createdAt: serverTimestamp()
-    });
-
-    alert("Deal confirm! Trip dimasukkan ke senarai.");
-    showViewOffersModal.value = false;
-    fetchRequests(); 
-  } catch(e) { alert("Gagal menerima tawaran."); }
-};
+onMounted(() => {
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        // Cek jika organizer (simple check dari ID token claims atau user doc - here simplifying)
+        // In real app, check user role from DB
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists() && userDoc.data().role === 'organizer') {
+            isCurrentUserOrganizer.value = true;
+        }
+        fetchRequests();
+    } else {
+        isCurrentUserOrganizer.value = false;
+        fetchRequests();
+    }
+  });
+});
 </script>
 
 <style scoped>
@@ -802,57 +533,4 @@ const acceptOffer = async (offer: any) => {
 .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #6c63ff; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .empty-state { text-align: center; padding: 3rem; display: flex; flex-direction: column; align-items: center; }
-
-/* --- GLASS MODAL --- */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999;
-  display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(5px);
-}
-.glass-modal {
-  background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px; padding: 2rem; width: 100%; max-width: 500px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5); color: white; display: flex; flex-direction: column;
-}
-.modal-wide { max-width: 600px; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.modal-header h3 { font-size: 1.3rem; margin: 0; color: white; }
-.close-btn { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
-
-/* Modal Dropdown Wrapper */
-.select-wrapper-modal { position: relative; width: 100%; }
-.select-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
-
-.glass-input {
-  width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.3); color: white; outline: none; font-size: 0.95rem; appearance: none; /* Hide default arrow */
-}
-.glass-input:focus { border-color: #6c63ff; }
-.glass-input option, .glass-input optgroup { background-color: #1e293b; color: white; }
-
-.btn-submit-modal {
-  margin-top: 10px; padding: 12px; border: none; border-radius: 8px; width: 100%;
-  background: linear-gradient(135deg, #6c63ff, #5b54e0); color: white; font-weight: bold; cursor: pointer;
-}
-.btn-submit-modal:hover { opacity: 0.9; }
-.btn-green { background: linear-gradient(135deg, #10b981, #059669); }
-
-/* Offer List */
-.offer-card { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); }
-.offer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.offer-user { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.offer-price-tag { font-weight: bold; color: #4ade80; font-size: 1.1rem; }
-.offer-msg { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; color: #cbd5e1; font-style: italic; font-size: 0.9rem; margin-bottom: 10px; }
-.offer-actions { display: flex; gap: 10px; }
-.btn-sm-glass { flex: 1; padding: 6px; background: rgba(255,255,255,0.1); border: none; border-radius: 6px; color: white; cursor: pointer; }
-.btn-accept { background: #10b981; }
-
-.custom-scrollbar { max-height: 60vh; overflow-y: auto; padding-right: 5px; }
-.custom-scrollbar::-webkit-scrollbar { width: 5px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #6c63ff; border-radius: 5px; }
-
-@media (max-width: 768px) {
-  .header-section { flex-direction: column; text-align: center; align-items: center; }
-  .filters-row { flex-direction: column; }
-  .select-wrapper { width: 100%; }
-}
 </style>

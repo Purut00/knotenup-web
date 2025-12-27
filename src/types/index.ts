@@ -15,7 +15,7 @@ export interface Trip {
   organizerId?: string;
   createdAt?: Timestamp;
   // Field tambahan untuk UI jika perlu
-  [key: string]: any; 
+  [key: string]: any;
 }
 
 export interface ForumPost {
@@ -30,7 +30,7 @@ export interface ForumPost {
   commentCount: number;
   createdAt: Timestamp;
   // Field UI tambahan
-  timeAgo?: string; 
+  timeAgo?: string;
   [key: string]: any;
 }
 
@@ -82,6 +82,7 @@ export interface UserProfile {
   organizerStatus?: string;
   // Media sosial (Flat structure ikut DB asal)
   whatsapp?: string;
+  telegramUsername?: string; // [NEW] Zero Quota Solution
   facebook?: string;
   instagram?: string;
   tiktok?: string;

@@ -54,37 +54,15 @@
           </div>
 
           <div class="form-group mb-6">
-             <div class="flex justify-between items-end mb-2">
-                <label class="block text-gray-300 font-bold">📍 Lokasi & Koordinat</label>
-                <button @click.prevent="detectCurrentLocation" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-md border border-blue-400/30">
-                  <i class="fas fa-location-arrow"></i> Auto-Detect GPS
-                </button>
-             </div>
-
-             <div id="picker-map" class="h-64 w-full rounded-xl border border-white/20 z-0 mb-3 shadow-inner"></div>
-             
-             <p v-if="detectedAddress" class="text-xs text-green-400 mb-3 flex items-center gap-1">
-                <i class="fas fa-check-circle"></i> Lokasi dikesan: <span class="font-bold text-white">{{ detectedAddress }}</span>
-             </p>
-
-             <div class="grid grid-cols-2 gap-4">
-               <div>
-                 <label class="text-xs text-gray-400 uppercase font-bold mb-1 block">Latitude</label>
-                 <input 
-                   type="number" step="any" v-model="form.latitude" 
-                   class="glass-input text-sm" placeholder="Cth: 4.2105" 
-                   @change="updateMapFromInput"
-                 />
-               </div>
-               <div>
-                 <label class="text-xs text-gray-400 uppercase font-bold mb-1 block">Longitude</label>
-                 <input 
-                   type="number" step="any" v-model="form.longitude" 
-                   class="glass-input text-sm" placeholder="Cth: 101.9758" 
-                   @change="updateMapFromInput"
-                 />
-               </div>
-             </div>
+             <!-- LOCATION PICKER -->
+             <LocationPicker 
+                v-if="!loading"
+                :initialLat="form.latitude ? parseFloat(form.latitude) : undefined"
+                :initialLng="form.longitude ? parseFloat(form.longitude) : undefined"
+                @update:lat="(val) => form.latitude = val.toString()"
+                @update:lng="(val) => form.longitude = val.toString()"
+                @update:state="(val) => { if(!form.state) form.state = val; }"
+             />
           </div>
 
           <div class="form-row">
@@ -178,7 +156,7 @@
                  <span v-else class="text-gray-400 text-sm">Upload fail .gpx (Optional)</span>
                </div>
                <input type="file" accept=".gpx" @change="handleGpxSelect" class="hidden-input" ref="gpxInput" />
-               <button class="btn-browse" @click="(gpxInput as any)?.$el?.click?.() || gpxInput?.click?.()">Pilih Fail</button>
+               <button class="btn-browse" @click="((gpxInput as any) || {}).click?.()">Pilih Fail</button>
             </div>
           </div>
         </div>
@@ -255,19 +233,7 @@ import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { MALAYSIA_STATES } from '../constants/data';
 import { isSpam } from '../utils/spamFilter';
-import L from 'leaflet'; 
-import 'leaflet/dist/leaflet.css'; 
-
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+import LocationPicker from '../components/common/LocationPicker.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -279,117 +245,22 @@ const duplicateWarning = ref(false);
 const isEditMode = ref(false);
 const spotId = route.params.id as string; 
 const multiFileInput = ref<HTMLInputElement | null>(null);
-const gpxInput = ref<HTMLInputElement>(null as any);
+const gpxInput = ref<HTMLInputElement | null>(null);
 
 const previewImages = ref<string[]>([]); 
 const newImageFiles = ref<File[]>([]); 
 const existingImageUrls = ref<string[]>([]);
 const gpxFile = ref<File | null>(null);
 
-const detectedAddress = ref('');
-let mapPicker: any = null;
-let markerPicker: any = null;
-
 const form = reactive({
   name: '', via: '', state: '', height: null, difficulty: 'Moderate',
   permit: 'No', guideRequired: 'No', mapsLink: '', 
-  distance: null, duration: '', // Added fields
+  distance: null, duration: '', 
   tips: '', parking: '', checkpointDetail: '', description: '', 
   images: [] as string[], gpxUrl: '',
   latitude: '', 
   longitude: '' 
 });
-
-const initPickerMap = () => {
-  if (mapPicker) return; 
-  
-  const startLat = form.latitude ? parseFloat(form.latitude) : 4.2105;
-  const startLng = form.longitude ? parseFloat(form.longitude) : 101.9758;
-  const zoomLevel = form.latitude ? 12 : 6;
-
-  mapPicker = L.map('picker-map').setView([startLat, startLng], zoomLevel);
-
-  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-    maxZoom: 17,
-    attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)'
-  }).addTo(mapPicker);
-
-  if (form.latitude && form.longitude) {
-    markerPicker = L.marker([startLat, startLng], { draggable: true }).addTo(mapPicker);
-    setupMarkerEvents();
-  }
-
-  mapPicker.on('click', async (e: any) => {
-    const { lat, lng } = e.latlng;
-    updateMarkerPosition(lat, lng);
-    await reverseGeocode(lat, lng);
-  });
-};
-
-const setupMarkerEvents = () => {
-  if (!markerPicker) return;
-  markerPicker.on('dragend', async (event: any) => {
-    const position = event.target.getLatLng();
-    updateFormCoords(position.lat, position.lng);
-    await reverseGeocode(position.lat, position.lng);
-  });
-}
-
-const updateMarkerPosition = (lat: number, lng: number) => {
-  if (markerPicker) {
-    markerPicker.setLatLng([lat, lng]);
-  } else {
-    markerPicker = L.marker([lat, lng], { draggable: true }).addTo(mapPicker);
-    setupMarkerEvents();
-  }
-  updateFormCoords(lat, lng);
-};
-
-const updateFormCoords = (lat: number, lng: number) => {
-  form.latitude = lat.toFixed(5);
-  form.longitude = lng.toFixed(5);
-};
-
-const updateMapFromInput = () => {
-  const lat = parseFloat(form.latitude);
-  const lng = parseFloat(form.longitude);
-  if (!isNaN(lat) && !isNaN(lng) && mapPicker) {
-    updateMarkerPosition(lat, lng);
-    mapPicker.setView([lat, lng], 13);
-  }
-};
-
-const detectCurrentLocation = () => {
-  if (!navigator.geolocation) return alert("Browser ini tidak menyokong Geolocation.");
-  
-  navigator.geolocation.getCurrentPosition((pos) => {
-    const { latitude, longitude } = pos.coords;
-    updateMarkerPosition(latitude, longitude);
-    mapPicker.setView([latitude, longitude], 13);
-    reverseGeocode(latitude, longitude);
-  }, (err) => {
-    console.error(err);
-    alert("Gagal mendapatkan lokasi GPS. Pastikan Location Service aktif.");
-  });
-};
-
-const reverseGeocode = async (lat: number, lng: number) => {
-  try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-    const data = await res.json();
-    if (data && data.address) {
-      const city = data.address.city || data.address.town || data.address.village || '';
-      const state = data.address.state || '';
-      detectedAddress.value = [city, state].filter(Boolean).join(', ');
-      
-      if (!form.state && state && MALAYSIA_STATES.includes(state)) {
-        form.state = state;
-      }
-    }
-  } catch (e) {
-    console.error("Geocoding failed:", e);
-  }
-};
 
 onMounted(async () => {
   if (spotId) {
@@ -413,10 +284,6 @@ onMounted(async () => {
     } catch (e) { console.error(e); }
     finally { loading.value = false; }
   }
-
-  setTimeout(() => {
-    initPickerMap();
-  }, 500);
 });
 
 const nextStep = () => {
@@ -431,10 +298,6 @@ const nextStep = () => {
 const prevStep = () => {
   currentStep.value = 1;
   window.scrollTo(0, 0);
-  setTimeout(() => {
-     mapPicker = null; 
-     initPickerMap();
-  }, 100);
 };
 
 const triggerMultiUpload = () => { multiFileInput.value?.click(); };
@@ -486,11 +349,9 @@ const checkDuplicate = async () => {
 
 const submitSpot = async () => {
   if (!auth.currentUser) return alert(t('auth.loginRequired') || "Sila login dahulu.");
-  
   if (isSpam(form.name) || isSpam(form.description) || isSpam(form.via)) return alert("Input mengandungi perkataan dilarang.");
 
   loading.value = true;
-
   try {
     const newUploadedUrls: string[] = [];
     for (const file of newImageFiles.value) {

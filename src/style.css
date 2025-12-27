@@ -1,154 +1,101 @@
-/* 0. IMPORT FONT POPPINS (Supaya nampak modern) */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* 0. IMPORT FONTS */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@700;800&display=swap');
 
-/* TAILWIND DIRECTIVES (Wajib ada untuk mix @apply nanti) */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 1. DEFINISI WARNA (THEME: SUNSET & DARK PURPLE MIX) */
-:root {
-  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@layer base {
+  :root {
+    --color-primary: #16a34a; /* green-600 */
+    --color-secondary: #475569; /* slate-600 */
+    --color-accent: #f97316; /* orange-500 */
+    --bg-dark: #0f172a; /* slate-900 */
+  }
 
-  /* --- SUNSET PALETTE VARIABLES --- */
-  --c-sunset-orange: #FF7E5F;
-  --c-sunset-pink: #FEB47B;
-  --c-sunset-purple: #6C63FF;
-  
-  /* --- DARK THEME PALETTE (Untuk Background Website) --- */
-  --c-dark-bg-start: #05010a;
-  --c-dark-bg-mid: #110524;
-  --c-dark-bg-end: #240b3b;
+  body {
+    @apply bg-slate-900 text-slate-100 font-sans antialiased min-h-screen;
+    background-image: radial-gradient(circle at 15% 50%, rgba(22, 163, 74, 0.08), transparent 25%),
+                      radial-gradient(circle at 85% 30%, rgba(249, 115, 22, 0.08), transparent 25%);
+    background-attachment: fixed;
+  }
 
-  /* Gradient Presets */
-  --gradient-sunset: linear-gradient(135deg, #FF7E5F 0%, #FEB47B 100%);
-  --gradient-text: linear-gradient(to right, #FF7E5F, #FEB47B, #6C63FF, #FF7E5F);
-  /* Background Gradient Gelap Keungguan */
-  --gradient-body-dark: linear-gradient(135deg, var(--c-dark-bg-start) 0%, var(--c-dark-bg-mid) 40%, var(--c-dark-bg-end) 100%);
+  /* HEADINGS */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold text-white tracking-tight;
+  }
+  h1 { @apply text-4xl md:text-5xl lg:text-6xl mb-6; }
+  h2 { @apply text-3xl md:text-4xl mb-4; }
+  h3 { @apply text-2xl md:text-3xl mb-3; }
+  h4 { @apply text-xl md:text-2xl mb-2; }
+
+  /* LINKS */
+  a { @apply transition-colors duration-200; }
   
-  /* Base Variables (Default ke Dark Mode untuk theme ini) */
-  --bg-body: var(--gradient-body-dark);
-  --text-primary: #f8fafc;     /* Putih/Kelabu cerah untuk background gelap */
-  --text-secondary: #94a3b8;   /* Slate-400 */
-  --border-color: rgba(255, 255, 255, 0.1); /* Border telus */
-  --input-bg: rgba(255, 255, 255, 0.05);
-  
-  /* Shadows (Soft & Float) */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-float: 0 10px 25px -5px rgba(255, 126, 95, 0.15), 0 8px 10px -6px rgba(255, 126, 95, 0.1);
-  --shadow-glow: 0 0 15px rgba(108, 99, 255, 0.2);
+  /* FORM INPUTS GLOBAL DEFAULT */
+  input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], input[type="time"], textarea, select {
+    @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate-400 outline-none transition-all duration-300;
+  }
+  input:focus, textarea:focus, select:focus {
+    @apply border-primary-500 bg-white/10 ring-1 ring-primary-500;
+  }
 }
 
-/* 2. GLOBAL STYLES */
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background: var(--bg-body); /* Guna gradient gelap */
-  background-attachment: fixed; /* Parallax effect */
-  color: var(--text-primary);
-  transition: background-color 0.3s, color 0.3s;
-  -webkit-font-smoothing: antialiased;
+@layer components {
+  /* --- BUTTONS --- */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
   
-  /* Scrollbar Customization */
-  scrollbar-width: thin;
-  scrollbar-color: var(--c-sunset-purple) var(--c-dark-bg-start);
+  .btn-primary {
+    @apply btn bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-900/20 hover:shadow-primary-600/30 hover:-translate-y-0.5;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-slate-700 text-white hover:bg-slate-600;
+  }
+  
+  .btn-accent {
+    @apply btn bg-gradient-to-r from-accent-500 to-accent-600 text-white shadow-lg shadow-accent-900/20 hover:shadow-accent-500/30 hover:-translate-y-0.5;
+  }
+
+  .btn-outline {
+    @apply btn border border-white/20 hover:bg-white/10 hover:border-white/40;
+  }
+  
+  .btn-ghost {
+    @apply btn hover:bg-white/5;
+  }
+
+  /* --- CARDS --- */
+  .card {
+    @apply relative overflow-hidden rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-md p-6 shadow-xl transition-all duration-300 hover:border-white/20;
+  }
+  
+  .card-hover {
+    @apply hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary-900/20;
+  }
+
+  /* --- UTILS --- */
+  .container-std {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent;
+  }
+
+  .glass-panel {
+     @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+  }
 }
 
-/* Scrollbar Webkit */
+/* SCROLLBAR */
 ::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--c-dark-bg-start); }
-::-webkit-scrollbar-thumb { background: var(--c-sunset-purple); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--c-sunset-orange); }
+::-webkit-scrollbar-track { @apply bg-slate-900; }
+::-webkit-scrollbar-thumb { @apply bg-slate-700 rounded-full border-2 border-slate-900; }
+::-webkit-scrollbar-thumb:hover { @apply bg-primary-600; }
 
-a {
-  font-weight: 500;
-  color: var(--c-sunset-pink);
-  text-decoration: inherit;
-  transition: all 0.2s;
-}
-a:hover { color: var(--c-sunset-orange); }
-
-h1, h2, h3, h4, h5 {
-  color: #ffffff; /* Tajuk sentiasa putih terang */
-  letter-spacing: -0.02em;
-}
-
-button { cursor: pointer; }
-
-input, select, textarea {
-  background-color: var(--input-bg) !important;
-  color: #ffffff !important;
-  border: 1px solid var(--border-color) !important;
-  font-family: inherit;
-}
-
-input::placeholder {
-  color: var(--text-secondary);
-}
-
-/* 3. CUSTOM COMPONENTS (Glassmorphism & Buttons) */
-
-/* Kad Glassmorphism (Gabungan stail Tailwind & CSS biasa) */
-.card-theme {
-  @apply backdrop-blur-md rounded-2xl shadow-xl overflow-hidden transition-all duration-300;
-  background-color: rgba(30, 11, 54, 0.4); /* Base ungu gelap telus */
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.card-theme:hover {
-  background-color: rgba(45, 27, 78, 0.5);
-  border-color: rgba(108, 99, 255, 0.5); /* Purple border on hover */
-  transform: translateY(-5px);
-}
-
-/* Butang Gradient Utama */
-.btn-primary {
-  background: linear-gradient(135deg, var(--c-sunset-purple) 0%, var(--c-sunset-orange) 100%);
-  @apply text-white font-semibold py-2 px-6 rounded-full inline-block no-underline border-none transition-all duration-300;
-  box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 126, 95, 0.4);
-}
-
-/* 4. ANIMATIONS */
-
-/* Helper Class for Gradient Text */
-.text-gradient-animate {
-  background: var(--gradient-text);
-  background-size: 200% auto;
-  color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: shine 5s linear infinite;
-  font-weight: 800; /* Extra bold untuk effect gradient lebih jelas */
-}
-
-@keyframes shine {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); } /* Ubah -5px ke -10px supaya lebih nampak */
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Animation Classes */
-.animate-fade-in-up {
-  animation: fadeInUp 0.8s ease-out forwards;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
+/* ANIMATIONS */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
