@@ -62,7 +62,7 @@
 
           <div class="form-group" style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
              <label style="color: #4ade80; font-weight: bold;"><i class="fab fa-whatsapp"></i> WhatsApp Contact (Optional)</label>
-             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 60123456789" />
+             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 0123456789" />
              <small style="color: #94a3b8; font-size: 0.75rem; display: block; margin-top: 5px;">
                 Jika kosong, organizer akan hubungi anda melalui sistem chat atau email.
              </small>
@@ -75,11 +75,21 @@
           </button>
         </div>
       </div>
+      
+      <LiabilityModal 
+        v-model:visible="showLiabilityModal"
+        context="create"
+        @proceed="confirmSubmit"
+      />
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, defineAsyncComponent } from 'vue';
+
+const LiabilityModal = defineAsyncComponent(() => 
+  import('../common/LiabilityModal.vue')
+);
 import { ACTIVITY_CATEGORIES, MALAYSIA_STATES } from '../../constants/data';
 import { auth, db } from '../../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -91,6 +101,7 @@ defineProps<{
 const emit = defineEmits(['update:visible', 'created']);
 
 const submitting = ref(false);
+const showLiabilityModal = ref(false);
 const form = reactive({ 
   destination: '', location: 'Selangor', budget: null, pax: null, date: '', note: '', category: '', whatsapp: ''
 });
@@ -103,13 +114,18 @@ const submit = async () => {
   if (!auth.currentUser) return alert("Sila login.");
   if (!form.destination || !form.budget || !form.category) return alert("Sila isi info wajib.");
 
+  // Open Liability Modal
+  showLiabilityModal.value = true;
+};
+
+const confirmSubmit = async () => {
   submitting.value = true;
   try {
     const docRef = await addDoc(collection(db, "trip_requests"), {
       ...form,
-      userId: auth.currentUser.uid,
-      userName: auth.currentUser.displayName || 'User',
-      userAvatar: auth.currentUser.photoURL || '',
+      userId: auth.currentUser!.uid,
+      userName: auth.currentUser!.displayName || 'User',
+      userAvatar: auth.currentUser!.photoURL || '',
       createdAt: serverTimestamp(),
       status: 'open',
       offeredBy: [] 

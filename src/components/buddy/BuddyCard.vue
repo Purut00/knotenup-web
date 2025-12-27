@@ -38,14 +38,14 @@
     </div>
 
     <div class="card-footer">
-      <a 
-         :href="contactInfo.href" 
-         target="_blank" 
+      <button 
+         @click="openLiabilityModal"
          class="btn-join"
          :class="{'disabled': contactInfo.href === '#'}"
+         :disabled="contactInfo.href === '#'"
       >
         <i :class="contactInfo.icon"></i> {{ contactInfo.label }}
-      </a>
+      </button>
     </div>
 
     <ReportModal 
@@ -54,6 +54,12 @@
         :targetId="buddy.id"
         targetType="buddy"
         :targetName="buddy.location || 'Buddy Request'"
+    />
+
+    <LiabilityModal
+        v-model:visible="showLiabilityModal"
+        context="join"
+        @proceed="proceedToJoin"
     />
   </div>
 </template>
@@ -67,6 +73,9 @@ import { getContactLink } from '../../utils/contactHelper';
 const ReportModal = defineAsyncComponent(() => 
   import('../common/ReportModal.vue')
 );
+const LiabilityModal = defineAsyncComponent(() => 
+  import('../common/LiabilityModal.vue')
+);
 
 const props = defineProps({
   buddy: { type: Object, required: true }
@@ -74,6 +83,12 @@ const props = defineProps({
 
 const hostProfile = ref<any>(null);
 const showReportModal = ref(false);
+const showLiabilityModal = ref(false);
+
+const openLiabilityModal = () => { showLiabilityModal.value = true; };
+const proceedToJoin = () => {
+    if (contactInfo.value?.href) window.open(contactInfo.value.href, '_blank');
+};
 
 const contactInfo = computed(() => {
   return getContactLink(props.buddy, hostProfile.value);

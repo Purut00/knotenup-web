@@ -39,10 +39,19 @@ export const getContactLink = (doc: any, organizer: any) => {
 
 const formatPhone = (phone: string) => {
   // Basic sanitization: remove non-digits
-  let p = phone.replace(/\D/g, '');
-  // Ensure starts with country code (default to 60 for Malaysia if starts with 1)
-  if (p.startsWith('01')) p = '6' + p;
-  else if (p.startsWith('1')) p = '60' + p;
+  let p = phone.toString().replace(/\D/g, '');
+
+  // Malaysian Format Handling
+  // If starts with '01' (e.g., 0123456789), replace '0' with '60' -> 60123456789
+  if (p.startsWith('01')) {
+    p = '6' + p;
+  }
+  // If starts with '1' (e.g., 123456789), add '60' -> 60123456789
+  else if (p.startsWith('1')) {
+    p = '60' + p;
+  }
+  // If user typed 601... it remains 601...
+
   return p;
 };
 

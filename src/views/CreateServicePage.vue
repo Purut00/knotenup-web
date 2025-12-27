@@ -202,7 +202,7 @@
              <label class="block text-sm font-semibold text-green-400 mb-2">
                <i class="fab fa-whatsapp text-lg mr-2"></i> {{ t('createService.whatsappLabel') || 'WhatsApp Contact' }} (Optional)
              </label>
-             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 60123456789" />
+             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 0123456789" />
              <p class="text-xs text-slate-400 mt-2">
                {{ t('createService.whatsappHint') || 'Jika kosong, kami akan guna nombor WhatsApp di profile anda. Jika tiada, kami akan guna email.' }}
              </p>
@@ -225,12 +225,22 @@
         </div>
 
       </div>
+    
+      <LiabilityModal 
+        v-model:visible="showLiabilityModal"
+        context="create"
+        @proceed="confirmSubmit"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, defineAsyncComponent } from 'vue';
+
+const LiabilityModal = defineAsyncComponent(() => 
+  import('../components/common/LiabilityModal.vue')
+);
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { auth } from '../firebaseConfig';
@@ -245,6 +255,7 @@ const { createService, loading: isCreating } = useServices();
 const { uploadMultipleImages, uploading: isUploading } = useStorage();
 
 const currentStep = ref(1);
+const showLiabilityModal = ref(false);
 const multiFileInput = ref<HTMLInputElement | null>(null);
 const FACILITY_OPTIONS = ["Toilet", "Shower", "Surau", "Plug Point", "Sink/Dapur", "Parking", "BBQ Pit", "Sungai/Air Terjun", "Line Telco Ada", "Campfire Boleh"];
 
@@ -294,14 +305,19 @@ const submitService = async () => {
   if (!auth.currentUser) return alert(t('auth.loginRequired'));
   if (rawFiles.value.length === 0) return alert(t('createService.errorImage'));
 
+  // Trigger Liability Modal
+  showLiabilityModal.value = true;
+};
+
+const confirmSubmit = async () => {
   try {
-    const uploadedUrls = await uploadMultipleImages(rawFiles.value, `uploads/${auth.currentUser.uid}/services/${Date.now()}`);
+    const uploadedUrls = await uploadMultipleImages(rawFiles.value, `uploads/${auth.currentUser!.uid}/services/${Date.now()}`);
     
     // Get effective profile
-    const userProfile = await getEffectiveUserProfile(auth.currentUser);
+    const userProfile = await getEffectiveUserProfile(auth.currentUser!);
 
     await createService({
-      ownerId: auth.currentUser.uid,
+      ownerId: auth.currentUser!.uid,
       ownerName: userProfile.name,
       ownerAvatar: userProfile.avatar,
       expiryDate: null, 

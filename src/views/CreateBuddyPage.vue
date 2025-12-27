@@ -70,7 +70,7 @@
              type="text" 
              v-model="form.whatsapp" 
              class="glass-input" 
-             :placeholder="t('createBuddy.whatsappPlaceholder')" 
+             placeholder="e.g. 0123456789" 
            />
            <small class="text-gray-400 mt-2 block text-xs">
               {{ t('createBuddy.whatsappHint') || 'Jika kosong, kami akan guna nombor profile anda.' }}
@@ -98,12 +98,22 @@
         </div>
 
       </div>
+      
+      <LiabilityModal 
+        v-model:visible="showLiabilityModal"
+        context="create"
+        @proceed="confirmSubmit"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, defineAsyncComponent } from 'vue';
+
+const LiabilityModal = defineAsyncComponent(() => 
+  import('../components/common/LiabilityModal.vue')
+);
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { auth, db } from '../firebaseConfig';
@@ -113,6 +123,7 @@ import { getEffectiveUserProfile } from '../utils/userProfile';
 const router = useRouter();
 const { t } = useI18n();
 const loading = ref(false);
+const showLiabilityModal = ref(false);
 
 const form = reactive({
   location: '',
@@ -132,14 +143,19 @@ const submitForm = async () => {
     return;
   }
 
+  // Trigger Modal
+  showLiabilityModal.value = true;
+};
+
+const confirmSubmit = async () => {
   loading.value = true;
 
   try {
-    const userProfile = await getEffectiveUserProfile(auth.currentUser);
+    const userProfile = await getEffectiveUserProfile(auth.currentUser!);
 
     await addDoc(collection(db, 'buddies'), {
       ...form,
-      hostId: auth.currentUser.uid,
+      hostId: auth.currentUser!.uid,
       hostName: userProfile.name,
       hostAvatar: userProfile.avatar,
       createdAt: serverTimestamp(),

@@ -187,15 +187,14 @@
                 </div>
               </div>
 
-              <a 
+              <button 
                  v-if="contactInfo && contactInfo.href !== '#'"
-                 :href="contactInfo.href" 
-                 target="_blank" 
+                 @click="openLiabilityModal" 
                  class="btn-whatsapp"
                  :class="contactInfo.color"
               >
                 <i :class="[contactInfo.icon, 'text-xl mr-2']"></i> {{ contactInfo.label }}
-              </a>
+              </button>
               <button v-else class="btn-whatsapp opacity-50 cursor-not-allowed" disabled>
                  No Contact Info
               </button>
@@ -241,6 +240,12 @@
         :targetName="service.name"
       />
 
+      <LiabilityModal
+        v-model:visible="showLiabilityModal"
+        context="join"
+        @proceed="proceedToJoin"
+      />
+
     </div>
   </div>
 </template>
@@ -257,6 +262,9 @@ import { defineAsyncComponent } from 'vue';
 
 const ReportModal = defineAsyncComponent(() => 
   import('../components/common/ReportModal.vue')
+);
+const LiabilityModal = defineAsyncComponent(() => 
+  import('../components/common/LiabilityModal.vue')
 ); 
 
 // @ts-ignore
@@ -284,6 +292,12 @@ const currentUser = ref<any>(null);
 const visibleRef = ref(false);
 const indexRef = ref(0);
 const showReportModal = ref(false);
+const showLiabilityModal = ref(false);
+
+const openLiabilityModal = () => { showLiabilityModal.value = true; };
+const proceedToJoin = () => {
+    if (contactInfo.value?.href) window.open(contactInfo.value.href, '_blank');
+};
 
 const displayImages = computed(() => {
   if (service.value?.images && service.value.images.length > 0) {

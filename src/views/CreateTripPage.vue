@@ -175,7 +175,7 @@
              <label class="block text-sm font-semibold text-green-400 mb-2">
                <i class="fab fa-whatsapp text-lg mr-2"></i> WhatsApp Contact (Optional) via KnoTenUp
              </label>
-             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 60123456789" />
+             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 0123456789" />
              <p class="text-xs text-slate-400 mt-2">
                Jika dibiarkan kosong, kami akan guna nombor WhatsApp di profile anda. Jika tiada, kami akan guna email.
              </p>
@@ -257,12 +257,22 @@
         </div>
 
       </div>
+    
+      <LiabilityModal 
+        v-model:visible="showLiabilityModal"
+        context="create"
+        @proceed="confirmSubmit"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue';
+
+const LiabilityModal = defineAsyncComponent(() => 
+  import('../components/common/LiabilityModal.vue')
+);
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ACTIVITY_CATEGORIES, TRIP_SERVICES, MALAYSIA_STATES } from '../constants/data';
@@ -279,6 +289,7 @@ const { createTrip, loading: isCreating } = useTrips();
 
 const currentStep = ref(1);
 const locationType = ref('malaysia');
+const showLiabilityModal = ref(false);
 
 const previewImages = ref<string[]>(Array.from({ length: 5 }).map(() => ''));
 const rawFiles = ref<(File | null)[]>(Array.from({ length: 5 }).map(() => null));
@@ -357,13 +368,18 @@ const prevStep = () => { if (currentStep.value > 1) currentStep.value--; window.
 const submitForm = async () => {
   if (!auth.currentUser) return alert(t('auth.loginRequired'));
   if (isSpam(`${form.title} ${form.description}`)) return alert(t('createSpot.alerts.spam'));
+  
+  // Open Liability Modal instead of direct submit
+  showLiabilityModal.value = true;
+};
 
+const confirmSubmit = async () => {
   try {
-    const uploadedUrls = await uploadMultipleImages(rawFiles.value, `uploads/${auth.currentUser.uid}/trips/${Date.now()}`);
+    const uploadedUrls = await uploadMultipleImages(rawFiles.value, `uploads/${auth.currentUser!.uid}/trips/${Date.now()}`);
     const finalLoc = locationType.value === 'malaysia' ? `${form.placeName}, ${form.state}` : form.overseasLocation;
     
     // Get effective profile
-    const userProfile = await getEffectiveUserProfile(auth.currentUser);
+    const userProfile = await getEffectiveUserProfile(auth.currentUser!);
 
     // Create Trip using Composable
     await createTrip({
@@ -378,7 +394,7 @@ const submitForm = async () => {
       maxSlots: Number(form.maxSlots),
       currentSlots: 0,
       status: 'open',
-      organizerId: auth.currentUser.uid,
+      organizerId: auth.currentUser!.uid,
       organizerName: userProfile.name,
       organizerImage: userProfile.avatar,
       spotId: form.spotId || null,

@@ -188,15 +188,14 @@
                 </div>
                 
                 <div v-else>
-                   <a 
+                   <button 
                       v-if="contactInfo && contactInfo.href !== '#'"
-                      :href="contactInfo.href" 
-                      target="_blank" 
+                      @click="openLiabilityModal" 
                       class="btn-join"
                       :class="contactInfo.color"
                    >
                     <i :class="[contactInfo.icon, 'text-xl mr-2']"></i> {{ contactInfo.label }}
-                  </a>
+                  </button>
                   <button v-else class="btn-join disabled" disabled>{{ t('trip.noLink') }}</button>
                   
                   <p class="text-[10px] text-gray-400 text-center mt-2 italic">
@@ -238,6 +237,12 @@
         :targetName="trip.title"
       />
 
+      <LiabilityModal
+        v-model:visible="showLiabilityModal"
+        context="join"
+        @proceed="proceedToJoin"
+      />
+
     </div>
   </div>
 </template>
@@ -253,6 +258,9 @@ import { defineAsyncComponent } from 'vue';
 
 const ReportModal = defineAsyncComponent(() => 
   import('../components/common/ReportModal.vue')
+);
+const LiabilityModal = defineAsyncComponent(() => 
+  import('../components/common/LiabilityModal.vue')
 );
 
 // @ts-ignore
@@ -280,6 +288,12 @@ const isProcessing = ref(false);
 const visibleRef = ref(false);
 const indexRef = ref(0);
 const showReportModal = ref(false);
+const showLiabilityModal = ref(false);
+
+const openLiabilityModal = () => { showLiabilityModal.value = true; };
+const proceedToJoin = () => {
+    if (contactInfo.value?.href) window.open(contactInfo.value.href, '_blank');
+};
 
 // Helper Date
 const formatDate = (dateString: string) => {

@@ -73,7 +73,7 @@
             </div>
             <div class="flex items-center gap-2">
               <i class="fab fa-whatsapp text-green-500 w-6"></i>
-              <input v-model="form.whatsapp" placeholder="No. WhatsApp (e.g 6012345678)" class="input-glass" />
+              <input v-model="form.whatsapp" placeholder="No. WhatsApp (e.g 0123456789)" class="input-glass" />
             </div>
             <div class="flex items-center gap-2">
               <i class="fab fa-facebook text-blue-500 w-6"></i>
