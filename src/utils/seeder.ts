@@ -95,6 +95,16 @@ export async function seedRealSpots() {
   console.log(`Processing ${totalBatches} batches...`);
 
   try {
+    const normalizeState = (rawState: string) => {
+      if (!rawState) return "Unknown";
+      const s = rawState.trim();
+      if (s === "Penang") return "Pulau Pinang";
+      if (s === "Federal Territory of Kuala Lumpur") return "Kuala Lumpur";
+      if (s === "Federal Territory of Putrajaya") return "Putrajaya";
+      if (s === "Federal Territory of Labuan") return "Labuan";
+      return s;
+    };
+
     for (let i = 0; i < chunks.length; i++) {
       const batch = writeBatch(db);
       const chunk = chunks[i];
@@ -117,7 +127,7 @@ export async function seedRealSpots() {
         const spotData = {
           name: item.name,
           name_lowercase: item.name.toLowerCase().trim(),
-          state: item.state || "Unknown",
+          state: normalizeState(item.state),
           height: heightVal,
           location: new GeoPoint(lat, lng),
           latitude: lat.toString(), // Keep string version for form compatibility
