@@ -29,9 +29,12 @@ const i18n = createI18n({
 // 2. Cipta App
 const app = createApp(App)
 
+import { globalErrorHandler } from './plugins/globalErrorHandler'
+
 // 3. Beritahu App untuk guna Router dan I18n
 app.use(router)
 app.use(i18n)
+app.use(globalErrorHandler) // [FIX] Global Error Boundary
 
 // 4. "Mount" App
 app.mount('#app')
