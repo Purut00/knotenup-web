@@ -59,6 +59,14 @@
             <label>Nota Tambahan</label>
             <textarea v-model="form.note" class="glass-input" rows="3" placeholder="Ceritakan detail..."></textarea>
           </div>
+
+          <div class="form-group" style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
+             <label style="color: #4ade80; font-weight: bold;"><i class="fab fa-whatsapp"></i> WhatsApp Contact (Optional)</label>
+             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 60123456789" />
+             <small style="color: #94a3b8; font-size: 0.75rem; display: block; margin-top: 5px;">
+                Jika kosong, organizer akan hubungi anda melalui sistem chat atau email.
+             </small>
+          </div>
         </div>
 
         <div class="modal-footer">
@@ -84,7 +92,7 @@ const emit = defineEmits(['update:visible', 'created']);
 
 const submitting = ref(false);
 const form = reactive({ 
-  destination: '', location: 'Selangor', budget: null, pax: null, date: '', note: '', category: ''
+  destination: '', location: 'Selangor', budget: null, pax: null, date: '', note: '', category: '', whatsapp: ''
 });
 
 const close = () => {
@@ -108,7 +116,7 @@ const submit = async () => {
     });
     
     // Reset form
-    Object.assign(form, { destination: '', location: 'Selangor', budget: null, pax: null, date: '', note: '', category: '' });
+    Object.assign(form, { destination: '', location: 'Selangor', budget: null, pax: null, date: '', note: '', category: '', whatsapp: '' });
     
     emit('created', { id: docRef.id, ...form }); // Optional: pass data back
     close();

@@ -85,6 +85,10 @@
               <button v-if="isOwnProfile" class="btn-action" style="color:#ef4444; border-color: #ef4444;" @click="handleLogout">
                   🚪 Logout
               </button>
+
+              <button v-if="!isOwnProfile" class="btn-action" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" @click="openReportModal">
+                  🚩 Report User
+              </button>
            </div>
         </aside>
 
@@ -205,6 +209,14 @@
        :privateData="privateData" 
     />
 
+    <ReportModal
+      v-if="user" 
+      v-model:visible="showReportModal"
+      :targetId="user.id"
+      targetType="user"
+      :targetName="user.name"
+    />
+
   </div>
 </template>
 
@@ -218,6 +230,9 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 // Lazy Load ProfileCardGenerator for performance
 const ProfileCardGenerator = defineAsyncComponent(() => 
   import('../components/profile/ProfileCardGenerator.vue')
+);
+const ReportModal = defineAsyncComponent(() => 
+  import('../components/common/ReportModal.vue')
 );
 
 const route = useRoute();
@@ -325,6 +340,9 @@ const openCard = (type: 'business' | 'emergency') => {
     cardType.value = type;
     showCardModal.value = true;
 };
+
+const showReportModal = ref(false);
+const openReportModal = () => { showReportModal.value = true; };
 
 const openEmergency = () => {
   if (!privateData.bloodType && !privateData.emergencyContact) {

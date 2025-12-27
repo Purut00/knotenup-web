@@ -90,41 +90,43 @@
           </div>
 
           <div v-if="locationType === 'malaysia'">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-              <div>
-                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.stateRequired') }}</label>
-                <div class="relative">
-                    <select v-model="form.state" class="glass-input appearance-none" @change="resetSpotSelection">
-                      <option disabled value="">{{ t('createSpot.options.selectState') }}</option>
-                      <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ t('states.' + state) || state }}</option>
-                    </select>
-                    <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.specificPlace') }}</label>
-                <input type="text" v-model="form.placeName" class="glass-input" :placeholder="t('createTrip.placeholderPlaceMy')" />
-              </div>
+            
+            <!-- STATE (Auto-filled but changeable) -->
+            <div class="mb-4">
+               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.stateRequired') }}</label>
+               <div class="relative">
+                   <select v-model="form.state" class="glass-input appearance-none">
+                     <option disabled value="">{{ t('createSpot.options.selectState') }}</option>
+                     <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ t('states.' + state) || state }}</option>
+                   </select>
+                   <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+               </div>
             </div>
 
-            <div class="p-4 rounded-xl border border-dashed border-slate-600 bg-slate-800/50 mb-6">
-              <label class="flex justify-between items-center text-sm font-semibold text-slate-300 mb-2">
-                 <span>🔗 {{ t('createTrip.spotLink') }}</span>
-                 <span v-if="autoDetected" class="text-green-400 text-xs font-bold animate-pulse">{{ t('createTrip.spotDetected') }}</span>
-              </label>
-              
-              <div class="relative">
-                 <select v-model="form.spotId" @change="handleSpotChange" class="glass-input appearance-none" :disabled="!form.state">
-                   <option value="">-- {{ form.state ? t('common.select') : t('createSpot.options.selectState') }} --</option>
-                   <option v-for="spot in filteredSpots" :key="spot.id" :value="spot.id">{{ spot.name }} ({{ spot.height }}m)</option>
-                 </select>
-                 <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
-              </div>
-              <p class="text-[10px] text-slate-400 mt-2 flex justify-between">
-                <span>{{ t('createTrip.spotHint') }}</span>
-                <span v-if="form.state && filteredSpots.length === 0" class="text-orange-400">{{ t('createTrip.noSpots') }}</span>
-              </p>
+            <!-- SPOT AUTOCOMPLETE -->
+            <div class="mb-6">
+               <label class="block text-sm font-semibold text-slate-300 mb-2">
+                 {{ t('createTrip.specificPlace') }} 
+                 <span class="text-xs text-slate-500 font-normal">({{ t('createTrip.searchHint') || 'Cari atau taip nama baru' }})</span>
+               </label>
+               
+               <SpotAutocomplete 
+                 v-model="form.placeName" 
+                 @select="handleSpotSelect"
+               />
+
+               <div v-if="form.spotId" class="mt-2 flex items-center justify-between text-sm bg-green-500/10 border border-green-500/20 text-green-400 px-3 py-2 rounded-lg">
+                  <span class="flex items-center gap-2">
+                    <i class="fas fa-link"></i> Linked to: <strong>{{ form.spotName }}</strong>
+                  </span>
+                  <button @click="unlinkSpot" class="text-xs hover:text-white underline">Unlink</button>
+               </div>
+               
+               <p v-else class="text-[10px] text-slate-500 mt-2">
+                 <i class="fas fa-info-circle"></i> Jika lokasi tiada dalam senarai, teruskan menaip nama lokasi anda. Link ke spot adalah optional.
+               </p>
             </div>
+
           </div>
 
           <div v-else class="mb-6">
@@ -167,6 +169,16 @@
             <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.groupLink') }}</label>
             <input type="text" v-model="form.groupLink" class="glass-input" :placeholder="t('createTrip.groupLinkPlaceholder')" />
             <span class="text-xs text-slate-500 mt-1 block">{{ t('createTrip.linkPrivacyNote') }}</span>
+          </div>
+
+          <div class="mb-6 bg-green-500/5 p-4 rounded-xl border border-green-500/20">
+             <label class="block text-sm font-semibold text-green-400 mb-2">
+               <i class="fab fa-whatsapp text-lg mr-2"></i> WhatsApp Contact (Optional) via KnoTenUp
+             </label>
+             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 60123456789" />
+             <p class="text-xs text-slate-400 mt-2">
+               Jika dibiarkan kosong, kami akan guna nombor WhatsApp di profile anda. Jika tiada, kami akan guna email.
+             </p>
           </div>
         </div>
 
@@ -250,12 +262,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ACTIVITY_CATEGORIES, TRIP_SERVICES, MALAYSIA_STATES } from '../constants/data';
-import { auth, db } from '../firebaseConfig';
-import { collection, getDocs } from 'firebase/firestore'; 
+import { auth } from '../firebaseConfig';
 import { isSpam } from '../utils/spamFilter';
 import { useStorage } from '../composables/useStorage'; 
 import { useTrips } from '../composables/useTrips';
@@ -268,11 +279,10 @@ const { createTrip, loading: isCreating } = useTrips();
 
 const currentStep = ref(1);
 const locationType = ref('malaysia');
-const autoDetected = ref(false);
 
 const previewImages = ref<string[]>(Array.from({ length: 5 }).map(() => ''));
 const rawFiles = ref<(File | null)[]>(Array.from({ length: 5 }).map(() => null));
-const spots = ref<any[]>([]); 
+// const spots = ref<any[]>([]); // Removed: using autocomplete 
 
 const form = reactive({
   title: '', category: '', difficulty: 'Moderate', 
@@ -280,46 +290,34 @@ const form = reactive({
   spotId: '', spotName: '', 
   startDate: '', endDate: '',   
   price: null, maxSlots: null, groupLink: '', description: '',
-  tips: '', mandatory: '', recommended: '', includes: [] as string[]
+  tips: '', mandatory: '', recommended: '', includes: [] as string[],
+  whatsapp: ''
 });
 
+import SpotAutocomplete from '../components/common/SpotAutocomplete.vue';
+
+// Cleaned up onMounted - no longer fetching all spots
 onMounted(async () => {
-  try {
-    const querySnapshot = await getDocs(collection(db, "spots"));
-    spots.value = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      name: doc.data().name,
-      state: doc.data().state,
-      height: doc.data().height
-    }));
-  } catch (error) { console.error("Error spots:", error); }
+  // Optional: Prefetch user profile or similar if needed
 });
 
-const filteredSpots = computed(() => {
-  if (!form.state) return [];
-  return spots.value.filter(s => s.state === form.state);
-});
+// Removed filteredSpots specific logic
 
-watch(() => form.title, (newTitle) => {
-  if (!newTitle || newTitle.length < 4) return;
-  const lowerTitle = newTitle.toLowerCase();
-  const foundSpot = spots.value.find(s => lowerTitle.includes(s.name.toLowerCase()));
-  if (foundSpot) {
-     form.state = foundSpot.state; 
-     form.spotId = foundSpot.id;   
-     form.spotName = foundSpot.name;
-     form.placeName = foundSpot.name;
-     autoDetected.value = true;
-     setTimeout(() => autoDetected.value = false, 3000);
-  }
-});
-
-const resetSpotSelection = () => { form.spotId = ''; form.spotName = ''; };
-const handleSpotChange = () => {
-  const selected = spots.value.find(s => s.id === form.spotId);
-  if (selected) { form.spotName = selected.name; form.placeName = selected.name; }
-  else form.spotName = '';
+const handleSpotSelect = (spot: any) => {
+  form.spotId = spot.id;
+  form.spotName = spot.name;
+  form.placeName = spot.name; // Use spot name as the place name
+  if (spot.state) form.state = spot.state; // Auto-fill state
 };
+
+const unlinkSpot = () => {
+  form.spotId = '';
+  form.spotName = '';
+  // form.placeName remains as typed
+};
+
+// Removed old resetSpotSelection and handleSpotChange
+
 
 const computedDuration = computed(() => {
   if (!form.startDate || !form.endDate) return '-';

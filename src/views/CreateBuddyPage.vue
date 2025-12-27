@@ -62,17 +62,19 @@
           </div>
         </div>
 
-        <div class="form-group mt-4">
-          <label>{{ t('createBuddy.whatsappLabel') }}</label>
-          <input 
-            type="text" 
-            v-model="form.whatsappLink" 
-            class="glass-input" 
-            :placeholder="t('createBuddy.whatsappPlaceholder')" 
-          />
-          <small class="text-gray-400 mt-1 block text-xs">
-             {{ t('createBuddy.whatsappHint') }}
-          </small>
+        <div class="form-group mt-4 bg-green-500/5 p-4 rounded-xl border border-green-500/20">
+           <label class="block font-semibold text-green-400 mb-2">
+             <i class="fab fa-whatsapp text-lg mr-2"></i> {{ t('createBuddy.whatsappLabel') }} (Optional)
+           </label>
+           <input 
+             type="text" 
+             v-model="form.whatsapp" 
+             class="glass-input" 
+             :placeholder="t('createBuddy.whatsappPlaceholder')" 
+           />
+           <small class="text-gray-400 mt-2 block text-xs">
+              {{ t('createBuddy.whatsappHint') || 'Jika kosong, kami akan guna nombor profile anda.' }}
+           </small>
         </div>
 
         <div class="form-group mt-4">
@@ -118,14 +120,14 @@ const form = reactive({
   time: '',
   pace: 'relaxed',
   carpool: 'self',
-  whatsappLink: '',
+  whatsapp: '',
   notes: '',
   declaration: false
 });
 
 const submitForm = async () => {
   if (!auth.currentUser) { alert(t('createBuddy.alerts.login')); return; }
-  if (!form.location || !form.date || !form.whatsappLink) {
+  if (!form.location || !form.date) {
     alert(t('createBuddy.alerts.fillRequired'));
     return;
   }

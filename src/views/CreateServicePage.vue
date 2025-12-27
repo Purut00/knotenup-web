@@ -198,12 +198,14 @@
             <textarea v-model="form.description" rows="5" class="glass-input" :placeholder="t('createService.fullDescPlaceholder')"></textarea>
           </div>
 
-          <div class="mb-6">
-            <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.whatsappLabelSimple') }}</label>
-            <div class="flex items-center bg-slate-900/50 border border-white/10 rounded-xl overflow-hidden">
-               <span class="px-4 py-3 text-slate-400 font-bold border-r border-white/10 bg-white/5">+60</span>
-               <input type="number" v-model="form.whatsapp" class="flex-1 bg-transparent p-3 text-white outline-none" placeholder="123456789" />
-            </div>
+          <div class="mb-6 bg-green-500/5 p-4 rounded-xl border border-green-500/20">
+             <label class="block text-sm font-semibold text-green-400 mb-2">
+               <i class="fab fa-whatsapp text-lg mr-2"></i> {{ t('createService.whatsappLabel') || 'WhatsApp Contact' }} (Optional)
+             </label>
+             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 60123456789" />
+             <p class="text-xs text-slate-400 mt-2">
+               {{ t('createService.whatsappHint') || 'Jika kosong, kami akan guna nombor WhatsApp di profile anda. Jika tiada, kami akan guna email.' }}
+             </p>
           </div>
         </div>
 

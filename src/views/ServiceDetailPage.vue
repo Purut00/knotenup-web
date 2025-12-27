@@ -187,16 +187,33 @@
                 </div>
               </div>
 
-              <a :href="whatsappUrl" target="_blank" class="btn-whatsapp">
-                <i class="fab fa-whatsapp text-xl"></i> WhatsApp
+              <a 
+                 v-if="contactInfo && contactInfo.href !== '#'"
+                 :href="contactInfo.href" 
+                 target="_blank" 
+                 class="btn-whatsapp"
+                 :class="contactInfo.color"
+              >
+                <i :class="[contactInfo.icon, 'text-xl mr-2']"></i> {{ contactInfo.label }}
               </a>
-              <p class="note">Tekan butang di atas untuk deal terus dengan owner.</p>
+              <button v-else class="btn-whatsapp opacity-50 cursor-not-allowed" disabled>
+                 No Contact Info
+              </button>
+              
+              <p class="note">Link akan membawa anda ke WhatsApp/Email rasmi penyedia servis.</p>
               
               <div v-if="isOwner" class="owner-actions">
                 <button class="btn-edit" @click="$router.push(`/service/edit/${serviceId}`)">
                   <i class="fas fa-edit"></i> Edit Iklan
                 </button>
               </div>
+
+               <!-- REPORT BUTTON -->
+               <div v-if="!isOwner" class="mt-4 text-center">
+                 <button @click="showReportModal = true" class="text-xs text-red-400 hover:text-red-300 underline flex items-center justify-center gap-1 mx-auto">
+                   <i class="fas fa-flag"></i> Report Service
+                 </button>
+               </div>
             </div>
           </div>
 
@@ -216,6 +233,14 @@
         @hide="onHide"
       />
 
+      <ReportModal
+        v-if="service"
+        v-model:visible="showReportModal"
+        :targetId="service.id"
+        targetType="service"
+        :targetName="service.name"
+      />
+
     </div>
   </div>
 </template>
@@ -227,6 +252,12 @@ import { auth, db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useI18n } from 'vue-i18n'; 
+import { getContactLink } from '../utils/contactHelper'; 
+import { defineAsyncComponent } from 'vue';
+
+const ReportModal = defineAsyncComponent(() => 
+  import('../components/common/ReportModal.vue')
+); 
 
 // @ts-ignore
 import VueEasyLightbox from 'vue-easy-lightbox';
@@ -245,12 +276,14 @@ const { t } = useI18n();
 const route = useRoute();
 const serviceId = route.params.id as string;
 const service = ref<any>(null);
+const owner = ref<any>(null); // Owner profile data
 const loading = ref(true);
 const currentUser = ref<any>(null);
 
 // LIGHTBOX STATE
 const visibleRef = ref(false);
 const indexRef = ref(0);
+const showReportModal = ref(false);
 
 const displayImages = computed(() => {
   if (service.value?.images && service.value.images.length > 0) {
@@ -261,10 +294,9 @@ const displayImages = computed(() => {
   return new Array(5).fill('https://via.placeholder.com/800x600?text=No+Image');
 });
 
-const whatsappUrl = computed(() => {
-  if (!service.value?.whatsapp) return '#';
-  const message = `Hi ${service.value.ownerName}, saya berminat dengan servis ${service.value.name} yang saya lihat di KnotenUp.`;
-  return `https://wa.me/60${service.value.whatsapp}?text=${encodeURIComponent(message)}`;
+const contactInfo = computed(() => {
+  if (!service.value) return null;
+  return getContactLink(service.value, owner.value);
 });
 
 const isOwner = computed(() => {
@@ -287,6 +319,14 @@ onMounted(async () => {
     const docSnap = await getDoc(doc(db, 'services', serviceId));
     if (docSnap.exists()) {
       service.value = docSnap.data();
+
+      // Fetch Owner Profile for Contact Fallback
+      if (service.value.ownerId) {
+        try {
+          const ownerSnap = await getDoc(doc(db, 'users', service.value.ownerId));
+          if (ownerSnap.exists()) owner.value = ownerSnap.data();
+        } catch (err) { /* ignore */ }
+      }
     }
   } catch (e) { console.error(e); }
   finally { loading.value = false; }

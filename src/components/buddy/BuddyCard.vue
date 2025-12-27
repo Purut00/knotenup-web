@@ -12,6 +12,11 @@
         <span class="day">{{ formatDateDay(buddy.date) }}</span>
         <span class="month">{{ formatDateMonth(buddy.date) }}</span>
       </div>
+
+      <!-- Report Icon -->
+      <button @click.stop="showReportModal = true" class="absolute top-3 right-3 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+        <i class="fas fa-flag"></i>
+      </button>
     </div>
 
     <div class="card-body">
@@ -33,16 +38,56 @@
     </div>
 
     <div class="card-footer">
-      <a :href="buddy.whatsappLink" target="_blank" class="btn-join">
-        <i class="fab fa-whatsapp"></i> Join Geng
+      <a 
+         :href="contactInfo.href" 
+         target="_blank" 
+         class="btn-join"
+         :class="{'disabled': contactInfo.href === '#'}"
+      >
+        <i :class="contactInfo.icon"></i> {{ contactInfo.label }}
       </a>
     </div>
+
+    <ReportModal 
+        v-if="buddy"
+        v-model:visible="showReportModal" 
+        :targetId="buddy.id"
+        targetType="buddy"
+        :targetName="buddy.location || 'Buddy Request'"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, defineAsyncComponent } from 'vue';
+import { db } from '../../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { getContactLink } from '../../utils/contactHelper';
+
+const ReportModal = defineAsyncComponent(() => 
+  import('../common/ReportModal.vue')
+);
+
 const props = defineProps({
   buddy: { type: Object, required: true }
+});
+
+const hostProfile = ref<any>(null);
+const showReportModal = ref(false);
+
+const contactInfo = computed(() => {
+  return getContactLink(props.buddy, hostProfile.value);
+});
+
+onMounted(async () => {
+  if (props.buddy.hostId) {
+    try {
+      const snap = await getDoc(doc(db, 'users', props.buddy.hostId));
+      if (snap.exists()) hostProfile.value = snap.data();
+    } catch (e) {
+      // ignore
+    }
+  }
 });
 
 // Helper Dates
@@ -57,8 +102,8 @@ const formatDateMonth = (dateStr: string) => {
 
 // Helper Style Pace
 const getPaceClass = (pace: string) => {
-  if (pace.includes('Santai')) return 'pace-easy';
-  if (pace.includes('Sederhana')) return 'pace-medium';
+  if (pace && pace.includes('Santai')) return 'pace-easy';
+  if (pace && pace.includes('Sederhana')) return 'pace-medium';
   return 'pace-hard';
 };
 </script>

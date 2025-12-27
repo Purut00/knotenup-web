@@ -1,82 +1,58 @@
-// src/utils/contactHelper.ts
-
-// Interface ringkas untuk elak error TS (ikut structure anda)
-interface TripData {
-  title: string;
-  contactPhone?: string;
-  organizerEmail?: string;
-  groupLink?: string; // Support existing field
-}
-
-interface UserData {
-  phoneNumber?: string;
-  phone?: string; // Support naming convention lain
-  email?: string;
-}
-
-const generateWaLink = (phone: string, message: string) => {
-  // Buang karakter bukan nombor
-  let cleanNumber = phone.replace(/\D/g, '');
-  
-  // Auto tambah 60 jika mula dengan 01
-  if (cleanNumber.startsWith('01')) {
-    cleanNumber = '6' + cleanNumber;
-  }
-
-  return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
-};
-
-export const getContactLink = (trip: TripData, organizer: UserData | null) => {
-  const defaultMessage = `Hi, saya berminat dengan trip "${trip.title}" di KnotenUp. Masih ada kekosongan?`;
-
-  // 1. Check Trip Specific Contact (Paling Utama)
-  // Kalau organizer ada letak link group terus (legacy support)
-  if (trip.groupLink && trip.groupLink.includes('chat.whatsapp.com')) {
+export const getContactLink = (doc: any, organizer: any) => {
+  // 1. Check Document Specific WhatsApp
+  if (doc.whatsapp) {
+    const phone = formatPhone(doc.whatsapp);
+    const msg = encodeURIComponent(generateMessage(doc));
     return {
-      href: trip.groupLink,
-      label: 'Join WhatsApp Group',
-      icon: 'fab fa-whatsapp',
-      color: 'bg-green-600 hover:bg-green-700' // Ikut warna asal btn-join
-    };
-  }
-
-  // Kalau ada phone number spesifik untuk trip
-  if (trip.contactPhone && trip.contactPhone.length > 5) {
-    return {
-      href: generateWaLink(trip.contactPhone, defaultMessage),
-      label: 'WhatsApp Admin Trip',
+      href: `https://wa.me/${phone}?text=${msg}`,
+      label: 'WhatsApp (Rasmi)',
       icon: 'fab fa-whatsapp',
       color: 'bg-green-600 hover:bg-green-700'
     };
   }
 
-  // 2. Check Organizer Profile Phone
-  const orgPhone = organizer?.phoneNumber || organizer?.phone;
-  if (orgPhone && orgPhone.length > 5) {
+  // 2. Check Organizer Profile WhatsApp
+  if (organizer && organizer.whatsapp) {
+    const phone = formatPhone(organizer.whatsapp);
+    const msg = encodeURIComponent(generateMessage(doc));
     return {
-      href: generateWaLink(orgPhone, defaultMessage),
-      label: 'WhatsApp Organizer',
+      href: `https://wa.me/${phone}?text=${msg}`,
+      label: 'Hubungi Organizer (WhatsApp)',
       icon: 'fab fa-whatsapp',
       color: 'bg-green-600 hover:bg-green-700'
     };
   }
 
-  // 3. Email Organizer (Fallback)
-  const email = organizer?.email || trip.organizerEmail;
+  // 3. Fallback to Email
+  const email = (organizer && organizer.email) || doc.organizerEmail; // Fallback
   if (email) {
     return {
-      href: `mailto:${email}?subject=Pertanyaan Trip: ${trip.title}`,
-      label: 'Email Organizer',
+      href: `mailto:${email}?subject=${encodeURIComponent(doc.title || 'Inquiry')}&body=${encodeURIComponent(generateMessage(doc))}`,
+      label: 'Hubungi Organizer (Email)',
       icon: 'fas fa-envelope',
       color: 'bg-blue-600 hover:bg-blue-700'
     };
   }
 
-  // 4. Dead End (Tiada contact)
-  return {
-    href: '#',
-    label: 'Contact Info Hidden',
-    icon: 'fas fa-eye-slash',
-    color: 'bg-gray-500 cursor-not-allowed opacity-70'
-  };
+  return { href: '#', label: 'Tiada Contact Info', icon: 'fas fa-ban', color: 'bg-gray-500' };
+};
+
+const formatPhone = (phone: string) => {
+  // Basic sanitization: remove non-digits
+  let p = phone.replace(/\D/g, '');
+  // Ensure starts with country code (default to 60 for Malaysia if starts with 1)
+  if (p.startsWith('01')) p = '6' + p;
+  else if (p.startsWith('1')) p = '60' + p;
+  return p;
+};
+
+const generateMessage = (doc: any) => {
+  // Auto-message based on context
+  // Trip: Hi, saya berminat untuk join trip "Title" pada Date.
+  if (doc.startDate) {
+    const date = new Date(doc.startDate).toLocaleDateString('ms-MY');
+    return `Hi, saya berminat untuk menyertai trip "${doc.title}" pada tarikh ${date}.`;
+  }
+  // Generic
+  return `Hi, saya berminat dengan "${doc.title}". Boleh saya tahu lebih lanjut?`;
 };

@@ -202,6 +202,13 @@
                   <p class="text-[10px] text-gray-400 text-center mt-2 italic">
                      Link akan membawa anda ke WhatsApp/Email rasmi organizer.
                   </p>
+
+                  <!-- REPORT BUTTON -->
+                  <div class="mt-4 text-center">
+                    <button @click="showReportModal = true" class="text-xs text-red-400 hover:text-red-300 underline flex items-center justify-center gap-1 mx-auto">
+                      <i class="fas fa-flag"></i> Report Trip
+                    </button>
+                  </div>
                 </div>
               </div>
               <p class="note mt-4">* {{ t('trip.paymentNote') }}</p>
@@ -223,6 +230,14 @@
         @hide="onHide"
       />
 
+      <ReportModal
+        v-if="trip"
+        v-model:visible="showReportModal"
+        :targetId="trip.id"
+        targetType="trip"
+        :targetName="trip.title"
+      />
+
     </div>
   </div>
 </template>
@@ -234,6 +249,11 @@ import { useI18n } from 'vue-i18n';
 import { db, auth } from '../firebaseConfig'; // Path asal
 import { doc, getDoc, updateDoc } from 'firebase/firestore'; 
 import { getContactLink } from '../utils/contactHelper'; // Import baru
+import { defineAsyncComponent } from 'vue';
+
+const ReportModal = defineAsyncComponent(() => 
+  import('../components/common/ReportModal.vue')
+);
 
 // @ts-ignore
 import VueEasyLightbox from 'vue-easy-lightbox';
@@ -259,6 +279,7 @@ const isProcessing = ref(false);
 // Lightbox State
 const visibleRef = ref(false);
 const indexRef = ref(0);
+const showReportModal = ref(false);
 
 // Helper Date
 const formatDate = (dateString: string) => {
