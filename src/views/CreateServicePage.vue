@@ -14,7 +14,7 @@
       </div>
 
       <!-- STEPPER -->
-      <div class="flex items-center justify-center mb-10 relative z-10 hidden md:flex">
+      <div class="hidden md:flex items-center justify-center mb-10 relative z-10">
          <!-- Step 1 -->
          <div class="flex flex-col items-center gap-2 transition-opacity duration-300" :class="{ 'opacity-100': currentStep >= 1, 'opacity-50': currentStep < 1 }">
             <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold bg-slate-900 transition-colors"

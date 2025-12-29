@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   visible: boolean;
   context: 'create' | 'join'; // 'create' for forms, 'join' for contact buttons
 }>();
