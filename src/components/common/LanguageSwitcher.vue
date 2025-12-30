@@ -1,6 +1,6 @@
 <template>
   <div class="language-switcher">
-    <select v-model="locale" @change="onLocaleChange" class="locale-select">
+    <select v-model="locale" @change="onLocaleChange" class="p-[0.4rem] border border-[#ccc] rounded-[5px] bg-[#f9f9f9] text-black">
       <option value="ms">Bahasa Melayu</option>
       <option value="en">English</option>
     </select>
@@ -24,12 +24,3 @@ watch(locale, (newLocale) => {
   localStorage.setItem('locale', newLocale);
 });
 </script>
-
-<style scoped>
-.locale-select {
-  padding: 0.4rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-}
-</style>

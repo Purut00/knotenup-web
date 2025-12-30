@@ -1,32 +1,32 @@
 <template>
-  <div class="admin-page">
+  <div class="min-h-screen bg-[#1a252f] p-8 text-[#ecf0f1] font-sans">
     
-    <div v-if="checkingAccess" class="security-check">
-      <div class="spinner"></div>
+    <div v-if="checkingAccess" class="flex flex-col items-center justify-center h-[80vh] text-center">
+      <div class="w-10 h-10 border-4 border-white/10 border-t-[#3498db] rounded-full animate-spin mb-5"></div>
       <p>Verifikasi Identiti...</p>
     </div>
 
-    <div v-else-if="isAdmin" class="admin-container fade-in">
+    <div v-else-if="isAdmin" class="max-w-[1200px] mx-auto animate-fade-in">
       
-      <div class="header">
+      <div class="flex justify-between items-center mb-8 border-b border-[#34495e] pb-4">
         <div>
-          <h1>⚡ Admin Panel</h1>
-          <p>Pusat Kawalan Utama</p>
+          <h1 class="text-3xl font-bold m-0">⚡ Admin Panel</h1>
+          <p class="text-gray-400">Pusat Kawalan Utama</p>
         </div>
-        <div class="user-badge">
+        <div class="bg-[#e67e22] text-white py-1.5 px-4 rounded-full font-bold text-xs">
            Admin Mode • {{ currentUserEmail ? maskEmail(currentUserEmail) : 'Unknown' }}
         </div>
       </div>
 
-      <div class="admin-tabs custom-scrollbar">
-        <button :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">📊 Dashboard</button>
-        <button :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">👥 Users</button>
-        <button :class="{ active: activeTab === 'trips' }" @click="activeTab = 'trips'">🏕️ Trips</button>
-        <button :class="{ active: activeTab === 'forum' }" @click="activeTab = 'forum'">💬 Forum</button>
-        <button :class="{ active: activeTab === 'services' }" @click="activeTab = 'services'">🛠️ Services</button>
-        <button :class="{ active: activeTab === 'spots' }" @click="activeTab = 'spots'">📍 Spots</button>
-        <button :class="{ active: activeTab === 'banners' }" @click="activeTab = 'banners'">🎨 Banners</button>
-        <button :class="{ active: activeTab === 'devtools' }" @click="activeTab = 'devtools'" style="color: #ff5e57; border-color: #ff5e57;">🤖 Data Tools</button>
+      <div class="flex gap-2.5 mb-8 overflow-x-auto pb-2">
+        <button :class="['bg-[#2c3e50] border-none text-[#bdc3c7] py-2.5 px-5 cursor-pointer rounded-lg font-semibold whitespace-nowrap transition-colors', activeTab === 'dashboard' ? 'bg-[#3498db] text-white' : '']" @click="activeTab = 'dashboard'">📊 Dashboard</button>
+        <button :class="['bg-[#2c3e50] border-none text-[#bdc3c7] py-2.5 px-5 cursor-pointer rounded-lg font-semibold whitespace-nowrap transition-colors', activeTab === 'users' ? 'bg-[#3498db] text-white' : '']" @click="activeTab = 'users'">👥 Users</button>
+        <button :class="['bg-[#2c3e50] border-none text-[#bdc3c7] py-2.5 px-5 cursor-pointer rounded-lg font-semibold whitespace-nowrap transition-colors', activeTab === 'trips' ? 'bg-[#3498db] text-white' : '']" @click="activeTab = 'trips'">🏕️ Trips</button>
+        <button :class="['bg-[#2c3e50] border-none text-[#bdc3c7] py-2.5 px-5 cursor-pointer rounded-lg font-semibold whitespace-nowrap transition-colors', activeTab === 'forum' ? 'bg-[#3498db] text-white' : '']" @click="activeTab = 'forum'">💬 Forum</button>
+        <button :class="['bg-[#2c3e50] border-none text-[#bdc3c7] py-2.5 px-5 cursor-pointer rounded-lg font-semibold whitespace-nowrap transition-colors', activeTab === 'services' ? 'bg-[#3498db] text-white' : '']" @click="activeTab = 'services'">🛠️ Services</button>
+        <button :class="['bg-[#2c3e50] border-none text-[#bdc3c7] py-2.5 px-5 cursor-pointer rounded-lg font-semibold whitespace-nowrap transition-colors', activeTab === 'spots' ? 'bg-[#3498db] text-white' : '']" @click="activeTab = 'spots'">📍 Spots</button>
+        <button :class="['bg-[#2c3e50] border-none text-[#bdc3c7] py-2.5 px-5 cursor-pointer rounded-lg font-semibold whitespace-nowrap transition-colors', activeTab === 'banners' ? 'bg-[#3498db] text-white' : '']" @click="activeTab = 'banners'">🎨 Banners</button>
+        <button :class="['bg-[#2c3e50] border border-[#ff5e57] text-[#ff5e57] py-2.5 px-5 cursor-pointer rounded-lg font-semibold whitespace-nowrap transition-colors', activeTab === 'devtools' ? 'bg-[#ff5e57] text-white' : '']" @click="activeTab = 'devtools'">🤖 Data Tools</button>
       </div>
 
       <!-- DASHBOARD -->
@@ -41,60 +41,60 @@
       <AdminSpots v-if="activeTab === 'spots'" @view-reports="openReportModal" />
 
       <!-- BANNERS MANAGER -->
-      <div v-if="activeTab === 'banners'" class="tab-content fade-in">
-        <h3>🎨 Pengurusan Tampilan</h3>
-        <div class="banner-manager-layout">
-           <div class="banner-edit-card large-section">
-              <div class="section-header"><h4>Slider Utama</h4><span>{{ banners.largeSlides.length }}/5</span></div>
-              <div class="slides-list custom-scrollbar">
-                 <div v-for="(slide, i) in banners.largeSlides" :key="i" class="slide-item">
-                    <img :src="slide.imageUrl" class="slide-thumb">
-                    <div class="slide-info"><input v-model="slide.title" class="mini-input"><input v-model="slide.linkUrl" class="mini-input"></div>
-                    <button class="btn-del-slide" @click="removeSlide(i)">✖</button>
+      <div v-if="activeTab === 'banners'" class="animate-fade-in">
+        <h3 class="text-xl font-bold mb-4">🎨 Pengurusan Tampilan</h3>
+        <div class="grid grid-cols-[2fr_1fr] gap-5 max-md:grid-cols-1">
+           <div class="bg-[#2c3e50] p-6 rounded-xl border border-[#34495e] flex flex-col">
+              <div class="flex justify-between items-center mb-4"><h4 class="font-bold m-0">Slider Utama</h4><span class="text-gray-400 text-sm">{{ banners.largeSlides.length }}/5</span></div>
+              <div class="max-h-[400px] overflow-y-auto pr-2 mb-4">
+                 <div v-for="(slide, i) in banners.largeSlides" :key="i" class="flex items-center gap-2.5 bg-[#34495e] p-2.5 rounded-lg mb-2.5">
+                    <img :src="slide.imageUrl" class="w-[60px] h-[35px] object-cover rounded">
+                    <div class="flex-1"><input v-model="slide.title" class="bg-[#253342] border border-[#555] text-white p-1 rounded w-full mb-0.5 text-xs placeholder-gray-500" placeholder="Title"><input v-model="slide.linkUrl" class="bg-[#253342] border border-[#555] text-white p-1 rounded w-full text-xs placeholder-gray-500" placeholder="Link URL"></div>
+                    <button class="bg-transparent border-none text-[#e74c3c] font-bold cursor-pointer" @click="removeSlide(i)">✖</button>
                  </div>
               </div>
-              <div v-if="banners.largeSlides.length < 5" class="add-slide-box">
-                 <input type="file" @change="handleSlideFileSelect" accept="image/*" class="file-input-mini">
-                 <button class="btn-add" @click="addSlide" :disabled="loading.slide || !newSlide.file">Upload</button>
+              <div v-if="banners.largeSlides.length < 5" class="bg-[#253342] p-2.5 rounded-lg border border-dashed border-[#555] flex gap-1.5 items-center mb-4">
+                 <input type="file" @change="handleSlideFileSelect" accept="image/*" class="text-xs text-gray-400 file:bg-[#34495e] file:border-none file:text-white file:rounded file:px-2 file:py-1 file:mr-2 file:cursor-pointer">
+                 <button class="bg-[#3498db] text-white border-none py-1.5 px-2.5 rounded cursor-pointer text-xs font-bold disabled:opacity-50" @click="addSlide" :disabled="loading.slide || !newSlide.file">Upload</button>
               </div>
-              <button class="btn-save main-save" @click="saveAllSlides" :disabled="loading.saveAll">Simpan Slider</button>
+              <button class="bg-[#27ae60] text-white p-2.5 border-none rounded-lg cursor-pointer font-bold mt-auto disabled:opacity-50" @click="saveAllSlides" :disabled="loading.saveAll">Simpan Slider</button>
            </div>
-           <div class="small-banners-wrapper">
-              <div class="banner-edit-card">
-                 <h4>Banner Kecil 1</h4>
-                 <div class="preview-box small" :style="{ backgroundImage: `url(${banners.small1.imageUrl})` }"></div>
-                 <input type="file" @change="(e) => handleFileSelect(e, 'small1')" class="file-input-mini">
-                 <button class="btn-save w-full mt-2" @click="saveBanner('small1')" :disabled="loading.small1">Simpan</button>
+           <div class="flex flex-col gap-5">
+              <div class="bg-[#2c3e50] p-6 rounded-xl border border-[#34495e] flex flex-col">
+                 <h4 class="font-bold m-0 mb-3">Banner Kecil 1</h4>
+                 <div class="w-full h-[120px] bg-[#253342] bg-cover bg-center rounded-lg mb-2.5 border-2 border-dashed border-[#555]" :style="{ backgroundImage: `url(${banners.small1.imageUrl})` }"></div>
+                 <input type="file" @change="(e) => handleFileSelect(e, 'small1')" class="text-xs text-gray-400 file:bg-[#34495e] file:border-none file:text-white file:rounded file:px-2 file:py-1 file:mr-2 file:cursor-pointer mb-2">
+                 <button class="w-full mt-2 bg-[#27ae60] text-white p-2.5 border-none rounded-lg cursor-pointer font-bold disabled:opacity-50" @click="saveBanner('small1')" :disabled="loading.small1">Simpan</button>
               </div>
-              <div class="banner-edit-card">
-                 <h4>Banner Kecil 2</h4>
-                 <div class="preview-box small" :style="{ backgroundImage: `url(${banners.small2.imageUrl})` }"></div>
-                 <input type="file" @change="(e) => handleFileSelect(e, 'small2')" class="file-input-mini">
-                 <button class="btn-save w-full mt-2" @click="saveBanner('small2')" :disabled="loading.small2">Simpan</button>
+              <div class="bg-[#2c3e50] p-6 rounded-xl border border-[#34495e] flex flex-col">
+                 <h4 class="font-bold m-0 mb-3">Banner Kecil 2</h4>
+                 <div class="w-full h-[120px] bg-[#253342] bg-cover bg-center rounded-lg mb-2.5 border-2 border-dashed border-[#555]" :style="{ backgroundImage: `url(${banners.small2.imageUrl})` }"></div>
+                 <input type="file" @change="(e) => handleFileSelect(e, 'small2')" class="text-xs text-gray-400 file:bg-[#34495e] file:border-none file:text-white file:rounded file:px-2 file:py-1 file:mr-2 file:cursor-pointer mb-2">
+                 <button class="w-full mt-2 bg-[#27ae60] text-white p-2.5 border-none rounded-lg cursor-pointer font-bold disabled:opacity-50" @click="saveBanner('small2')" :disabled="loading.small2">Simpan</button>
               </div>
            </div>
         </div>
       </div>
 
       <!-- DEVTOOLS -->
-      <div v-if="activeTab === 'devtools'" class="tab-content fade-in">
-        <h3 class="text-red-400 mb-4 flex items-center gap-2">
+      <div v-if="activeTab === 'devtools'" class="animate-fade-in">
+        <h3 class="text-red-400 mb-4 flex items-center gap-2 font-bold text-xl">
             <i class="fas fa-database text-2xl"></i> Import Data Sebenar
         </h3>
         <p class="text-gray-400 mb-6 bg-white/5 p-3 rounded-lg border border-white/10">
             <i class="fas fa-info-circle text-blue-400 mr-2"></i> 
             Bahagian ini adalah untuk memasukkan data bukit/gunung sebenar dari fail JSON yang telah diproses.
         </p>
-        <div class="single-tool-container">
-           <div class="tool-card big-card" style="border: 1px solid #e74c3c;">
-               <div class="icon-bg" style="background: rgba(231, 76, 60, 0.2); width: 70px; height: 70px; font-size: 2rem;">🗺️</div>
-               <h4 style="color: #ff8787; font-size: 1.5rem; margin: 10px 0;">Real Maps Import</h4>
-               <p style="font-size: 1rem; max-width: 400px;">
+        <div class="flex justify-center items-center min-h-[400px]">
+           <div class="bg-[#253342] p-12 rounded-xl border border-[#e74c3c] flex flex-col items-center text-center w-full max-w-[600px]">
+               <div class="w-[70px] h-[70px] rounded-full flex items-center justify-center mb-2.5 bg-[rgba(231,76,60,0.2)] text-[2rem]">🗺️</div>
+               <h4 class="text-[#ff8787] text-[1.5rem] my-2.5 font-bold">Real Maps Import</h4>
+               <p class="text-[1rem] max-w-[400px] mb-5 text-gray-300">
                  Import data bukit dari fail <code>gunung_siap_negeri.json</code>. 
                  Sistem akan automatik memasukkan Nama, Lokasi, Ketinggian, dan Negeri ke dalam database.
                </p>
-               <div class="action-row" style="justify-content: center; margin-top: 20px;">
-               <button @click="seedRealSpots" class="btn-tool" style="background: #e74c3c; padding: 15px 40px; font-size: 1.1rem;">
+               <div class="flex justify-center mt-5">
+               <button @click="seedRealSpots" class="bg-[#e74c3c] text-white py-[15px] px-[40px] text-[1.1rem] font-bold rounded-lg border-none cursor-pointer transition duration-200 hover:brightness-110 hover:scale-105">
                  MULA IMPORT DATA
                </button>
                </div>
@@ -104,10 +104,10 @@
 
     </div>
     
-    <div v-else class="access-denied">
-       <h1>⛔ AKSES DITOLAK</h1>
-       <p>Cubaan menceroboh telah direkodkan.</p>
-       <button @click="router.push('/')">Balik ke Home</button>
+    <div v-else class="flex flex-col items-center justify-center h-[80vh] text-center">
+       <h1 class="text-[#e74c3c] text-[3rem] mb-4 font-bold">⛔ AKSES DITOLAK</h1>
+       <p class="text-gray-300">Cubaan menceroboh telah direkodkan.</p>
+       <button @click="router.push('/')" class="bg-[#e74c3c] text-white border-none py-2.5 px-5 rounded cursor-pointer mt-4 font-bold hover:brightness-110">Balik ke Home</button>
     </div>
 
     <!-- REPORT MODAL -->
@@ -237,56 +237,3 @@ const saveBanner = async (type: 'small1' | 'small2') => {
   } catch (e) { alert("Gagal."); } finally { loading[type] = false; }
 };
 </script>
-
-<style scoped>
-.admin-page { background: #1a252f; min-height: 100vh; padding: 2rem; color: #ecf0f1; font-family: 'Inter', sans-serif; }
-.admin-container { max-width: 1200px; margin: 0 auto; }
-.security-check, .access-denied { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; color: white; text-align: center; }
-.access-denied h1 { color: #e74c3c; font-size: 3rem; margin-bottom: 1rem; }
-.access-denied button { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 1rem; }
-.spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-/* HEADER & TABS */
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid #34495e; padding-bottom: 1rem; }
-.user-badge { background: #e67e22; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; }
-.admin-tabs { display: flex; gap: 10px; margin-bottom: 2rem; overflow-x: auto; }
-.admin-tabs button { background: #2c3e50; border: none; color: #bdc3c7; padding: 10px 20px; cursor: pointer; border-radius: 8px; font-weight: 600; white-space: nowrap; }
-.admin-tabs button.active { background: #3498db; color: white; }
-
-/* LAYOUTS */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-.card { background: #2c3e50; padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #34495e; }
-.card h3 { font-size: 2rem; margin: 0; color: #f1c40f; }
-.dashboard-split { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-.panel-section { background: #2c3e50; padding: 1.5rem; border-radius: 12px; }
-.note-area { width: 100%; height: 100px; background: #34495e; border: none; color: white; padding: 1rem; margin-bottom: 10px; }
-
-.list-wrapper { display: flex; flex-direction: column; gap: 10px; }
-.list-item { background: #34495e; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-.info strong { display: block; color:white; } .info small { color: #bdc3c7; }
-.btn-approve { background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
-.btn-save-note { background: #27ae60; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
-
-/* BANNER MANAGER */
-.banner-manager-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-.banner-edit-card { background: #2c3e50; padding: 1.5rem; border-radius: 12px; border: 1px solid #34495e; display: flex; flex-direction: column; }
-.slide-item { display: flex; align-items: center; gap: 10px; background: #34495e; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
-.slide-thumb { width: 60px; height: 35px; object-fit: cover; }
-.mini-input { background: #253342; border: 1px solid #555; color: white; padding: 4px; border-radius: 4px; width: 100%; margin-bottom: 2px; }
-.preview-box { width: 100%; height: 120px; background-color: #253342; background-size: cover; border-radius: 8px; margin-bottom: 10px; border: 2px dashed #555; }
-.btn-save { background: #27ae60; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-.add-slide-box { background: #253342; padding: 10px; border-radius: 8px; border: 1px dashed #555; display: flex; gap: 5px; align-items: center; }
-.btn-add { background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-.btn-del-slide { background: none; border: none; color: #e74c3c; font-weight: bold; cursor: pointer; }
-
-/* TOOL CARD */
-.single-tool-container { display: flex; justify-content: center; align-items: center; min-height: 400px; }
-.tool-card { background: #253342; padding: 1.5rem; border-radius: 12px; border: 1px solid #34495e; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.tool-card.big-card { width: 100%; max-width: 600px; padding: 3rem; }
-.icon-bg { border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-.btn-tool { border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
-.btn-tool:hover { filter: brightness(1.1); transform: scale(1.05); }
-
-@media (max-width: 768px) { .dashboard-split, .banner-manager-layout { grid-template-columns: 1fr; } }
-</style>

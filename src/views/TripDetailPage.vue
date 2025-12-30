@@ -1,86 +1,73 @@
 <template>
-  <div class="trip-detail-page">
+  <div class="min-h-screen relative overflow-x-hidden text-white bg-slate-900">
     
-    <div class="contour-lines"></div>
-    <div class="page-glow-purple"></div>
-    <div class="page-glow-orange"></div>
+    <!-- Background Decor -->
+    <div class="absolute inset-0 z-0 opacity-[0.08] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')] bg-cover"></div>
+    <div class="absolute -top-[10%] -right-[10%] w-[60vw] h-[60vw] bg-[#6c63ff] blur-[150px] opacity-15 pointer-events-none rounded-full z-0"></div>
+    <div class="absolute -bottom-[10%] -left-[10%] w-[60vw] h-[60vw] bg-[#ff8c42] blur-[150px] opacity-10 pointer-events-none rounded-full z-0"></div>
 
-    <div class="content-container" style="padding-top: 120px; padding-bottom: 4rem;">
+    <div class="relative z-10 max-w-7xl mx-auto px-6 pt-[120px] pb-16">
 
-      <div v-if="loading" class="loading-container">
-        <div class="spinner"></div>
+      <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-slate-400">
+        <div class="w-10 h-10 border-4 border-white/10 border-t-[#6c63ff] rounded-full animate-spin mb-4"></div>
         <p>Sedang memuatkan...</p>
       </div>
 
-      <div v-else-if="trip" class="fade-up">
+      <div v-else-if="trip" class="animate-fade-in-up">
         
-        <div class="hero-gallery-wrapper mb-8">
+        <!-- HERO GALLERY -->
+        <div class="relative mb-8">
           
-          <div class="desktop-gallery">
-            <div class="gallery-item main-item" 
+          <!-- GALLERY UNIFIED -->
+          <div class="grid grid-cols-[2fr_1fr] gap-2.5 h-[450px] rounded-[20px] overflow-hidden border border-white/10 relative">
+            <div class="w-full h-full bg-cover bg-center cursor-pointer transition-all hover:brightness-90 relative" 
                  :style="{ backgroundImage: `url(${displayImages[0]})` }"
                  @click="openLightbox(0)">
-                 <div class="overlay-gradient-heavy"></div>
+                 <div class="absolute inset-0 bg-gradient-to-t from-[#0f172a]/95 via-transparent to-transparent opacity-60"></div>
             </div>
-            <div class="sub-gallery">
-              <div class="gallery-item" 
+            
+            <div class="grid grid-cols-2 grid-rows-2 gap-2.5">
+              <div class="bg-cover bg-center cursor-pointer transition-all hover:brightness-90 bg-gray-700" 
                    v-for="(img, index) in displayImages.slice(1, 5)" 
                    :key="index" 
                    :style="{ backgroundImage: `url(${img})` }"
                    @click="openLightbox(index + 1)">
-                   <div class="overlay-hover"></div>
               </div>
             </div>
             
-            <button class="btn-show-all" @click="openLightbox(0)">
+            <button class="absolute bottom-5 right-5 bg-white/90 text-slate-900 px-5 py-2.5 rounded-full font-bold cursor-pointer transition-transform hover:scale-105 hover:bg-white z-10 flex items-center" @click="openLightbox(0)">
               <i class="fas fa-images mr-2"></i> {{ t('trip.viewPhotos') || 'Lihat Gambar' }}
             </button>
             
-            <div class="gallery-title-overlay">
-              <span class="badge-cat">{{ trip.category }}</span>
-              <h1>{{ trip.title }}</h1>
-              <div class="hero-meta">
+            <div class="absolute bottom-[30px] left-[30px] z-[5] max-w-[70%]">
+              <span class="inline-block bg-[#e67e22] text-white px-3 py-1 rounded-[30px] font-bold text-xs uppercase tracking-wider mb-2">{{ trip.category }}</span>
+              <h1 class="text-5xl font-extrabold leading-[1.1] mb-2 drop-shadow-md">{{ trip.title }}</h1>
+              <div class="text-lg text-slate-300 flex items-center gap-4">
                 <span><i class="fas fa-map-marker-alt text-red-400"></i> {{ trip.location }}</span>
-                <span v-if="trip.duration"><i class="fas fa-clock text-blue-400 ml-3"></i> {{ trip.duration }}</span>
-                <span class="ml-3"><i class="fas fa-tachometer-alt text-yellow-400"></i> {{ trip.difficulty }}</span>
+                <span v-if="trip.duration"><i class="fas fa-clock text-blue-400 ml-2"></i> {{ trip.duration }}</span>
+                <span class="ml-2"><i class="fas fa-tachometer-alt text-yellow-400"></i> {{ trip.difficulty }}</span>
               </div>
             </div>
           </div>
 
-          <div class="mobile-gallery">
-            <swiper
-              :modules="[Pagination, Navigation]"
-              :slides-per-view="1"
-              :pagination="{ clickable: true }"
-              class="detail-swiper"
-            >
-              <swiper-slide v-for="(img, index) in displayImages" :key="index">
-                <div class="slide-bg" :style="{ backgroundImage: `url(${img})` }" @click="openLightbox(index)">
-                   <div class="overlay-gradient-mobile"></div>
-                </div>
-              </swiper-slide>
-            </swiper>
-            <div class="mobile-title-overlay">
-              <span class="badge-cat">{{ trip.category }}</span>
-              <h1>{{ trip.title }}</h1>
-              <div class="hero-meta-mobile"><span>📍 {{ trip.location }}</span></div>
-            </div>
-          </div>
+          <!-- Mobile Gallery Removed -->
         </div>
 
-        <div class="main-layout">
+        <!-- MAIN LAYOUT -->
+        <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8">
           
-          <div class="left-content">
+          <!-- LEFT CONTENT -->
+          <div class="flex flex-col">
             
             <div v-if="trip.spotId" 
-                 class="glass-panel mb-6 bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30 cursor-pointer hover:border-purple-400 transition group"
+                 class="mb-6 bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30 rounded-2xl p-6 backdrop-blur-md cursor-pointer hover:border-purple-400 transition group"
                  @click="$router.push('/spots/' + trip.spotId)">
               <div class="flex items-center justify-between">
                 <div>
                    <small class="text-purple-300 uppercase font-bold tracking-wider text-xs flex items-center gap-2">
                      <i class="fas fa-mountain"></i> Info Lokasi Rasmi
                    </small>
-                   <h3 class="text-xl font-bold text-white m-0 border-none p-0 flex items-center gap-2 group-hover:text-purple-300 transition mt-1">
+                   <h3 class="text-xl font-bold text-white m-0 p-0 flex items-center gap-2 group-hover:text-purple-300 transition mt-1">
                      {{ trip.spotName || 'Lihat Detail Gunung/Bukit' }}
                    </h3>
                    <p class="text-sm text-gray-300 mt-1">
@@ -93,70 +80,71 @@
               </div>
             </div>
 
-            <div class="glass-panel mb-6">
-              <h3><i class="fas fa-book-open text-purple-400 mr-2"></i> {{ t('trip.about') || 'Tentang Trip' }}</h3>
-              <p class="desc-text">{{ trip.description }}</p>
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md text-white mb-6">
+              <h3 class="text-xl font-bold text-white border-b border-white/10 pb-2 mb-6 flex items-center"><i class="fas fa-book-open text-purple-400 mr-2"></i> {{ t('trip.about') || 'Tentang Trip' }}</h3>
+              <p class="text-base leading-relaxed text-slate-300 whitespace-pre-wrap">{{ trip.description }}</p>
             </div>
 
-            <div class="glass-panel mb-6">
-              <h3><i class="far fa-calendar-alt text-orange-400 mr-2"></i> {{ t('trip.schedule') || 'Jadual' }}</h3>
-              <div class="date-row">
-                <div class="date-item">
-                  <small>{{ t('createTrip.startDate') }}</small>
-                  <strong>{{ formatDate(trip.startDate) }}</strong>
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md text-white mb-6">
+              <h3 class="text-xl font-bold text-white border-b border-white/10 pb-2 mb-6 flex items-center"><i class="far fa-calendar-alt text-orange-400 mr-2"></i> {{ t('trip.schedule') || 'Jadual' }}</h3>
+              <div class="flex items-center justify-around bg-white/5 p-4 rounded-xl border border-white/20 border-dashed">
+                <div class="text-center">
+                  <small class="block text-slate-400 text-xs uppercase tracking-wide">{{ t('createTrip.startDate') }}</small>
+                  <strong class="block text-white text-lg mt-1">{{ formatDate(trip.startDate) }}</strong>
                 </div>
-                <div class="arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="date-item">
-                  <small>{{ t('createTrip.endDate') }}</small>
-                  <strong>{{ formatDate(trip.endDate) }}</strong>
+                <div class="text-2xl text-[#6c63ff]"><i class="fas fa-arrow-right"></i></div>
+                <div class="text-center">
+                  <small class="block text-slate-400 text-xs uppercase tracking-wide">{{ t('createTrip.endDate') }}</small>
+                  <strong class="block text-white text-lg mt-1">{{ formatDate(trip.endDate) }}</strong>
                 </div>
               </div>
             </div>
 
-            <div class="info-grid mb-6">
-              <div class="info-card warning" v-if="trip.mandatory">
-                <h4><i class="fas fa-exclamation-triangle mr-1"></i> {{ t('createTrip.mandatory') }}</h4>
-                <p>{{ trip.mandatory }}</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div class="p-6 rounded-xl bg-red-500/10 border-l-4 border-red-500" v-if="trip.mandatory">
+                <h4 class="text-red-300 font-bold mb-2 flex items-center"><i class="fas fa-exclamation-triangle mr-2"></i> {{ t('createTrip.mandatory') }}</h4>
+                <p class="text-sm text-slate-300 whitespace-pre-wrap">{{ trip.mandatory }}</p>
               </div>
-              <div class="info-card tip" v-if="trip.tips">
-                <h4><i class="fas fa-lightbulb mr-1"></i> {{ t('createTrip.tips') }}</h4>
-                <p>{{ trip.tips }}</p>
+              <div class="p-6 rounded-xl bg-amber-500/10 border-l-4 border-amber-400" v-if="trip.tips">
+                <h4 class="text-amber-300 font-bold mb-2 flex items-center"><i class="fas fa-lightbulb mr-2"></i> {{ t('createTrip.tips') }}</h4>
+                <p class="text-sm text-slate-300 whitespace-pre-wrap">{{ trip.tips }}</p>
               </div>
-              <div class="info-card recommend" v-if="trip.recommended">
-                <h4><i class="fas fa-hiking mr-1"></i> {{ t('createTrip.recommended') }}</h4>
-                <p>{{ trip.recommended }}</p>
+              <div class="p-6 rounded-xl bg-blue-500/10 border-l-4 border-blue-500 col-span-1 md:col-span-2" v-if="trip.recommended">
+                <h4 class="text-blue-300 font-bold mb-2 flex items-center"><i class="fas fa-hiking mr-2"></i> {{ t('createTrip.recommended') }}</h4>
+                <p class="text-sm text-slate-300 whitespace-pre-wrap">{{ trip.recommended }}</p>
               </div>
             </div>
 
-            <div class="glass-panel mb-6" v-if="trip.includes && trip.includes.length">
-              <h3><i class="fas fa-check-circle text-green-400 mr-2"></i> {{ t('createTrip.includes') }}</h3>
-              <ul class="includes-list">
-                <li v-for="item in trip.includes" :key="item">
-                  <i class="fas fa-check text-green-400 mr-2"></i> {{ item }}
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md text-white mb-6" v-if="trip.includes && trip.includes.length">
+              <h3 class="text-xl font-bold text-white border-b border-white/10 pb-2 mb-6 flex items-center"><i class="fas fa-check-circle text-green-400 mr-2"></i> {{ t('createTrip.includes') }}</h3>
+              <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 p-0 list-none">
+                <li v-for="item in trip.includes" :key="item" class="flex items-center gap-2.5 text-slate-300 text-[0.95rem]">
+                  <i class="fas fa-check text-green-400"></i> {{ item }}
                 </li>
               </ul>
             </div>
 
-            <div class="glass-panel organizer-card" @click="$router.push(`/user/${trip.organizerId}`)">
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md text-white mb-6 flex items-center justify-between cursor-pointer transition hover:bg-white/10" @click="$router.push(`/user/${trip.organizerId}`)">
               <div class="flex items-center gap-4">
-                <img :src="(organizer && organizer.avatar) || trip.organizerImage || 'https://i.pravatar.cc/150?img=3'" class="org-avatar" />
-                <div class="org-info">
-                  <small class="text-gray-400 text-xs uppercase tracking-wider">{{ t('trip.organizedBy') }}</small>
-                  <h4>{{ (organizer && (organizer.name || organizer.fullName)) || trip.organizerName }}</h4>
+                <img :src="(organizer && organizer.avatar) || trip.organizerImage || 'https://i.pravatar.cc/150?img=3'" class="w-[60px] h-[60px] rounded-full object-cover border-2 border-white/20" />
+                <div class="flex-grow">
+                  <small class="text-slate-400 text-xs uppercase tracking-wider block">{{ t('trip.organizedBy') }}</small>
+                  <h4 class="m-0 text-white text-lg font-bold">{{ (organizer && (organizer.name || organizer.fullName)) || trip.organizerName }}</h4>
                 </div>
               </div>
-              <button class="btn-view-profile">{{ t('trip.viewProfile') }}</button>
+              <button class="bg-transparent border border-white/30 text-white px-4 py-1.5 rounded-full text-xs font-bold cursor-pointer transition hover:bg-white hover:text-slate-900">{{ t('trip.viewProfile') }}</button>
             </div>
 
           </div>
 
-          <div class="right-sidebar">
+          <!-- RIGHT SIDEBAR -->
+          <div class="md:sticky md:top-[120px] h-fit md:order-last order-first mb-6 md:mb-0">
             
-            <div v-if="isOwner" class="glass-panel mb-4 border border-red-500/30 bg-red-900/10">
+            <div v-if="isOwner" class="mb-4 rounded-2xl p-6 backdrop-blur-md border border-red-500/30 bg-red-900/10">
                <h3 class="text-red-400 text-sm mb-3 font-bold uppercase tracking-widest border-b border-red-500/20 pb-2">
                  <i class="fas fa-user-shield mr-2"></i> Zon Penganjur
                </h3>
-               <button @click="archiveTrip" :disabled="isProcessing" class="w-full btn-delete-soft">
+               <button @click="archiveTrip" :disabled="isProcessing" class="w-full p-2.5 rounded-lg border border-red-500/30 bg-red-500/15 text-red-300 font-semibold text-sm transition hover:bg-red-500/30 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">
                  <i class="fas fa-trash-alt mr-2"></i>
                  {{ isProcessing ? 'Memproses...' : 'Padam Trip (Arkib)' }}
                </button>
@@ -165,38 +153,38 @@
                </p>
             </div>
 
-            <div class="glass-panel price-card">
-              <div class="price-tag">
-                <span class="currency">RM</span>
-                <span class="amount">{{ trip.price }}</span>
-                <span class="unit">/ {{ t('trip.perPax') }}</span>
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md text-center border-t-4 border-t-[#e67e22]">
+              <div class="mb-6 text-center">
+                <span class="text-xl text-slate-400 align-top relative top-1">RM</span>
+                <span class="text-5xl font-extrabold text-[#fbbf24]">{{ trip.price }}</span>
+                <span class="text-slate-400 text-base">/ {{ t('trip.perPax') }}</span>
               </div>
               
-              <div class="slots-info mt-6">
-                <div class="progress-bar">
-                  <div class="fill" :style="{ width: (trip.currentSlots / trip.maxSlots) * 100 + '%' }"></div>
+              <div class="text-left mt-6">
+                <div class="h-2.5 bg-white/10 rounded-full overflow-hidden mb-2">
+                  <div class="h-full bg-[#27ae60] rounded-full transition-all duration-500" :style="{ width: (trip.currentSlots / trip.maxSlots) * 100 + '%' }"></div>
                 </div>
-                <div class="slot-text mt-2">
+                <div class="flex justify-between text-sm font-semibold text-slate-300">
                   <span>{{ trip.currentSlots }} {{ t('trip.taken') }}</span>
-                  <span class="slot-left text-orange-400">{{ trip.maxSlots - trip.currentSlots }} {{ t('trip.empty') }}</span>
+                  <span class="text-[#fbbf24]">{{ trip.maxSlots - trip.currentSlots }} {{ t('trip.empty') }}</span>
                 </div>
               </div>
 
-              <div class="action-buttons mt-6">
+              <div class="mt-6">
                 <div v-if="isOwner">
-                  <button class="btn-join disabled" disabled>Ini Trip Anda</button>
+                  <button class="w-full p-4 bg-white/10 text-gray-500 rounded-xl cursor-not-allowed font-bold" disabled>Ini Trip Anda</button>
                 </div>
                 
                 <div v-else>
                    <button 
                       v-if="contactInfo && contactInfo.href !== '#'"
                       @click="openLiabilityModal" 
-                      class="btn-join"
+                      class="w-full flex items-center justify-center p-4 bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-xl font-bold text-base transition transform hover:-translate-y-0.5 shadow-lg shadow-emerald-500/30 border-none cursor-pointer mb-2"
                       :class="contactInfo.color"
                    >
                     <i :class="[contactInfo.icon, 'text-xl mr-2']"></i> {{ contactInfo.label }}
                   </button>
-                  <button v-else class="btn-join disabled" disabled>{{ t('trip.noLink') }}</button>
+                  <button v-else class="w-full p-4 bg-white/10 text-gray-500 rounded-xl cursor-not-allowed font-bold" disabled>{{ t('trip.noLink') }}</button>
                   
                   <p class="text-[10px] text-gray-400 text-center mt-2 italic">
                      Link akan membawa anda ke WhatsApp/Email rasmi organizer.
@@ -204,22 +192,22 @@
 
                   <!-- REPORT BUTTON -->
                   <div class="mt-4 text-center">
-                    <button @click="showReportModal = true" class="text-xs text-red-400 hover:text-red-300 underline flex items-center justify-center gap-1 mx-auto">
+                    <button @click="showReportModal = true" class="text-xs text-red-400 hover:text-red-300 underline flex items-center justify-center gap-1 mx-auto bg-transparent border-none cursor-pointer">
                       <i class="fas fa-flag"></i> Report Trip
                     </button>
                   </div>
                 </div>
               </div>
-              <p class="note mt-4">* {{ t('trip.paymentNote') }}</p>
+              <p class="text-xs text-slate-500 italic mt-4 leading-normal">* {{ t('trip.paymentNote') }}</p>
             </div>
           </div>
 
         </div>
       </div>
 
-      <div v-else class="error-container glass-panel">
-        <h2 class="text-white">{{ t('trip.notFound') }} 😔</h2>
-        <button @click="$router.push('/trips')" class="btn-back">{{ t('trip.backList') }}</button>
+      <div v-else class="text-center p-20 text-xl text-slate-400 bg-white/5 border border-white/10 rounded-2xl">
+        <h2 class="text-white mb-4">{{ t('trip.notFound') }} 😔</h2>
+        <button @click="$router.push('/trips')" class="bg-[#6c63ff] text-white px-5 py-2.5 rounded-full border-none cursor-pointer">{{ t('trip.backList') }}</button>
       </div>
 
       <VueEasyLightbox
@@ -392,180 +380,3 @@ onMounted(async () => {
   }
 });
 </script>
-
-<style scoped>
-/* --- BASE THEME (DARK GLASS) --- */
-.trip-detail-page { 
-  background-color: #0f172a; /* Dark Blue Base */
-  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
-}
-.content-container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
-
-/* GLOWS */
-.page-glow-purple {
-  position: absolute; top: -10%; right: -10%; width: 60vw; height: 60vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
-}
-.page-glow-orange {
-  position: absolute; bottom: -10%; left: -10%; width: 60vw; height: 60vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
-}
-.contour-lines {
-  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: cover; pointer-events: none;
-}
-
-/* --- HERO GALLERY --- */
-.hero-gallery-wrapper { position: relative; margin-bottom: 2rem; }
-
-.desktop-gallery { 
-  display: grid; grid-template-columns: 2fr 1fr; gap: 10px; 
-  height: 450px; border-radius: 20px; overflow: hidden; position: relative; 
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.main-item { width: 100%; height: 100%; background-size: cover; background-position: center; cursor: pointer; transition: filter 0.2s; position: relative; }
-.main-item:hover { filter: brightness(0.9); }
-.sub-gallery { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; }
-.gallery-item { background-size: cover; background-position: center; cursor: pointer; transition: filter 0.2s; position: relative; }
-.gallery-item:hover { filter: brightness(0.9); }
-
-/* Overlays */
-.overlay-gradient-heavy { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent 60%); }
-.gallery-title-overlay { 
-  position: absolute; bottom: 30px; left: 30px; z-index: 5; max-width: 70%; 
-}
-.gallery-title-overlay h1 { font-size: 3rem; font-weight: 800; line-height: 1.1; margin: 10px 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-.badge-cat { 
-  background: #e67e22; color: white; padding: 5px 12px; 
-  border-radius: 30px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; 
-  letter-spacing: 1px;
-}
-.hero-meta { font-size: 1.1rem; color: #cbd5e1; }
-
-.btn-show-all { 
-  position: absolute; bottom: 20px; right: 20px; 
-  background: rgba(255, 255, 255, 0.9); color: #0f172a; 
-  padding: 10px 20px; border-radius: 50px; font-weight: bold; 
-  cursor: pointer; transition: transform 0.2s; z-index: 5; 
-}
-.btn-show-all:hover { transform: scale(1.05); background: white; }
-
-/* Mobile Gallery */
-.mobile-gallery { display: none; }
-
-/* --- MAIN LAYOUT --- */
-.main-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
-
-/* --- GLASS PANELS (Dark) --- */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px; padding: 2rem;
-  backdrop-filter: blur(10px);
-  color: white;
-}
-
-.glass-panel h3 { margin-top: 0; color: white; font-size: 1.3rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 1.5rem; font-weight: 700; display: flex; align-items: center; }
-.desc-text { line-height: 1.8; color: #cbd5e1; white-space: pre-wrap; font-size: 1rem; }
-
-/* Date Box */
-.date-row { display: flex; align-items: center; justify-content: space-around; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.2); }
-.date-item { text-align: center; }
-.date-item small { display: block; color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
-.date-item strong { display: block; color: white; font-size: 1.2rem; margin-top: 5px; }
-.arrow { font-size: 1.5rem; color: #6c63ff; }
-
-/* Info Cards */
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-.info-card { padding: 1.5rem; border-radius: 12px; border-left: 4px solid #ccc; background: rgba(255,255,255,0.05); }
-.info-card h4 { margin: 0 0 10px 0; font-size: 1rem; color: white; }
-.info-card p { margin: 0; font-size: 0.9rem; color: #cbd5e1; white-space: pre-wrap; }
-
-.info-card.warning { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
-.info-card.warning h4 { color: #fca5a5; }
-.info-card.tip { border-color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
-.info-card.tip h4 { color: #fcd34d; }
-.info-card.recommend { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); grid-column: 1 / -1; }
-.info-card.recommend h4 { color: #93c5fd; }
-
-/* Includes List */
-.includes-list { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.includes-list li { display: flex; align-items: center; gap: 10px; color: #cbd5e1; font-size: 0.95rem; }
-
-/* Organizer Card */
-.organizer-card { display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
-.organizer-card:hover { background: rgba(255,255,255,0.08); }
-.org-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); }
-.org-info { flex-grow: 1; }
-.org-info small { color: #94a3b8; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
-.org-info h4 { margin: 0; color: white; font-size: 1.1rem; }
-.btn-view-profile { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: 0.2s; }
-.btn-view-profile:hover { background: white; color: #0f172a; }
-
-/* --- RIGHT SIDEBAR --- */
-.right-sidebar { position: sticky; top: 120px; height: fit-content; }
-.price-card { text-align: center; border-top: 4px solid #e67e22; }
-.price-tag { margin-bottom: 1.5rem; }
-.currency { font-size: 1.2rem; color: #94a3b8; vertical-align: top; position: relative; top: 5px; }
-.amount { font-size: 3rem; font-weight: 800; color: #fbbf24; } /* Gold */
-.unit { color: #94a3b8; font-size: 1rem; }
-
-.slots-info { text-align: left; }
-.progress-bar { height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-bottom: 8px; }
-.fill { height: 100%; background: #27ae60; border-radius: 5px; transition: width 0.5s; }
-.slot-text { display: flex; justify-content: space-between; font-size: 0.85rem; color: #cbd5e1; font-weight: 600; }
-.slot-left { color: #fbbf24; }
-
-.btn-join { 
-  display: flex; align-items: center; justify-content: center; width: 100%; padding: 1rem; 
-  background: linear-gradient(135deg, #10b981, #059669); color: white; text-decoration: none; font-weight: bold; 
-  border-radius: 12px; margin-bottom: 10px; transition: transform 0.2s; border: none; cursor: pointer; font-size: 1rem; 
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); 
-}
-.btn-join:hover { transform: translateY(-2px); }
-.btn-join.disabled { background: rgba(255,255,255,0.1); color: #666; cursor: not-allowed; box-shadow: none; transform: none; background-image: none; }
-
-/* DELETE SOFT BUTTON */
-.btn-delete-soft {
-  background: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: 0.3s;
-}
-.btn-delete-soft:hover {
-  background: rgba(239, 68, 68, 0.3);
-  color: white;
-}
-.btn-delete-soft:disabled {
-  opacity: 0.5; cursor: not-allowed;
-}
-
-.note { font-size: 0.8rem; color: #64748b; line-height: 1.4; margin-top: 1rem; font-style: italic; }
-
-/* Loading/Error */
-.loading-container, .error-container { text-align: center; padding: 5rem; font-size: 1.2rem; color: #94a3b8; }
-.spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #6c63ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.btn-back { margin-top: 20px; padding: 10px 20px; background: #6c63ff; color: white; border: none; border-radius: 50px; cursor: pointer; }
-
-.fade-up { animation: fadeUp 0.6s ease-out; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-@media (max-width: 768px) {
-  .hero-gallery-wrapper { margin-bottom: 1rem; }
-  .desktop-gallery { display: none; }
-  .mobile-gallery { display: block; height: 350px; position: relative; border-radius: 0; margin-left: -1.5rem; margin-right: -1.5rem; width: calc(100% + 3rem); }
-  .slide-bg { height: 100%; background-size: cover; background-position: center; position: relative; }
-  .overlay-gradient-mobile { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(15,23,42,0.95)); }
-  .mobile-title-overlay { position: absolute; bottom: 40px; left: 1.5rem; z-index: 10; color: white; }
-  .mobile-title-overlay h1 { font-size: 2rem; margin: 5px 0; line-height: 1.2; }
-  .main-layout { grid-template-columns: 1fr; gap: 1.5rem; }
-  .right-sidebar { order: -1; position: static; }
-  .info-grid { grid-template-columns: 1fr; }
-}
-</style>

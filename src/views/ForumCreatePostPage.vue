@@ -1,17 +1,16 @@
 <template>
-  <div class="create-post-page">
+  <div class="min-h-screen bg-[#0f172a] relative overflow-x-hidden text-white">
     
     <!-- BACKGROUND LAYERS -->
-    <div class="contour-lines"></div>
-    <div class="page-glow-purple"></div>
-    <div class="page-glow-orange"></div>
+    <div class="absolute inset-0 z-0 opacity-[0.08] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')] bg-cover"></div>
+    <div class="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[#6c63ff] blur-[150px] opacity-15 pointer-events-none rounded-full"></div>
+    <div class="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[#ff8c42] blur-[150px] opacity-10 pointer-events-none rounded-full"></div>
 
     <!-- MAIN CONTAINER -->
-    <!-- FIX: Guna inline style untuk paksa padding-top (override CSS class yang degil) -->
-    <div class="container relative z-10" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="container mx-auto px-6 pt-[100px] pb-20 relative z-10 max-w-[800px]">
       
-      <div class="glass-form-container fade-up">
-        <div class="header-section text-center mb-8">
+      <div class="bg-[#1e293b]/70 border border-white/10 rounded-[24px] p-12 max-sm:p-6 backdrop-blur-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.3)] animate-fade-in-up">
+        <div class="text-center mb-8">
             <h2 class="text-3xl font-bold text-white mb-2">
                 {{ isEditing ? t('createPostPage.editTitle') : t('createPostPage.createTitle') }}
             </h2>
@@ -19,40 +18,40 @@
         </div>
 
         <!-- FORM -->
-        <div class="form-content">
+        <div>
             
             <!-- TAJUK -->
-            <div class="form-group">
+            <div class="mb-6 relative">
                 <label class="text-gray-300 font-semibold mb-2 block">{{ t('createPostPage.titleLabel') }}</label>
                 <input 
                     type="text" 
                     v-model="form.title" 
-                    class="glass-input" 
+                    class="w-full p-[14px] px-[16px] rounded-[12px] border border-white/10 bg-[#0f172a]/60 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-[#0f172a]/80 focus:shadow-[0_0_0_4px_rgba(108,99,255,0.1)] placeholder-slate-500"
                     :placeholder="t('createPostPage.titlePlaceholder')" 
                 />
             </div>
 
             <!-- KATEGORI -->
-            <div class="form-group">
+            <div class="mb-6 relative">
                 <label class="text-gray-300 font-semibold mb-2 block">{{ t('createPostPage.categoryLabel') }}</label>
-                <div class="select-wrapper">
-                    <select v-model="form.category" class="glass-input">
+                <div class="relative">
+                    <select v-model="form.category" class="w-full p-[14px] px-[16px] rounded-[12px] border border-white/10 bg-[#0f172a]/60 text-white outline-none transition duration-300 text-base cursor-pointer appearance-none focus:border-[#6c63ff] focus:bg-[#0f172a]/80 focus:shadow-[0_0_0_4px_rgba(108,99,255,0.1)]">
                         <option disabled value="">{{ t('createPostPage.categoryPlaceholder') }}</option>
-                        <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
-                            <option v-for="item in group.items" :key="item" :value="item">{{ item }}</option>
+                        <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group" class="bg-[#1e293b] text-white">
+                            <option v-for="item in group.items" :key="item" :value="item" class="bg-[#1e293b] text-white">{{ item }}</option>
                         </optgroup>
                     </select>
-                    <i class="fas fa-chevron-down select-arrow"></i>
+                    <i class="fas fa-chevron-down absolute right-[15px] top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none transition duration-300"></i>
                 </div>
             </div>
 
             <!-- KANDUNGAN -->
-            <div class="form-group">
+            <div class="mb-6 relative">
                 <label class="text-gray-300 font-semibold mb-2 block">{{ t('createPostPage.contentLabel') }}</label>
                 <textarea 
                     v-model="form.content" 
                     rows="8" 
-                    class="glass-input" 
+                    class="w-full p-[14px] px-[16px] rounded-[12px] border border-white/10 bg-[#0f172a]/60 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-[#0f172a]/80 focus:shadow-[0_0_0_4px_rgba(108,99,255,0.1)] placeholder-slate-500"
                     :placeholder="t('createPostPage.contentPlaceholder')"
                 ></textarea>
                 <div class="text-right mt-1">
@@ -63,11 +62,11 @@
             </div>
 
             <!-- ACTIONS -->
-            <div class="form-actions mt-8 flex gap-4">
-                <button @click="$router.back()" class="btn-cancel">
+            <div class="mt-8 flex gap-4 justify-end max-sm:flex-col-reverse">
+                <button @click="$router.back()" class="flex-1 bg-transparent border border-white/10 text-[#94a3b8] p-[14px_24px] rounded-[12px] font-semibold cursor-pointer transition duration-300 hover:bg-white/5 hover:text-white hover:border-white/30 max-sm:w-full">
                     {{ t('createPostPage.cancel') }}
                 </button>
-                <button @click="submitPost" class="btn-submit" :disabled="loading">
+                <button @click="submitPost" class="flex-[2] bg-gradient-to-br from-[#6c63ff] to-[#5b54e0] text-white p-[14px_24px] border-none rounded-[12px] font-semibold text-base cursor-pointer transition duration-300 shadow-[0_4px_15px_rgba(108,99,255,0.3)] hover:enabled:-translate-y-[2px] hover:enabled:shadow-[0_8px_25px_rgba(108,99,255,0.5)] hover:enabled:bg-gradient-to-br hover:from-[#7b72ff] hover:to-[#655ee6] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none max-sm:w-full" :disabled="loading">
                     <span v-if="loading"><i class="fas fa-spinner fa-spin mr-2"></i> {{ t('createPostPage.processing') }}</span>
                     <span v-else>{{ isEditing ? t('createPostPage.save') : t('createPostPage.publish') }}</span>
                 </button>
@@ -192,105 +191,3 @@ const submitPost = async () => {
   }
 };
 </script>
-
-<style scoped>
-/* --- BASE THEME (DARK - MATCHING PROFILE PAGE) --- */
-.create-post-page { 
-  background-color: #0f172a; 
-  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
-}
-
-/* FIX: Pecahkan padding supaya tak kacau vertical padding */
-.container { 
-    max-width: 800px; 
-    margin: 0 auto; 
-    padding-left: 1.5rem; 
-    padding-right: 1.5rem;
-    /* Dulu ada 'padding: 0 1.5rem' di sini yang reset padding-top jadi 0. Sekarang dah buang. */
-}
-
-/* GLOWS */
-.page-glow-purple {
-  position: absolute; top: 0; left: 0; width: 60vw; height: 60vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
-}
-.page-glow-orange {
-  position: absolute; bottom: 0; right: 0; width: 60vw; height: 60vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
-}
-.contour-lines {
-  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: cover; pointer-events: none;
-}
-
-/* --- GLASS CONTAINER --- */
-.glass-form-container {
-  background: rgba(30, 41, 59, 0.7); 
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px; padding: 3rem;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-}
-
-.form-group { margin-bottom: 1.5rem; position: relative; }
-
-/* GLASS INPUTS */
-.glass-input {
-  width: 100%; padding: 14px 16px; border-radius: 12px; 
-  border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.6);
-  color: white; outline: none; transition: 0.3s; font-size: 1rem;
-}
-.glass-input:focus { 
-    border-color: #6c63ff; 
-    background: rgba(15, 23, 42, 0.8); 
-    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
-}
-.glass-input::placeholder { color: #64748b; }
-.glass-input option, .glass-input optgroup { background-color: #1e293b; color: white; }
-
-/* SELECT DROPDOWN STYLE */
-.select-wrapper { position: relative; }
-.select-arrow { 
-    position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
-    color: #94a3b8; pointer-events: none; transition: 0.3s;
-}
-.glass-input:focus + .select-arrow { color: #6c63ff; transform: translateY(-50%) rotate(180deg); }
-select.glass-input { appearance: none; cursor: pointer; }
-
-/* ACTIONS */
-.form-actions { display: flex; justify-content: flex-end; }
-.btn-submit { 
-    flex: 2;
-    background: linear-gradient(135deg, #6c63ff, #5b54e0); 
-    color: white; padding: 14px 24px; border: none; border-radius: 12px; 
-    font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.3s;
-    box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
-}
-.btn-submit:hover:not(:disabled) { 
-    transform: translateY(-2px); 
-    box-shadow: 0 8px 25px rgba(108, 99, 255, 0.5);
-    background: linear-gradient(135deg, #7b72ff, #655ee6); 
-}
-.btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-
-.btn-cancel { 
-    flex: 1;
-    background: transparent; 
-    border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; 
-    padding: 14px 24px; border-radius: 12px; cursor: pointer; 
-    font-weight: 600; transition: 0.3s;
-}
-.btn-cancel:hover { background: rgba(255,255,255,0.05); color: white; border-color: rgba(255,255,255,0.3); }
-
-/* ANIMATION */
-.fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-/* RESPONSIVE */
-@media (max-width: 640px) {
-    .glass-form-container { padding: 1.5rem; }
-    .form-actions { flex-direction: column-reverse; }
-    .btn-submit, .btn-cancel { width: 100%; }
-}
-</style>

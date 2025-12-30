@@ -1,16 +1,16 @@
 <template>
-  <div class="search-page">
+  <div class="min-h-screen bg-slate-900 relative overflow-x-hidden text-white">
     
     <!-- BACKGROUND LAYERS -->
-    <div class="contour-lines"></div>
-    <div class="page-glow-purple"></div>
-    <div class="page-glow-orange"></div>
+    <div class="absolute inset-0 z-0 opacity-[0.08] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')] bg-cover"></div>
+    <div class="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[#6c63ff] blur-[150px] opacity-15 pointer-events-none rounded-full"></div>
+    <div class="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[#ff8c42] blur-[150px] opacity-10 pointer-events-none rounded-full"></div>
 
     <!-- MAIN CONTAINER -->
-    <div class="container relative z-10" style="padding-top: 150px; padding-bottom: 80px;">
+    <div class="container mx-auto px-6 pt-[150px] pb-20 relative z-10 max-w-[1200px]">
       
       <!-- SEARCH HEADER -->
-      <div class="text-center mb-8 fade-up">
+      <div class="text-center mb-8 animate-fade-in-up">
         <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">
             🔍 Carian: <span class="text-purple-400">"{{ searchQuery }}"</span>
         </h1>
@@ -20,7 +20,7 @@
       </div>
 
       <!-- SEARCH & FILTER SECTION -->
-      <div class="search-section fade-up delay-100 max-w-4xl mx-auto mb-12">
+      <div class="animate-fade-in-up delay-[100ms] max-w-4xl mx-auto mb-12">
         
         <!-- Search Input -->
         <div class="relative w-full mb-4">
@@ -28,10 +28,10 @@
                 v-model="searchInput" 
                 @keyup.enter="updateSearch"
                 @input="handleInput"
-                class="glass-input-search"
+                class="w-full pl-5 pr-[50px] py-[14px] rounded-xl border border-white/15 bg-[#1e293b]/60 text-white outline-none transition duration-300 text-base backdrop-blur-md focus:border-[#6c63ff] focus:bg-[#1e293b]/90 focus:shadow-[0_0_0_3px_rgba(108,99,255,0.2)]"
                 placeholder="Cari lokasi, aktiviti, atau topik..." 
             />
-            <button @click="updateSearch" class="search-btn">
+            <button @click="updateSearch" class="absolute right-[6px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-lg border-none bg-[#6c63ff] text-white cursor-pointer transition duration-200 hover:bg-[#5b54e0]">
                 <i class="fas fa-search"></i>
             </button>
         </div>
@@ -40,29 +40,29 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <!-- Filter Lokasi (Imported Data) -->
             <div class="relative">
-                <select v-model="filters.location" @change="performFilter" class="glass-select">
-                    <option value="">Semua Lokasi</option>
-                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ state }}</option>
+                <select v-model="filters.location" @change="performFilter" class="w-full pl-[40px] pr-3 py-3 rounded-[10px] appearance-none border border-white/10 bg-[#0f172a]/60 text-white text-[0.9rem] cursor-pointer transition duration-200 hover:bg-[#0f172a]/80 hover:border-white/30 focus:border-[#6c63ff] focus:outline-none">
+                    <option value="" class="bg-[#1e293b] text-white">Semua Lokasi</option>
+                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state" class="bg-[#1e293b] text-white">{{ state }}</option>
                 </select>
                 <i class="fas fa-map-marker-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
             </div>
 
             <!-- Filter Bulan -->
             <div class="relative">
-                <select v-model="filters.month" @change="performFilter" class="glass-select">
-                    <option value="">Semua Masa</option>
-                    <option v-for="(m, i) in MONTHS" :key="i" :value="i + 1">{{ m }}</option>
+                <select v-model="filters.month" @change="performFilter" class="w-full pl-[40px] pr-3 py-3 rounded-[10px] appearance-none border border-white/10 bg-[#0f172a]/60 text-white text-[0.9rem] cursor-pointer transition duration-200 hover:bg-[#0f172a]/80 hover:border-white/30 focus:border-[#6c63ff] focus:outline-none">
+                    <option value="" class="bg-[#1e293b] text-white">Semua Masa</option>
+                    <option v-for="(m, i) in MONTHS" :key="i" :value="i + 1" class="bg-[#1e293b] text-white">{{ m }}</option>
                 </select>
                 <i class="fas fa-calendar-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
             </div>
 
             <!-- Filter Kategori (Grouped Data) -->
             <div class="relative">
-                <select v-model="filters.category" @change="performFilter" class="glass-select">
-                    <option value="">Semua Kategori</option>
+                <select v-model="filters.category" @change="performFilter" class="w-full pl-[40px] pr-3 py-3 rounded-[10px] appearance-none border border-white/10 bg-[#0f172a]/60 text-white text-[0.9rem] cursor-pointer transition duration-200 hover:bg-[#0f172a]/80 hover:border-white/30 focus:border-[#6c63ff] focus:outline-none">
+                    <option value="" class="bg-[#1e293b] text-white">Semua Kategori</option>
                     <!-- Menggunakan optgroup untuk susunan kategori yang lebih kemas -->
-                    <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
-                        <option v-for="item in group.items" :key="item" :value="item">{{ item }}</option>
+                    <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group" class="bg-[#0f172a] text-slate-400 font-bold">
+                        <option v-for="item in group.items" :key="item" :value="item" class="bg-[#1e293b] text-white font-normal">{{ item }}</option>
                     </optgroup>
                 </select>
                 <i class="fas fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
@@ -71,11 +71,11 @@
       </div>
 
       <!-- RESULTS CONTAINER -->
-      <div class="results-container fade-up delay-200">
+      <div class="animate-fade-in-up delay-[200ms]">
         
         <!-- LOADING -->
         <div v-if="loading" class="text-center py-20">
-            <div class="glass-card inline-block px-8 py-6">
+            <div class="inline-block px-8 py-6 bg-[#1e293b]/70 border border-white/10 rounded-2xl backdrop-blur-xl">
                 <i class="fas fa-spinner fa-spin text-3xl text-purple-400 mb-3"></i>
                 <p class="text-gray-300">⏳ Sedang mencari...</p>
             </div>
@@ -84,30 +84,30 @@
         <div v-else>
           
           <!-- 1. TRIPS SECTION -->
-          <section v-if="filteredTrips.length > 0" class="result-section mb-12">
-            <div class="section-header">
+          <section v-if="filteredTrips.length > 0" class="mb-12">
+            <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    🏔️ Trips <span class="count-badge">{{ filteredTrips.length }}</span>
+                    🏔️ Trips <span class="bg-white/10 text-slate-400 text-[0.8rem] px-2 py-[2px] rounded-[10px] ml-[5px]">{{ filteredTrips.length }}</span>
                 </h3>
                 <router-link to="/trips" class="text-sm text-purple-400 hover:text-white">Lihat Semua</router-link>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              <TripCard v-for="trip in filteredTrips" :key="trip.id" :trip="trip" class="compact-card" />
+              <TripCard v-for="trip in filteredTrips" :key="trip.id" :trip="trip" class="text-[0.9rem]" />
             </div>
           </section>
 
           <!-- 2. SPOTS SECTION -->
-          <section v-if="filteredSpots.length > 0" class="result-section mb-12">
+          <section v-if="filteredSpots.length > 0" class="mb-12">
             <h3 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
-                📍 Spots Menarik <span class="count-badge">{{ filteredSpots.length }}</span>
+                📍 Spots Menarik <span class="bg-white/10 text-slate-400 text-[0.8rem] px-2 py-[2px] rounded-[10px] ml-[5px]">{{ filteredSpots.length }}</span>
             </h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div 
                     v-for="spot in filteredSpots" 
                     :key="spot.id" 
-                    class="glass-card-hover p-4 flex gap-4 items-center"
+                    class="bg-[#1e293b]/50 border border-white/5 rounded-xl backdrop-blur-md cursor-pointer transition duration-300 hover:bg-[#1e293b]/80 hover:border-[#6c63ff]/40 hover:-translate-y-[3px] hover:shadow-[0_10px_20px_rgba(0,0,0,0.2)] p-4 flex gap-4 items-center"
                     @click="$router.push('/spots/' + spot.id)"
                 >
                     <img :src="spot.images?.[0] || 'https://via.placeholder.com/150'" class="w-16 h-16 rounded-lg object-cover bg-gray-700" />
@@ -121,16 +121,16 @@
           </section>
 
           <!-- 3. SERVICES SECTION -->
-          <section v-if="filteredServices.length > 0" class="result-section mb-12">
+          <section v-if="filteredServices.length > 0" class="mb-12">
             <h3 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
-                🛠️ Servis & Guide <span class="count-badge">{{ filteredServices.length }}</span>
+                🛠️ Servis & Guide <span class="bg-white/10 text-slate-400 text-[0.8rem] px-2 py-[2px] rounded-[10px] ml-[5px]">{{ filteredServices.length }}</span>
             </h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div 
                     v-for="service in filteredServices" 
                     :key="service.id" 
-                    class="glass-card-hover p-4"
+                    class="bg-[#1e293b]/50 border border-white/5 rounded-xl backdrop-blur-md cursor-pointer transition duration-300 hover:bg-[#1e293b]/80 hover:border-[#6c63ff]/40 hover:-translate-y-[3px] hover:shadow-[0_10px_20px_rgba(0,0,0,0.2)] p-4"
                     @click="$router.push('/services/' + service.id)"
                 >
                     <div class="flex justify-between items-start mb-2">
@@ -147,16 +147,16 @@
           </section>
 
           <!-- 4. FORUM SECTION -->
-          <section v-if="filteredPosts.length > 0" class="result-section mb-12">
+          <section v-if="filteredPosts.length > 0" class="mb-12">
             <h3 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
-                💬 Forum <span class="count-badge">{{ filteredPosts.length }}</span>
+                💬 Forum <span class="bg-white/10 text-slate-400 text-[0.8rem] px-2 py-[2px] rounded-[10px] ml-[5px]">{{ filteredPosts.length }}</span>
             </h3>
             
             <div class="space-y-3">
               <div 
                 v-for="post in filteredPosts" 
                 :key="post.id" 
-                class="glass-card-hover p-4 flex flex-col sm:flex-row gap-4"
+                class="bg-[#1e293b]/50 border border-white/5 rounded-xl backdrop-blur-md cursor-pointer transition duration-300 hover:bg-[#1e293b]/80 hover:border-[#6c63ff]/40 hover:-translate-y-[3px] hover:shadow-[0_10px_20px_rgba(0,0,0,0.2)] p-4 flex flex-col sm:flex-row gap-4"
                 @click="$router.push('/forum/' + post.id)"
               >
                 <div class="flex-1">
@@ -337,93 +337,3 @@ onMounted(() => {
   fetchData();
 });
 </script>
-
-<style scoped>
-/* --- BASE THEME --- */
-.search-page { 
-  background-color: #0f172a; 
-  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
-}
-.container { max-width: 1200px; margin: 0 auto; padding-left: 1.5rem; padding-right: 1.5rem; }
-
-/* GLOWS */
-.page-glow-purple {
-  position: absolute; top: 0; left: 0; width: 60vw; height: 60vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
-}
-.page-glow-orange {
-  position: absolute; bottom: 0; right: 0; width: 60vw; height: 60vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
-}
-.contour-lines {
-  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: cover; pointer-events: none;
-}
-
-/* --- INPUTS & FILTERS --- */
-.glass-input-search {
-  width: 100%; padding: 14px 50px 14px 20px; border-radius: 12px; 
-  border: 1px solid rgba(255,255,255,0.15); background: rgba(30, 41, 59, 0.6);
-  color: white; outline: none; transition: 0.3s; font-size: 1rem;
-  backdrop-filter: blur(10px);
-}
-.glass-input-search:focus { 
-    border-color: #6c63ff; background: rgba(30, 41, 59, 0.9); 
-    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
-}
-
-.glass-select {
-    width: 100%; padding: 12px 12px 12px 40px; border-radius: 10px; appearance: none;
-    border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.6);
-    color: white; font-size: 0.9rem; cursor: pointer; transition: 0.2s;
-}
-.glass-select:hover { background: rgba(15, 23, 42, 0.8); border-color: rgba(255,255,255,0.3); }
-.glass-select:focus { border-color: #6c63ff; outline: none; }
-.glass-select option { background: #1e293b; color: white; }
-.glass-select optgroup { background: #0f172a; color: #94a3b8; font-weight: bold; } /* Style untuk optgroup */
-
-.search-btn {
-    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-    width: 40px; height: 40px; border-radius: 10px; border: none;
-    background: #6c63ff; color: white; cursor: pointer; transition: 0.2s;
-}
-.search-btn:hover { background: #5b54e0; }
-
-/* --- SECTIONS --- */
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.count-badge {
-    background: rgba(255,255,255,0.1); color: #94a3b8; font-size: 0.8rem;
-    padding: 2px 8px; border-radius: 10px; margin-left: 5px;
-}
-
-/* --- CARDS --- */
-.compact-card { font-size: 0.9rem; } 
-
-.glass-card-hover {
-    background: rgba(30, 41, 59, 0.5); 
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px; 
-    backdrop-filter: blur(10px); cursor: pointer;
-    transition: all 0.3s ease;
-}
-.glass-card-hover:hover {
-    background: rgba(30, 41, 59, 0.8);
-    border-color: rgba(108, 99, 255, 0.4);
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-}
-
-/* LOADING */
-.glass-card {
-    background: rgba(30, 41, 59, 0.7); 
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px; backdrop-filter: blur(20px);
-}
-
-/* ANIMATIONS */
-.fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-.delay-100 { animation-delay: 0.1s; animation-fill-mode: backwards; }
-.delay-200 { animation-delay: 0.2s; animation-fill-mode: backwards; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-</style>

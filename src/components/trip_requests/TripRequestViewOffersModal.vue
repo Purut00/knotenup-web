@@ -1,31 +1,31 @@
 <template>
-  <div v-if="visible" class="modal-overlay" @click.self="close">
-      <div class="glass-modal fade-up modal-wide">
-        <div class="modal-header header-view">
-          <h3>📨 Senarai Tawaran</h3>
-          <button class="close-btn" @click="close">✖</button>
+  <div v-if="visible" class="fixed inset-0 bg-black/80 z-[9999] flex justify-center items-center p-4 backdrop-blur-[5px]" @click.self="close">
+      <div class="bg-slate-800/95 border border-white/10 rounded-2xl p-8 w-full max-w-[600px] shadow-2xl text-white flex flex-col animate-fade-in-up">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-[1.3rem] m-0 text-white">📨 Senarai Tawaran</h3>
+          <button class="bg-transparent border-none text-slate-400 text-2xl cursor-pointer hover:text-white" @click="close">✖</button>
         </div>
         
-        <div class="modal-body custom-scrollbar">
+        <div class="max-h-[60vh] overflow-y-auto pr-[5px] custom-scrollbar">
            <div v-if="loading" class="text-center text-white py-4">Memuatkan...</div>
            <div v-else-if="offers.length === 0" class="text-center text-gray-400 py-4">Tiada tawaran lagi.</div>
            
-           <div v-else class="offers-list">
-             <div class="offer-card" v-for="offer in offers" :key="offer.id">
-                <div class="offer-top">
-                   <div class="offer-user" @click="goToProfile(offer.organizerId)">
-                      <img :src="offer.organizerAvatar || 'https://i.pravatar.cc/150'" class="avatar-sm">
+           <div v-else>
+             <div class="bg-white/5 p-4 rounded-xl mb-[10px] border border-white/5" v-for="offer in offers" :key="offer.id">
+                <div class="flex justify-between items-center mb-2">
+                   <div class="flex items-center gap-[10px] cursor-pointer" @click="goToProfile(offer.organizerId)">
+                      <img :src="offer.organizerAvatar || 'https://i.pravatar.cc/150'" class="w-10 h-10 rounded-full border border-white/20 object-cover">
                       <div>
                           <div class="font-bold text-white">{{ offer.organizerName }}</div>
                           <div class="text-xs text-gray-400">{{ formatDate(offer.createdAt) }}</div>
                       </div>
                    </div>
-                   <div class="offer-price-tag">RM {{ offer.offeredPrice }}</div>
+                   <div class="font-bold text-green-400 text-[1.1rem]">RM {{ offer.offeredPrice }}</div>
                 </div>
-                <div class="offer-msg">"{{ offer.message }}"</div>
-                <div class="offer-actions">
-                   <button class="btn-sm-glass" @click="openWhatsapp(offer)">📲 Chat</button>
-                   <button class="btn-sm-glass btn-accept" @click="acceptOffer(offer)">✅ Terima</button>
+                <div class="bg-black/20 p-2 rounded-md text-slate-300 italic text-[0.9rem] mb-[10px]">"{{ offer.message }}"</div>
+                <div class="flex gap-[10px]">
+                   <button class="flex-1 p-[6px] bg-white/10 border-none rounded-md text-white cursor-pointer hover:bg-white/20" @click="openWhatsapp(offer)">📲 Chat</button>
+                   <button class="flex-1 p-[6px] border-none rounded-md text-white cursor-pointer bg-emerald-500 hover:bg-emerald-600" @click="acceptOffer(offer)">✅ Terima</button>
                 </div>
              </div>
            </div>
@@ -124,36 +124,3 @@ const acceptOffer = async (offer: any) => {
   }
 };
 </script>
-
-<style scoped>
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999;
-  display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(5px);
-}
-.glass-modal {
-  background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px; padding: 2rem; width: 100%; max-width: 500px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5); color: white; display: flex; flex-direction: column;
-}
-.modal-wide { max-width: 600px; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.modal-header h3 { font-size: 1.3rem; margin: 0; color: white; }
-.close-btn { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
-
-/* Offer List */
-.offer-card { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); }
-.offer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.offer-user { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.offer-price-tag { font-weight: bold; color: #4ade80; font-size: 1.1rem; }
-.offer-msg { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; color: #cbd5e1; font-style: italic; font-size: 0.9rem; margin-bottom: 10px; }
-.offer-actions { display: flex; gap: 10px; }
-.btn-sm-glass { flex: 1; padding: 6px; background: rgba(255,255,255,0.1); border: none; border-radius: 6px; color: white; cursor: pointer; }
-.btn-accept { background: #10b981; }
-
-.avatar-sm { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); object-fit: cover; }
-.custom-scrollbar { max-height: 60vh; overflow-y: auto; padding-right: 5px; }
-.custom-scrollbar::-webkit-scrollbar { width: 5px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #6c63ff; border-radius: 5px; }
-.fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-</style>

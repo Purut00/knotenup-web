@@ -1,31 +1,32 @@
 <template>
-  <div class="home min-h-screen bg-cover bg-fixed bg-center" :style="{ backgroundImage: `url(${bgImage})` }">
+  <div class="min-h-screen bg-cover bg-fixed bg-center" :style="{ backgroundImage: `url(${bgImage})` }">
     
-    <div class="hero-header-section relative text-center pt-24 px-4 pb-12">
+    <div class="relative text-center pt-24 px-4 pb-12">
       <div class="container mx-auto max-w-6xl relative z-10">
-        <div class="hero-glow-purple"></div>
-        <div class="hero-glow-orange"></div>
+        <!-- Glow Effects -->
+        <div class="absolute top-[-50px] left-[20%] w-[300px] h-[300px] bg-[#6c63ff] blur-[80px] -z-10 opacity-40 rounded-full"></div>
+        <div class="absolute top-[50px] right-[20%] w-[250px] h-[250px] bg-[#ff8c42] blur-[80px] -z-10 opacity-40 rounded-full"></div>
 
-        <h1 class="hero-title animate-fade-in-up text-white font-extrabold text-5xl md:text-6xl mb-5 leading-tight">
+        <h1 class="animate-fade-in-up text-white font-extrabold text-5xl md:text-6xl mb-5 leading-tight">
           {{ t('home.heroPrefix') }}<br>
-          <span class="text-gradient-animate">{{ t('home.heroHighlight') || 'Alam Semulajadi' }}</span>
+          <span class="animate-text-gradient">{{ t('home.heroHighlight') || 'Alam Semulajadi' }}</span>
         </h1>
-        <p class="hero-subtitle animate-fade-in-up text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light" style="animation-delay: 0.1s;">
+        <p class="animate-fade-in-up text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light" style="animation-delay: 0.1s;">
           {{ t('home.heroSubtitle') || 'Temui aktiviti luar yang menarik, daripada hiking hingga menyelam.' }}
         </p>
 
-        <div class="search-wrapper-floating animate-float mx-auto max-w-xl relative z-20" style="animation-delay: 0.2s;">
-          <div class="search-glow absolute -inset-1 bg-gradient-to-r from-purple-600 to-orange-500 rounded-full opacity-30 blur-md transition duration-300"></div>
-          <div class="search-box relative flex items-center bg-gray-900/80 backdrop-blur-md border border-white/10 rounded-full p-2 pl-6 shadow-2xl">
+        <div class="animate-float mx-auto max-w-xl relative z-20" style="animation-delay: 0.2s;">
+          <div class="absolute -inset-1 bg-gradient-to-r from-purple-600 to-orange-500 rounded-full opacity-30 blur-md transition duration-300"></div>
+          <div class="relative flex items-center bg-gray-900/80 backdrop-blur-md border border-white/10 rounded-full p-2 pl-6 shadow-2xl">
              <i class="fas fa-location-dot text-purple-400 mr-4 text-xl"></i>
              <input 
                type="text" 
                v-model="searchQuery"
-               class="flex-1 bg-transparent border-none outline-none text-white text-base placeholder-gray-400"
+               class="flex-1 bg-transparent border-none outline-none text-white text-base placeholder-gray-400 focus:ring-0"
                :placeholder="t('home.searchPlaceholder')" 
                @keyup.enter="executeSearch" 
              />
-             <button class="btn-search-sunset bg-gradient-to-r from-purple-600 to-orange-500 text-white px-8 py-3 rounded-full font-semibold hover:-translate-y-0.5 transition shadow-lg" @click="executeSearch">
+             <button class="bg-gradient-to-r from-purple-600 to-orange-500 text-white px-8 py-3 rounded-full font-semibold hover:-translate-y-0.5 transition shadow-lg" @click="executeSearch">
                {{ t('common.search') }}
              </button>
           </div>
@@ -33,21 +34,21 @@
       </div>
     </div>
 
-    <div class="main-content-wrapper container mx-auto max-w-6xl px-6">
+    <div class="container mx-auto max-w-6xl px-6">
       
-      <section class="banner-grid-section animate-fade-in-up grid grid-cols-1 md:grid-cols-[2.5fr_1fr] gap-6 h-auto md:h-[420px] mb-16 mt-8" style="animation-delay: 0.3s;">
-        <div class="banner-large-slider rounded-3xl overflow-hidden shadow-2xl border border-white/5 h-[280px] md:h-full relative">
+      <section class="animate-fade-in-up grid grid-cols-1 md:grid-cols-[2.5fr_1fr] gap-6 h-auto md:h-[420px] mb-16 mt-8" style="animation-delay: 0.3s;">
+        <div class="rounded-3xl overflow-hidden shadow-2xl border border-white/5 h-[280px] md:h-full relative">
           <swiper
             :modules="[Autoplay, Pagination]"
             :slides-per-view="1"
             :loop="true"
             :autoplay="{ delay: 5000, disableOnInteraction: false }"
             :pagination="{ clickable: true }"
-            class="mySwiper w-full h-full"
+            class="w-full h-full"
           >
             <swiper-slide v-for="(slide, index) in banners.largeSlides" :key="index">
               <div 
-                class="banner-slide-item w-full h-full bg-cover bg-center relative cursor-pointer group" 
+                class="w-full h-full bg-cover bg-center relative cursor-pointer group" 
                 :style="{ backgroundImage: `url(${slide.imageUrl})` }"
                 @click="goToLink(slide.linkUrl)"
               >
@@ -60,16 +61,16 @@
           </swiper>
         </div>
         
-        <div class="banner-stack hidden md:flex flex-col gap-6 h-full">
+        <div class="hidden md:flex flex-col gap-6 h-full">
            <div 
-            class="banner-small flex-1 rounded-3xl bg-cover bg-center cursor-pointer relative overflow-hidden border border-white/5 hover:-translate-y-1 transition transform duration-300" 
+            class="flex-1 rounded-3xl bg-cover bg-center cursor-pointer relative overflow-hidden border border-white/5 hover:-translate-y-1 transition transform duration-300" 
             :style="{ backgroundImage: `url(${banners.small1.imageUrl})` }"
             @click="goToLink(banners.small1.linkUrl)"
           >
             <div class="absolute inset-0 bg-black/20 hover:bg-transparent transition"></div>
           </div>
            <div 
-            class="banner-small flex-1 rounded-3xl bg-cover bg-center cursor-pointer relative overflow-hidden border border-white/5 hover:-translate-y-1 transition transform duration-300" 
+            class="flex-1 rounded-3xl bg-cover bg-center cursor-pointer relative overflow-hidden border border-white/5 hover:-translate-y-1 transition transform duration-300" 
             :style="{ backgroundImage: `url(${banners.small2.imageUrl})` }"
             @click="goToLink(banners.small2.linkUrl)"
           >
@@ -78,37 +79,40 @@
         </div>
       </section>
 
-      <section class="category-section mb-16">
-        <div class="category-list flex gap-6 justify-start md:justify-center overflow-x-auto pb-4 scrollbar-hide">
+      <section class="mb-16">
+        <div class="flex gap-6 justify-start md:justify-center overflow-x-auto pb-4 no-scrollbar">
           <div 
-            class="cat-item flex flex-col items-center cursor-pointer min-w-[80px]" 
+            class="flex flex-col items-center cursor-pointer min-w-[80px] group" 
             v-for="item in POPULAR_ACTIVITIES" 
             :key="item.key" 
             @click="filterBy(item.key)"
           >
-            <div class="cat-circle w-[70px] h-[70px] bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center text-2xl text-slate-400 mb-3 transition-all duration-300 hover:bg-[var(--icon-color)] hover:text-white hover:-translate-y-2 hover:shadow-lg hover:border-transparent" :style="{ '--icon-color': item.color }">
+            <div 
+                class="w-[70px] h-[70px] bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center text-2xl text-slate-400 mb-3 transition-all duration-300 group-hover:bg-[var(--icon-color)] group-hover:text-white group-hover:-translate-y-2 group-hover:shadow-lg group-hover:border-transparent" 
+                :style="{ '--icon-color': item.color }"
+            >
                <i :class="item.icon"></i>
             </div>
-            <span class="cat-label text-sm font-medium text-slate-400">{{ t('activities.' + item.key) }}</span>
+            <span class="text-sm font-medium text-slate-400">{{ t('activities.' + item.key) }}</span>
           </div>
           
-          <div class="cat-item flex flex-col items-center cursor-pointer min-w-[80px]" @click="$router.push('/trips')">
-            <div class="cat-circle more-circle w-[70px] h-[70px] bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center text-2xl text-pink-500 mb-3 transition-all duration-300 hover:bg-purple-600 hover:text-white hover:-translate-y-2 hover:shadow-lg">
+          <div class="flex flex-col items-center cursor-pointer min-w-[80px] group" @click="$router.push('/trips')">
+            <div class="w-[70px] h-[70px] bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center text-2xl text-pink-500 mb-3 transition-all duration-300 group-hover:bg-purple-600 group-hover:text-white group-hover:-translate-y-2 group-hover:shadow-lg">
                 <i class="fas fa-arrow-right"></i>
             </div>
-            <span class="cat-label text-sm font-medium text-slate-400">{{ t('home.more') }}</span>
+            <span class="text-sm font-medium text-slate-400">{{ t('home.more') }}</span>
           </div>
         </div>
       </section>
 
-      <section class="section-container mb-20">
-        <div class="section-header flex justify-between items-center mb-8 border-b border-white/5 pb-4">
+      <section class="mb-20">
+        <div class="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
           <div class="flex items-center gap-4">
-            <h3 class="section-title text-3xl font-bold text-white"><span class="text-gradient-animate">{{ t('home.popularTripsHeader') }}</span></h3>
+            <h3 class="text-3xl font-bold text-white"><span class="animate-text-gradient">{{ t('home.popularTripsHeader') }}</span></h3>
             
             <button 
               @click="isCompact = !isCompact"
-              class="toggle-view-btn bg-white/5 border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg hover:bg-white/10 hover:text-white transition flex items-center"
+              class="bg-white/5 border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg hover:bg-white/10 hover:text-white transition flex items-center"
               :title="isCompact ? t('common.switchToFull') : t('common.switchToCompact')"
             >
               <i :class="isCompact ? 'fas fa-border-all' : 'fas fa-list-ul'"></i>
@@ -116,13 +120,13 @@
             </button>
           </div>
 
-          <a href="#" @click.prevent="$router.push('/trips')" class="see-more-link text-pink-400 hover:text-orange-400 flex items-center gap-2 text-sm bg-white/5 px-4 py-2 rounded-full transition hover:translate-x-1">
+          <a href="#" @click.prevent="$router.push('/trips')" class="text-pink-400 hover:text-orange-400 flex items-center gap-2 text-sm bg-white/5 px-4 py-2 rounded-full transition hover:translate-x-1">
             {{ t('home.viewAll') }} <i class="fas fa-chevron-right text-xs"></i>
           </a>
         </div>
         
-        <div v-if="loadingTrips" class="loading-area py-12 text-center text-gray-500">
-            <div class="spinner w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
+        <div v-if="loadingTrips" class="py-12 text-center text-gray-500">
+            <div class="w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
             <span>{{ t('common.loading') }}</span>
         </div>
         
@@ -135,24 +139,24 @@
           />
         </div>
         
-        <div v-else class="empty-text text-center text-gray-500 py-12 italic">{{ t('home.noTrips') }}</div>
+        <div v-else class="text-center text-gray-500 py-12 italic">{{ t('home.noTrips') }}</div>
       </section>
 
-      <section class="section-container mb-20">
-        <div class="section-header flex justify-between items-center mb-8 border-b border-white/5 pb-4">
-          <h3 class="section-title text-3xl font-bold text-white"><span class="text-gradient-animate">{{ t('home.communityDiscuss') }}</span></h3>
-          <a href="#" @click.prevent="$router.push('/forum')" class="see-more-link text-pink-400 hover:text-orange-400 flex items-center gap-2 text-sm bg-white/5 px-4 py-2 rounded-full transition hover:translate-x-1">
+      <section class="mb-20">
+        <div class="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
+          <h3 class="text-3xl font-bold text-white"><span class="animate-text-gradient">{{ t('home.communityDiscuss') }}</span></h3>
+          <a href="#" @click.prevent="$router.push('/forum')" class="text-pink-400 hover:text-orange-400 flex items-center gap-2 text-sm bg-white/5 px-4 py-2 rounded-full transition hover:translate-x-1">
             {{ t('home.goToForum') }} <i class="fas fa-chevron-right text-xs"></i>
           </a>
         </div>
 
-        <div v-if="loadingPosts" class="loading-area py-12 text-center">
-             <div class="spinner w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mx-auto"></div>
+        <div v-if="loadingPosts" class="py-12 text-center">
+             <div class="w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mx-auto"></div>
         </div>
-        <div v-else-if="latestPosts.length > 0" class="forum-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div v-else-if="latestPosts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <ForumPostCard v-for="post in latestPosts" :key="post.id" :post="post" />
         </div>
-        <div v-else class="empty-text text-center text-gray-500 py-12 italic">{{ t('home.noPosts') }}</div>
+        <div v-else class="text-center text-gray-500 py-12 italic">{{ t('home.noPosts') }}</div>
       </section>
 
     </div>
@@ -253,35 +257,3 @@ onMounted(async () => {
   finally { loadingPosts.value = false; }
 });
 </script>
-
-<style scoped>
-/* Hanya CSS kritikal untuk glow dan animasi disimpan. 
-   Selebihnya telah digantikan dengan kelas Tailwind (w-full, h-full, absolute, dll). */
-
-/* Glow Decoration */
-.hero-glow-purple {
-  position: absolute; width: 300px; height: 300px;
-  background: #6c63ff; top: -50px; left: 20%;
-  filter: blur(80px); z-index: -1; opacity: 0.4;
-}
-.hero-glow-orange {
-  position: absolute; width: 250px; height: 250px;
-  background: #ff8c42; top: 50px; right: 20%;
-  filter: blur(80px); z-index: -1; opacity: 0.4;
-}
-
-/* Text Gradient Animation */
-.text-gradient-animate {
-  background: linear-gradient(270deg, #ff8c42, #6c63ff, #ff2e63);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradient-move 4s ease infinite;
-}
-@keyframes gradient-move { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-/* Scrollbar Hide Helper (Jika Tailwind plugin tak ada) */
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-</style>

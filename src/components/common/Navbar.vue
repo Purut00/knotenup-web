@@ -13,13 +13,49 @@
         </div>
 
         <div class="hidden md:flex items-center space-x-8">
-          <router-link to="/" class="nav-link">{{ t('navbar.home') }}</router-link>
-          <router-link to="/trips" class="nav-link">{{ t('navbar.trips') }}</router-link>
-          <router-link to="/buddies" class="nav-link">{{ t('navbar.buddy') }}</router-link>
-          <router-link to="/forum" class="nav-link">{{ t('navbar.forum') }}</router-link>
-          <router-link to="/service" class="nav-link">{{ t('navbar.services') }}</router-link>
-          <router-link to="/spots" class="nav-link">{{ t('navbar.spots') }}</router-link>
-          <router-link v-if="currentUser" to="/profile" class="nav-link font-semibold text-primary-400">
+          <router-link 
+            to="/" 
+            class="text-slate-400 hover:text-white font-medium transition-colors duration-200 text-sm tracking-wide"
+            active-class="text-primary-400 font-bold"
+          >
+            {{ t('navbar.home') }}
+          </router-link>
+          <router-link 
+            to="/trips" 
+            class="text-slate-400 hover:text-white font-medium transition-colors duration-200 text-sm tracking-wide"
+            active-class="text-primary-400 font-bold"
+          >
+            {{ t('navbar.trips') }}
+          </router-link>
+          <router-link 
+            to="/buddies" 
+            class="text-slate-400 hover:text-white font-medium transition-colors duration-200 text-sm tracking-wide"
+            active-class="text-primary-400 font-bold"
+          >
+            {{ t('navbar.buddy') }}
+          </router-link>
+          <router-link 
+            to="/forum" 
+            class="text-slate-400 hover:text-white font-medium transition-colors duration-200 text-sm tracking-wide"
+            active-class="text-primary-400 font-bold"
+          >
+            {{ t('navbar.forum') }}
+          </router-link>
+          <router-link 
+            to="/service" 
+            class="text-slate-400 hover:text-white font-medium transition-colors duration-200 text-sm tracking-wide"
+            active-class="text-primary-400 font-bold"
+          >
+            {{ t('navbar.services') }}
+          </router-link>
+          <router-link 
+            to="/spots" 
+            class="text-slate-400 hover:text-white font-medium transition-colors duration-200 text-sm tracking-wide"
+            active-class="text-primary-400 font-bold"
+          >
+            {{ t('navbar.spots') }}
+          </router-link>
+          <router-link v-if="currentUser" to="/profile" class="hover:text-white transition-colors duration-200 text-sm tracking-wide font-semibold text-primary-400">
             {{ displayName || t('navbar.profile') }}
           </router-link>
         </div>
@@ -99,12 +135,12 @@
     <!-- Mobile Menu -->
     <div v-show="isMobileMenuOpen" class="md:hidden bg-slate-900 border-t border-white/10 shadow-lg">
       <div class="px-4 pt-2 pb-6 space-y-2 flex flex-col">
-        <router-link to="/" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.home') }}</router-link>
-        <router-link to="/trips" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.trips') }}</router-link>
-        <router-link to="/buddies" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.buddy') }}</router-link>
-        <router-link v-if="currentUser" to="/requests" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.requests') }}</router-link>
-        <router-link to="/forum" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.forum') }}</router-link>
-        <router-link to="/service" class="mobile-nav-link" @click="isMobileMenuOpen = false">{{ t('navbar.services') }}</router-link>
+        <router-link to="/" class="block py-3 px-4 rounded-xl text-base font-medium text-slate-300 hover:text-white hover:bg-white/5" @click="isMobileMenuOpen = false">{{ t('navbar.home') }}</router-link>
+        <router-link to="/trips" class="block py-3 px-4 rounded-xl text-base font-medium text-slate-300 hover:text-white hover:bg-white/5" @click="isMobileMenuOpen = false">{{ t('navbar.trips') }}</router-link>
+        <router-link to="/buddies" class="block py-3 px-4 rounded-xl text-base font-medium text-slate-300 hover:text-white hover:bg-white/5" @click="isMobileMenuOpen = false">{{ t('navbar.buddy') }}</router-link>
+        <router-link v-if="currentUser" to="/requests" class="block py-3 px-4 rounded-xl text-base font-medium text-slate-300 hover:text-white hover:bg-white/5" @click="isMobileMenuOpen = false">{{ t('navbar.requests') }}</router-link>
+        <router-link to="/forum" class="block py-3 px-4 rounded-xl text-base font-medium text-slate-300 hover:text-white hover:bg-white/5" @click="isMobileMenuOpen = false">{{ t('navbar.forum') }}</router-link>
+        <router-link to="/service" class="block py-3 px-4 rounded-xl text-base font-medium text-slate-300 hover:text-white hover:bg-white/5" @click="isMobileMenuOpen = false">{{ t('navbar.services') }}</router-link>
 
         <div class="border-t border-white/10 my-2 pt-4">
            <button v-if="!currentUser" @click="showLogin = true; isMobileMenuOpen = false" class="w-full btn btn-primary">
@@ -193,15 +229,3 @@ const handleLogout = async () => {
   router.push('/');
 };
 </script>
-
-<style scoped>
-.nav-link {
-  @apply text-slate-400 hover:text-white font-medium transition-colors duration-200 text-sm tracking-wide;
-}
-.nav-link.router-link-active {
-  @apply text-primary-400 font-bold;
-}
-.mobile-nav-link {
-  @apply block py-3 px-4 rounded-xl text-base font-medium text-slate-300 hover:text-white hover:bg-white/5;
-}
-</style>

@@ -1,16 +1,22 @@
 <template>
-  <div class="search-wrapper">
-    <div class="search-box">
+  <div class="w-full flex flex-col items-center">
+    <div class="bg-white p-2 rounded-full flex w-full max-w-[600px] shadow-[0_4px_15px_rgba(0,0,0,0.1)] border border-gray-100">
       <input 
         type="text" 
         v-model="searchQuery" 
         :placeholder="placeholder" 
         @keyup.enter="triggerSearch"
+        class="flex-1 border-none px-6 py-3 text-base outline-none rounded-l-full bg-transparent placeholder-slate-400 text-slate-700"
       />
-      <button @click="triggerSearch">{{ t('common.search') }}</button>
+      <button 
+        @click="triggerSearch"
+        class="bg-accent-500 text-white border-none px-8 text-base font-bold rounded-full cursor-pointer transition-colors duration-300 hover:bg-accent-600"
+      >
+        {{ t('common.search') }}
+      </button>
     </div>
     
-    <p v-if="searchScope" class="scope-text">
+    <p v-if="searchScope" class="text-xs text-white mt-2 opacity-90 drop-shadow-md">
       {{ t('common.searchScope') }} {{ searchScope }}
     </p>
   </div>
@@ -37,13 +43,3 @@ const triggerSearch = () => {
   emit('handle-search', searchQuery.value);
 };
 </script>
-
-<style scoped>
-/* CSS KEKAL SAMA */
-.search-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; }
-.search-box { background: white; padding: 0.5rem; border-radius: 50px; display: flex; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #eee; }
-.search-box input { flex: 1; border: none; padding: 0.8rem 1.5rem; font-size: 1rem; outline: none; border-radius: 50px 0 0 50px; background: transparent; }
-.search-box button { background-color: #e67e22; color: white; border: none; padding: 0 2rem; font-size: 1rem; font-weight: bold; border-radius: 50px; cursor: pointer; transition: background 0.3s; }
-.search-box button:hover { background-color: #d35400; }
-.scope-text { font-size: 0.8rem; color: #fff; margin-top: 0.5rem; opacity: 0.9; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
-</style>

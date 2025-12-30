@@ -1,16 +1,19 @@
 <template>
-  <div class="author-badge">
+  <div class="flex gap-2.5 items-start">
     <img 
       :src="userData.avatar || fallbackAvatar || 'https://i.pravatar.cc/150?img=3'" 
-      class="author-avatar" 
+      class="w-[35px] h-[35px] rounded-full object-cover border border-gray-100" 
       alt="Avatar"
       @error="handleImgError"
     />
     
-    <div class="author-meta">
-      <span class="author-name" :class="{ 'is-organizer': userData.role === 'organizer' }">
+    <div class="flex flex-col">
+      <span 
+        class="font-bold text-sm text-slate-700 flex items-center gap-1.5"
+        :class="{ 'text-accent-500': userData.role === 'organizer' }"
+      >
         {{ userData.name }}
-        <span v-if="userData.role === 'organizer'" class="org-tag">ORG</span>
+        <span v-if="userData.role === 'organizer'" class="text-[0.6rem] bg-accent-500 text-white px-1 py-[1px] rounded-[3px]">ORG</span>
       </span>
       
       <slot name="subtext"></slot>
@@ -66,12 +69,3 @@ const handleImgError = (e: any) => {
 onMounted(fetchUser);
 watch(() => props.userId, fetchUser);
 </script>
-
-<style scoped>
-.author-badge { display: flex; gap: 10px; align-items: flex-start; }
-.author-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
-.author-meta { display: flex; flex-direction: column; }
-.author-name { font-weight: bold; font-size: 0.9rem; color: #2c3e50; display: flex; align-items: center; gap: 5px;}
-.is-organizer { color: #e67e22; }
-.org-tag { font-size: 0.6rem; background: #e67e22; color: white; padding: 1px 4px; border-radius: 3px; }
-</style>

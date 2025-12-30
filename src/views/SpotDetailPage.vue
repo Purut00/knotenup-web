@@ -1,26 +1,27 @@
 <template>
-  <div class="spot-detail-page">
+  <div class="min-h-screen bg-slate-900 text-white relative overflow-x-hidden">
     
-    <div class="contour-lines"></div>
-    <div class="page-glow-purple"></div>
-    <div class="page-glow-orange"></div>
+    <!-- Background Decor -->
+    <div class="absolute inset-0 z-0 opacity-[0.08] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')] bg-cover"></div>
+    <div class="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[#6c63ff] blur-[150px] opacity-15 pointer-events-none rounded-full z-0"></div>
+    <div class="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[#ff8c42] blur-[150px] opacity-10 pointer-events-none rounded-full z-0"></div>
 
-    <div v-if="loading" class="loading-container">
-      <div class="glass-card inline-block px-8 py-6">
-          <i class="fas fa-spinner fa-spin text-3xl text-purple-400 mb-3"></i>
+    <div v-if="loading" class="min-h-[80vh] flex items-center justify-center relative z-10">
+      <div class="inline-block px-8 py-6 bg-[#0f172a]/75 border border-white/10 rounded-[20px] backdrop-blur-md shadow-xl">
+          <i class="fas fa-spinner fa-spin text-3xl text-purple-400 mb-3 block text-center"></i>
           <p class="text-gray-300">⏳ {{ t('common.loading') }}</p>
       </div>
     </div>
 
-    <div v-else-if="!spot" class="error-container">
-      <div class="glass-card inline-block px-8 py-6 border-red-500/30 border">
-          <i class="fas fa-exclamation-triangle text-3xl text-red-400 mb-3"></i>
+    <div v-else-if="!spot" class="min-h-[80vh] flex items-center justify-center relative z-10">
+      <div class="inline-block px-8 py-6 bg-[#0f172a]/75 border border-red-500/30 rounded-[20px] backdrop-blur-md shadow-xl text-center">
+          <i class="fas fa-exclamation-triangle text-3xl text-red-400 mb-3 block"></i>
           <p class="text-red-300">{{ t('spotDetail.notFound') }}</p>
-          <button @click="$router.push('/spots')" class="mt-4 btn-cancel-small">Kembali</button>
+          <button @click="$router.push('/spots')" class="mt-4 bg-white/5 text-slate-300 px-4 py-2 rounded-lg text-sm border border-white/10 cursor-pointer transition hover:bg-white/15 hover:text-white">Kembali</button>
       </div>
     </div>
 
-    <div v-else class="container relative z-10" style="padding-top: 150px; padding-bottom: 80px;">
+    <div v-else class="container mx-auto px-6 relative z-10 max-w-7xl pt-[150px] pb-[80px]">
       
       <!-- Gallery Component -->
       <SpotGallery :spot="spot" :images="displayImages" />
@@ -28,11 +29,11 @@
       <!-- Map Component -->
       <SpotMap :spot="spot" />
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-up delay-100">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in-up delay-100">
         
         <div class="lg:col-span-2 space-y-8">
 
-            <div v-if="relatedTrips.length > 0" class="glass-card p-6 md:p-8 border-l-4 border-orange-500">
+            <div v-if="relatedTrips.length > 0" class="bg-[#0f172a]/75 border border-white/10 rounded-[20px] backdrop-blur-md shadow-xl p-6 md:p-8 border-l-4 border-l-orange-500">
                <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
                  <i class="fas fa-hiking text-orange-400"></i> Trip Akan Datang di Sini
                </h3>
@@ -44,15 +45,15 @@
                </div>
             </div>
             
-            <div class="glass-card p-6 md:p-8">
+            <div class="bg-[#0f172a]/75 border border-white/10 rounded-[20px] backdrop-blur-md shadow-xl p-6 md:p-8">
                 <div class="flex flex-wrap justify-between items-start mb-6 gap-4">
                     <h3 class="text-xl font-bold text-white">Maklumat Trek</h3>
                     <div class="flex items-center gap-3">
-                         <button class="btn-icon-glass" @click="toggleTranslation" :disabled="translating" title="Translate">
+                         <button class="w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center cursor-pointer transition hover:bg-white/15 hover:scale-105" @click="toggleTranslation" :disabled="translating" title="Translate">
                             <i class="fas fa-language"></i> 
                             <span class="text-xs ml-1" v-if="translating">...</span>
                          </button>
-                         <button class="btn-icon-glass text-red-400 hover:text-red-300" @click="handleReport" title="Report">
+                         <button class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer transition hover:bg-white/15 hover:scale-105 text-red-400 hover:text-red-300" @click="handleReport" title="Report">
                             <i class="fas fa-flag"></i>
                          </button>
                     </div>
@@ -65,53 +66,53 @@
 
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                     
-                    <div class="info-box">
-                        <span class="info-label">🏳️ Negeri</span>
-                        <span class="info-value">{{ spot.state || '-' }}</span>
+                    <div class="p-3 bg-black/30 rounded-lg border border-white/5">
+                        <span class="block text-[0.7rem] text-slate-400 uppercase tracking-wide mb-1">🏳️ Negeri</span>
+                        <span class="text-base text-white font-semibold">{{ spot.state || '-' }}</span>
                     </div>
 
-                    <div class="info-box">
-                        <span class="info-label">🏔️ Ketinggian</span>
-                        <span class="info-value">{{ spot.height ? spot.height + ' m' : '-' }}</span>
+                    <div class="p-3 bg-black/30 rounded-lg border border-white/5">
+                        <span class="block text-[0.7rem] text-slate-400 uppercase tracking-wide mb-1">🏔️ Ketinggian</span>
+                        <span class="text-base text-white font-semibold">{{ spot.height ? spot.height + ' m' : '-' }}</span>
                     </div>
 
-                    <div class="info-box">
-                        <span class="info-label">📏 Jarak</span>
-                        <span class="info-value">{{ spot.distance ? spot.distance + ' km' : '-' }}</span>
+                    <div class="p-3 bg-black/30 rounded-lg border border-white/5">
+                        <span class="block text-[0.7rem] text-slate-400 uppercase tracking-wide mb-1">📏 Jarak</span>
+                        <span class="text-base text-white font-semibold">{{ spot.distance ? spot.distance + ' km' : '-' }}</span>
                     </div>
 
-                    <div class="info-box">
-                        <span class="info-label">⏱️ Masa</span>
-                        <span class="info-value">{{ spot.duration || '-' }}</span>
+                    <div class="p-3 bg-black/30 rounded-lg border border-white/5">
+                        <span class="block text-[0.7rem] text-slate-400 uppercase tracking-wide mb-1">⏱️ Masa</span>
+                        <span class="text-base text-white font-semibold">{{ spot.duration || '-' }}</span>
                     </div>
 
-                    <div class="info-box">
-                        <span class="info-label">🛤️ Via</span>
-                        <span class="info-value">{{ spot.via || '-' }}</span>
+                    <div class="p-3 bg-black/30 rounded-lg border border-white/5">
+                        <span class="block text-[0.7rem] text-slate-400 uppercase tracking-wide mb-1">🛤️ Via</span>
+                        <span class="text-base text-white font-semibold">{{ spot.via || '-' }}</span>
                     </div>
 
-                    <div class="info-box">
-                        <span class="info-label">💪 Tahap</span>
-                        <span class="info-value">{{ getLevelLabel(spot.difficulty) }}</span>
+                    <div class="p-3 bg-black/30 rounded-lg border border-white/5">
+                        <span class="block text-[0.7rem] text-slate-400 uppercase tracking-wide mb-1">💪 Tahap</span>
+                        <span class="text-base text-white font-semibold">{{ getLevelLabel(spot.difficulty) }}</span>
                     </div>
 
-                    <div class="info-box">
-                        <span class="info-label">📜 Permit</span>
-                        <span class="info-value font-bold" :class="(!spot.permit || spot.permit === 'No' || spot.permit === 'Tidak Perlu') ? 'text-green-400' : 'text-orange-400'">
+                    <div class="p-3 bg-black/30 rounded-lg border border-white/5">
+                        <span class="block text-[0.7rem] text-slate-400 uppercase tracking-wide mb-1">📜 Permit</span>
+                        <span class="text-base font-bold" :class="(!spot.permit || spot.permit === 'No' || spot.permit === 'Tidak Perlu') ? 'text-green-400' : 'text-orange-400'">
                            {{ (!spot.permit || spot.permit === 'No' || spot.permit === 'Tidak Perlu') ? 'Tidak' : 'Perlu' }}
                         </span>
                     </div>
 
-                    <div class="info-box">
-                        <span class="info-label">👮 Guide</span>
-                        <span class="info-value font-bold" :class="spot.guideRequired === 'Yes' ? 'text-red-400' : 'text-green-400'">
+                    <div class="p-3 bg-black/30 rounded-lg border border-white/5">
+                        <span class="block text-[0.7rem] text-slate-400 uppercase tracking-wide mb-1">👮 Guide</span>
+                        <span class="text-base font-bold" :class="spot.guideRequired === 'Yes' ? 'text-red-400' : 'text-green-400'">
                             {{ getGuideLabel(spot.guideRequired) }}
                         </span>
                     </div>
 
-                    <div class="info-box" v-if="spot.location">
-                        <span class="info-label">📍 Koordinat</span>
-                        <span class="info-value text-xs font-mono">
+                    <div class="p-3 bg-black/30 rounded-lg border border-white/5" v-if="spot.location">
+                        <span class="block text-[0.7rem] text-slate-400 uppercase tracking-wide mb-1">📍 Koordinat</span>
+                        <span class="text-xs font-mono text-white font-semibold">
                           {{ spot.location.latitude.toFixed(4) }}, {{ spot.location.longitude.toFixed(4) }}
                         </span>
                     </div>
@@ -161,7 +162,7 @@
                            <AuthorBadge :userId="spot.contributorId" :fallbackName="spot.contributorName" />
                         </div>
                     </div>
-                    <button class="text-blue-400 hover:text-blue-300 text-sm underline flex items-center gap-1" @click="showHistory = true">
+                    <button class="text-blue-400 hover:text-blue-300 text-sm underline flex items-center gap-1 bg-transparent border-none cursor-pointer" @click="showHistory = true">
                         📜 {{ t('spotDetail.viewHistory') }}
                     </button>
                 </div>
@@ -186,16 +187,16 @@
             />
 
             <!-- Navigation Box -->
-            <div class="glass-card p-5">
+            <div class="bg-[#0f172a]/75 border border-white/10 rounded-[20px] backdrop-blur-md shadow-xl p-5">
                 <h3 class="font-bold text-white mb-2">{{ t('spotDetail.navigation') }}</h3>
-                <a :href="spot.mapsLink" target="_blank" class="flex items-center justify-center gap-2 w-full py-2 bg-blue-700/80 hover:bg-blue-600 text-white rounded-lg text-sm font-bold transition mb-2">
+                <a :href="spot.mapsLink" target="_blank" class="flex items-center justify-center gap-2 w-full py-2 bg-blue-700/80 hover:bg-blue-600 text-white rounded-lg text-sm font-bold transition mb-2 no-underline">
                     🚗 📍 Trailhead (Google Maps)
                 </a>
                 
                 <a v-if="spot.location" 
                    :href="`https://www.google.com/maps/search/?api=1&query=${spot.location.latitude},${spot.location.longitude}`" 
                    target="_blank" 
-                   class="flex items-center justify-center gap-2 w-full py-2 bg-green-700/80 hover:bg-green-600 text-white rounded-lg text-sm font-bold transition">
+                   class="flex items-center justify-center gap-2 w-full py-2 bg-green-700/80 hover:bg-green-600 text-white rounded-lg text-sm font-bold transition no-underline">
                     📍 Koordinat (Map)
                 </a>
             </div>
@@ -317,65 +318,3 @@ onMounted(async () => {
   } catch (e) { console.error(e); } 
 });
 </script>
-
-<style scoped>
-/* --- BASE THEME (DARK) --- */
-.spot-detail-page { 
-  background-color: #0f172a; 
-  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
-}
-.container { max-width: 1200px; margin: 0 auto; padding-left: 1.5rem; padding-right: 1.5rem; }
-
-/* GLOWS */
-.page-glow-purple {
-  position: absolute; top: 0; left: 0; width: 60vw; height: 60vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
-}
-.page-glow-orange {
-  position: absolute; bottom: 0; right: 0; width: 60vw; height: 60vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
-}
-.contour-lines {
-  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: cover; pointer-events: none;
-}
-
-/* --- GLASS COMPONENTS --- */
-.glass-card {
-  background: rgba(15, 23, 42, 0.75); 
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px; 
-  backdrop-filter: blur(10px); 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-}
-
-.btn-icon-glass {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-    color: white; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: 0.2s;
-}
-.btn-icon-glass:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
-
-.btn-cancel-small { background: rgba(255,255,255,0.05); color: #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1); }
-.btn-cancel-small:hover { background: rgba(255,255,255,0.15); color: white; }
-
-/* INFO BOX */
-.info-box {
-    padding: 12px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);
-}
-.info-label {
-    display: block; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
-}
-.info-value {
-    font-size: 1rem; color: white; font-weight: 600;
-}
-
-/* ANIMATION */
-.fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-.delay-100 { animation-delay: 0.1s; animation-fill-mode: backwards; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-.loading-container, .error-container { min-height: 80vh; display: flex; align-items: center; justify-content: center; }
-</style>

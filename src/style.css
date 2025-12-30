@@ -7,54 +7,88 @@
 
 @layer base {
   :root {
-    --color-primary: #16a34a; /* green-600 */
-    --color-secondary: #475569; /* slate-600 */
-    --color-accent: #f97316; /* orange-500 */
-    --bg-dark: #0f172a; /* slate-900 */
+    --color-primary: #16a34a;
+    /* green-600 */
+    --color-secondary: #475569;
+    /* slate-600 */
+    --color-accent: #f97316;
+    /* orange-500 */
+    --bg-dark: #0f172a;
+    /* slate-900 */
   }
 
   body {
-    @apply bg-slate-900 text-slate-100 font-sans antialiased min-h-screen;
+    @apply bg-slate-900 text-slate-100 font-sans antialiased min-h-screen text-base;
     background-image: radial-gradient(circle at 15% 50%, rgba(22, 163, 74, 0.08), transparent 25%),
-                      radial-gradient(circle at 85% 30%, rgba(249, 115, 22, 0.08), transparent 25%);
+      radial-gradient(circle at 85% 30%, rgba(249, 115, 22, 0.08), transparent 25%);
     background-attachment: fixed;
   }
 
   /* HEADINGS */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display font-bold text-white tracking-tight;
   }
-  h1 { @apply text-4xl md:text-5xl lg:text-6xl mb-6; }
-  h2 { @apply text-3xl md:text-4xl mb-4; }
-  h3 { @apply text-2xl md:text-3xl mb-3; }
-  h4 { @apply text-xl md:text-2xl mb-2; }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl mb-6;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl mb-4;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl mb-3;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl mb-2;
+  }
 
   /* LINKS */
-  a { @apply transition-colors duration-200; }
-  
+  a {
+    @apply transition-colors duration-200;
+  }
+
   /* FORM INPUTS GLOBAL DEFAULT */
-  input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], input[type="time"], textarea, select {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  textarea,
+  select {
     @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate-400 outline-none transition-all duration-300;
   }
-  input:focus, textarea:focus, select:focus {
+
+  input:focus,
+  textarea:focus,
+  select:focus {
     @apply border-primary-500 bg-white/10 ring-1 ring-primary-500;
   }
 }
 
 @layer components {
+
   /* --- BUTTONS --- */
   .btn {
     @apply inline-flex items-center justify-center rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  
+
   .btn-primary {
     @apply btn bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-900/20 hover:shadow-primary-600/30 hover:-translate-y-0.5;
   }
-  
+
   .btn-secondary {
     @apply btn bg-slate-700 text-white hover:bg-slate-600;
   }
-  
+
   .btn-accent {
     @apply btn bg-gradient-to-r from-accent-500 to-accent-600 text-white shadow-lg shadow-accent-900/20 hover:shadow-accent-500/30 hover:-translate-y-0.5;
   }
@@ -62,7 +96,7 @@
   .btn-outline {
     @apply btn border border-white/20 hover:bg-white/10 hover:border-white/40;
   }
-  
+
   .btn-ghost {
     @apply btn hover:bg-white/5;
   }
@@ -71,7 +105,7 @@
   .card {
     @apply relative overflow-hidden rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-md p-6 shadow-xl transition-all duration-300 hover:border-white/20;
   }
-  
+
   .card-hover {
     @apply hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary-900/20;
   }
@@ -81,21 +115,57 @@
     @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
-  .text-gradient {
-    @apply bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent;
-  }
-
   .glass-panel {
-     @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+  }
+}
+
+@layer utilities {
+  .animate-text-gradient {
+    background: linear-gradient(270deg, #ff8c42, #6c63ff, #ff2e63);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }
 
 /* SCROLLBAR */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { @apply bg-slate-900; }
-::-webkit-scrollbar-thumb { @apply bg-slate-700 rounded-full border-2 border-slate-900; }
-::-webkit-scrollbar-thumb:hover { @apply bg-primary-600; }
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-700 rounded-full border-2 border-slate-900;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary-600;
+}
 
 /* ANIMATIONS */
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+/* Basic transitions for Vue */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Swiper Custom Overrides */
+.swiper-pagination-bullet {
+  background: white !important;
+  opacity: 0.5 !important;
+}
+
+.swiper-pagination-bullet-active {
+  opacity: 1 !important;
+  background: #6c63ff !important;
+}

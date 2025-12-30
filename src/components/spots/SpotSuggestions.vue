@@ -2,7 +2,7 @@
   <div class="space-y-6">
       
       <!-- Action Card -->
-      <div class="glass-card p-4">
+      <div class="bg-[#0f172a]/75 border border-white/10 rounded-[20px] backdrop-blur-[10px] shadow-[0_10px_30px_rgba(0,0,0,0.4)] p-4">
             <button 
               class="w-full py-3 rounded-lg font-bold transition text-sm flex items-center justify-center gap-2 mb-2 shadow-lg"
               :class="suggestions.length > 0 ? 'bg-gray-700 text-gray-400 cursor-not-allowed border border-white/5' : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90'"
@@ -28,7 +28,7 @@
       </div>
 
       <!-- Pending Suggestions List -->
-      <div v-if="suggestions.length > 0" class="glass-card p-5 border-l-4 border-l-yellow-500 relative overflow-hidden">
+      <div v-if="suggestions.length > 0" class="bg-[#0f172a]/75 border border-white/10 rounded-[20px] backdrop-blur-[10px] shadow-[0_10px_30px_rgba(0,0,0,0.4)] p-5 border-l-4 border-l-yellow-500 relative overflow-hidden">
           <div class="absolute top-0 right-0 p-2 opacity-10"><i class="fas fa-hard-hat text-6xl text-yellow-500"></i></div>
           <h4 class="font-bold text-yellow-500 mb-4 flex items-center gap-2">🚧 Semakan Komuniti</h4>
           
@@ -58,13 +58,13 @@
       </div>
 
       <!-- Suggestion Modal -->
-      <div v-if="showSuggestionModal" class="modal-overlay">
-         <div class="glass-modal w-full max-w-lg">
+      <div v-if="showSuggestionModal" class="fixed inset-0 bg-black/80 z-[2000] flex items-center justify-center backdrop-blur-[5px] p-4">
+         <div class="bg-[#0f172a]/95 p-8 rounded-[20px] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-h-[90vh] overflow-y-auto w-full max-w-lg text-white">
            <h3 class="text-xl font-bold text-white mb-4">✏️ Cadang Perubahan</h3>
            <p class="text-sm text-gray-400 mb-4">Perubahan ini akan dihantar kepada komuniti untuk undian (5 undi diperlukan).</p>
            
            <label class="block text-gray-300 text-sm mb-2 font-bold">Bahagian:</label>
-           <select v-model="suggForm.field" class="glass-input mb-4 text-white bg-black/50">
+           <select v-model="suggForm.field" class="w-full p-3 rounded-[10px] border border-white/10 bg-black/40 text-white outline-none transition duration-300 mb-4 [&>option]:bg-[#1a202c]">
                <option value="description">Deskripsi</option>
                <option value="difficulty">Kesukaran</option>
                <option value="duration">Masa / Durasi</option>
@@ -74,18 +74,18 @@
            </select>
 
            <label class="block text-gray-300 text-sm mb-2 font-bold">Maklumat Baru:</label>
-           <textarea v-model="suggForm.newValue" rows="4" class="glass-input mb-6" placeholder="Tulis maklumat yang betul di sini..."></textarea>
+           <textarea v-model="suggForm.newValue" rows="4" class="w-full p-3 rounded-[10px] border border-white/10 bg-black/40 text-white outline-none transition duration-300 mb-6" placeholder="Tulis maklumat yang betul di sini..."></textarea>
 
            <div class="flex gap-3">
-               <button class="btn-cancel-small flex-1" @click="showSuggestionModal = false">Batal</button>
-               <button class="btn-primary flex-1" @click="submitSuggestion">Hantar</button>
+               <button class="flex-1 bg-white/5 text-slate-300 px-4 py-2 rounded-lg text-sm cursor-pointer transition duration-200 border border-white/10 hover:bg-white/10" @click="showSuggestionModal = false">Batal</button>
+               <button class="flex-1 bg-gradient-to-br from-[#6c63ff] to-[#5b54e0] text-white px-6 py-[10px] border-none rounded-lg font-semibold cursor-pointer transition duration-300 hover:brightness-110" @click="submitSuggestion">Hantar</button>
            </div>
          </div>
       </div>
 
       <!-- Diff / Voting Modal -->
-      <div v-if="showDiffModal && selectedSugg" class="modal-overlay">
-         <div class="glass-modal w-full max-w-2xl">
+      <div v-if="showDiffModal && selectedSugg" class="fixed inset-0 bg-black/80 z-[2000] flex items-center justify-center backdrop-blur-[5px] p-4">
+         <div class="bg-[#0f172a]/95 p-8 rounded-[20px] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-h-[90vh] overflow-y-auto w-full max-w-2xl text-white">
            <div class="flex justify-between items-start mb-4 border-b border-white/10 pb-4">
                <div>
                    <h3 class="text-xl font-bold text-white">🔍 Semakan Komuniti</h3>
@@ -272,34 +272,3 @@ const adminReject = async (sugg: any) => {
     alert("Cadangan ditolak oleh Admin."); 
 };
 </script>
-
-<style scoped>
-/* Scoped styles reuse */
-.glass-card {
-  background: rgba(15, 23, 42, 0.75); 
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px; 
-  backdrop-filter: blur(10px); 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-}
-.glass-input {
-    width: 100%; padding: 12px; border-radius: 10px; 
-    border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 0, 0, 0.4); 
-    color: white; outline: none; transition: 0.3s;
-}
-.glass-input option { background: #1a202c; }
-
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 1rem; } 
-.glass-modal { 
-    background: rgba(15, 23, 42, 0.95); 
-    padding: 2rem; border-radius: 20px; 
-    border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    max-height: 90vh; overflow-y: auto;
-}
-.btn-primary { 
-  background: linear-gradient(135deg, #6c63ff, #5b54e0); 
-  color: white; padding: 10px 24px; border: none; border-radius: 8px; 
-  font-weight: 600; cursor: pointer; transition: 0.3s;
-}
-.btn-cancel-small { background: rgba(255,255,255,0.05); color: #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1); }
-</style>

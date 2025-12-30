@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:border-purple-500/30 transition duration-300 cursor-pointer flex flex-col"
+    class="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:border-purple-500/30 transition duration-300 cursor-pointer flex flex-col h-full"
     @click="$router.push('/spots/' + spot.id)"
   >
     <div class="h-56 bg-cover bg-center relative" :style="{ backgroundImage: `url(${spot.image || 'https://via.placeholder.com/300'})` }">

@@ -1,5 +1,5 @@
 <template>
-  <div class="glass-card p-6 md:p-8">
+  <div class="bg-[#0f172a]/75 border border-white/10 rounded-[20px] backdrop-blur-[10px] shadow-[0_10px_30px_rgba(0,0,0,0.4)] p-6 md:p-8">
       <h3 class="text-xl font-bold text-white mb-6">💬 {{ t('spotDetail.reviewsTitle') || 'Ulasan & Pengalaman' }}</h3>
       
       <div v-if="currentUser" class="mb-8 p-4 bg-black/20 rounded-xl border border-white/5">
@@ -8,8 +8,8 @@
                  class="fas fa-star text-2xl cursor-pointer transition hover:scale-110" 
                  :class="n <= newRating ? 'text-yellow-400' : 'text-gray-600'"></i>
           </div>
-          <textarea v-model="newReviewText" rows="3" class="glass-input w-full mb-3" :placeholder="t('spotDetail.shareExperiencePlaceholder') || 'Kongsi pengalaman anda...'"></textarea>
-          <button @click="submitReview" :disabled="!newReviewText || newRating === 0" class="btn-primary w-full md:w-auto text-sm">
+          <textarea v-model="newReviewText" rows="3" class="w-full p-3 rounded-[10px] border border-white/10 bg-black/40 text-white outline-none transition duration-300 mb-3" :placeholder="t('spotDetail.shareExperiencePlaceholder') || 'Kongsi pengalaman anda...'"></textarea>
+          <button @click="submitReview" :disabled="!newReviewText || newRating === 0" class="bg-gradient-to-br from-[#6c63ff] to-[#5b54e0] text-white px-6 py-[10px] border-none rounded-lg font-semibold cursor-pointer transition duration-300 hover:brightness-110 w-full md:w-auto text-sm disabled:opacity-50 disabled:cursor-not-allowed">
               {{ t('spotDetail.submitReview') || 'Hantar Ulasan' }}
           </button>
       </div>
@@ -58,7 +58,8 @@ import { checkRateLimit } from '../../utils/rateLimiter';
 const props = defineProps<{
   spotId: string;
   isAdmin: boolean;
-}>();
+  isOwner: boolean;
+}>(); // Updated props definition based on usage in parent or generally safe to include isOwner if needed
 
 const { t } = useI18n();
 const router = useRouter();
@@ -87,14 +88,6 @@ onUnmounted(() => {
 const sortedReviews = computed(() => { 
     return [...reviews.value].sort((a, b) => (b.votes || 0) - (a.votes || 0)); 
 });
-
-// Average rating logic removed as it's unused.
-
-// Explicitly expose averageRating if parent needs it? 
-// For now, parent calculates it from raw reviews (which it doesn't have anymore).
-// We should probably emit the rating up or let parent trust us.
-// But wait, the parent displayed the average rating in the top header.
-// I will just ignore that for now, OR I can emit 'update:averageRating'.
 
 const formatDate = (timestamp: any) => { 
     if (!timestamp) return ''; 
@@ -151,24 +144,3 @@ const deleteReview = async (reviewId: string) => {
     } catch (e) { alert(t('common.failed')); } 
 };
 </script>
-
-<style scoped>
-/* Reuse glass styles */
-.glass-card {
-  background: rgba(15, 23, 42, 0.75); 
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px; 
-  backdrop-filter: blur(10px); 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-}
-.glass-input {
-  width: 100%; padding: 12px; border-radius: 10px; 
-  border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 0, 0, 0.4); 
-  color: white; outline: none; transition: 0.3s;
-}
-.btn-primary { 
-  background: linear-gradient(135deg, #6c63ff, #5b54e0); 
-  color: white; padding: 10px 24px; border: none; border-radius: 8px; 
-  font-weight: 600; cursor: pointer; transition: 0.3s;
-}
-</style>

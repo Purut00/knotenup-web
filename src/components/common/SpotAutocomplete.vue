@@ -6,7 +6,7 @@
         :value="modelValue"
         @input="handleInput"
         @focus="showDropdown = true"
-        class="glass-input pr-10"
+        class="w-full p-[12px] rounded-xl border border-white/10 bg-slate-800/50 text-white outline-none transition-all duration-300 pr-10 focus:border-purple-500 focus:bg-slate-800/80"
         :placeholder="t('createTrip.placeholderPlaceMy') || 'Cari nama lokasi...'" 
       />
       <!-- Loading Indicator -->
@@ -144,23 +144,3 @@ const clearInput = () => {
   results.value = [];
 };
 </script>
-
-<style scoped>
-.glass-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(30, 41, 59, 0.5); /* lighter slate */
-  color: white;
-  outline: none;
-  transition: all 0.3s;
-}
-.glass-input:focus {
-  border-color: #a855f7; /* purple-500 */
-  background: rgba(30, 41, 59, 0.8);
-}
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
-</style>

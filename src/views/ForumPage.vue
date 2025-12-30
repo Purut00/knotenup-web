@@ -1,8 +1,9 @@
 <template>
-  <div class="forum-page min-h-screen bg-slate-900 text-white relative overflow-hidden">
+  <div class="min-h-screen bg-slate-900 text-white relative overflow-hidden">
     
-    <div class="page-glow-purple"></div>
-    <div class="page-glow-orange"></div>
+    <!-- Background Decor -->
+    <div class="absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] bg-[#6c63ff] blur-[150px] opacity-15 pointer-events-none rounded-full z-0"></div>
+    <div class="absolute top-[10%] -right-[10%] w-[40vw] h-[40vw] bg-[#ff8c42] blur-[150px] opacity-10 pointer-events-none rounded-full z-0"></div>
 
     <div class="container mx-auto px-4 pt-24 pb-12 relative z-10 max-w-6xl">
 
@@ -27,7 +28,7 @@
 
           <button 
             @click="goToCreatePost"
-            class="bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-500 hover:to-orange-400 text-white px-6 py-3 rounded-full font-bold shadow-lg transform hover:-translate-y-1 transition flex items-center gap-2"
+            class="bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-500 hover:to-orange-400 text-white px-6 py-3 rounded-full font-bold shadow-lg transform hover:-translate-y-1 transition flex items-center gap-2 cursor-pointer border-none"
           >
             <i class="fas fa-pen"></i>
             <span class="hidden sm:inline">Tulis Post</span>
@@ -35,10 +36,10 @@
         </div>
       </div>
 
-      <div class="mb-8 overflow-x-auto pb-2 scrollbar-hide animate-fade-in-up" style="animation-delay: 0.1s;">
+      <div class="mb-8 overflow-x-auto pb-2 scrollbar-hide animate-fade-in-up delay-[100ms]">
         <div class="flex gap-3 min-w-max">
           <button 
-            class="px-5 py-2.5 rounded-full border border-white/10 transition font-medium flex items-center gap-2"
+            class="px-5 py-2.5 rounded-full border border-white/10 transition font-medium flex items-center gap-2 cursor-pointer"
             :class="selectedCategory === '' ? 'bg-purple-600 border-purple-500 text-white shadow-purple-500/30 shadow-lg' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'"
             @click="selectedCategory = ''"
           >
@@ -48,7 +49,7 @@
           <button 
             v-for="cat in FORUM_CATEGORIES" 
             :key="cat.id"
-            class="px-5 py-2.5 rounded-full border border-white/10 transition font-medium flex items-center gap-2"
+            class="px-5 py-2.5 rounded-full border border-white/10 transition font-medium flex items-center gap-2 cursor-pointer"
             :class="selectedCategory === cat.id ? 'bg-purple-600 border-purple-500 text-white shadow-purple-500/30 shadow-lg' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'"
             @click="selectedCategory = cat.id"
           >
@@ -63,7 +64,7 @@
         <div class="lg:col-span-2 space-y-6">
           
           <div v-if="loading" class="py-12 text-center">
-             <div class="spinner w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mx-auto mb-3"></div>
+             <div class="w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mx-auto mb-3"></div>
              <p class="text-gray-500">Memuatkan diskusi...</p>
           </div>
 
@@ -73,7 +74,7 @@
             <p class="text-gray-500 mt-2">Cuba cari kata kunci lain atau mulakan topik baru.</p>
           </div>
 
-          <div v-else class="space-y-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+          <div v-else class="space-y-4 animate-fade-in-up delay-[200ms]">
             <ForumPostCard 
               v-for="post in filteredPosts" 
               :key="post.id" 
@@ -82,7 +83,7 @@
           </div>
         </div>
 
-        <div class="hidden lg:block space-y-6 animate-fade-in-right" style="animation-delay: 0.3s;">
+        <div class="hidden lg:block space-y-6 animate-fade-in-right delay-[300ms]">
           
           <div class="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
             <h3 class="font-bold text-xl mb-4 text-white">Selamat Datang! 👋</h3>
@@ -193,21 +194,3 @@ onMounted(async () => {
   }
 });
 </script>
-
-<style scoped>
-/* Page Glow Backgrounds */
-.page-glow-purple {
-  position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none;
-  border-radius: 50%;
-}
-.page-glow-orange {
-  position: absolute; top: 10%; right: -10%; width: 40vw; height: 40vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none;
-  border-radius: 50%;
-}
-
-/* Hide Scrollbar helper */
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-</style>

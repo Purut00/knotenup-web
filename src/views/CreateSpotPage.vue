@@ -1,11 +1,11 @@
 <template>
-  <div class="create-spot-page">
+  <div class="min-h-screen bg-[#0f172a] relative overflow-x-hidden text-white">
     
-    <div class="contour-lines"></div>
-    <div class="page-glow-purple"></div>
-    <div class="page-glow-orange"></div>
+    <div class="absolute inset-0 z-0 opacity-[0.08] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')] bg-cover"></div>
+    <div class="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[#6c63ff] blur-[150px] opacity-15 pointer-events-none rounded-full"></div>
+    <div class="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[#ff8c42] blur-[150px] opacity-10 pointer-events-none rounded-full"></div>
 
-    <div class="container pt-44 pb-20">
+    <div class="container mx-auto px-6 pt-[176px] pb-20 max-w-[800px] relative z-[2]">
       
       <div class="text-center mb-10 relative z-10">
         <h1 class="text-4xl font-bold text-white mb-2">
@@ -16,29 +16,29 @@
         </p>
       </div>
 
-      <div class="stepper-wrapper relative z-10">
-        <div class="step-item" :class="{ active: currentStep >= 1, done: currentStep > 1 }">
-          <div class="step-circle">1</div>
-          <span class="step-label">{{ t('createSpot.steps.step1') }}</span>
+      <div class="flex items-center justify-center mb-8 relative z-10">
+        <div class="flex flex-col items-center gap-[5px] opacity-50 transition duration-300 relative z-[2]" :class="{ 'opacity-100': currentStep >= 1 }">
+          <div class="w-[40px] h-[40px] rounded-full border-[2px] border-[#6c63ff] text-[#6c63ff] flex items-center justify-center font-bold bg-[#0f172a]" :class="{ 'bg-[#6c63ff] text-white': currentStep > 1, 'border-[#ff8c42] text-[#ff8c42]': currentStep === 1 }">1</div>
+          <span class="text-[0.8rem] font-semibold uppercase">{{ t('createSpot.steps.step1') }}</span>
         </div>
-        <div class="step-line" :class="{ active: currentStep > 1 }"></div>
-        <div class="step-item" :class="{ active: currentStep >= 2, done: currentStep > 2 }">
-          <div class="step-circle">2</div>
-          <span class="step-label">{{ t('createSpot.steps.step2') }}</span>
+        <div class="w-[60px] h-[2px] bg-white/10 mx-[10px] mb-[20px] transition duration-300" :class="{ 'bg-gradient-to-r from-[#6c63ff] to-[#ff8c42]': currentStep > 1 }"></div>
+        <div class="flex flex-col items-center gap-[5px] opacity-50 transition duration-300 relative z-[2]" :class="{ 'opacity-100': currentStep >= 2 }">
+          <div class="w-[40px] h-[40px] rounded-full border-[2px] border-[#6c63ff] text-[#6c63ff] flex items-center justify-center font-bold bg-[#0f172a]" :class="{ 'bg-[#6c63ff] text-white': currentStep > 2, 'border-[#ff8c42] text-[#ff8c42]': currentStep === 2 }">2</div>
+          <span class="text-[0.8rem] font-semibold uppercase">{{ t('createSpot.steps.step2') }}</span>
         </div>
       </div>
 
-      <div class="glass-form-card relative z-10 fade-up">
+      <div class="bg-[#1e293b]/60 border border-white/10 rounded-[20px] p-10 max-sm:p-6 backdrop-blur-[15px] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative z-10 animate-fade-in-up">
         
         <div v-if="currentStep === 1">
-          <h2 class="section-title">{{ t('createSpot.section1.title') }}</h2>
+          <h2 class="text-2xl text-white mb-6 border-b border-white/10 pb-[10px] font-bold">{{ t('createSpot.section1.title') }}</h2>
           
-          <div class="form-group">
-            <label>{{ t('createSpot.nameLabel') }}</label>
+          <div class="mb-6">
+            <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.nameLabel') }}</label>
             <input 
               type="text" 
               v-model="form.name" 
-              class="glass-input"
+              class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80"
               :placeholder="t('createSpot.namePlaceholder')" 
               @blur="checkDuplicate"
               :disabled="isEditMode"
@@ -48,12 +48,12 @@
             </small>
           </div>
 
-          <div class="form-group">
-            <label>{{ t('createSpot.viaLabel') }}</label>
-            <input type="text" v-model="form.via" class="glass-input" :placeholder="t('createSpot.viaPlaceholder')" />
+          <div class="mb-6">
+            <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.viaLabel') }}</label>
+            <input type="text" v-model="form.via" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80" :placeholder="t('createSpot.viaPlaceholder')" />
           </div>
 
-          <div class="form-group mb-6">
+          <div class="mb-6">
              <!-- LOCATION PICKER -->
              <LocationPicker 
                 v-if="!loading"
@@ -65,156 +65,156 @@
              />
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>{{ t('createSpot.stateLabel') }}</label>
-              <div class="select-wrapper">
-                  <select v-model="form.state" class="glass-input">
+          <div class="grid grid-cols-2 gap-5 max-md:grid-cols-1 max-md:gap-0">
+            <div class="mb-6">
+              <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.stateLabel') }}</label>
+              <div class="relative">
+                  <select v-model="form.state" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80 appearance-none cursor-pointer">
                     <option disabled value="">{{ t('createSpot.options.selectState') }}</option>
-                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ t('states.' + state) || state }}</option>
+                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state" class="bg-[#1e293b] text-white p-2.5">{{ t('states.' + state) || state }}</option>
                   </select>
-                  <i class="fas fa-chevron-down select-arrow"></i>
+                  <i class="fas fa-chevron-down absolute right-[15px] top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none"></i>
               </div>
             </div>
-            <div class="form-group">
-              <label>{{ t('createSpot.heightLabel') }}</label>
-              <input type="number" v-model="form.height" class="glass-input" :placeholder="t('createSpot.heightPlaceholder')" />
+            <div class="mb-6">
+              <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.heightLabel') }}</label>
+              <input type="number" v-model="form.height" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80" :placeholder="t('createSpot.heightPlaceholder')" />
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>{{ t('createSpot.distanceLabel') }}</label>
-              <input type="number" step="0.1" v-model="form.distance" class="glass-input" :placeholder="t('createSpot.distancePlaceholder')" />
+          <div class="grid grid-cols-2 gap-5 max-md:grid-cols-1 max-md:gap-0">
+            <div class="mb-6">
+              <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.distanceLabel') }}</label>
+              <input type="number" step="0.1" v-model="form.distance" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80" :placeholder="t('createSpot.distancePlaceholder')" />
             </div>
-            <div class="form-group">
-              <label>{{ t('createSpot.durationLabel') }}</label>
-              <input type="text" v-model="form.duration" class="glass-input" :placeholder="t('createSpot.durationPlaceholder')" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>{{ t('createSpot.diffLabel') || 'Tahap Kesukaran' }}</label>
-              <div class="select-wrapper">
-                  <select v-model="form.difficulty" class="glass-input">
-                    <option value="Easy">{{ t('levels.easy') }}</option>
-                    <option value="Moderate">{{ t('levels.moderate') }}</option>
-                    <option value="Hard">{{ t('levels.hard') }}</option>
-                    <option value="Extreme">{{ t('levels.extreme') }}</option>
-                  </select>
-                  <i class="fas fa-chevron-down select-arrow"></i>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>{{ t('createSpot.permitLabel') }}</label>
-              <div class="select-wrapper">
-                  <select v-model="form.permit" class="glass-input">
-                    <option value="Unknown">{{ t('createSpot.options.unknown') }}</option>
-                    <option value="No">{{ t('createSpot.options.notRequired') }}</option>
-                    <option value="Perlu">{{ t('createSpot.options.required') }}</option>
-                  </select>
-                  <i class="fas fa-chevron-down select-arrow"></i>
-              </div>
+            <div class="mb-6">
+              <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.durationLabel') }}</label>
+              <input type="text" v-model="form.duration" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80" :placeholder="t('createSpot.durationPlaceholder')" />
             </div>
           </div>
 
-          <div class="form-group mt-4">
-            <label>{{ t('createSpot.guideLabel') }}</label>
-            <div class="radio-group">
-              <label class="radio-card" :class="{ active: form.guideRequired === 'Unknown' }">
+          <div class="grid grid-cols-2 gap-5 max-md:grid-cols-1 max-md:gap-0">
+            <div class="mb-6">
+              <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.diffLabel') || 'Tahap Kesukaran' }}</label>
+              <div class="relative">
+                  <select v-model="form.difficulty" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80 appearance-none cursor-pointer">
+                    <option value="Easy" class="bg-[#1e293b] text-white p-2.5">{{ t('levels.easy') }}</option>
+                    <option value="Moderate" class="bg-[#1e293b] text-white p-2.5">{{ t('levels.moderate') }}</option>
+                    <option value="Hard" class="bg-[#1e293b] text-white p-2.5">{{ t('levels.hard') }}</option>
+                    <option value="Extreme" class="bg-[#1e293b] text-white p-2.5">{{ t('levels.extreme') }}</option>
+                  </select>
+                  <i class="fas fa-chevron-down absolute right-[15px] top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none"></i>
+              </div>
+            </div>
+            <div class="mb-6">
+              <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.permitLabel') }}</label>
+              <div class="relative">
+                  <select v-model="form.permit" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80 appearance-none cursor-pointer">
+                    <option value="Unknown" class="bg-[#1e293b] text-white p-2.5">{{ t('createSpot.options.unknown') }}</option>
+                    <option value="No" class="bg-[#1e293b] text-white p-2.5">{{ t('createSpot.options.notRequired') }}</option>
+                    <option value="Perlu" class="bg-[#1e293b] text-white p-2.5">{{ t('createSpot.options.required') }}</option>
+                  </select>
+                  <i class="fas fa-chevron-down absolute right-[15px] top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-6 mt-4">
+            <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.guideLabel') }}</label>
+            <div class="flex gap-[10px] flex-wrap">
+              <label class="p-[10px_16px] border border-white/10 rounded-lg cursor-pointer transition duration-200 text-[#cbd5e1] bg-white/5 hover:bg-white/10" :class="{ '!bg-[#6c63ff] !text-white !border-[#6c63ff] shadow-[0_4px_10px_rgba(108,99,255,0.3)]': form.guideRequired === 'Unknown' }">
                  <input type="radio" v-model="form.guideRequired" value="Unknown" hidden>
                  <span>{{ t('createSpot.options.unknown') }}</span>
                </label>
-               <label class="radio-card" :class="{ active: form.guideRequired === 'No' }">
+               <label class="p-[10px_16px] border border-white/10 rounded-lg cursor-pointer transition duration-200 text-[#cbd5e1] bg-white/5 hover:bg-white/10" :class="{ '!bg-[#6c63ff] !text-white !border-[#6c63ff] shadow-[0_4px_10px_rgba(108,99,255,0.3)]': form.guideRequired === 'No' }">
                  <input type="radio" v-model="form.guideRequired" value="No" hidden>
                  <span>{{ t('createSpot.options.notRequired') }}</span>
                </label>
-               <label class="radio-card" :class="{ active: form.guideRequired === 'Optional' }">
+               <label class="p-[10px_16px] border border-white/10 rounded-lg cursor-pointer transition duration-200 text-[#cbd5e1] bg-white/5 hover:bg-white/10" :class="{ '!bg-[#6c63ff] !text-white !border-[#6c63ff] shadow-[0_4px_10px_rgba(108,99,255,0.3)]': form.guideRequired === 'Optional' }">
                  <input type="radio" v-model="form.guideRequired" value="Optional" hidden>
                  <span>{{ t('createSpot.guideOptions.optional') || 'Optional' }}</span>
                </label>
-               <label class="radio-card" :class="{ active: form.guideRequired === 'Yes' }">
+               <label class="p-[10px_16px] border border-white/10 rounded-lg cursor-pointer transition duration-200 text-[#cbd5e1] bg-white/5 hover:bg-white/10" :class="{ '!bg-[#6c63ff] !text-white !border-[#6c63ff] shadow-[0_4px_10px_rgba(108,99,255,0.3)]': form.guideRequired === 'Yes' }">
                  <input type="radio" v-model="form.guideRequired" value="Yes" hidden>
                  <span>{{ t('createSpot.guideOptions.yes') || 'Mandatory' }}</span>
                </label>
             </div>
           </div>
 
-          <div class="form-group mt-4">
-            <label>{{ t('createSpot.mapsLinkLabel') }}</label>
-            <input type="text" v-model="form.mapsLink" class="glass-input" :placeholder="t('createSpot.mapPlaceholder')" />
+          <div class="mb-6 mt-4">
+            <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.mapsLinkLabel') }}</label>
+            <input type="text" v-model="form.mapsLink" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80" :placeholder="t('createSpot.mapPlaceholder')" />
           </div>
 
-          <div class="form-group">
-            <label>{{ t('createSpot.gpxLabel') }}</label>
-            <div class="file-upload-box">
-               <div class="file-info">
+          <div class="mb-6">
+            <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">{{ t('createSpot.gpxLabel') }}</label>
+            <div class="border-2 border-dashed border-white/20 rounded-[10px] p-[1.5rem] flex items-center justify-between gap-[1rem] bg-slate-900/20 transition duration-200 hover:border-emerald-500 hover:bg-emerald-500/5">
+               <div class="flex flex-col items-start">
                  <i class="fas fa-map-marked-alt text-2xl mb-2 text-green-400"></i>
                  <span v-if="gpxFile" class="text-white font-bold">{{ gpxFile.name }}</span>
                  <span v-else-if="form.gpxUrl" class="text-green-400 font-bold">{{ t('createSpot.gpx.existing') }}</span>
                  <span v-else class="text-gray-400 text-sm">{{ t('createSpot.gpx.prompt') }}</span>
                </div>
-               <input type="file" accept=".gpx" @change="handleGpxSelect" class="hidden-input" ref="gpxInput" />
-               <button class="btn-browse" @click="((gpxInput as any) || {}).click?.()">{{ t('createSpot.chooseFile') }}</button>
+               <input type="file" accept=".gpx" @change="handleGpxSelect" class="hidden" ref="gpxInput" />
+               <button class="bg-[#34495e] text-white p-[8px_16px] rounded-[6px] border-none cursor-pointer" @click="((gpxInput as any) || {}).click?.()">{{ t('createSpot.chooseFile') }}</button>
             </div>
           </div>
         </div>
 
         <div v-if="currentStep === 2">
-          <h2 class="section-title">{{ t('createSpot.galleryInfoTitle') }}</h2>
+          <h2 class="text-2xl text-white mb-6 border-b border-white/10 pb-[10px] font-bold">{{ t('createSpot.galleryInfoTitle') }}</h2>
 
-          <div class="form-group">
-            <label>📸 {{ t('createSpot.imagesLabelLimit') }}</label>
-            <div class="upload-grid mt-2">
-               <div class="upload-box" @click="triggerMultiUpload" v-if="previewImages.length < 10">
+          <div class="mb-6">
+            <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">📸 {{ t('createSpot.imagesLabelLimit') }}</label>
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-[15px] mt-2">
+               <div class="h-[100px] border-2 border-dashed border-white/20 rounded-[12px] flex flex-col items-center justify-center cursor-pointer text-[#94a3b8] transition duration-200 bg-slate-900/20 hover:border-[#e67e22] hover:text-[#e67e22]" @click="triggerMultiUpload" v-if="previewImages.length < 10">
                  <i class="fas fa-plus text-2xl mb-2 text-purple-400"></i>
                  <span>{{ t('createSpot.addPhoto') }}</span>
                </div>
                <input type="file" ref="multiFileInput" multiple accept="image/*" @change="handleImageSelect" hidden />
 
-               <div v-for="(img, index) in previewImages" :key="index" class="preview-box">
-                 <img :src="img" />
-                 <button class="btn-remove" @click="removeImage(index)">×</button>
+               <div v-for="(img, index) in previewImages" :key="index" class="relative h-[100px] rounded-[12px] overflow-hidden border border-white/10">
+                 <img :src="img" class="w-full h-full object-cover" />
+                 <button class="absolute top-[2px] right-[2px] w-[22px] h-[22px] bg-black/70 text-white border-none rounded-full cursor-pointer flex items-center justify-center text-[14px]" @click="removeImage(index)">×</button>
                </div>
             </div>
           </div>
 
-          <div class="form-group mt-6">
-              <label>💡 {{ t('createSpot.labels.tips') }}</label>
-              <textarea v-model="form.tips" rows="2" class="glass-input" :placeholder="t('createSpot.placeholders.tips')"></textarea>
+          <div class="mb-6 mt-6">
+              <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">💡 {{ t('createSpot.labels.tips') }}</label>
+              <textarea v-model="form.tips" rows="2" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80" :placeholder="t('createSpot.placeholders.tips')"></textarea>
           </div>
 
-          <div class="form-group">
-              <label>🚗 {{ t('createSpot.labels.parking') }}</label>
-              <input type="text" v-model="form.parking" class="glass-input" :placeholder="t('createSpot.placeholders.parking')" />
+          <div class="mb-6">
+              <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">🚗 {{ t('createSpot.labels.parking') }}</label>
+              <input type="text" v-model="form.parking" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80" :placeholder="t('createSpot.placeholders.parking')" />
           </div>
 
-          <div class="form-group">
-              <label>📍 {{ t('createSpot.labels.checkpoint') }}</label>
-              <textarea v-model="form.checkpointDetail" rows="3" class="glass-input" :placeholder="t('createSpot.placeholders.checkpoint')"></textarea>
+          <div class="mb-6">
+              <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">📍 {{ t('createSpot.labels.checkpoint') }}</label>
+              <textarea v-model="form.checkpointDetail" rows="3" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80" :placeholder="t('createSpot.placeholders.checkpoint')"></textarea>
           </div>
 
-          <div class="form-group">
-              <label>📝 {{ t('createSpot.labels.other') }}</label>
-              <textarea v-model="form.description" rows="4" class="glass-input" :placeholder="t('createSpot.descPlaceholder')"></textarea>
+          <div class="mb-6">
+              <label class="block text-[0.9rem] text-[#cbd5e1] mb-2 font-semibold">📝 {{ t('createSpot.labels.other') }}</label>
+              <textarea v-model="form.description" rows="4" class="w-full p-3 rounded-[10px] border border-white/10 bg-slate-900/50 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-slate-900/80" :placeholder="t('createSpot.descPlaceholder')"></textarea>
           </div>
         </div>
 
-        <div class="form-actions mt-8 flex justify-between items-center">
-           <button v-if="currentStep === 1" class="btn-back" @click="$router.back()">
+        <div class="mt-8 flex justify-between items-center">
+           <button v-if="currentStep === 1" class="bg-transparent text-[#94a3b8] border border-white/20 p-[10px_24px] rounded-[50px] font-semibold cursor-pointer transition duration-200 hover:text-white hover:border-white" @click="$router.back()">
              {{ t('common.cancel') }}
            </button>
-           <button v-if="currentStep === 2" class="btn-back" @click="prevStep">
+           <button v-if="currentStep === 2" class="bg-transparent text-[#94a3b8] border border-white/20 p-[10px_24px] rounded-[50px] font-semibold cursor-pointer transition duration-200 hover:text-white hover:border-white" @click="prevStep">
              <i class="fas fa-arrow-left mr-2"></i> {{ t('common.back') }}
            </button>
            
-           <div v-if="currentStep === 1" class="spacer"></div>
+           <div v-if="currentStep === 1" class="flex-grow"></div>
 
-           <button v-if="currentStep === 1" @click="nextStep" class="btn-next">
+           <button v-if="currentStep === 1" @click="nextStep" class="bg-gradient-to-br from-[#6c63ff] to-[#5b54e0] text-white border-none p-[12px_30px] rounded-[50px] font-bold cursor-pointer shadow-[0_4px_15px_rgba(108,99,255,0.4)] transition duration-200 hover:-translate-y-[2px]">
              {{ t('common.next') }} <i class="fas fa-arrow-right ml-2"></i>
            </button>
-           <button v-if="currentStep === 2" @click="submitSpot" class="btn-submit" :disabled="loading">
+           <button v-if="currentStep === 2" @click="submitSpot" class="bg-gradient-to-br from-[#e67e22] to-[#d35400] text-white border-none p-[12px_30px] rounded-[50px] font-bold cursor-pointer shadow-[0_4px_15px_rgba(230,126,34,0.4)] transition duration-200 hover:-translate-y-[2px] disabled:bg-[#555] disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none" :disabled="loading">
              {{ loading ? t('common.uploading') : (isEditMode ? t('createSpot.submitUpdate') : t('createSpot.submitCreate')) }}
            </button>
         </div>
@@ -414,144 +414,3 @@ const submitSpot = async () => {
   }
 };
 </script>
-
-<style scoped>
-/* --- BASE THEME (DARK) --- */
-.create-spot-page { 
-  background-color: #0f172a; 
-  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
-}
-.container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
-
-/* GLOWS */
-.page-glow-purple {
-  position: absolute; top: 0; left: 0; width: 60vw; height: 60vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
-}
-.page-glow-orange {
-  position: absolute; bottom: 0; right: 0; width: 60vw; height: 60vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
-}
-.contour-lines {
-  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: cover; pointer-events: none;
-}
-
-/* --- STEPPER --- */
-.stepper-wrapper {
-  display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;
-}
-.step-item { display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.5; transition: 0.3s; position: relative; z-index: 2; }
-.step-item.active { opacity: 1; }
-.step-circle {
-  width: 40px; height: 40px; border-radius: 50%; border: 2px solid #6c63ff; color: #6c63ff;
-  display: flex; align-items: center; justify-content: center; font-weight: bold; background: #0f172a;
-}
-.step-item.done .step-circle { background: #6c63ff; color: white; }
-.step-item.active .step-circle { border-color: #ff8c42; color: #ff8c42; }
-.step-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
-
-.step-line { width: 60px; height: 2px; background: rgba(255,255,255,0.1); margin: 0 10px; margin-bottom: 20px; transition: 0.3s; }
-.step-line.active { background: linear-gradient(90deg, #6c63ff, #ff8c42); }
-
-/* --- GLASS FORM CARD --- */
-.glass-form-card {
-  background: rgba(30, 41, 59, 0.6); 
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px; padding: 2.5rem;
-  backdrop-filter: blur(15px);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-}
-
-.section-title { font-size: 1.5rem; color: white; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; font-weight: 700; }
-
-.form-group { margin-bottom: 1.5rem; }
-.form-group label { display: block; font-size: 0.9rem; color: #cbd5e1; margin-bottom: 8px; font-weight: 600; }
-
-/* GLASS INPUT */
-.glass-input {
-  width: 100%; padding: 12px; border-radius: 10px; 
-  border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);
-  color: white; outline: none; transition: 0.3s; font-size: 1rem;
-}
-.glass-input:focus { border-color: #6c63ff; background: rgba(0,0,0,0.5); }
-
-.glass-input option { 
-  background-color: #1e293b; 
-  color: white; 
-  padding: 10px;
-}
-
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-
-/* Custom Select Arrow */
-.select-wrapper { position: relative; }
-.select-arrow { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
-.glass-input { appearance: none; }
-
-/* RADIO GROUP */
-.radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
-.radio-card { 
-  padding: 10px 16px; border: 1px solid rgba(255,255,255,0.1); 
-  border-radius: 8px; cursor: pointer; transition: 0.2s; color: #cbd5e1; background: rgba(255,255,255,0.05);
-}
-.radio-card:hover { background: rgba(255,255,255,0.1); }
-.radio-card.active { 
-  background: #6c63ff; color: white; border-color: #6c63ff; 
-  box-shadow: 0 4px 10px rgba(108, 99, 255, 0.3); 
-}
-
-/* FILE UPLOAD BOX */
-.file-upload-box {
-  border: 2px dashed rgba(255,255,255,0.2); border-radius: 10px; padding: 1.5rem;
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  background: rgba(0,0,0,0.2); transition: 0.2s;
-}
-.file-upload-box:hover { border-color: #10b981; background: rgba(16, 185, 129, 0.05); }
-.file-info { display: flex; flex-direction: column; align-items: flex-start; }
-.hidden-input { display: none; }
-.btn-browse {
-  background: #34495e; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer;
-}
-
-/* UPLOAD GRID */
-.upload-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
-.upload-box {
-  height: 100px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  cursor: pointer; color: #94a3b8; transition: 0.2s; background: rgba(0,0,0,0.2);
-}
-.upload-box:hover { border-color: #e67e22; color: #e67e22; }
-.preview-box { position: relative; height: 100px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-.preview-box img { width: 100%; height: 100%; object-fit: cover; }
-.btn-remove { position: absolute; top: 2px; right: 2px; width: 22px; height: 22px; background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-
-/* ACTIONS */
-.btn-back { background: transparent; color: #94a3b8; border: 1px solid rgba(255,255,255,0.2); padding: 10px 24px; border-radius: 50px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-.btn-back:hover { color: white; border-color: white; }
-
-.btn-next { 
-  background: linear-gradient(135deg, #6c63ff, #5b54e0); color: white; 
-  border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700; 
-  cursor: pointer; box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4); transition: 0.2s;
-}
-.btn-next:hover { transform: translateY(-2px); }
-
-.btn-submit {
-  background: linear-gradient(135deg, #e67e22, #d35400); color: white;
-  border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700;
-  cursor: pointer; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4); transition: 0.2s;
-}
-.btn-submit:hover { transform: translateY(-2px); }
-.btn-submit:disabled { background: #555; cursor: not-allowed; transform: none; box-shadow: none; }
-
-.fade-up { animation: fadeUp 0.6s ease-out; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-@media (max-width: 768px) {
-  .form-row { grid-template-columns: 1fr; gap: 0; }
-  .stepper-wrapper { display: none; } 
-  .container { padding-top: 140px; }
-}
-</style>

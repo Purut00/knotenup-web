@@ -20,7 +20,7 @@
            type="number" step="any" 
            :value="lat"
            @input="(e) => updateLat(parseFloat((e.target as HTMLInputElement).value))"
-           class="glass-input text-sm" placeholder="Cth: 4.2105" 
+           class="w-full p-[10px] rounded-lg border border-white/10 bg-black/30 text-white outline-none text-[0.9rem] focus:border-[#6c63ff] text-sm" placeholder="Cth: 4.2105" 
          />
        </div>
        <div>
@@ -29,7 +29,7 @@
            type="number" step="any" 
            :value="lng"
            @input="(e) => updateLng(parseFloat((e.target as HTMLInputElement).value))"
-           class="glass-input text-sm" placeholder="Cth: 101.9758" 
+           class="w-full p-[10px] rounded-lg border border-white/10 bg-black/30 text-white outline-none text-[0.9rem] focus:border-[#6c63ff] text-sm" placeholder="Cth: 101.9758" 
          />
        </div>
      </div>
@@ -162,12 +162,3 @@ onUnmounted(() => {
    if (map) { map.remove(); map = null; } 
 });
 </script>
-
-<style scoped>
-.glass-input {
-  width: 100%; padding: 10px; border-radius: 8px; 
-  border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);
-  color: white; outline: none; font-size: 0.9rem;
-}
-.glass-input:focus { border-color: #6c63ff; }
-</style>

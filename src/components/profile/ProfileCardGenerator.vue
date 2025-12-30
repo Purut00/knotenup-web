@@ -1,89 +1,89 @@
 <template>
-  <div v-if="visible" class="modal-overlay" @click.self="close">
-    <div class="card-modal-wrapper fade-up">
-      <button class="close-btn" @click="close">✖</button>
+  <div v-if="visible" class="fixed inset-0 bg-black/85 z-[9999] flex justify-center items-center backdrop-blur-[5px]" @click.self="close">
+    <div class="relative flex flex-col items-center animate-fade-in-up">
+      <button class="absolute -top-10 right-0 bg-transparent border-none text-[2rem] text-white cursor-pointer hover:text-slate-300 transition-colors" @click="close">✖</button>
       
       <!-- BUSINESS CARD -->
-      <div v-if="type === 'business'" id="businessCard" class="standard-card business-card">
-        <div class="bc-left-panel">
-          <div class="bc-profile-header">
-            <img :src="userData.avatar || userData.photoURL || 'https://i.pravatar.cc/150'" class="bc-avatar-square" crossorigin="anonymous" />
-            <div class="bc-texts">
-               <h1 class="bc-name">{{ userData.name }}</h1>
-               <div class="bc-role">{{ (userData.role || 'Member').toUpperCase() }}</div>
-               <p v-if="userData.organizerDetails?.orgName" class="bc-company">{{ userData.organizerDetails.orgName }}</p>
-               <p v-if="userData.organizerDetails?.ssmNo" class="bc-ssm">SSM: {{ userData.organizerDetails.ssmNo }}</p>
+      <div v-if="type === 'business'" id="businessCard" class="w-[600px] h-[340px] bg-[#2c3e50] text-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden flex font-sans">
+        <div class="flex-[2] p-[30px] flex flex-col justify-center gap-5">
+          <div class="flex items-center gap-5 border-b border-white/10 pb-[15px]">
+            <img :src="userData.avatar || userData.photoURL || 'https://i.pravatar.cc/150'" class="w-[90px] h-[90px] object-cover rounded-lg border-[3px] border-[#e67e22] bg-white" crossorigin="anonymous" />
+            <div class="flex flex-col">
+               <h1 class="text-[1.5rem] font-black m-0 leading-[1.1] text-white">{{ userData.name }}</h1>
+               <div class="text-[#e67e22] text-[0.75rem] font-bold tracking-[1px] mt-[5px]">{{ (userData.role || 'Member').toUpperCase() }}</div>
+               <p v-if="userData.organizerDetails?.orgName" class="text-[0.9rem] text-[#bdc3c7] mt-[5px] italic">{{ userData.organizerDetails.orgName }}</p>
+               <p v-if="userData.organizerDetails?.ssmNo" class="text-[0.65rem] text-[#7f8c8d] m-0">SSM: {{ userData.organizerDetails.ssmNo }}</p>
             </div>
           </div>
-          <div class="bc-socials-list">
-             <div class="bc-soc-row" v-if="userData.email">
-                <img src="https://img.icons8.com/fluency/48/mail.png" /> {{ userData.email }}
+          <div class="grid grid-cols-2 gap-[10px]">
+             <div class="flex items-center gap-[8px] text-[0.8rem] text-[#ecf0f1]" v-if="userData.email">
+                <img src="https://img.icons8.com/fluency/48/mail.png" class="w-4 h-4 opacity-90" /> {{ userData.email }}
              </div>
-             <div class="bc-soc-row" v-if="userData.phone">
-                <img src="https://img.icons8.com/fluency/48/whatsapp.png" /> {{ userData.phone }}
+             <div class="flex items-center gap-[8px] text-[0.8rem] text-[#ecf0f1]" v-if="userData.phone">
+                <img src="https://img.icons8.com/fluency/48/whatsapp.png" class="w-4 h-4 opacity-90" /> {{ userData.phone }}
              </div>
-             <div class="bc-soc-row" v-if="userData.instagram">
-                <img src="https://img.icons8.com/fluency/48/instagram-new.png" /> {{ userData.instagram }}
+             <div class="flex items-center gap-[8px] text-[0.8rem] text-[#ecf0f1]" v-if="userData.instagram">
+                <img src="https://img.icons8.com/fluency/48/instagram-new.png" class="w-4 h-4 opacity-90" /> {{ userData.instagram }}
              </div>
-             <div class="bc-soc-row" v-if="userData.location">
-                <img src="https://img.icons8.com/fluency/48/marker.png" /> {{ userData.location }}
+             <div class="flex items-center gap-[8px] text-[0.8rem] text-[#ecf0f1]" v-if="userData.location">
+                <img src="https://img.icons8.com/fluency/48/marker.png" class="w-4 h-4 opacity-90" /> {{ userData.location }}
              </div>
           </div>
         </div>
-        <div class="bc-right-panel">
-           <div class="qr-container">
-             <div class="scan-text">SCAN ME</div>
-             <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/user/${userData.id}`" class="bc-qr" crossorigin="anonymous" />
-             <div class="bc-brand">KNOTENUP</div>
+        <div class="flex-1 bg-white flex items-center justify-center relative -ml-5 [clip-path:polygon(15%_0,100%_0,100%_100%,0%_100%)]">
+           <div class="flex flex-col items-center text-center ml-[15px]">
+             <div class="text-[0.7rem] font-bold tracking-[2px] text-[#2c3e50] mb-[5px]">SCAN ME</div>
+             <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/user/${userData.id}`" class="w-[110px] h-[110px]" crossorigin="anonymous" />
+             <div class="font-black text-[1.1rem] text-[#2c3e50] mt-[5px]">KNOTENUP</div>
            </div>
         </div>
       </div>
 
       <!-- EMERGENCY CARD -->
-      <div v-else-if="type === 'emergency'" id="emergencyCard" class="standard-card emergency-card">
-         <div class="ec-header">
-            <h2>EMERGENCY CARD</h2>
-            <span>ID: {{ userData.id?.substring(0,6).toUpperCase() }}</span>
+      <div v-else-if="type === 'emergency'" id="emergencyCard" class="w-[600px] h-[340px] bg-[#ecf0f1] border-4 border-[#c0392b] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col font-sans text-[#333]">
+         <div class="bg-[#c0392b] text-white px-5 py-[10px] flex justify-between items-center h-[50px]">
+            <h2 class="m-0 text-[1.2rem] tracking-[1px] font-bold">EMERGENCY CARD</h2>
+            <span class="text-[0.8rem] opacity-80">ID: {{ userData.id?.substring(0,6).toUpperCase() }}</span>
          </div>
-         <div class="ec-body">
-            <div class="ec-main">
-               <div class="ec-row">
-                  <label>Name</label>
-                  <strong>{{ userData.name }}</strong>
+         <div class="flex p-5 h-[calc(100%-50px)]">
+            <div class="flex-[2] flex flex-col justify-around pr-[10px]">
+               <div class="border-b border-[#bdc3c7] pb-[5px] mb-[5px]">
+                  <label class="text-[0.65rem] text-[#7f8c8d] block">Name</label>
+                  <strong class="text-[1rem] text-[#2c3e50]">{{ userData.name }}</strong>
                </div>
-               <div class="ec-grid">
-                  <div class="ec-col">
-                     <label>Blood Type</label>
-                     <div class="blood-type">{{ privateData.bloodType || '-' }}</div>
+               <div class="flex gap-[15px] mb-[5px]">
+                  <div class="flex-1">
+                     <label class="text-[0.65rem] text-[#7f8c8d] block">Blood Type</label>
+                     <div class="text-[#c0392b] text-[1.4rem] font-black">{{ privateData.bloodType || '-' }}</div>
                   </div>
-                  <div class="ec-col" style="flex:2;">
-                     <label>Primary Contact</label>
-                     <strong>{{ privateData.emergencyContact || '-' }}</strong>
+                  <div class="flex-[2]">
+                     <label class="text-[0.65rem] text-[#7f8c8d] block">Primary Contact</label>
+                     <strong class="text-[1rem] text-[#2c3e50]">{{ privateData.emergencyContact || '-' }}</strong>
                   </div>
                </div>
-               <div class="ec-row">
-                  <label>Relationship</label>
-                  <strong>{{ privateData.emergencyRelationship || '-' }}</strong>
+               <div class="border-b border-[#bdc3c7] pb-[5px] mb-[5px]">
+                  <label class="text-[0.65rem] text-[#7f8c8d] block">Relationship</label>
+                  <strong class="text-[1rem] text-[#2c3e50]">{{ privateData.emergencyRelationship || '-' }}</strong>
                </div>
-               <div class="ec-alert-box">
-                  <label>Medical Conditions / Allergies</label>
-                  <div style="font-size: 0.85rem; color: #333; line-height: 1.2;">
+               <div class="bg-[#fadbd8] p-[8px] rounded-[5px] border border-[#f5b7b1]">
+                  <label class="text-[0.65rem] text-[#c0392b] font-bold block">Medical Conditions / Allergies</label>
+                  <div class="text-[0.85rem] text-[#333] leading-[1.2]">
                      {{ privateData.medicalCondition || 'None' }}
                   </div>
                </div>
             </div>
-            <div class="ec-side">
-               <img :src="userData.avatar || userData.photoURL || 'https://i.pravatar.cc/150'" class="ec-avatar" crossorigin="anonymous" />
-               <div class="ec-qr-box">
-                  <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/emergency/${userData.id}`" crossorigin="anonymous">
+            <div class="flex-[0.8] flex flex-col items-center border-l border-dashed border-[#bdc3c7] pl-[10px]">
+               <img :src="userData.avatar || userData.photoURL || 'https://i.pravatar.cc/150'" class="w-20 h-20 rounded-[4px] border border-[#bdc3c7] object-cover mb-[10px]" crossorigin="anonymous" />
+               <div class="w-20 h-20">
+                  <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://knotenup.com/emergency/${userData.id}`" crossorigin="anonymous" class="w-20 h-20 opacity-80">
                </div>
             </div>
          </div>
       </div>
 
       <!-- ACTIONS -->
-      <div class="modal-actions">
-         <button class="share-btn download" @click="downloadPDF" :disabled="isDownloading">
+      <div class="mt-5">
+         <button class="px-[30px] py-[12px] rounded-[50px] border-none font-bold cursor-pointer transition-all duration-200 bg-[#e67e22] text-white shadow-[0_4px_15px_rgba(230,126,34,0.4)] hover:-translate-y-[2px] hover:shadow-[0_6px_20px_rgba(230,126,34,0.6)] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none" @click="downloadPDF" :disabled="isDownloading">
             {{ isDownloading ? 'Generating...' : 'Download PDF' }}
          </button>
       </div>
@@ -137,58 +137,3 @@ const downloadPDF = async () => {
   }
 };
 </script>
-
-<style scoped>
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-.card-modal-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; }
-.close-btn { position: absolute; top: -40px; right: 0; background: none; border: none; font-size: 2rem; color: white; cursor: pointer; }
-.modal-actions { margin-top: 20px; }
-.share-btn { padding: 12px 30px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-.share-btn.download { background: #e67e22; color: white; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4); }
-.share-btn.download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(230, 126, 34, 0.6); }
-.share-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-
-.fade-up { animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-/* --- CARD STYLES --- */
-.standard-card { width: 600px; height: 340px; background: white; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; display: flex; font-family: 'Helvetica Neue', sans-serif; color: #333; }
-.business-card { background: #2c3e50; color: white; }
-
-/* Business Card Internals */
-.bc-left-panel { flex: 2; padding: 30px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
-.bc-profile-header { display: flex; align-items: center; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
-.bc-avatar-square { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; border: 3px solid #e67e22; background: #fff; }
-.bc-texts { display: flex; flex-direction: column; }
-.bc-name { font-size: 1.5rem; font-weight: 800; margin: 0; line-height: 1.1; color: white; }
-.bc-role { color: #e67e22; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; margin-top: 5px; }
-.bc-company { font-size: 0.9rem; color: #bdc3c7; margin: 5px 0 0 0; font-style: italic; }
-.bc-ssm { font-size: 0.65rem; color: #7f8c8d; margin: 0; }
-.bc-socials-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.bc-soc-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #ecf0f1; }
-.bc-soc-row img { width: 16px; height: 16px; opacity: 0.9; }
-.bc-right-panel { flex: 1; background: white; display: flex; align-items: center; justify-content: center; position: relative; clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%); margin-left: -20px; }
-.qr-container { display: flex; flex-direction: column; align-items: center; text-align: center; margin-left: 15px; }
-.scan-text { font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; color: #2c3e50; margin-bottom: 5px; }
-.bc-qr { width: 110px; height: 110px; }
-.bc-brand { font-weight: 900; font-size: 1.1rem; color: #2c3e50; margin-top: 5px; }
-
-/* Emergency Card Internals */
-.emergency-card { background: #ecf0f1; border: 4px solid #c0392b; flex-direction: column; }
-.ec-header { background: #c0392b; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 50px; }
-.ec-header h2 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
-.ec-header span { font-size: 0.8rem; opacity: 0.8; }
-.ec-body { display: flex; padding: 20px; height: calc(100% - 50px); }
-.ec-main { flex: 2; display: flex; flex-direction: column; justify-content: space-around; padding-right: 10px; }
-.ec-side { flex: 0.8; display: flex; flex-direction: column; align-items: center; border-left: 1px dashed #bdc3c7; padding-left: 10px; }
-.ec-row { border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; margin-bottom: 5px; }
-.ec-row label { font-size: 0.65rem; color: #7f8c8d; display: block; }
-.ec-row strong { font-size: 1rem; color: #2c3e50; }
-.ec-grid { display: flex; gap: 15px; margin-bottom: 5px; }
-.ec-col label { font-size: 0.65rem; color: #7f8c8d; display: block; }
-.blood-type { color: #c0392b; font-size: 1.4rem; font-weight: 900; }
-.ec-alert-box { background: #fadbd8; padding: 8px; border-radius: 5px; border: 1px solid #f5b7b1; }
-.ec-alert-box label { font-size: 0.65rem; color: #c0392b; font-weight: bold; display: block; }
-.ec-avatar { width: 80px; height: 80px; border-radius: 4px; border: 1px solid #bdc3c7; object-fit: cover; margin-bottom: 10px; }
-.ec-qr-box img { width: 80px; height: 80px; opacity: 0.8; }
-</style>

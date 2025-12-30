@@ -1,11 +1,11 @@
 <template>
-  <div v-if="visible" class="modal-overlay" @click.self="close">
-      <div class="glass-modal">
-        <div class="modal-header"><h3>Laporan ({{ reporters.length }})</h3><button class="close-btn" @click="close">✖</button></div>
-        <div class="modal-body custom-scrollbar">
+  <div v-if="visible" class="fixed inset-0 bg-black/80 z-[2000] flex justify-center items-center" @click.self="close">
+      <div class="bg-[#2c3e50] p-5 rounded-xl w-[90%] max-w-[500px] border border-[#34495e] text-white">
+        <div class="flex justify-between border-b border-[#34495e] pb-[10px] mb-[10px] items-center"><h3>Laporan ({{ reporters.length }})</h3><button class="bg-transparent border-none text-[#95a5a6] text-[1.2rem] cursor-pointer" @click="close">✖</button></div>
+        <div class="max-h-[60vh] overflow-y-auto custom-scrollbar">
            <div v-if="loading" class="p-4 text-center">Loading...</div>
            <div v-else-if="reporters.length === 0" class="p-4 text-center">Tiada info pelapor.</div>
-           <div v-else v-for="rep in reporters" :key="rep.id" class="reporter-item">
+           <div v-else v-for="rep in reporters" :key="rep.id" class="p-[10px] border-b border-[#34495e]">
               <strong class="text-blue-400">{{ rep.reporterName }}</strong>: 
               <span class="text-gray-300">"{{ rep.reason }}"</span>
               <div class="text-xs text-gray-500 mt-1">{{ formatDate(rep.createdAt) }}</div>
@@ -53,13 +53,3 @@ watch(() => props.visible, async (val) => {
     }
 });
 </script>
-
-<style scoped>
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-.glass-modal { background: #2c3e50; padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; border: 1px solid #34495e; color: white; }
-.modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #34495e; padding-bottom: 10px; margin-bottom: 10px; align-items: center; }
-.modal-header h3 { margin: 0; font-size: 1.2rem; }
-.close-btn { background: none; border: none; color: #95a5a6; font-size: 1.2rem; cursor: pointer; }
-.reporter-item { padding: 10px; border-bottom: 1px solid #34495e; }
-.custom-scrollbar { max-height: 60vh; overflow-y: auto; }
-</style>

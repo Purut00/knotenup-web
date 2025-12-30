@@ -1,46 +1,46 @@
 <template>
-  <div class="admin-tab-content fade-in">
-     <div class="tab-header">
+  <div class="animate-fade-in">
+     <div class="flex justify-between mb-4 items-center">
         <h3>Pengurusan Pengguna</h3>
-        <div class="actions">
-            <input type="text" v-model="searchQuery" placeholder="Cari email/nama..." class="search-box" @keyup.enter="performSearch"/>
-            <button class="btn-search" @click="performSearch">Cari</button>
+        <div class="flex gap-[5px]">
+            <input type="text" v-model="searchQuery" placeholder="Cari email/nama..." class="p-2 rounded-[5px] border-none bg-[#34495e] text-white" @keyup.enter="performSearch"/>
+            <button class="bg-[#3498db] text-white border-none px-[15px] py-0 rounded-[5px] cursor-pointer" @click="performSearch">Cari</button>
         </div>
      </div>
 
      <div v-if="loading" class="text-center py-4">Loading users...</div>
      
-     <div v-else class="data-list custom-scrollbar">
-        <div v-for="user in users" :key="user.id" class="data-item">
-           <div class="item-main">
+     <div v-else class="flex flex-col gap-[10px] max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <div v-for="user in users" :key="user.id" class="bg-[#2c3e50] p-4 rounded-lg flex justify-between items-center border-l-4 border-[#95a5a6]">
+           <div class="flex flex-col gap-[2px]">
               <div class="flex items-center gap-2">
                  <span class="font-bold text-white">{{ user.displayName || user.name || 'User' }}</span>
-                 <span v-if="user.role === 'admin'" class="badge-admin">ADMIN</span>
-                 <span v-else-if="user.role === 'organizer'" class="badge-org">ORGANIZER</span>
-                 <span v-if="user.isBanned" class="badge-banned">BANNED</span>
+                 <span v-if="user.role === 'admin'" class="bg-[#c0392b] text-white text-[0.6rem] px-[6px] py-[2px] rounded-[4px] ml-[5px]">ADMIN</span>
+                 <span v-else-if="user.role === 'organizer'" class="bg-[#27ae60] text-white text-[0.6rem] px-[6px] py-[2px] rounded-[4px] ml-[5px]">ORGANIZER</span>
+                 <span v-if="user.isBanned" class="bg-[#7f8c8d] text-white text-[0.6rem] px-[6px] py-[2px] rounded-[4px] ml-[5px]">BANNED</span>
               </div>
-              <div class="item-meta">{{ user.email }} • Joined: {{ formatDate(user.createdAt) }}</div>
+              <div class="text-[#95a5a6] text-[0.8rem]">{{ user.email }} • Joined: {{ formatDate(user.createdAt) }}</div>
               <div v-if="user.organizerStatus === 'pending'" class="mt-1 text-yellow-400 text-xs flex items-center gap-1">
                  <i class="fas fa-clock"></i> Memohon Organizer: {{ user.organizerDetails?.orgName }}
               </div>
            </div>
            
-           <div class="item-actions">
-              <button v-if="user.organizerStatus === 'pending'" class="btn-approve" @click="approveOrganizer(user)">
+           <div class="flex gap-[5px]">
+              <button v-if="user.organizerStatus === 'pending'" class="p-[5px_10px] rounded-[5px] border-none cursor-pointer text-white text-[0.8rem] font-bold bg-[#27ae60]" @click="approveOrganizer(user)">
                  ✅ Approve
               </button>
               
-              <button class="btn-action" :class="user.isBanned ? 'btn-unban' : 'btn-ban'" @click="toggleBan(user)">
+              <button class="p-[5px_10px] rounded-[5px] border-none cursor-pointer text-white text-[0.8rem] font-bold" :class="user.isBanned ? 'bg-[#f39c12]' : 'bg-[#e74c3c]'" @click="toggleBan(user)">
                   {{ user.isBanned ? 'Unban' : 'Ban' }}
               </button>
               
               <!-- Prevent deleting own account or crucial admins via UI if needed, but generic delete here -->
-              <button class="btn-del" @click="deleteUser(user.id)" title="Padam User">🗑️</button>
+              <button class="p-[5px_10px] rounded-[5px] border-none cursor-pointer text-white text-[0.8rem] font-bold bg-[#c0392b]" @click="deleteUser(user.id)" title="Padam User">🗑️</button>
            </div>
         </div>
         
         <div v-if="hasMore" class="text-center mt-4">
-            <button class="btn-load-more" @click="loadMore">Load More</button>
+            <button class="bg-[#34495e] text-white px-[20px] py-[10px] rounded-[8px] border-none cursor-pointer" @click="loadMore">Load More</button>
         </div>
      </div>
   </div>
@@ -164,28 +164,3 @@ onMounted(() => {
     fetchUsers();
 });
 </script>
-
-<style scoped>
-.tab-header { display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: center; }
-.actions { display: flex; gap: 5px; }
-.search-box { padding: 8px; border-radius: 5px; border: none; background: #34495e; color: white; }
-.btn-search { background: #3498db; color: white; border: none; padding: 0 15px; border-radius: 5px; cursor: pointer; }
-
-.data-list { display: flex; flex-direction: column; gap: 10px; max-height: 70vh; overflow-y: auto; }
-.data-item { background: #2c3e50; padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #95a5a6; }
-
-.item-main { display: flex; flex-direction: column; gap: 2px; }
-.item-meta { color: #95a5a6; font-size: 0.8rem; }
-.item-actions { display: flex; gap: 5px; }
-
-.btn-del, .btn-ban, .btn-unban, .btn-approve { padding: 5px 10px; border-radius: 5px; border: none; cursor: pointer; color: white; font-size: 0.8rem; font-weight: bold; }
-.btn-del { background: #c0392b; }
-.btn-ban { background: #e74c3c; }
-.btn-unban { background: #f39c12; }
-.btn-approve { background: #27ae60; }
-.btn-load-more { background: #34495e; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; }
-
-.badge-admin { background: #c0392b; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
-.badge-org { background: #27ae60; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
-.badge-banned { background: #7f8c8d; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
-</style>

@@ -1,37 +1,37 @@
 <template>
-  <div class="admin-tab-content fade-in">
-     <div class="tab-header">
+  <div class="animate-fade-in">
+     <div class="flex justify-between mb-4 items-center">
         <h3>Pengurusan Trip</h3>
-        <div class="actions">
-            <input type="text" v-model="searchQuery" placeholder="Cari title..." class="search-box" @keyup.enter="performSearch"/>
-            <button class="btn-search" @click="performSearch">Cari</button>
+        <div class="flex gap-[5px]">
+            <input type="text" v-model="searchQuery" placeholder="Cari title..." class="p-2 rounded-[5px] border-none bg-[#34495e] text-white" @keyup.enter="performSearch"/>
+            <button class="bg-[#3498db] text-white border-none px-[15px] py-0 rounded-[5px] cursor-pointer" @click="performSearch">Cari</button>
         </div>
      </div>
 
      <div v-if="loading" class="text-center py-4">Loading trips...</div>
      
-     <div v-else class="data-list custom-scrollbar">
-        <div v-for="trip in trips" :key="trip.id" class="data-item" :class="{ 'frozen-item': trip.isFrozen }">
-           <div class="item-main">
-              <a :href="`/trips/${trip.id}`" target="_blank" class="item-title">
+     <div v-else class="flex flex-col gap-[10px] max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <div v-for="trip in trips" :key="trip.id" class="bg-[#2c3e50] p-4 rounded-lg flex justify-between items-center border-l-4 border-[#2ecc71]" :class="{ '!border-[#3498db] opacity-70': trip.isFrozen }">
+           <div class="flex flex-col gap-[2px]">
+              <a :href="`/trips/${trip.id}`" target="_blank" class="text-white font-bold no-underline">
                   {{ trip.title }} 
-                  <span v-if="trip.isFrozen" class="frozen-badge">❄️ FROZEN</span>
+                  <span v-if="trip.isFrozen" class="text-[0.7rem] bg-[#3498db] px-[4px] py-[2px] rounded-[4px] ml-[5px]">❄️ FROZEN</span>
               </a>
-              <div class="item-meta">{{ trip.organizerName }} • {{ trip.status }} • {{ formatDate(trip.createdAt) }}</div>
+              <div class="text-[#95a5a6] text-[0.8rem]">{{ trip.organizerName }} • {{ trip.status }} • {{ formatDate(trip.createdAt) }}</div>
            </div>
-           <div class="item-actions">
+           <div class="flex gap-[5px]">
               <!-- Report count is tricky without fetching all reports. We pass logic to parent or just show button -->
-              <button class="btn-report" @click="$emit('view-reports', trip.id)">🚨 Reports</button>
+              <button class="p-[5px_10px] rounded-[5px] border-none cursor-pointer text-white text-[0.8rem] bg-[#e74c3c]" @click="$emit('view-reports', trip.id)">🚨 Reports</button>
               
-              <button class="btn-action" :class="trip.isFrozen ? 'btn-unfreeze' : 'btn-freeze'" @click="toggleFreeze(trip)">
+              <button class="p-[5px_10px] rounded-[5px] border-none cursor-pointer text-white text-[0.8rem]" :class="trip.isFrozen ? 'bg-[#f39c12]' : 'bg-[#3498db]'" @click="toggleFreeze(trip)">
                   {{ trip.isFrozen ? 'Unfreeze' : 'Freeze' }}
               </button>
-              <button class="btn-del" @click="deleteItem(trip.id)">🗑️</button>
+              <button class="p-[5px_10px] rounded-[5px] border-none cursor-pointer text-white text-[0.8rem] bg-[#e74c3c]" @click="deleteItem(trip.id)">🗑️</button>
            </div>
         </div>
         
         <div v-if="hasMore" class="text-center mt-4">
-            <button class="btn-load-more" @click="loadMore">Load More</button>
+            <button class="bg-[#34495e] text-white px-[20px] py-[10px] rounded-[8px] border-none cursor-pointer" @click="loadMore">Load More</button>
         </div>
      </div>
   </div>
@@ -125,21 +125,3 @@ onMounted(() => {
     fetchTrips();
 });
 </script>
-
-<style scoped>
-.tab-header { display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: center; }
-.actions { display: flex; gap: 5px; }
-.search-box { padding: 8px; border-radius: 5px; border: none; background: #34495e; color: white; }
-.btn-search { background: #3498db; color: white; border: none; padding: 0 15px; border-radius: 5px; cursor: pointer; }
-
-.data-list { display: flex; flex-direction: column; gap: 10px; max-height: 70vh; overflow-y: auto; }
-.data-item { background: #2c3e50; padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #2ecc71; }
-.data-item.frozen-item { border-left-color: #3498db; opacity: 0.7; }
-.item-title { color: white; font-weight: bold; text-decoration: none; }
-.item-meta { color: #95a5a6; font-size: 0.8rem; }
-.item-actions { display: flex; gap: 5px; }
-.btn-del, .btn-freeze, .btn-unfreeze, .btn-report { padding: 5px 10px; border-radius: 5px; border: none; cursor: pointer; color: white; font-size: 0.8rem; }
-.btn-del { background: #e74c3c; } .btn-freeze { background: #3498db; } .btn-unfreeze { background: #f39c12; } .btn-report { background: #e74c3c; }
-.btn-load-more { background: #34495e; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; }
-.frozen-badge { font-size: 0.7rem; background: #3498db; padding: 2px 4px; border-radius: 4px; margin-left: 5px; }
-</style>

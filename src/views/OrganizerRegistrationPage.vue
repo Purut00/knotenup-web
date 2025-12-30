@@ -1,15 +1,15 @@
 <template>
-  <div class="reg-page">
+  <div class="min-h-screen bg-[#0f172a] relative overflow-x-hidden text-white">
     
     <!-- BACKGROUND LAYERS -->
-    <div class="contour-lines"></div>
-    <div class="page-glow-purple"></div>
-    <div class="page-glow-orange"></div>
+    <div class="absolute inset-0 z-0 opacity-[0.08] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')] bg-cover"></div>
+    <div class="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[#6c63ff] blur-[150px] opacity-15 pointer-events-none rounded-full"></div>
+    <div class="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[#ff8c42] blur-[150px] opacity-10 pointer-events-none rounded-full"></div>
 
-    <!-- MAIN CONTAINER (Hardcoded Padding Fix) -->
-    <div class="container relative z-10" style="padding-top: 100px; padding-bottom: 80px;">
+    <!-- MAIN CONTAINER -->
+    <div class="container mx-auto px-6 pt-[100px] pb-20 relative z-10 max-w-[600px]">
       
-      <div class="glass-form-container fade-up">
+      <div class="bg-[#1e293b]/70 border border-white/10 rounded-[20px] p-10 max-sm:p-6 backdrop-blur-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.3)] animate-fade-in-up">
         
         <!-- HEADER -->
         <div class="text-center mb-8">
@@ -17,13 +17,13 @@
             <p class="text-gray-400">Tingkatkan akaun anda untuk mula menganjurkan trip dan aktiviti menarik.</p>
         </div>
 
-        <div class="form-body">
+        <div>
           
           <!-- NAMA ORGANISASI -->
-          <div class="form-group">
+          <div class="mb-6 relative">
             <label class="text-gray-300 font-semibold mb-2 block">Nama Organisasi / Jenama</label>
             
-            <div class="checkbox-wrapper mb-3">
+            <div class="flex items-center mb-3">
               <input type="checkbox" v-model="useProfileName" @change="syncName" id="useProfile" class="accent-purple-500 w-4 h-4">
               <label for="useProfile" class="text-sm text-gray-400 cursor-pointer select-none ml-2">
                 Guna nama profil saya <span class="text-white font-bold">({{ currentUserName }})</span>
@@ -34,33 +34,33 @@
                 type="text" 
                 v-model="form.orgName" 
                 :disabled="useProfileName" 
-                class="glass-input"
+                class="w-full p-[12px] px-[16px] rounded-[10px] border border-white/10 bg-[#0f172a]/60 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-[#0f172a]/80 focus:shadow-[0_0_0_4px_rgba(108,99,255,0.1)] placeholder-slate-500"
                 :class="{ 'opacity-50 cursor-not-allowed': useProfileName }"
                 placeholder="Cth: Abang Mat Guide Services" 
             />
           </div>
 
           <!-- SSM -->
-          <div class="form-group">
+          <div class="mb-6 relative">
             <label class="text-gray-300 font-semibold mb-2 block">
                 No. Pendaftaran Perniagaan (SSM) 
                 <span class="text-xs text-gray-500 font-normal ml-1">- Jika ada</span>
             </label>
-            <input type="text" v-model="form.ssm" class="glass-input" placeholder="Cth: 20230100XXXX" />
+            <input type="text" v-model="form.ssm" class="w-full p-[12px] px-[16px] rounded-[10px] border border-white/10 bg-[#0f172a]/60 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-[#0f172a]/80 focus:shadow-[0_0_0_4px_rgba(108,99,255,0.1)] placeholder-slate-500" placeholder="Cth: 20230100XXXX" />
           </div>
 
           <!-- LESEN -->
-          <div class="form-group">
+          <div class="mb-6 relative">
             <label class="text-gray-300 font-semibold mb-2 block">
                 No. Pemandu Pelancong (Green Badge) / Malim Gunung Perhutanan 
                 <span class="text-xs text-gray-500 font-normal ml-1">- Jika ada</span>
             </label>
-            <input type="text" v-model="form.license" class="glass-input" placeholder="Cth: MGP-A9753" />
+            <input type="text" v-model="form.license" class="w-full p-[12px] px-[16px] rounded-[10px] border border-white/10 bg-[#0f172a]/60 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-[#0f172a]/80 focus:shadow-[0_0_0_4px_rgba(108,99,255,0.1)] placeholder-slate-500" placeholder="Cth: MGP-A9753" />
           </div>
 
           <!-- T&C BOX -->
-          <div class="tnc-box">
-            <label class="checkbox-container flex items-start gap-3 cursor-pointer">
+          <div class="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-[10px] mb-8">
+            <label class="flex items-start gap-3 cursor-pointer">
               <input type="checkbox" v-model="form.agreed" class="accent-orange-500 mt-1 w-5 h-5 flex-shrink-0">
               <span class="text-sm text-gray-300 leading-relaxed">
                 Saya mengesahkan maklumat ini adalah benar. Saya faham bahawa <span class="text-white font-bold">KnotenUp</span> hanyalah medium promosi dan saya bertanggungjawab sepenuhnya ke atas trip yang dianjurkan.
@@ -69,7 +69,11 @@
           </div>
 
           <!-- BUTTON -->
-          <button class="btn-submit w-full" :disabled="!form.agreed || loading" @click="submitUpgrade">
+          <button 
+            class="w-full bg-gradient-to-br from-[#e67e22] to-[#d35400] text-white p-[14px] border-none rounded-[12px] font-bold cursor-pointer transition duration-300 text-base shadow-[0_4px_15px_rgba(230,126,34,0.3)] hover:enabled:-translate-y-[2px] hover:enabled:shadow-[0_8px_25px_rgba(230,126,34,0.5)] disabled:bg-[#475569] disabled:text-[#94a3b8] disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none" 
+            :disabled="!form.agreed || loading" 
+            @click="submitUpgrade"
+          >
             <span v-if="loading"><i class="fas fa-spinner fa-spin mr-2"></i> Sedang Proses...</span>
             <span v-else>Hantar Permohonan</span>
           </button>
@@ -152,86 +156,3 @@ const submitUpgrade = async () => {
   }
 };
 </script>
-
-<style scoped>
-/* --- BASE THEME (DARK) --- */
-.reg-page { 
-  background-color: #0f172a; 
-  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
-}
-.container { max-width: 600px; margin: 0 auto; padding-left: 1.5rem; padding-right: 1.5rem; }
-
-/* GLOWS */
-.page-glow-purple {
-  position: absolute; top: 0; left: 0; width: 60vw; height: 60vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
-}
-.page-glow-orange {
-  position: absolute; bottom: 0; right: 0; width: 60vw; height: 60vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
-}
-.contour-lines {
-  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: cover; pointer-events: none;
-}
-
-/* --- GLASS FORM --- */
-.glass-form-container {
-  background: rgba(30, 41, 59, 0.7); 
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px; padding: 2.5rem;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-}
-
-.form-group { margin-bottom: 1.5rem; position: relative; }
-
-/* GLASS INPUT */
-.glass-input {
-  width: 100%; padding: 12px 16px; border-radius: 10px; 
-  border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.6);
-  color: white; outline: none; transition: 0.3s; font-size: 1rem;
-}
-.glass-input:focus { 
-    border-color: #6c63ff; 
-    background: rgba(15, 23, 42, 0.8); 
-    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
-}
-.glass-input::placeholder { color: #64748b; }
-
-/* CHECKBOX WRAPPER */
-.checkbox-wrapper { display: flex; align-items: center; }
-
-/* TNC BOX */
-.tnc-box {
-  background: rgba(234, 179, 8, 0.1); /* Yellow tint */
-  border: 1px solid rgba(234, 179, 8, 0.3);
-  padding: 1rem; border-radius: 10px; margin-bottom: 2rem;
-}
-
-/* BUTTONS */
-.btn-submit { 
-  background: linear-gradient(135deg, #e67e22, #d35400); 
-  color: white; padding: 14px; border: none; border-radius: 12px; 
-  font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 1rem;
-  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
-}
-.btn-submit:hover:not(:disabled) { 
-  transform: translateY(-2px); 
-  box-shadow: 0 8px 25px rgba(230, 126, 34, 0.5);
-}
-.btn-submit:disabled { 
-  background: #475569; color: #94a3b8; 
-  cursor: not-allowed; box-shadow: none; transform: none;
-}
-
-/* ANIMATION */
-.fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-/* RESPONSIVE */
-@media (max-width: 640px) {
-    .glass-form-container { padding: 1.5rem; }
-}
-</style>

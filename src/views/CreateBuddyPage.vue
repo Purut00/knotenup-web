@@ -1,75 +1,75 @@
 <template>
-  <div class="create-buddy-page">
+  <div class="min-h-screen bg-slate-900 relative overflow-x-hidden text-white">
     
-    <div class="contour-lines"></div>
-    <div class="page-glow-purple"></div>
-    <div class="page-glow-orange"></div>
+    <div class="absolute inset-0 z-0 opacity-[0.08] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')] bg-cover"></div>
+    <div class="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[#6c63ff] blur-[150px] opacity-15 pointer-events-none rounded-full"></div>
+    <div class="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[#ff8c42] blur-[150px] opacity-10 pointer-events-none rounded-full"></div>
 
-    <div class="container pt-32 pb-20">
+    <div class="container mx-auto px-6 pt-32 pb-20 relative z-10 max-w-[800px]">
       
       <div class="text-center mb-10 relative z-10">
         <h1 class="text-4xl font-bold text-white mb-2">{{ t('createBuddy.title') }}</h1>
         <p class="text-gray-400">"{{ t('createBuddy.sub') }}"</p>
       </div>
 
-      <div class="glass-form-card relative z-10 fade-up max-w-2xl mx-auto">
+      <div class="bg-[#1e293b]/60 border border-white/10 rounded-[20px] p-10 backdrop-blur-[15px] shadow-[0_20px_50px_rgba(0,0,0,0.3)] animate-fade-in-up relative z-10 max-w-2xl mx-auto max-sm:p-6">
         
-        <h2 class="section-title">{{ t('createBuddy.sectionTitle') }}</h2>
+        <h2 class="text-2xl text-white mb-6 border-b border-white/10 pb-2.5 font-bold">{{ t('createBuddy.sectionTitle') }}</h2>
         
-        <div class="form-group">
-          <label>{{ t('createBuddy.locationLabel') }}</label>
+        <div class="mb-5">
+          <label class="block text-[0.9rem] text-slate-300 mb-2 font-semibold">{{ t('createBuddy.locationLabel') }}</label>
           <input 
             type="text" 
             v-model="form.location" 
-            class="glass-input" 
+            class="w-full p-3 rounded-[10px] border border-white/10 bg-black/30 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-black/50" 
             :placeholder="t('createBuddy.locationPlaceholder')" 
           />
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>{{ t('createBuddy.dateLabel') }}</label>
-            <input type="date" v-model="form.date" class="glass-input" />
+        <div class="grid grid-cols-2 gap-5 max-md:grid-cols-1 max-md:gap-0">
+          <div class="mb-5">
+            <label class="block text-[0.9rem] text-slate-300 mb-2 font-semibold">{{ t('createBuddy.dateLabel') }}</label>
+            <input type="date" v-model="form.date" class="w-full p-3 rounded-[10px] border border-white/10 bg-black/30 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-black/50 appearance-none" />
           </div>
-          <div class="form-group">
-            <label>{{ t('createBuddy.timeLabel') }}</label>
-            <input type="time" v-model="form.time" class="glass-input" />
-          </div>
-        </div>
-
-        <div class="form-row mt-4">
-          <div class="form-group">
-            <label>{{ t('createBuddy.paceLabel') }}</label>
-            <div class="select-wrapper">
-                <select v-model="form.pace" class="glass-input">
-                  <option value="relaxed">{{ t('createBuddy.options.pace.relaxed') }}</option>
-                  <option value="moderate">{{ t('createBuddy.options.pace.moderate') }}</option>
-                  <option value="fast">{{ t('createBuddy.options.pace.fast') }}</option>
-                </select>
-                <i class="fas fa-chevron-down select-arrow"></i>
-            </div>
-          </div>
-          <div class="form-group">
-             <label>{{ t('createBuddy.transportLabel') }}</label>
-             <div class="select-wrapper">
-                <select v-model="form.carpool" class="glass-input">
-                  <option value="self">{{ t('createBuddy.options.transport.self') }}</option>
-                  <option value="driver">{{ t('createBuddy.options.transport.driver') }}</option>
-                  <option value="passenger">{{ t('createBuddy.options.transport.passenger') }}</option>
-                </select>
-                <i class="fas fa-chevron-down select-arrow"></i>
-            </div>
+          <div class="mb-5">
+            <label class="block text-[0.9rem] text-slate-300 mb-2 font-semibold">{{ t('createBuddy.timeLabel') }}</label>
+            <input type="time" v-model="form.time" class="w-full p-3 rounded-[10px] border border-white/10 bg-black/30 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-black/50 appearance-none" />
           </div>
         </div>
 
-        <div class="form-group mt-4 bg-green-500/5 p-4 rounded-xl border border-green-500/20">
+        <div class="grid grid-cols-2 gap-5 mt-4 max-md:grid-cols-1 max-md:gap-0">
+          <div class="mb-5">
+            <label class="block text-[0.9rem] text-slate-300 mb-2 font-semibold">{{ t('createBuddy.paceLabel') }}</label>
+            <div class="relative">
+                <select v-model="form.pace" class="w-full p-3 rounded-[10px] border border-white/10 bg-black/30 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-black/50 appearance-none">
+                  <option value="relaxed" class="bg-[#1e293b] text-white">{{ t('createBuddy.options.pace.relaxed') }}</option>
+                  <option value="moderate" class="bg-[#1e293b] text-white">{{ t('createBuddy.options.pace.moderate') }}</option>
+                  <option value="fast" class="bg-[#1e293b] text-white">{{ t('createBuddy.options.pace.fast') }}</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-[15px] top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            </div>
+          </div>
+          <div class="mb-5">
+             <label class="block text-[0.9rem] text-slate-300 mb-2 font-semibold">{{ t('createBuddy.transportLabel') }}</label>
+             <div class="relative">
+                <select v-model="form.carpool" class="w-full p-3 rounded-[10px] border border-white/10 bg-black/30 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-black/50 appearance-none">
+                  <option value="self" class="bg-[#1e293b] text-white">{{ t('createBuddy.options.transport.self') }}</option>
+                  <option value="driver" class="bg-[#1e293b] text-white">{{ t('createBuddy.options.transport.driver') }}</option>
+                  <option value="passenger" class="bg-[#1e293b] text-white">{{ t('createBuddy.options.transport.passenger') }}</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-[15px] top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-5 mt-4 bg-green-500/5 p-4 rounded-xl border border-green-500/20">
            <label class="block font-semibold text-green-400 mb-2">
              <i class="fab fa-whatsapp text-lg mr-2"></i> {{ t('createBuddy.whatsappLabel') }} (Optional)
            </label>
            <input 
              type="text" 
              v-model="form.whatsapp" 
-             class="glass-input" 
+             class="w-full p-3 rounded-[10px] border border-white/10 bg-black/30 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-black/50" 
              placeholder="e.g. 0123456789" 
            />
            <small class="text-gray-400 mt-2 block text-xs">
@@ -77,9 +77,9 @@
            </small>
         </div>
 
-        <div class="form-group mt-4">
-           <label>{{ t('createBuddy.notesLabel') }}</label>
-           <textarea v-model="form.notes" rows="3" class="glass-input" :placeholder="t('createBuddy.notesPlaceholder')"></textarea>
+        <div class="mb-5 mt-4">
+           <label class="block text-[0.9rem] text-slate-300 mb-2 font-semibold">{{ t('createBuddy.notesLabel') }}</label>
+           <textarea v-model="form.notes" rows="3" class="w-full p-3 rounded-[10px] border border-white/10 bg-black/30 text-white outline-none transition duration-300 text-base focus:border-[#6c63ff] focus:bg-black/50" :placeholder="t('createBuddy.notesPlaceholder')"></textarea>
         </div>
 
         <div class="mt-6 p-4 rounded-lg bg-red-900/20 border border-red-500/30">
@@ -91,8 +91,8 @@
            </label>
         </div>
 
-        <div class="form-actions mt-8 flex justify-end">
-           <button @click="submitForm" class="btn-submit" :disabled="loading || !form.declaration">
+        <div class="mt-8 flex justify-end">
+           <button @click="submitForm" class="w-full bg-gradient-to-br from-[#e67e22] to-[#d35400] text-white border-none padding-3 rounded-full font-bold cursor-pointer shadow-[0_4px_15px_rgba(230,126,34,0.4)] transition duration-200 py-3 px-[30px] hover:-translate-y-0.5 disabled:bg-[#555] disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none disabled:opacity-70" :disabled="loading || !form.declaration">
              {{ loading ? t('createBuddy.loadingBtn') : t('createBuddy.submitBtn') }}
            </button>
         </div>
@@ -172,68 +172,3 @@ const confirmSubmit = async () => {
   }
 };
 </script>
-
-<style scoped>
-/* REUSE STYLE DARI CreateTripPage.vue SUPAYA TEMA SAMA */
-.create-buddy-page { 
-  background-color: #0f172a; 
-  min-height: 100vh; position: relative; overflow-x: hidden; color: white;
-}
-.container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 2; }
-
-/* GLOWS */
-.page-glow-purple {
-  position: absolute; top: 0; left: 0; width: 60vw; height: 60vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%;
-}
-.page-glow-orange {
-  position: absolute; bottom: 0; right: 0; width: 60vw; height: 60vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%;
-}
-.contour-lines {
-  position: absolute; inset: 0; z-index: 0; opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: cover; pointer-events: none;
-}
-
-/* GLASS CARD */
-.glass-form-card {
-  background: rgba(30, 41, 59, 0.6); 
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px; padding: 2.5rem;
-  backdrop-filter: blur(15px);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-}
-
-.section-title { font-size: 1.5rem; color: white; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; font-weight: 700; }
-
-.form-group { margin-bottom: 1.2rem; }
-.form-group label { display: block; font-size: 0.9rem; color: #cbd5e1; margin-bottom: 8px; font-weight: 600; }
-
-.glass-input {
-  width: 100%; padding: 12px; border-radius: 10px; 
-  border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);
-  color: white; outline: none; transition: 0.3s; font-size: 1rem;
-}
-.glass-input:focus { border-color: #6c63ff; background: rgba(0,0,0,0.5); }
-.glass-input option { background-color: #1e293b; color: white; }
-
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.select-wrapper { position: relative; }
-.select-arrow { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
-.glass-input { appearance: none; }
-
-.btn-submit {
-  background: linear-gradient(135deg, #e67e22, #d35400); color: white;
-  border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700;
-  cursor: pointer; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4); transition: 0.2s;
-  width: 100%;
-}
-.btn-submit:hover { transform: translateY(-2px); }
-.btn-submit:disabled { background: #555; cursor: not-allowed; transform: none; box-shadow: none; opacity: 0.7; }
-
-@media (max-width: 768px) {
-  .form-row { grid-template-columns: 1fr; gap: 0; }
-  .container { padding-top: 100px; }
-}
-</style>

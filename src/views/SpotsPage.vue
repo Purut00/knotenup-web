@@ -1,9 +1,10 @@
 <template>
-  <div class="spots-page min-h-screen bg-slate-900 text-white relative overflow-x-hidden">
+  <div class="min-h-screen bg-slate-900 text-white relative overflow-x-hidden">
     
-    <div class="contour-lines"></div>
-    <div class="page-glow-purple"></div>
-    <div class="page-glow-orange"></div>
+    <!-- Background Decor -->
+    <div class="absolute inset-0 z-0 opacity-[0.08] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')] bg-cover"></div>
+    <div class="absolute top-0 right-0 w-[60vw] h-[60vw] bg-[#6c63ff] blur-[150px] opacity-15 pointer-events-none rounded-full z-0"></div>
+    <div class="absolute bottom-0 left-0 w-[60vw] h-[60vw] bg-[#ff8c42] blur-[150px] opacity-10 pointer-events-none rounded-full z-0"></div>
 
     <div class="container mx-auto px-6 pt-24 pb-12 relative z-10 max-w-7xl">
       
@@ -14,14 +15,12 @@
         </div>
         
         <div class="flex gap-4">
-
-
            <button 
-             class="group relative inline-flex items-center justify-center px-6 py-3 font-bold text-white transition-all duration-200 bg-transparent border-none cursor-pointer focus:outline-none"
+             class="group relative inline-flex items-center justify-center px-6 py-3 font-bold text-white transition-all duration-200 bg-transparent border-none cursor-pointer focus:outline-none hover:-translate-y-1"
              @click="$router.push('/create-spot')"
            >
              <span class="absolute inset-0 w-full h-full -mt-1 rounded-full opacity-30 bg-gradient-to-r from-purple-600 to-blue-600 blur-lg group-hover:opacity-60 transition duration-200"></span>
-             <span class="relative flex items-center bg-gradient-to-r from-purple-600 to-blue-600 rounded-full px-6 py-3 shadow-xl hover:-translate-y-1 transition transform duration-200">
+             <span class="relative flex items-center bg-gradient-to-r from-purple-600 to-blue-600 rounded-full px-6 py-3 shadow-xl">
                 <i class="fas fa-plus-circle text-xl mr-2"></i>
                 <span class="uppercase tracking-wide text-sm">{{ t('spots.addBtn') || 'Tambah Spot' }}</span>
              </span>
@@ -29,7 +28,7 @@
         </div>
       </div>
 
-      <div class="mb-10 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md animate-fade-in-up" style="animation-delay: 0.1s;">
+      <div class="mb-10 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md animate-fade-in-up delay-[100ms]">
         <div class="flex flex-col gap-4">
           
           <div class="relative w-full">
@@ -44,7 +43,7 @@
                />
                <button 
                  @click="handleSearch"
-                 class="absolute right-2 top-2 bottom-2 bg-purple-600 hover:bg-purple-500 text-white px-5 rounded-lg font-semibold transition"
+                 class="absolute right-2 top-2 bottom-2 bg-purple-600 hover:bg-purple-500 text-white px-5 rounded-lg font-semibold transition cursor-pointer border-none"
                >
                  Cari
                </button>
@@ -53,26 +52,28 @@
           <div class="flex flex-wrap gap-3 items-center">
              
              <div class="relative flex-1 min-w-[180px]">
-                <i class="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-red-400 pointer-events-none"></i>
-                <select v-model="filters.state" class="custom-select pl-10" @change="handleSearch">
+                <i class="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-red-400 pointer-events-none z-10"></i>
+                <select v-model="filters.state" class="w-full appearance-none pl-10 pr-10 py-3 rounded-xl border border-white/10 bg-black/20 text-slate-200 outline-none cursor-pointer transition-all hover:bg-black/30 focus:border-[#6c63ff]" @change="handleSearch">
                   <option value="">{{ t('spots.allStates') || 'Semua Negeri' }}</option>
                   <option v-for="s in MALAYSIA_STATES" :key="s" :value="s">{{ s }}</option>
                 </select>
+                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[0.7rem] pointer-events-none">▼</span>
              </div>
 
              <div class="relative flex-1 min-w-[180px]">
-                <i class="fas fa-tree absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 pointer-events-none"></i>
-                <select v-model="filters.category" class="custom-select pl-10" @change="handleSearch">
+                <i class="fas fa-tree absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 pointer-events-none z-10"></i>
+                <select v-model="filters.category" class="w-full appearance-none pl-10 pr-10 py-3 rounded-xl border border-white/10 bg-black/20 text-slate-200 outline-none cursor-pointer transition-all hover:bg-black/30 focus:border-[#6c63ff]" @change="handleSearch">
                   <option value="">Semua Jenis</option>
                   <option v-for="cat in SPOT_CATEGORIES" :key="cat.value" :value="cat.value">
                     {{ cat.label }}
                   </option>
                 </select>
+                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[0.7rem] pointer-events-none">▼</span>
              </div>
 
              <button 
                 v-if="hasActiveFilters" 
-                class="w-12 h-12 flex items-center justify-center rounded-xl bg-red-500/20 text-red-500 hover:bg-red-500/30 transition shadow-lg shrink-0" 
+                class="w-12 h-12 flex items-center justify-center rounded-xl bg-red-500/20 text-red-500 hover:bg-red-500/30 transition shadow-lg shrink-0 border-none cursor-pointer" 
                 @click="resetFilters"
                 title="Reset Filter"
              >
@@ -85,7 +86,7 @@
       <div class="relative z-10">
         
         <div v-if="initialLoading && spots.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-400">
-          <div class="spinner w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mb-4"></div>
+          <div class="w-10 h-10 border-4 border-white/10 border-t-purple-500 rounded-full animate-spin mb-4"></div>
           <p>{{ t('common.loading') }}...</p>
         </div>
         
@@ -93,7 +94,7 @@
           <i class="fas fa-mountain text-5xl mb-4 opacity-30"></i>
           <h3 class="text-xl font-bold text-gray-300">{{ t('spots.empty') || 'Tiada Lokasi Dijumpai' }}</h3>
           <p class="mt-2 text-sm">Masih belum ada lokasi tersenarai atau cuba filter lain.</p>
-          <button @click="resetFilters" class="text-purple-400 hover:text-purple-300 underline mt-3 font-medium">Reset Filter</button>
+          <button @click="resetFilters" class="text-purple-400 hover:text-purple-300 underline mt-3 font-medium bg-transparent border-none cursor-pointer">Reset Filter</button>
         </div>
 
         <div v-else>
@@ -142,28 +143,3 @@ onMounted(() => {
 });
 
 </script>
-
-<style scoped>
-.page-glow-purple {
-  position: absolute; top: 0; right: 0; width: 60vw; height: 60vw;
-  background: #6c63ff; filter: blur(150px); opacity: 0.15; pointer-events: none; border-radius: 50%; z-index: 0;
-}
-.page-glow-orange {
-  position: absolute; bottom: 0; left: 0; width: 60vw; height: 60vw;
-  background: #ff8c42; filter: blur(150px); opacity: 0.1; pointer-events: none; border-radius: 50%; z-index: 0;
-}
-.contour-lines {
-  position: absolute; inset: 0; z-index: 0; opacity: 0.08; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400' stroke='white' fill='none' stroke-width='2' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: cover;
-}
-
-.custom-select {
-  width: 100%; appearance: none; padding: 12px 36px 12px 38px;
-  border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.2); color: #e2e8f0;
-  outline: none; cursor: pointer; transition: 0.3s;
-}
-.custom-select:hover { background: rgba(0,0,0,0.3); }
-.custom-select:focus { border-color: #6c63ff; }
-</style>

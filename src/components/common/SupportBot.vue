@@ -102,7 +102,10 @@ const sendMessage = async () => {
 <template>
   <div class="fixed bottom-6 right-6 z-[100] flex flex-col items-end font-sans">
     
-    <transition name="scale-up">
+    <transition enter-active-class="transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]" 
+                leave-active-class="transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                enter-from-class="opacity-0 translate-y-5 scale-95"
+                leave-to-class="opacity-0 translate-y-5 scale-95">
       <div v-if="isOpen" class="bg-white w-80 sm:w-96 h-[500px] rounded-2xl shadow-2xl flex flex-col mb-4 border border-gray-200 overflow-hidden ring-1 ring-black/5">
         <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 flex justify-between items-center shadow-md">
           <div class="flex items-center gap-3">
@@ -153,8 +156,7 @@ const sendMessage = async () => {
             v-model="userInput" 
             @keyup.enter="sendMessage" 
             type="text"
-            style="color: #000000 !important;" 
-            class="flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 py-2.5 text-sm !text-black text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition placeholder:text-gray-400"
+            class="flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 py-2.5 text-sm !text-black focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition placeholder:text-gray-400 [&]:[-webkit-text-fill-color:black]"
             placeholder="Tanya soalan..." 
           />
           <button 
@@ -175,12 +177,3 @@ const sendMessage = async () => {
     </button>
   </div>
 </template>
-
-<style scoped>
-input[type="text"] {
-  color: black !important;
-  -webkit-text-fill-color: black !important;
-}
-.scale-up-enter-active, .scale-up-leave-active { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-.scale-up-enter-from, .scale-up-leave-to { opacity: 0; transform: translateY(20px) scale(0.95); }
-</style>

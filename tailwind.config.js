@@ -50,7 +50,28 @@ export default {
         forest: '#14532d', // green-900
         earth: '#475569', // slate-600
         sand: '#f5f5f4', // stone-100
-      }
+      },
+      keyframes: {
+        'fade-in-up': {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'gradient-move': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        'float': {
+          '0%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+          '100%': { transform: 'translateY(0px)' },
+        },
+      },
+      animation: {
+        'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
+        'text-gradient': 'gradient-move 4s ease infinite',
+        'float': 'float 6s ease-in-out infinite',
+      },
     },
   },
   plugins: [

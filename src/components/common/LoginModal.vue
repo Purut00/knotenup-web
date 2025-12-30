@@ -1,23 +1,23 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
-    <div class="login-card glass-modal">
-      <button class="close-btn" @click="$emit('close')">✖</button>
+  <div class="fixed top-0 left-0 w-full h-full bg-black/60 z-[2000] flex justify-center items-start pt-[100px] px-4 backdrop-blur-sm" @click.self="$emit('close')">
+    <div class="relative w-full max-w-[400px] p-10 rounded-[20px] text-center bg-white/90 backdrop-blur-xl border border-white/50 shadow-[0_10px_40px_rgba(0,0,0,0.2)]">
+      <button class="absolute top-4 right-4 bg-black/5 w-8 h-8 rounded-full border-none flex items-center justify-center text-gray-500 hover:bg-black/10 hover:text-gray-800 transition-all cursor-pointer" @click="$emit('close')">✖</button>
       
-      <div class="header">
-        <h2>{{ t('auth.modalTitle') || 'Selamat Datang' }}</h2>
-        <p>{{ t('auth.modalSub') || 'Log masuk untuk teruskan' }}</p>
+      <div class="mb-8">
+        <h2 class="m-0 mb-2 text-slate-700 font-bold text-2xl">{{ t('auth.modalTitle') || 'Selamat Datang' }}</h2>
+        <p class="text-gray-500 text-sm">{{ t('auth.modalSub') || 'Log masuk untuk teruskan' }}</p>
       </div>
 
-      <div class="button-stack">
-        <button class="social-btn google" @click="loginWith('google')">
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G" />
+      <div class="flex flex-col gap-4">
+        <button class="flex items-center justify-center gap-3 w-full p-3 rounded-full font-semibold text-base border border-black/10 bg-white text-gray-800 hover:bg-white hover:-translate-y-0.5 hover:shadow-lg transition-all" @click="loginWith('google')">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G" class="w-5 h-5" />
           {{ t('auth.continueWith', { provider: 'Google' }) || 'Teruskan dengan Google' }}
         </button>
         
         <!-- Tambahan button lain jika perlu nanti -->
       </div>
 
-      <p class="disclaimer">
+      <p class="mt-8 text-xs text-gray-400">
         {{ t('auth.disclaimer') || 'Dengan log masuk, anda bersetuju dengan Terma & Syarat kami.' }}
       </p>
     </div>
@@ -84,86 +84,3 @@ const saveUserToDB = async (user: any) => {
   }
 };
 </script>
-
-<style scoped>
-/* OVERLAY: Gelapkan belakang */
-.modal-overlay { 
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  width: 100%; 
-  height: 100%; 
-  background: rgba(0,0,0,0.6); /* Gelap sikit */
-  z-index: 2000; 
-  
-  display: flex; 
-  justify-content: center; 
-  /* TUKAR: align-items center -> flex-start supaya boleh tolak ke bawah */
-  align-items: flex-start; 
-  
-  /* PENTING: Tolak modal ke bawah (jarak dari atas) */
-  padding-top: 100px; 
-  padding-left: 1rem;
-  padding-right: 1rem;
-  backdrop-filter: blur(5px); /* Blur background belakang modal */
-}
-
-/* KAD LOGIN (GLASS EFFECT) */
-.login-card { 
-  width: 100%; 
-  max-width: 400px; 
-  padding: 2.5rem; 
-  border-radius: 20px; 
-  text-align: center; 
-  position: relative; 
-  
-  /* 🔥 GLASS EFFECT SETTING 🔥 */
-  background: rgba(255, 255, 255, 0.9); /* Putih lutsinar */
-  backdrop-filter: blur(15px);           /* Blur content belakang kad */
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.5); /* Border halus */
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); /* Shadow lembut */
-}
-
-.close-btn { 
-  position: absolute; 
-  top: 15px; 
-  right: 15px; 
-  background: rgba(0,0,0,0.05); /* Bulatan pudar */
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: none; 
-  font-size: 1rem; 
-  cursor: pointer; 
-  color: #666; 
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.close-btn:hover { background: rgba(0,0,0,0.1); color: #333; }
-
-.header h2 { margin: 0 0 0.5rem 0; color: #2c3e50; font-weight: 700; }
-.header p { color: #666; margin-bottom: 2rem; font-size: 0.95rem; }
-
-.button-stack { display: flex; flex-direction: column; gap: 1rem; }
-
-.social-btn { 
-  display: flex; align-items: center; justify-content: center; gap: 12px; 
-  width: 100%; padding: 0.8rem; border-radius: 50px; 
-  font-weight: 600; font-size: 1rem; cursor: pointer; 
-  border: 1px solid rgba(0,0,0,0.1); 
-  background: white; 
-  color: #333; 
-  transition: transform 0.1s, box-shadow 0.2s; 
-}
-.social-btn:hover { 
-  background-color: #fff; 
-  transform: translateY(-2px); 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-.social-btn img { width: 20px; height: 20px; }
-
-.disclaimer { margin-top: 2rem; font-size: 0.75rem; color: #999; }
-</style>

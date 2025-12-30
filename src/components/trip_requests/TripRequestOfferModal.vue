@@ -1,36 +1,36 @@
 <template>
-  <div v-if="visible" class="modal-overlay" @click.self="close">
-      <div class="glass-modal fade-up">
-        <div class="modal-header header-offer">
-          <h3>🤝 Hantar Proposal</h3>
-          <button class="close-btn" @click="close">✖</button>
+  <div v-if="visible" class="fixed inset-0 bg-black/80 z-[9999] flex justify-center items-center p-4 backdrop-blur-[5px]" @click.self="close">
+      <div class="bg-slate-800/95 border border-white/10 rounded-2xl p-8 w-full max-w-[500px] shadow-2xl text-white flex flex-col animate-fade-in-up">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-[1.3rem] m-0 text-emerald-500">🤝 Hantar Proposal</h3>
+          <button class="bg-transparent border-none text-slate-400 text-2xl cursor-pointer hover:text-white" @click="close">✖</button>
         </div>
         
-        <div class="modal-body">
-          <div class="offer-context p-3 bg-white/5 rounded-lg mb-4 text-sm border border-white/5">
+        <div>
+          <div class="p-3 bg-white/5 rounded-lg mb-4 text-sm border border-white/5">
              User: <strong class="text-white">{{ request?.userName }}</strong> <br>
              Destinasi: <strong class="text-white">{{ request?.destination }}</strong>
           </div>
 
-          <div class="form-group mt-4">
-            <label>Harga Tawaran (RM)</label>
-            <input type="number" v-model="form.price" class="glass-input" placeholder="0" />
+          <div class="mb-4">
+            <label class="block mb-[5px] text-[0.9rem] text-slate-300">Harga Tawaran (RM)</label>
+            <input type="number" v-model="form.price" class="w-full p-[10px] rounded-lg border border-white/10 bg-black/30 text-white outline-none text-[0.95rem] appearance-none focus:border-[#6c63ff]" placeholder="0" />
             <small class="text-gray-400">Bajet asal: <span class="text-green-400">RM {{ request?.budget }}</span></small>
           </div>
 
-          <div class="form-group">
-            <label>Mesej</label>
-            <textarea v-model="form.message" class="glass-input" rows="3" placeholder="Saya boleh bawa trip ini..."></textarea>
+          <div class="mb-4">
+            <label class="block mb-[5px] text-[0.9rem] text-slate-300">Mesej</label>
+            <textarea v-model="form.message" class="w-full p-[10px] rounded-lg border border-white/10 bg-black/30 text-white outline-none text-[0.95rem] appearance-none focus:border-[#6c63ff]" rows="3" placeholder="Saya boleh bawa trip ini..."></textarea>
           </div>
           
-          <div class="form-group">
-            <label>WhatsApp (Optional)</label>
-            <input type="text" v-model="form.contact" class="glass-input" placeholder="012-3456789" />
+          <div class="mb-4">
+            <label class="block mb-[5px] text-[0.9rem] text-slate-300">WhatsApp (Optional)</label>
+            <input type="text" v-model="form.contact" class="w-full p-[10px] rounded-lg border border-white/10 bg-black/30 text-white outline-none text-[0.95rem] appearance-none focus:border-[#6c63ff]" placeholder="012-3456789" />
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button class="btn-submit-modal btn-green" @click="submit" :disabled="submitting">
+        <div>
+          <button class="mt-[10px] p-[12px] border-none rounded-lg w-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white font-bold cursor-pointer hover:opacity-90" @click="submit" :disabled="submitting">
             {{ submitting ? 'Menghantar...' : 'Hantar Tawaran' }}
           </button>
         </div>
@@ -97,33 +97,3 @@ const submit = async () => {
   }
 };
 </script>
-
-<style scoped>
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999;
-  display: flex; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(5px);
-}
-.glass-modal {
-  background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px; padding: 2rem; width: 100%; max-width: 500px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5); color: white; display: flex; flex-direction: column;
-}
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.modal-header h3 { font-size: 1.3rem; margin: 0; color: white; }
-.close-btn { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
-.glass-input {
-  width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.3); color: white; outline: none; font-size: 0.95rem; appearance: none;
-}
-.glass-input:focus { border-color: #6c63ff; }
-.btn-submit-modal {
-  margin-top: 10px; padding: 12px; border: none; border-radius: 8px; width: 100%;
-  background: linear-gradient(135deg, #10b981, #059669); color: white; font-weight: bold; cursor: pointer;
-}
-.btn-submit-modal:hover { opacity: 0.9; }
-.form-group { margin-bottom: 1rem; }
-.form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #cbd5e1; }
-.header-offer h3 { color: #10b981; }
-.fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-</style>

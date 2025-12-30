@@ -1,10 +1,10 @@
 <template>
   <div v-if="visible" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md" @click.self="cancel">
-    <div class="bg-slate-900 border border-red-500/30 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative fade-up">
+    <div class="bg-slate-900 border border-red-500/30 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative animate-fade-in-up">
       
       <!-- Icons -->
       <div class="flex justify-center mb-6">
-        <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center border-2 border-red-500/50 pulse-ring">
+        <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center border-2 border-red-500/50 animate-pulse-ring">
           <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
         </div>
       </div>
@@ -76,22 +76,3 @@ const proceed = () => {
   emit('proceed');
 };
 </script>
-
-<style scoped>
-.fade-up { animation: fadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-.pulse-ring {
-  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-  animation: pulse-red 2s infinite;
-}
-@keyframes pulse-red {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-}
-
-.custom-scrollbar::-webkit-scrollbar { width: 5px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-</style>

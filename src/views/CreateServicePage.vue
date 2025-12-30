@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-slate-900 relative overflow-x-hidden text-white">
+  <div class="min-h-screen bg-[#0f172a] relative overflow-x-hidden text-white">
     
     <!-- Background Decor -->
-    <div class="absolute inset-0 z-0 opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml,...')"></div>
+    <div class="absolute inset-0 z-0 opacity-[0.08] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')] bg-cover"></div>
     <div class="absolute top-0 left-0 w-3/4 h-3/4 bg-purple-600/20 blur-[150px] rounded-full pointer-events-none"></div>
     <div class="absolute bottom-0 right-0 w-3/4 h-3/4 bg-orange-500/10 blur-[150px] rounded-full pointer-events-none"></div>
 
@@ -37,7 +37,7 @@
          </div>
       </div>
 
-      <div class="bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl relative z-10 fade-up">
+      <div class="bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl relative z-10 animate-fade-in-up">
         
         <!-- STEP 1 -->
         <div v-if="currentStep === 1">
@@ -45,20 +45,20 @@
           
           <div class="mb-6">
             <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.nameLabel') || 'Nama Servis / Tempat' }}</label>
-            <input type="text" v-model="form.name" class="glass-input" :placeholder="t('createService.namePlaceholder')" />
+            <input type="text" v-model="form.name" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createService.namePlaceholder')" />
           </div>
 
           <div class="mb-6">
             <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.catLabel') }}</label>
             <div class="relative">
-                <select v-model="form.category" class="glass-input appearance-none">
+                <select v-model="form.category" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80 appearance-none">
                   <option disabled value="">{{ t('common.select') }}</option>
-                  <option value="Campsite">⛺ {{ t('services.campsite') || 'Campsite' }}</option>
-                  <option value="Chalet">🏡 {{ t('services.chalet') || 'Chalet / Homestay' }}</option>
-                  <option value="Guide">🧗 {{ t('services.guide') || 'Guide / Malim' }}</option>
-                  <option value="Transport">🚙 {{ t('services.transport') || 'Transport' }}</option>
-                  <option value="Rental">🎒 {{ t('services.equipment') || 'Sewaan Barang' }}</option>
-                  <option value="Event">🚩 {{ t('services.event') || 'Event / Trip' }}</option>
+                  <option value="Campsite" class="bg-slate-800">⛺ {{ t('services.campsite') || 'Campsite' }}</option>
+                  <option value="Chalet" class="bg-slate-800">🏡 {{ t('services.chalet') || 'Chalet / Homestay' }}</option>
+                  <option value="Guide" class="bg-slate-800">🧗 {{ t('services.guide') || 'Guide / Malim' }}</option>
+                  <option value="Transport" class="bg-slate-800">🚙 {{ t('services.transport') || 'Transport' }}</option>
+                  <option value="Rental" class="bg-slate-800">🎒 {{ t('services.equipment') || 'Sewaan Barang' }}</option>
+                  <option value="Event" class="bg-slate-800">🚩 {{ t('services.event') || 'Event / Trip' }}</option>
                 </select>
                 <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
             </div>
@@ -68,16 +68,16 @@
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createSpot.stateLabel') }}</label>
               <div class="relative">
-                  <select v-model="form.state" class="glass-input appearance-none">
+                  <select v-model="form.state" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80 appearance-none">
                     <option disabled value="">{{ t('createSpot.options.selectState') }}</option>
-                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ t('states.' + state) || state }}</option>
+                    <option v-for="state in MALAYSIA_STATES" :key="state" :value="state" class="bg-slate-800">{{ t('states.' + state) || state }}</option>
                   </select>
                   <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
               </div>
             </div>
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.locLabel') }}</label>
-              <input type="text" v-model="form.location" class="glass-input" :placeholder="t('createService.locPlaceholder')" />
+              <input type="text" v-model="form.location" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createService.locPlaceholder')" />
             </div>
           </div>
         </div>
@@ -91,11 +91,11 @@
              <div class="grid grid-cols-2 gap-6 mb-6">
                 <div>
                   <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.checkIn') }}</label>
-                  <input type="time" v-model="form.checkIn" class="glass-input" />
+                  <input type="time" v-model="form.checkIn" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" />
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.checkOut') }}</label>
-                  <input type="time" v-model="form.checkOut" class="glass-input" />
+                  <input type="time" v-model="form.checkOut" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" />
                 </div>
              </div>
              
@@ -117,24 +117,24 @@
              <div class="grid grid-cols-2 gap-6 mb-6">
                 <div>
                    <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.priceType') }}</label>
-                   <select v-model="form.priceType" class="glass-input appearance-none">
-                     <option value="pax">{{ t('createService.options.pax') }}</option>
-                     <option value="group">{{ t('createService.options.group') }}</option>
-                     <option value="day">{{ t('createService.options.day') }}</option>
+                   <select v-model="form.priceType" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80 appearance-none">
+                     <option value="pax" class="bg-slate-800">{{ t('createService.options.pax') }}</option>
+                     <option value="group" class="bg-slate-800">{{ t('createService.options.group') }}</option>
+                     <option value="day" class="bg-slate-800">{{ t('createService.options.day') }}</option>
                    </select>
                 </div>
                 <div>
                    <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.rateLabel') }}</label>
-                   <input type="number" v-model="form.price" class="glass-input" placeholder="0" />
+                   <input type="number" v-model="form.price" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" placeholder="0" />
                 </div>
              </div>
              <div class="mb-6">
                 <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.guideRatio') }}</label>
-                <input type="text" v-model="form.guideRatio" class="glass-input" :placeholder="t('createService.ratioPlaceholder')" />
+                <input type="text" v-model="form.guideRatio" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createService.ratioPlaceholder')" />
              </div>
              <div class="mb-6">
                 <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.certification') }}</label>
-                <input type="text" v-model="form.certification" class="glass-input" :placeholder="t('createService.certPlaceholder')" />
+                <input type="text" v-model="form.certification" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createService.certPlaceholder')" />
              </div>
           </div>
 
@@ -142,15 +142,15 @@
           <div v-if="form.category === 'Transport'">
              <div class="mb-6">
                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.vehicleType') }}</label>
-               <input type="text" v-model="form.vehicleType" class="glass-input" :placeholder="t('createService.vehiclePlaceholder')" />
+               <input type="text" v-model="form.vehicleType" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createService.vehiclePlaceholder')" />
              </div>
              <div class="mb-6">
                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.coverageArea') }}</label>
-               <textarea v-model="form.coverageArea" rows="2" class="glass-input"></textarea>
+               <textarea v-model="form.coverageArea" rows="2" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80"></textarea>
              </div>
              <div class="mb-6">
                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.maxPax') }}</label>
-               <input type="number" v-model="form.maxPax" class="glass-input" />
+               <input type="number" v-model="form.maxPax" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" />
              </div>
           </div>
 
@@ -158,18 +158,18 @@
            <div v-if="form.category === 'Rental'">
              <div class="mb-6">
                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.equipmentList') }}</label>
-               <textarea v-model="form.equipmentList" rows="5" class="glass-input"></textarea>
+               <textarea v-model="form.equipmentList" rows="5" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80"></textarea>
              </div>
              <div class="mb-6">
                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.pickupLocation') }}</label>
-               <input type="text" v-model="form.pickupLocation" class="glass-input" />
+               <input type="text" v-model="form.pickupLocation" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" />
              </div>
           </div>
 
           <!-- General Price Field -->
           <div v-if="!['Guide', 'Rental'].includes(form.category)" class="mb-6">
              <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.priceDisplayLabel') }}</label>
-             <input type="text" v-model="form.priceDisplay" class="glass-input" :placeholder="t('createService.pricePlaceholder')" />
+             <input type="text" v-model="form.priceDisplay" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createService.pricePlaceholder')" />
           </div>
         </div>
 
@@ -195,14 +195,14 @@
 
           <div class="mb-6">
             <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createService.fullDescLabel') }}</label>
-            <textarea v-model="form.description" rows="5" class="glass-input" :placeholder="t('createService.fullDescPlaceholder')"></textarea>
+            <textarea v-model="form.description" rows="5" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createService.fullDescPlaceholder')"></textarea>
           </div>
 
           <div class="mb-6 bg-green-500/5 p-4 rounded-xl border border-green-500/20">
              <label class="block text-sm font-semibold text-green-400 mb-2">
                <i class="fab fa-whatsapp text-lg mr-2"></i> {{ t('createService.whatsappLabel') || 'WhatsApp Contact' }} (Optional)
              </label>
-             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 0123456789" />
+             <input type="text" v-model="form.whatsapp" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" placeholder="e.g. 0123456789" />
              <p class="text-xs text-slate-400 mt-2">
                {{ t('createService.whatsappHint') || 'Jika kosong, kami akan guna nombor WhatsApp di profile anda. Jika tiada, kami akan guna email.' }}
              </p>
@@ -355,17 +355,3 @@ const confirmSubmit = async () => {
   }
 };
 </script>
-
-<style scoped>
-.glass-input {
-  @apply w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300;
-}
-.glass-input:focus {
-  @apply border-purple-500 bg-slate-900/80;
-}
-.glass-input option {
-  @apply bg-slate-800 text-white;
-}
-.fade-up { animation: fadeUp 0.6s ease-out; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-</style>

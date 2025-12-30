@@ -1,6 +1,6 @@
 <template>
-  <div v-if="visible" class="modal-overlay" @click.self="close">
-       <div class="glass-modal w-full max-w-lg">
+  <div v-if="visible" class="fixed inset-0 bg-black/80 z-[2000] flex items-center justify-center backdrop-blur-[5px] p-4" @click.self="close">
+       <div class="bg-[#0f172a]/95 p-8 rounded-[20px] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-h-[90vh] overflow-y-auto w-full max-w-lg text-white">
          <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
             <h3 class="text-xl font-bold text-white">📜 Sejarah Kemaskini</h3>
             <button class="text-gray-400 hover:text-white text-xl" @click="close">✖</button>
@@ -82,13 +82,3 @@ const translateField = (field: string) => {
     return map[field] || field;
 };
 </script>
-
-<style scoped>
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 1rem; } 
-.glass-modal { 
-    background: rgba(15, 23, 42, 0.95); 
-    padding: 2rem; border-radius: 20px; 
-    border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    max-height: 90vh; overflow-y: auto;
-}
-</style>

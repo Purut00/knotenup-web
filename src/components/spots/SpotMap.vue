@@ -1,6 +1,6 @@
 <template>
-  <div v-if="spot.gpxUrl || spot.location" class="mb-8 fade-up delay-100">
-      <div class="glass-card p-1 overflow-hidden relative group">
+  <div v-if="spot.gpxUrl || spot.location" class="mb-8 animate-fade-in-up delay-100">
+      <div class="bg-[#0f172a]/75 border border-white/10 rounded-[20px] backdrop-blur-[10px] shadow-[0_10px_30px_rgba(0,0,0,0.4)] p-1 overflow-hidden relative group">
         <div class="absolute top-4 left-4 z-[400] bg-black/60 backdrop-blur px-4 py-2 rounded-lg border border-white/10">
             <h3 class="font-bold text-white flex items-center gap-2">
               <i class="fas fa-mountain text-orange-400"></i> Peta Topografi & Laluan
@@ -13,7 +13,7 @@
             </a>
         </div>
 
-        <div :id="mapId" class="w-full h-[500px] rounded-xl z-0 bg-gray-900"></div>
+        <div :id="mapId" class="w-full h-[500px] rounded-xl z-0 bg-gray-900 relative"></div>
       </div>
   </div>
 </template>
@@ -108,15 +108,3 @@ watch(() => props.spot, () => {
     initMap();
 }, { deep: true });
 </script>
-
-<style scoped>
-/* Glass card styles */
-.glass-card {
-  background: rgba(15, 23, 42, 0.75); 
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px; 
-  backdrop-filter: blur(10px); 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-}
-.map-container { position: relative; }
-</style>

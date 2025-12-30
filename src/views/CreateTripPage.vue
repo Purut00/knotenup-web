@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-slate-900 relative overflow-x-hidden text-white">
     
-    <div class="absolute inset-0 z-0 opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml,...')"></div>
+    <div class="absolute inset-0 z-0 opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')"></div>
     <div class="absolute top-0 left-0 w-3/4 h-3/4 bg-purple-600/20 blur-[150px] rounded-full pointer-events-none"></div>
     <div class="absolute bottom-0 right-0 w-3/4 h-3/4 bg-orange-500/10 blur-[150px] rounded-full pointer-events-none"></div>
 
@@ -35,7 +35,7 @@
         </div>
       </div>
 
-      <div class="bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl relative z-10 fade-up">
+      <div class="bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl relative z-10 animate-fade-in-up">
         
         <!-- STEP 1 -->
         <div v-if="currentStep === 1">
@@ -43,7 +43,7 @@
           
           <div class="mb-6">
             <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.tripTitle') }}</label>
-            <input type="text" v-model="form.title" class="glass-input" 
+            <input type="text" v-model="form.title" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" 
                    :placeholder="t('createTrip.placeholderTitle')" />
           </div>
 
@@ -51,9 +51,9 @@
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.category') }}</label>
               <div class="relative">
-                  <select v-model="form.category" class="glass-input appearance-none">
+                  <select v-model="form.category" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80 appearance-none">
                     <option disabled value="">{{ t('common.select') }}</option>
-                    <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group">
+                    <optgroup v-for="group in ACTIVITY_CATEGORIES" :key="group.group" :label="group.group" class="bg-slate-800 text-white">
                       <option v-for="item in group.items" :key="item" :value="item">{{ item }}</option>
                     </optgroup>
                   </select>
@@ -63,10 +63,10 @@
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.level') }}</label>
               <div class="relative">
-                  <select v-model="form.difficulty" class="glass-input appearance-none">
-                    <option value="Easy">{{ t('createTrip.options.easy') }}</option>
-                    <option value="Moderate">{{ t('createTrip.options.moderate') }}</option>
-                    <option value="Hard">{{ t('createTrip.options.hard') }}</option>
+                  <select v-model="form.difficulty" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80 appearance-none">
+                    <option value="Easy" class="bg-slate-800">{{ t('createTrip.options.easy') }}</option>
+                    <option value="Moderate" class="bg-slate-800">{{ t('createTrip.options.moderate') }}</option>
+                    <option value="Hard" class="bg-slate-800">{{ t('createTrip.options.hard') }}</option>
                   </select>
                   <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
               </div>
@@ -95,9 +95,9 @@
             <div class="mb-4">
                <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.stateRequired') }}</label>
                <div class="relative">
-                   <select v-model="form.state" class="glass-input appearance-none">
+                   <select v-model="form.state" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80 appearance-none">
                      <option disabled value="">{{ t('createSpot.options.selectState') }}</option>
-                     <option v-for="state in MALAYSIA_STATES" :key="state" :value="state">{{ t('states.' + state) || state }}</option>
+                     <option v-for="state in MALAYSIA_STATES" :key="state" :value="state" class="bg-slate-800">{{ t('states.' + state) || state }}</option>
                    </select>
                    <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                </div>
@@ -131,7 +131,7 @@
 
           <div v-else class="mb-6">
             <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.fullLocation') }}</label>
-            <input type="text" v-model="form.overseasLocation" class="glass-input" :placeholder="t('createTrip.placeholderPlaceOverseas')" />
+            <input type="text" v-model="form.overseasLocation" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createTrip.placeholderPlaceOverseas')" />
           </div>
         </div>
 
@@ -142,11 +142,11 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.startDate') }}</label>
-              <input type="date" v-model="form.startDate" class="glass-input" />
+              <input type="date" v-model="form.startDate" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.endDate') }}</label>
-              <input type="date" v-model="form.endDate" :min="form.startDate" class="glass-input" />
+              <input type="date" v-model="form.endDate" :min="form.startDate" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" />
             </div>
           </div>
           
@@ -157,17 +157,17 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.price') }} (RM)</label>
-              <input type="number" v-model="form.price" class="glass-input" placeholder="0" />
+              <input type="number" v-model="form.price" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" placeholder="0" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.slots') }}</label>
-              <input type="number" v-model="form.maxSlots" class="glass-input" placeholder="20" />
+              <input type="number" v-model="form.maxSlots" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" placeholder="20" />
             </div>
           </div>
 
           <div class="mb-6">
             <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.groupLink') }}</label>
-            <input type="text" v-model="form.groupLink" class="glass-input" :placeholder="t('createTrip.groupLinkPlaceholder')" />
+            <input type="text" v-model="form.groupLink" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createTrip.groupLinkPlaceholder')" />
             <span class="text-xs text-slate-500 mt-1 block">{{ t('createTrip.linkPrivacyNote') }}</span>
           </div>
 
@@ -175,7 +175,7 @@
              <label class="block text-sm font-semibold text-green-400 mb-2">
                <i class="fab fa-whatsapp text-lg mr-2"></i> WhatsApp Contact (Optional) via KnoTenUp
              </label>
-             <input type="text" v-model="form.whatsapp" class="glass-input" placeholder="e.g. 0123456789" />
+             <input type="text" v-model="form.whatsapp" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" placeholder="e.g. 0123456789" />
              <p class="text-xs text-slate-400 mt-2">
                Jika dibiarkan kosong, kami akan guna nombor WhatsApp di profile anda. Jika tiada, kami akan guna email.
              </p>
@@ -210,21 +210,21 @@
 
           <div class="mb-6">
             <label class="block text-sm font-semibold text-slate-300 mb-2">{{ t('createTrip.desc') }}</label>
-            <textarea v-model="form.description" rows="5" class="glass-input" :placeholder="t('createTrip.descPlaceholder')"></textarea>
+            <textarea v-model="form.description" rows="5" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createTrip.descPlaceholder')"></textarea>
           </div>
 
           <div class="space-y-4 mb-6">
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-1">⚠️ {{ t('createTrip.mandatory') }}</label>
-              <input type="text" v-model="form.mandatory" class="glass-input" :placeholder="t('createTrip.mandatoryPlaceholder')" />
+              <input type="text" v-model="form.mandatory" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createTrip.mandatoryPlaceholder')" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-1">💡 {{ t('createTrip.tips') }}</label>
-              <input type="text" v-model="form.tips" class="glass-input" :placeholder="t('createTrip.tipsPlaceholder')" />
+              <input type="text" v-model="form.tips" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createTrip.tipsPlaceholder')" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-slate-300 mb-1">🎒 {{ t('createTrip.recommended') }}</label>
-              <input type="text" v-model="form.recommended" class="glass-input" :placeholder="t('createTrip.recommendedPlaceholder')" />
+              <input type="text" v-model="form.recommended" class="w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300 focus:border-purple-500 focus:bg-slate-900/80" :placeholder="t('createTrip.recommendedPlaceholder')" />
             </div>
           </div>
 
@@ -293,7 +293,6 @@ const showLiabilityModal = ref(false);
 
 const previewImages = ref<string[]>(Array.from({ length: 5 }).map(() => ''));
 const rawFiles = ref<(File | null)[]>(Array.from({ length: 5 }).map(() => null));
-// const spots = ref<any[]>([]); // Removed: using autocomplete 
 
 const form = reactive({
   title: '', category: '', difficulty: 'Moderate', 
@@ -307,28 +306,20 @@ const form = reactive({
 
 import SpotAutocomplete from '../components/common/SpotAutocomplete.vue';
 
-// Cleaned up onMounted - no longer fetching all spots
 onMounted(async () => {
-  // Optional: Prefetch user profile or similar if needed
 });
-
-// Removed filteredSpots specific logic
 
 const handleSpotSelect = (spot: any) => {
   form.spotId = spot.id;
   form.spotName = spot.name;
-  form.placeName = spot.name; // Use spot name as the place name
-  if (spot.state) form.state = spot.state; // Auto-fill state
+  form.placeName = spot.name; 
+  if (spot.state) form.state = spot.state; 
 };
 
 const unlinkSpot = () => {
   form.spotId = '';
   form.spotName = '';
-  // form.placeName remains as typed
 };
-
-// Removed old resetSpotSelection and handleSpotChange
-
 
 const computedDuration = computed(() => {
   if (!form.startDate || !form.endDate) return '-';
@@ -369,7 +360,6 @@ const submitForm = async () => {
   if (!auth.currentUser) return alert(t('auth.loginRequired'));
   if (isSpam(`${form.title} ${form.description}`)) return alert(t('createSpot.alerts.spam'));
   
-  // Open Liability Modal instead of direct submit
   showLiabilityModal.value = true;
 };
 
@@ -378,10 +368,8 @@ const confirmSubmit = async () => {
     const uploadedUrls = await uploadMultipleImages(rawFiles.value, `uploads/${auth.currentUser!.uid}/trips/${Date.now()}`);
     const finalLoc = locationType.value === 'malaysia' ? `${form.placeName}, ${form.state}` : form.overseasLocation;
     
-    // Get effective profile
     const userProfile = await getEffectiveUserProfile(auth.currentUser!);
 
-    // Create Trip using Composable
     await createTrip({
       ...form,
       location: finalLoc,
@@ -410,17 +398,3 @@ const confirmSubmit = async () => {
   }
 };
 </script>
-
-<style scoped>
-.glass-input {
-  @apply w-full p-3 rounded-xl border border-white/10 bg-slate-900/50 text-white outline-none transition-all duration-300;
-}
-.glass-input:focus {
-  @apply border-purple-500 bg-slate-900/80;
-}
-.glass-input option, .glass-input optgroup {
-  @apply bg-slate-800 text-white;
-}
-.fade-up { animation: fadeUp 0.6s ease-out; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-</style>

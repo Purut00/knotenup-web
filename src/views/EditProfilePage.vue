@@ -1,9 +1,9 @@
 <template>
-  <div class="edit-page">
-    <div class="contour-lines"></div>
+  <div class="min-h-screen bg-[#0f172a] text-white">
+    <div class="absolute inset-0 z-0 opacity-[0.08] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg width=\'100%25\' height=\'100%25\' viewBox=\'0 0 1000 1000\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,500 Q250,300 500,500 T1000,500 M0,600 Q250,400 500,600 T1000,600 M0,400 Q250,200 500,400 T1000,400\' stroke=\'white\' fill=\'none\' stroke-width=\'2\' opacity=\'0.5\'/%3E%3C/svg%3E')] bg-cover"></div>
     
-    <div class="container pt-32 pb-20 relative z-10 max-w-2xl mx-auto">
-      <div class="glass-form p-8 rounded-2xl bg-slate-800/90 border border-white/10">
+    <div class="container pt-32 pb-20 relative z-10 max-w-2xl mx-auto px-6">
+      <div class="p-8 rounded-2xl bg-slate-800/90 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-[15px]">
         <h2 class="text-2xl font-bold text-white mb-6">⚙️ Edit Profil</h2>
 
         <div class="mb-8">
@@ -20,11 +20,11 @@
         <div class="grid gap-4 mb-8">
           <div>
             <label class="text-gray-400 text-sm">Nama Paparan</label>
-            <input v-model="form.name" type="text" class="input-glass" />
+            <input v-model="form.name" type="text" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50" />
           </div>
           <div>
             <label class="text-gray-400 text-sm">Bio</label>
-            <textarea v-model="form.bio" rows="3" class="input-glass"></textarea>
+            <textarea v-model="form.bio" rows="3" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50"></textarea>
           </div>
         </div>
 
@@ -37,18 +37,18 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="text-gray-400 text-sm">Jenis Darah</label>
-              <select v-model="privateForm.bloodType" class="input-glass">
-                <option value="">- Pilih -</option>
-                <option v-for="t in ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']" :key="t" :value="t">{{ t }}</option>
+              <select v-model="privateForm.bloodType" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50 appearance-none">
+                <option value="" class="bg-[#1e293b] text-white">- Pilih -</option>
+                <option v-for="t in ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']" :key="t" :value="t" class="bg-[#1e293b] text-white">{{ t }}</option>
               </select>
             </div>
             <div>
               <label class="text-gray-400 text-sm">No. Waris</label>
-              <input v-model="privateForm.emergencyContact" type="text" class="input-glass" placeholder="01X-XXXXXXX" />
+              <input v-model="privateForm.emergencyContact" type="text" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50" placeholder="01X-XXXXXXX" />
             </div>
             <div class="col-span-2">
               <label class="text-gray-400 text-sm">Alahan / Penyakit</label>
-              <input v-model="privateForm.allergies" type="text" class="input-glass" placeholder="Contoh: Kacang, Seafood" />
+              <input v-model="privateForm.allergies" type="text" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50" placeholder="Contoh: Kacang, Seafood" />
             </div>
           </div>
         </div>
@@ -56,8 +56,8 @@
         <div v-if="form.role === 'organizer' && form.organizerDetails" class="mb-8 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
            <h3 class="text-orange-400 font-bold mb-4">Maklumat Penganjur</h3>
            <div class="grid gap-3">
-             <input v-model="form.organizerDetails.orgName" placeholder="Nama Organisasi" class="input-glass" />
-             <input v-model="form.organizerDetails.ssm" placeholder="No. SSM" class="input-glass" />
+             <input v-model="form.organizerDetails.orgName" placeholder="Nama Organisasi" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50" />
+             <input v-model="form.organizerDetails.ssm" placeholder="No. SSM" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50" />
            </div>
         </div>
 
@@ -68,35 +68,35 @@
               <i class="fab fa-telegram text-blue-400 w-6 text-xl"></i>
               <div class="relative w-full">
                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">@</span>
-                 <input v-model="form.telegramUsername" placeholder="Telegram Username (tanpa @)" class="input-glass pl-8" />
+                 <input v-model="form.telegramUsername" placeholder="Telegram Username (tanpa @)" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50 pl-8" />
               </div>
             </div>
             <div class="flex items-center gap-2">
               <i class="fab fa-whatsapp text-green-500 w-6"></i>
-              <input v-model="form.whatsapp" placeholder="No. WhatsApp (e.g 0123456789)" class="input-glass" />
+              <input v-model="form.whatsapp" placeholder="No. WhatsApp (e.g 0123456789)" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50" />
             </div>
             <div class="flex items-center gap-2">
               <i class="fab fa-facebook text-blue-500 w-6"></i>
-              <input v-model="form.facebook" placeholder="Facebook Username" class="input-glass" />
+              <input v-model="form.facebook" placeholder="Facebook Username" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50" />
             </div>
             <div class="flex items-center gap-2">
               <i class="fab fa-instagram text-pink-500 w-6"></i>
-              <input v-model="form.instagram" placeholder="Instagram Username" class="input-glass" />
+              <input v-model="form.instagram" placeholder="Instagram Username" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50" />
             </div>
              <div class="flex items-center gap-2">
               <i class="fab fa-tiktok text-white w-6"></i>
-              <input v-model="form.tiktok" placeholder="TikTok Username" class="input-glass" />
+              <input v-model="form.tiktok" placeholder="TikTok Username" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50" />
             </div>
              <div class="flex items-center gap-2">
               <i class="fab fa-youtube text-red-500 w-6"></i>
-              <input v-model="form.youtube" placeholder="YouTube Username" class="input-glass" />
+              <input v-model="form.youtube" placeholder="YouTube Username" class="w-full p-[10px_15px] rounded-[10px] bg-black/30 border border-white/10 text-white outline-none transition duration-300 focus:border-[#6c63ff] focus:bg-black/50" />
             </div>
           </div>
         </div>
 
         <div class="flex gap-4 pt-4 border-t border-white/10">
           <button class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition" @click="$router.back()">Batal</button>
-          <button class="flex-[2] py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl hover:shadow-lg transition" @click="saveProfile" :disabled="loading">
+          <button class="flex-[2] py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed" @click="saveProfile" :disabled="loading">
             {{ loading ? 'Menyimpan...' : 'Simpan Perubahan' }}
           </button>
         </div>
@@ -219,14 +219,3 @@ const saveProfile = async () => {
   }
 };
 </script>
-
-<style scoped>
-.edit-page { background-color: #0f172a; min-height: 100vh; color: white; }
-.input-glass {
-  width: 100%; padding: 10px 15px; border-radius: 10px;
-  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
-  color: white; outline: none; transition: 0.3s;
-}
-.input-glass:focus { border-color: #6c63ff; background: rgba(0,0,0,0.5); }
-.input-glass option { background: #1e293b; color: white; }
-</style>
