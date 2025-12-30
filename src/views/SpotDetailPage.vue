@@ -172,7 +172,7 @@
             </div>
 
             <!-- Reviews Component -->
-            <SpotReviews :spotId="spotId" :isAdmin="isAdmin" />
+            <SpotReviews :spotId="spotId" :isAdmin="isAdmin" :isOwner="isOwner" />
 
         </div>
 
